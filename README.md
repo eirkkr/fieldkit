@@ -5,7 +5,7 @@ Shared dev conventions, tooling, and reusable assets, drawn on across my repos.
 Like a survival field kit: the **manual** (conventions) and the **instruments**
 (reusable tooling) live in one place, and every repo reaches into the same kit.
 
-## Planned layout
+## Layout
 
 - `conventions/` — convention docs, referenced from each repo (e.g. `@`-imported
   into a `CLAUDE.md`): `git`, `github`, `workflow`, `style`.
@@ -20,4 +20,5 @@ anywhere. Editing a file here can affect **every** consumer.
 
 ## Status
 
-Stub. See the open setup issue for the full build plan.
+`conventions/` is in place (#1). Still to do: clone to the stable path and wire
+the consumer repos. See the open setup issue for the full build plan.
