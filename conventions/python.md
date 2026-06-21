@@ -16,8 +16,15 @@ applies. Several rules below have no automated enforcement and rely on review.
 
 - A package's `__all__` is its public surface. Import public symbols from the
   owning package, not the module that defines them (even a private `_`-module).
+- Annotation-only imports under `TYPE_CHECKING` count as public usage (they
+  are a real cross-package contract). Test imports do not: a symbol used only
+  by tests stays private.
 - A symbol used only within its own package isn't re-exported; in-package
   callers import it directly from its defining module.
+- Re-export a public symbol from the package that owns it, not from a parent.
+- A module that `__init__` imports during initialisation can't import back from
+  the package (it's only half-built at that point); import shared symbols
+  directly from the source file instead, even when they are public.
 - Name a module by what it exposes. A `_`-prefix marks a module as internal to
   its package, not part of its public surface.
 
