@@ -1,4 +1,4 @@
-# Shared conventions
+# Claude Guidance (Generic)
 
 Shared dev conventions for use across repos. A consumer repo pulls these in by
 `@`-importing this file (or individual `conventions/*` files) from its own
@@ -9,15 +9,13 @@ CLAUDE.md - e.g. `@~/src/fieldkit/CLAUDE.md`.
 - These are the generic, cross-repo rules. Repo-specific conventions, setup, and
   architecture live in the consumer repo's own docs.
 
-## Always-on
+## Load Always
 
-Imported into context, since they bear on nearly every edit and commit.
+@conventions/workflow.md
+@conventions/git.md
+@conventions/style.md
 
-@~/src/fieldkit/conventions/workflow.md
-@~/src/fieldkit/conventions/git.md
-@~/src/fieldkit/conventions/style.md
-
-## Load on demand
+## Load on Demand
 
 Situational conventions, not carried in context. Read the matching file before
 the action; don't load it otherwise.
@@ -25,6 +23,10 @@ the action; don't load it otherwise.
 Critical even before reading: get approval before creating or editing an issue
 or comment, marking a PR ready for review, or merging. Creating and updating
 draft PRs needs no pre-approval.
+
+<!-- These paths stay absolute on purpose: they are Read-tool instructions,
+not @-imports, so they resolve against the consumer's working directory, not
+this file. A relative path here would resolve into the wrong repo. -->
 
 | Before...                              | Read                                    |
 | -------------------------------------- | --------------------------------------- |
