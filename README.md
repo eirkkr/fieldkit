@@ -52,6 +52,18 @@ normal git repo. You have push access as the owner; add collaborators with write
 access on GitHub if others consume it. Consumers pick up the change next
 session.
 
+## Development
+
+Markdown is linted with [pymarkdown](https://github.com/jackdewinter/pymarkdown)
+(line length 80, table rows exempt; config in `.pymarkdown`). Needs
+[just](https://just.systems) and [uv](https://docs.astral.sh/uv/) - the recipes
+run the linter via `uvx`, so no install step is required.
+
+| Task             | Command      |
+| ---------------- | ------------ |
+| Lint all docs    | `just check` |
+| Auto-fix issues  | `just fix`   |
+
 ## Status
 
 `conventions/` and the `CLAUDE.md` entry point are in place. Still to do: clone
