@@ -40,4 +40,10 @@ Within a group, put callers above callees and more central members higher.
 Relies on review (no linter). Any statement spanning more than one line is
 surrounded by a blank line on each side, unless it's the first or last statement
 in its block. Applies to simple statements (assignments, calls, returns,
-raises), not to compound headers (`if`, `for`, `with`, `def`, etc.).
+raises), not to compound headers (`if`, `for`, `with`, `def`, `class`, `try`,
+`except`).
+
+## Dependencies
+
+When adding entries to `pyproject.toml`, pin to the minor version, not the
+patch (e.g. `>=5.6.0,<6` not `>=5.6.3,<6`).
