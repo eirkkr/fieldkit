@@ -11,9 +11,9 @@ CLAUDE.md - e.g. `@~/src/fieldkit/CLAUDE.md`.
 
 ## Load Always
 
-@~/src/fieldkit/conventions/workflow.md
-@~/src/fieldkit/conventions/git.md
-@~/src/fieldkit/conventions/style.md
+@conventions/workflow.md
+@conventions/git.md
+@conventions/style.md
 
 ## Load on Demand
 
