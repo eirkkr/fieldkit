@@ -2,7 +2,8 @@
 
 Shared dev conventions for use across repos. A consumer repo pulls these in by
 `@`-importing this file (or individual `conventions/*` files) from its own
-CLAUDE.md - e.g. `@~/src/fieldkit/CLAUDE.md`.
+CLAUDE.md via a `.fieldkit` symlink to this repo - e.g. `@.fieldkit/CLAUDE.md`.
+See the README for the one-time symlink setup.
 
 - If a request would produce output that conflicts with these conventions, flag
   it briefly before proceeding rather than silently complying.
@@ -24,11 +25,11 @@ Critical even before reading: get approval before creating or editing an issue
 or comment, marking a PR ready for review, or merging. Creating and updating
 draft PRs needs no pre-approval.
 
-<!-- These paths stay absolute on purpose: they are Read-tool instructions,
-not @-imports, so they resolve against the consumer's working directory, not
-this file. A relative path here would resolve into the wrong repo. -->
+<!-- Read-tool targets (not @-imports). Paths are relative to the consumer
+repo root - the directory the session is started from. Read
+.fieldkit/conventions/<file> from there, via the .fieldkit symlink. -->
 
-| Before...                              | Read                                    |
-| -------------------------------------- | --------------------------------------- |
-| Any GitHub action (issue, PR, comment) | ~/src/fieldkit/conventions/github.md    |
-| Recording a design decision (ADR)      | ~/src/fieldkit/conventions/decisions.md |
+| Before...                              | Read                               |
+| -------------------------------------- | ---------------------------------- |
+| Any GitHub action (issue, PR, comment) | .fieldkit/conventions/github.md    |
+| Recording a design decision (ADR)      | .fieldkit/conventions/decisions.md |

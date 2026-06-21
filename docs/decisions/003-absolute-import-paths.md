@@ -20,3 +20,9 @@ for consistency, even though those resolve relative to the containing file.
 - The clone must live at `~/src/fieldkit`; the README documents this as a setup
   step and the path is hardcoded throughout `CLAUDE.md`.
 - Relocating the kit means updating those paths (and any consumer import lines).
+
+## Superseded
+
+Superseded by [ADR 006](006-symlink-kit-reference.md): consumers now reach the
+kit through a `.fieldkit` symlink, so the shared CLAUDE.md no longer hardcodes
+`~/src/fieldkit`.
