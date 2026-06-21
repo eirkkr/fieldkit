@@ -19,37 +19,50 @@ Like a survival field kit: the **manual** (conventions) and the **instruments**
 
 ## Setup
 
-1. **Clone to the fixed path.** The imports in `CLAUDE.md` are absolute
-   (`@~/src/fieldkit/...`), so the clone must live at `~/src/fieldkit`:
+1. **Clone the kit.** Anywhere - it no longer hardcodes its location:
 
    ```bash
    git clone https://github.com/eirkkr/fieldkit.git ~/src/fieldkit
    ```
 
-2. **Wire a consumer repo.** Add to that repo's own `CLAUDE.md`:
+2. **Wire a consumer repo.** From the consumer repo root, link the kit and
+   `@`-import through the symlink:
 
-   ```markdown
-   @~/src/fieldkit/CLAUDE.md
+   ```bash
+   ln -s ~/src/fieldkit .fieldkit
+   echo '.fieldkit' >> .gitignore
    ```
 
-   For a Python repo, also add `@~/src/fieldkit/conventions/python.md`. Or
-   import individual `conventions/*` files if you want only some.
+   ```markdown
+   @.fieldkit/CLAUDE.md
+   ```
 
-3. **Grant Claude access to the path.** A consumer session runs in the consumer
-   repo, so to let Claude read and edit the kit from there, add the path to that
-   repo's `.claude/settings.json`:
+   For a Python repo, also add `@.fieldkit/conventions/python.md`, or import
+   individual `conventions/*` files for only some. `.fieldkit` is gitignored, so
+   every clone, collaborator, and CI checkout recreates it.
+
+3. **Grant Claude access to the kit.** A consumer session runs in the consumer
+   repo, so add your clone path to that repo's `.claude/settings.json`:
 
    ```json
    { "permissions": { "additionalDirectories": ["~/src/fieldkit"] } }
    ```
 
-   or run `/add-dir ~/src/fieldkit` in-session. (If `~` isn't expanded, use the
-   full absolute path.)
+   or run `/add-dir ~/src/fieldkit` in-session. Point it at the real clone path,
+   not the symlink.
+
+4. **Start sessions from the repo root.** The load-on-demand files are
+   referenced relative to the consumer repo root, so launch `claude` there, not
+   a subdirectory. Worth repeating in each consumer repo's README.
+
+5. **First run.** Accept Claude Code's external-import dialog for `@.fieldkit` -
+   declining permanently disables it. Verify with `/memory`: `CLAUDE.md` and the
+   convention files should show as loaded.
 
 ## Updating a shared rule
 
 Every consumer reads the same files, so editing one here affects **all** of
-them. Make changes in `~/src/fieldkit`, commit on a branch, and push - it's a
+them. Make changes in your kit clone, commit on a branch, and push - it's a
 normal git repo. You have push access as the owner; add collaborators with write
 access on GitHub if others consume it. Consumers pick up the change next
 session.
@@ -68,6 +81,5 @@ run the linter via `uvx`, so no install step is required.
 
 ## Status
 
-`conventions/` and the `CLAUDE.md` entry point are in place. Still to do: clone
-to the stable path and wire the consumer repos. See the open setup issue for the
-full build plan.
+`conventions/` and the `CLAUDE.md` entry point are in place. Still to do: wire
+the consumer repos. See the open setup issue for the full build plan.
