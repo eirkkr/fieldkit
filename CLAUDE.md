@@ -22,8 +22,9 @@ Imported into context, since they bear on nearly every edit and commit.
 Situational conventions, not carried in context. Read the matching file before
 the action; don't load it otherwise.
 
-Critical even before reading: never take an externally-visible GitHub action
-(issue, PR, comment) without showing a draft and waiting for approval.
+Critical even before reading: never create or edit an issue or comment, or merge
+a PR, without showing the proposed content for approval first. Creating and
+updating PRs themselves needs no pre-approval.
 
 | Before...                              | Read                                    |
 | -------------------------------------- | --------------------------------------- |

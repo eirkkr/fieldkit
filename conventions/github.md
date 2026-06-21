@@ -1,7 +1,10 @@
 # GitHub and external actions
 
-- Show a draft and wait for approval before any externally-visible action
-  (issues, PRs, comments). Treat like destructive ops: confirm first.
+- Show a draft and wait for approval before creating or editing issues or
+  comments. Treat like destructive ops: confirm first.
+- PRs are the exception: create and update them directly, no pre-approval of the
+  title or body needed. The review gate is the pre-merge message (see
+  [git.md](git.md)), not the PR itself.
 - Before drafting an issue, check for duplicates/broader scope:
   `gh issue list --search "<2-3 keywords>"`.
 - Create PRs with `--draft` unless explicitly told they're ready.
