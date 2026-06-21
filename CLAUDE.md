@@ -25,10 +25,10 @@ the action; don't load it otherwise.
 Critical even before reading: never take an externally-visible GitHub action
 (issue, PR, comment) without showing a draft and waiting for approval.
 
-| Before...                              | Read                     |
-| -------------------------------------- | ------------------------ |
-| Any GitHub action (issue, PR, comment) | conventions/github.md    |
-| Recording a design decision (ADR)      | conventions/decisions.md |
+| Before...                              | Read                                    |
+| -------------------------------------- | --------------------------------------- |
+| Any GitHub action (issue, PR, comment) | ~/src/fieldkit/conventions/github.md    |
+| Recording a design decision (ADR)      | ~/src/fieldkit/conventions/decisions.md |
 
 ## Language-specific (opt-in)
 
