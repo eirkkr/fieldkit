@@ -29,5 +29,6 @@
   title. Reference the issue with `Closes #X` in the body.
 - Always `git push` before `gh pr merge` (squash merge uses remote state).
 - Squash-merge: synthesise a subject + body summarising the whole change; don't
-  concatenate commit messages. Append `(#PR)` to a custom `--subject` manually.
-  Include `Closes #X`. Show the proposed message for approval before merging.
+  concatenate commit messages. Append `(#PR)` to a custom `--subject` manually
+  (GitHub omits it when you provide a custom subject). Include `Closes #X`.
+  Show the proposed message for approval before merging.

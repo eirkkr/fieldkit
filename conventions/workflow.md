@@ -8,7 +8,9 @@
   conventions kit; repo-specific ones into that repo's own docs.
 - Before any suppression (`# type: ignore`, `# noqa`, tool exclusion), check
   whether the underlying issue can be fixed instead. Suppress only when the tool
-  is genuinely wrong about the file's context.
+  is genuinely wrong about the file's context (e.g. a generated or vendored
+  file). A `type: ignore[unreachable]` on a branch condition almost always means
+  the condition itself is wrong, not the type checker.
 
 ## Design decisions
 
