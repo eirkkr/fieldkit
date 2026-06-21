@@ -13,6 +13,7 @@
 - Recurring tasks reuse one canonical branch name (no dates or run-number
   suffixes); delete it after its PR merges so the name is free again. E.g.
   dependency updates always use `chore/update-deps`.
+- Show the proposed branch name for approval before creating the branch.
 
 ## Commits
 
