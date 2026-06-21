@@ -29,8 +29,3 @@ Critical even before reading: never take an externally-visible GitHub action
 | -------------------------------------- | --------------------------------------- |
 | Any GitHub action (issue, PR, comment) | ~/src/fieldkit/conventions/github.md    |
 | Recording a design decision (ADR)      | ~/src/fieldkit/conventions/decisions.md |
-
-## Language-specific (opt-in)
-
-For Python repos, also import `@~/src/fieldkit/conventions/python.md` from your
-CLAUDE.md.
