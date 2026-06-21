@@ -24,6 +24,10 @@ Critical even before reading: get approval before creating or editing an issue
 or comment, marking a PR ready for review, or merging. Creating and updating
 draft PRs needs no pre-approval.
 
+<!-- These paths stay absolute on purpose: they are Read-tool instructions,
+not @-imports, so they resolve against the consumer's working directory, not
+this file. A relative path here would resolve into the wrong repo. -->
+
 | Before...                              | Read                                    |
 | -------------------------------------- | --------------------------------------- |
 | Any GitHub action (issue, PR, comment) | ~/src/fieldkit/conventions/github.md    |
