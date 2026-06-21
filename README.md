@@ -12,6 +12,8 @@ Like a survival field kit: the **manual** (conventions) and the **instruments**
 - `conventions/` - the convention docs themselves: `workflow`, `git`, `github`,
   `style`, `decisions` (language-agnostic), and `python` (opt-in, for Python
   repos).
+- `docs/decisions/` - ADRs recording this repo's own non-obvious design
+  choices; the one `docs/` subtree.
 - further areas as needs emerge - e.g. Claude Code assets (skills, commands,
   agents, hooks), shared scripts, editor/CI config.
 
