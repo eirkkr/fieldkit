@@ -2,8 +2,10 @@
 
 - When proposing new doc/convention text, show it and wait for approval before
   editing.
-- Record non-obvious conventions in CLAUDE.md / docs, not machine-local memory
-  (memory isn't available on other machines or to other developers).
+- Anything learned that's worth keeping goes in docs or CLAUDE.md, not
+  machine-local memory (which isn't on other machines or available to other
+  developers). Route by scope: generic, cross-repo lessons into the shared
+  conventions kit; repo-specific ones into that repo's own docs.
 - Before any suppression (`# type: ignore`, `# noqa`, tool exclusion), check
   whether the underlying issue can be fixed instead. Suppress only when the tool
   is genuinely wrong about the file's context.
