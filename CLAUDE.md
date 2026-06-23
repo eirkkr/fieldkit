@@ -33,3 +33,5 @@ repo root - the directory the session is started from. Read
 | -------------------------------------- | ---------------------------------- |
 | Any GitHub action (issue, PR, comment) | .fieldkit/conventions/github.md    |
 | Recording a design decision (ADR)      | .fieldkit/conventions/decisions.md |
+| Writing an implementation spec or plan | .fieldkit/conventions/specs.md     |
+| Building a feature that calls an LLM   | .fieldkit/conventions/ai.md        |
