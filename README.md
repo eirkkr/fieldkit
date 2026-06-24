@@ -69,9 +69,10 @@ session.
 
 ## Feeding failures back to an agent
 
-Agents don't run linters or tests themselves
-([ADR 007](docs/decisions/007-agents-dont-run-linters.md)) - you run them and
-hand back the failures. To do that cheaply:
+Agents don't run linters or formatters
+([ADR 007](docs/decisions/007-agents-dont-run-linters.md)) - you run those and
+hand back any failures. (Tests are different: the agent runs those itself as
+part of its loop.) When you do need to feed command output back, do it cheaply:
 
 - Type `!<command>` in the Claude Code prompt. It runs in the session and the
   output lands in context directly - no copy-paste.

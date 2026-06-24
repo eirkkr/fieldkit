@@ -34,6 +34,11 @@ Alternatives rejected:
 - Consumer-repo rules like "lint must pass before push/merge" are read as CI's
   and the human's gate, not one the agent drives. The workflow rule states this
   so the two don't conflict.
+- Scope is linters and formatters only. Tests are deliberately excluded: their
+  output is correctness feedback that improves the code, so iterating on tests
+  is part of the agent's loop, not churn. The same lean-output discipline
+  applies - run them concise (quiet, short traceback, fail-fast) to keep the
+  loop cheap.
 - If a repo wants formatting fully automated off the agent's plate, the path is
   a per-repo silent auto-format hook, documented as opt-in - not a change to
   this decision. Prefer firing it on stop (turn end) over per-edit: a formatter

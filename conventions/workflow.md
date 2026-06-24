@@ -22,6 +22,12 @@
   cost the human accepts in exchange for not burning tokens on lint/format
   churn. "Lint must pass before push/merge" (if a consumer repo states it) is
   CI's job and the human's, not a gate the agent drives.
+- Tests are different from linters: running them to verify the code you wrote
+  is part of the job, not churn - the output is correctness feedback that makes
+  the code better, where lint findings are mostly style. Run and iterate on
+  them. Keep the output lean (the repo's canonical test command, or the
+  runner's quiet and short-traceback flags, failing fast while iterating) so
+  the loop stays cheap.
 
 ## Design decisions
 
