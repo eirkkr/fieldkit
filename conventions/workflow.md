@@ -13,6 +13,11 @@
   is genuinely wrong about the file's context (e.g. a generated or vendored
   file). A `type: ignore[unreachable]` on a branch condition almost always means
   the condition itself is wrong, not the type checker.
+- Delegate to a subagent for context isolation - keeping a large, throwaway
+  exploration out of the main window - not to put a cheaper model on a small
+  task. A fresh subagent re-pays context from scratch (system prompt, tools,
+  conventions, inputs), which dominates a small task's cost and isn't recovered
+  by a lower per-token rate.
 
 ## Linting and formatting
 
