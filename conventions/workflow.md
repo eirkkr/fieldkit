@@ -1,7 +1,9 @@
 # Working conventions
 
-- When proposing new doc/convention text, show it and wait for approval before
-  editing.
+- Default to act-then-show: make the change, then surface it (the diff or PR)
+  for review and correct after - don't gate edits on pre-approval. For a
+  genuinely new convention or design decision, agree the direction first, since
+  redoing it is costly; refinements and routine edits need none.
 - Anything learned that's worth keeping goes in docs or CLAUDE.md, not
   machine-local memory (which isn't on other machines or available to other
   developers). Route by scope: generic, cross-repo lessons into the shared

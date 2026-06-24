@@ -21,9 +21,10 @@ See the README for the one-time symlink setup.
 Situational conventions, not carried in context. Read the matching file before
 the action; don't load it otherwise.
 
-Critical even before reading: get approval before creating or editing an issue
-or comment, marking a PR ready for review, or merging. Creating and updating
-draft PRs needs no pre-approval.
+Critical even before reading: gate only on what's outward-facing or
+irreversible - get approval before creating or editing an issue or comment,
+marking a PR ready for review, or merging. Local, pre-merge work (branches,
+edits, commits, draft PRs) is act-then-show: do it, surface it, correct after.
 
 <!-- Read-tool targets (not @-imports). Paths are relative to the consumer
 repo root - the directory the session is started from. Read
