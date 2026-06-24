@@ -12,6 +12,17 @@
   file). A `type: ignore[unreachable]` on a branch condition almost always means
   the condition itself is wrong, not the type checker.
 
+## Linting and formatting
+
+- Don't run formatters or linters, and don't gate your work on them, unless
+  asked - the human runs these and CI enforces them. Match the surrounding
+  style and rely on normal care while writing; don't run a linter to discover
+  problems.
+- This division is deliberate: a style slip or a stray defect reaching CI is a
+  cost the human accepts in exchange for not burning tokens on lint/format
+  churn. "Lint must pass before push/merge" (if a consumer repo states it) is
+  CI's job and the human's, not a gate the agent drives.
+
 ## Design decisions
 
 - Record non-obvious design decisions - rationale plus alternatives rejected -
