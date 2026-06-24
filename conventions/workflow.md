@@ -28,6 +28,10 @@
   them. Keep the output lean (the repo's canonical test command, or the
   runner's quiet and short-traceback flags, failing fast while iterating) so
   the loop stays cheap.
+- While iterating, run the narrowest relevant selection - a path or test id is
+  far quicker than the whole suite - and widen to the full suite for broad
+  confidence before declaring the work done. Pass the selection to the repo's
+  canonical command so lean output and targeting come together.
 
 ## Design decisions
 
