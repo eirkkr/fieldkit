@@ -11,3 +11,4 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 004 | [Lint with uvx, not a uv project](004-lint-via-uvx.md)                 | Accepted   |
 | 005 | [Flat, content-shaped structure](005-flat-repo-structure.md)           | Accepted   |
 | 006 | [Symlink kit reference](006-symlink-kit-reference.md)                  | Accepted   |
+| 007 | [Agents don't run linters](007-agents-dont-run-linters.md)             | Accepted   |

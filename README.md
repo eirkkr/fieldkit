@@ -67,6 +67,50 @@ normal git repo. You have push access as the owner; add collaborators with write
 access on GitHub if others consume it. Consumers pick up the change next
 session.
 
+## Rolling out a rule change to consumers
+
+After merging a rule change here, a consumer repo may need matching changes -
+docs that now contradict the rules, or a command or recipe the rules imply.
+Paste this into a session in the consumer repo:
+
+```text
+The shared conventions kit (imported here via @.fieldkit) has changed. See what
+changed: review the kit's recent history with `git -C .fieldkit log` and
+`git -C .fieldkit show <commit>`. It squash-merges, so the latest commit on main
+is the change (use a wider range if catching up several). Then reconcile this
+repo to the current kit conventions:
+
+1. Audit agent-facing docs and instructions for anything that now contradicts
+   the kit, and bring them into line.
+2. Make any repo-side change the new rules imply - commands, recipes, config.
+3. Leave human-facing tooling alone: don't touch CI, pre-commit, or the linters
+   themselves. This reconciles agent instructions, not the human's tools.
+
+Follow the kit's git conventions: show me the proposed changes for approval
+before editing, work on a branch, and open a PR.
+```
+
+## Feeding failures back to an agent
+
+Agents don't run linters or formatters
+([ADR 007](docs/decisions/007-agents-dont-run-linters.md)) - you run those and
+hand back any failures. (Tests are different: the agent runs those itself as
+part of its loop.) When you do need to feed command output back, do it cheaply:
+
+- Type `!<command>` in the Claude Code prompt. It runs in the session and the
+  output lands in context directly - no copy-paste.
+- Filter at the source so only failures land, not noise, using the tool's own
+  quiet/errors-only flags (the exact command is per-repo) - e.g.
+  `pytest -q --tb=line` or `ruff check --output-format=concise`. Pipe through
+  `tail`/`grep` for anything still noisy.
+- Reach for a cheaper subagent (e.g. Haiku) only when raw output is genuinely
+  huge *and* reducing it needs judgement, not a flag: it reads the flood in its
+  own window and hands back a digest. For normal runs, flags are cheaper and
+  won't silently drop a real failure.
+
+This is human-facing on purpose - it's how you operate the loop, not a rule for
+the agent, so it stays out of every session's context.
+
 ## Development
 
 Markdown is linted with [pymarkdown](https://github.com/jackdewinter/pymarkdown)
