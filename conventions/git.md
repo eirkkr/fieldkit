@@ -13,7 +13,6 @@
 - Recurring tasks reuse one canonical branch name (no dates or run-number
   suffixes); delete it after its PR merges so the name is free again. E.g.
   dependency updates always use `chore/update-deps`.
-- Show the proposed branch name for approval before creating the branch.
 
 ## Commits
 
@@ -28,6 +27,8 @@
 - PR title follows the same Conventional Commits format; no issue numbers in the
   title. Reference the issue with `Closes #X` in the body.
 - Always `git push` before `gh pr merge` (squash merge uses remote state).
+- On first push, open the draft PR and surface its link - a checkpoint for
+  review, not a gate; the pre-merge message is the gate.
 - Squash-merge: synthesise a subject + body summarising the whole change; don't
   concatenate commit messages. Append `(#PR)` to a custom `--subject` manually
   (GitHub omits it when you provide a custom subject). Include `Closes #X`.
