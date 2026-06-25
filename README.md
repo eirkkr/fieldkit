@@ -14,8 +14,10 @@ Like a survival field kit: the **manual** (conventions) and the **instruments**
   repos).
 - `docs/decisions/` - ADRs recording this repo's own non-obvious design
   choices; the one `docs/` subtree.
-- further areas as needs emerge - e.g. Claude Code assets (skills, commands,
-  agents, hooks), shared scripts, editor/CI config.
+- `commands/` - shared Claude Code slash commands, symlinked into
+  `~/.claude/commands` by `just install` (see Setup).
+- further areas as needs emerge - e.g. more Claude Code assets (skills, agents,
+  hooks), shared scripts, editor/CI config.
 
 ## Setup
 
@@ -24,6 +26,17 @@ Like a survival field kit: the **manual** (conventions) and the **instruments**
    ```bash
    git clone https://github.com/eirkkr/fieldkit.git ~/src/fieldkit
    ```
+
+   Then wire the kit's slash commands into your user-level Claude config (once
+   per machine - the command sources are version-controlled here, but the
+   symlink into `~/.claude` is not):
+
+   ```bash
+   cd ~/src/fieldkit && just install
+   ```
+
+   This makes `/kit-reconcile` available in every repo. See "Rolling out a rule
+   change to consumers".
 
 2. **Wire a consumer repo.** From the consumer repo root, link the kit and
    `@`-import through the symlink:
@@ -70,25 +83,20 @@ session.
 ## Rolling out a rule change to consumers
 
 After merging a rule change here, a consumer repo may need matching changes -
-docs that now contradict the rules, or a command or recipe the rules imply.
-Paste this into a session in the consumer repo:
+docs that now contradict the rules, or a command or recipe the rules imply. In a
+session in the consumer repo, run:
 
 ```text
-The shared conventions kit (imported here via @.fieldkit) has changed. See what
-changed: review the kit's recent history with `git -C .fieldkit log` and
-`git -C .fieldkit show <commit>`. It squash-merges, so the latest commit on main
-is the change (use a wider range if catching up several). Then reconcile this
-repo to the current kit conventions:
-
-1. Audit agent-facing docs and instructions for anything that now contradicts
-   the kit, and bring them into line.
-2. Make any repo-side change the new rules imply - commands, recipes, config.
-3. Leave human-facing tooling alone: don't touch CI, pre-commit, or the linters
-   themselves. This reconciles agent instructions, not the human's tools.
-
-Follow the kit's git conventions: show me the proposed changes for approval
-before editing, work on a branch, and open a PR.
+/kit-reconcile
 ```
+
+It reviews the kit's recent history, then reconciles this repo's agent-facing
+docs and tooling to the current conventions, working on a branch and showing the
+changes for approval before editing. Pass a git range to catch up several
+changes at once, e.g. `/kit-reconcile main~3..main`.
+
+The command is defined in `commands/kit-reconcile.md` and wired up by
+`just install` (see Setup); editing that file updates it everywhere.
 
 ## Feeding failures back to an agent
 
@@ -118,10 +126,11 @@ Markdown is linted with [pymarkdown](https://github.com/jackdewinter/pymarkdown)
 [just](https://just.systems) and [uv](https://docs.astral.sh/uv/) - the recipes
 run the linter via `uvx`, so no install step is required.
 
-| Task             | Command      |
-| ---------------- | ------------ |
-| Lint all docs    | `just check` |
-| Auto-fix issues  | `just fix`   |
+| Task                       | Command        |
+| -------------------------- | -------------- |
+| Lint all docs              | `just check`   |
+| Auto-fix issues            | `just fix`     |
+| Wire slash commands (once) | `just install` |
 
 ## Status
 
