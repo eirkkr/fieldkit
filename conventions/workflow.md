@@ -24,7 +24,10 @@
 - Don't run formatters or linters, and don't gate your work on them, unless
   asked - the human runs these and CI enforces them. Match the surrounding
   style and rely on normal care while writing; don't run a linter to discover
-  problems.
+  problems. This includes ad-hoc checks that stand in for one: counting line
+  length or reflowing prose to hit an exact wrap column is the same churn. Wrap
+  to roughly the target by eye in one pass and leave any off-by-one to CI and
+  the formatter - don't iterate to satisfy it yourself.
 - This division is deliberate: a style slip or a stray defect reaching CI is a
   cost the human accepts in exchange for not burning tokens on lint/format
   churn. "Lint must pass before push/merge" (if a consumer repo states it) is
