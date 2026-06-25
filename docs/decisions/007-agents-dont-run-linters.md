@@ -21,7 +21,7 @@ Alternatives rejected:
   only know what the linter found by running it and reading the output, which is
   the churn we're removing. Correctness defects (undefined name, unused import)
   are caught by reading one's own code while writing, not by a lint pass.
-- **A silent auto-format hook.** Hooks live in `.claude/settings.json`, which
+- **A silent auto-fix hook.** Hooks live in `.claude/settings.json`, which
   doesn't travel through the `@.fieldkit` import, so it can't be a shared
   cross-repo rule; the command is also toolchain-specific per repo. Viable as a
   per-repo opt-in later, but not the generic mechanism. A hook that reports lint
@@ -40,7 +40,7 @@ Alternatives rejected:
   applies - run them concise (quiet, short traceback, fail-fast) to keep the
   loop cheap.
 - If a repo wants formatting fully automated off the agent's plate, the path is
-  a per-repo silent auto-format hook, documented as opt-in - not a change to
+  a per-repo silent auto-fix hook, documented as opt-in - not a change to
   this decision. Prefer firing it on stop (turn end) over per-edit: a formatter
   reorders whitespace, so per-edit reformatting can leave a later edit's
   `old_string` no longer matching the file, costing a failed edit and a re-read.
