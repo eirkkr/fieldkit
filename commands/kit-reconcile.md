@@ -3,6 +3,8 @@ description: Reconcile this repo to the latest shared-conventions-kit changes
 argument-hint: "[git range, e.g. main~3..main]"
 ---
 
+# Reconcile this repo to the latest kit changes
+
 The shared conventions kit (imported here via `@.fieldkit`) has changed. See
 what changed: review the kit's recent history with `git -C .fieldkit log` and
 `git -C .fieldkit show <commit>`. It squash-merges, so the latest commit on main
