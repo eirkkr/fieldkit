@@ -45,3 +45,12 @@ Alternatives rejected:
   reorders whitespace, so per-edit reformatting can leave a later edit's
   `old_string` no longer matching the file, costing a failed edit and a re-read.
   On-stop timing lets the agent work against stable state.
+- Guard that hook on a dirty working tree (`git status --porcelain | grep -q
+  .`), not on a list of fixable file extensions. Skipping no-op turns (those
+  that changed nothing) is worth the cheap `git status`, but enumerating
+  extensions couples the guard to the format command: add a fixer for a new
+  file type and the guard silently stops triggering for it. Running the
+  formatter on a turn that touched only non-fixable files is a near-instant
+  no-op; a newly added fixer that never fires is a silent drift bug. The coarse
+  guard removes the coupling, so the hook stays correct as the format command
+  grows.
