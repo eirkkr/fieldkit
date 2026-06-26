@@ -78,6 +78,20 @@ resolves the latest by default; after it runs, tighten the version range in
 Python version with `uv run python --version` and use that patch in
 `requires-python`.
 
+## Running code
+
+Always prefix tool invocations with `uv run` so the project venv is used
+rather than the system Python:
+
+```sh
+uv run python script.py   # run a script
+uv run pytest             # run tests
+uv run ruff check .       # run a linter/formatter
+```
+
+This applies to exploratory commands in the shell as well as to subprocess
+calls in scripts - use `uv run python` rather than `python3` or `python`.
+
 ## Dependencies
 
 After `uv add` installs a package, set its version range in `pyproject.toml`
