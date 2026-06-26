@@ -50,7 +50,32 @@ in its block. Applies to simple statements (assignments, calls, returns,
 raises), not to compound headers (`if`, `for`, `with`, `def`, `class`, `try`,
 `except`).
 
+## Project setup
+
+Initialise new projects with uv commands rather than hand-authoring
+`pyproject.toml`:
+
+```sh
+uv init <name>          # scaffold pyproject.toml, .python-version, README
+uv add <pkg>            # add a runtime dependency
+uv add --dev <pkg>      # add a dev dependency
+uv sync                 # create/update the lockfile and venv
+```
+
+Commit both `pyproject.toml` and `uv.lock`. Do not edit either by hand after
+initial setup - use `uv add` / `uv remove` so the lockfile stays consistent.
+
 ## Dependencies
 
-When adding entries to `pyproject.toml`, pin to the minor version, not the
-patch (e.g. `>=5.6.0,<6` not `>=5.6.3,<6`).
+Pin every entry in `pyproject.toml` to a version range. The minimum is the
+first release of the minor you need; the maximum depends on the package:
+
+- **Dependencies (major >= 1):** cap at the next major.
+  `>=X.Y.0,<X+1` - e.g. `pytest 9.1.1` → `>=9.1.0,<10`
+- **Dependencies (major == 0):** cap at the next minor - 0.x semver treats
+  the minor as the breaking-change boundary.
+  `>=0.Y.0,<0.Y+1` - e.g. `pymarkdownlnt 0.9.38` → `>=0.9.0,<0.10`
+- **`requires-python`:** pin to the exact installed patch and cap at the next
+  minor. Python patch releases can introduce new language features, so the
+  minimum must be exact.
+  `>=X.Y.Z,<X.Y+1` - e.g. Python 3.14.4 → `>=3.14.4,<3.15`
