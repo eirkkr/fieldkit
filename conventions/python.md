@@ -71,10 +71,10 @@ Pin every entry in `pyproject.toml` to a version range. The minimum is the
 first release of the minor you need; the maximum depends on the package:
 
 - **Dependencies (major >= 1):** cap at the next major.
-  `>=X.Y.0,<X+1` - e.g. `pytest 9.1.1` → `>=9.1.0,<10`
+  `>=X.Y,<X+1` - e.g. `pytest 9.1.1` → `>=9.1,<10`
 - **Dependencies (major == 0):** cap at the next minor - 0.x semver treats
   the minor as the breaking-change boundary.
-  `>=0.Y.0,<0.Y+1` - e.g. `pymarkdownlnt 0.9.38` → `>=0.9.0,<0.10`
+  `>=0.Y,<0.Y+1` - e.g. `pymarkdownlnt 0.9.38` → `>=0.9,<0.10`
 - **`requires-python`:** pin to the exact installed patch and cap at the next
   minor. Python patch releases can introduce new language features, so the
   minimum must be exact.
