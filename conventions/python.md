@@ -19,6 +19,11 @@ applies. Several rules below have no automated enforcement and rely on review.
 - Annotation-only imports under `TYPE_CHECKING` count as public usage (they
   are a real cross-package contract). Test imports do not: a symbol used only
   by tests stays private.
+- An annotation-only import can live under `if TYPE_CHECKING:` without
+  `from __future__ import annotations` on Python 3.14+, where PEP 649 defers
+  annotation evaluation by default. Below 3.14, a runtime-evaluated annotation
+  - notably a module- or class-level variable annotation - still needs the
+  symbol imported at runtime, so don't move it.
 - A symbol used only within its own package isn't re-exported; in-package
   callers import it directly from its defining module.
 - Re-export a public symbol from the package that owns it, not from a parent.
