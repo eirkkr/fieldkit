@@ -62,8 +62,14 @@ uv add --dev <pkg>      # add a dev dependency (resolves latest)
 uv sync                 # create/update the lockfile and venv
 ```
 
-Commit both `pyproject.toml` and `uv.lock`. Do not edit either by hand after
-initial setup - use `uv add` / `uv remove` so the lockfile stays consistent.
+Commit `pyproject.toml`, `uv.lock`, and `.python-version`. Do not edit
+`pyproject.toml` or `uv.lock` by hand after initial setup - use `uv add` /
+`uv remove` so the lockfile stays consistent.
+
+`.python-version` records the exact Python patch the project uses (e.g.
+`3.14.4`). Create or update it with `uv python pin <version>`. This is the
+specific version developers and CI should run; `requires-python` in
+`pyproject.toml` is the broader compatibility range.
 
 **Always use the latest available versions** when setting up a project - the
 latest stable Python minor and the latest release of each dependency. `uv add`
