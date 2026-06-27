@@ -10,8 +10,9 @@ Like a survival field kit: the **manual** (conventions) and the **instruments**
 - `CLAUDE.md` - the entry point a consumer repo `@`-imports; pulls in the
   language-agnostic conventions and points to the opt-in language-specific ones.
 - `conventions/` - the convention docs themselves: `workflow`, `git`, `github`,
-  `style`, `decisions` (language-agnostic), and `python` (opt-in, for Python
-  repos).
+  `style`, `decisions` (language-agnostic), and the opt-in Python set for Python
+  repos - `python` (a slim always-on hub) indexing `python-code`,
+  `python-setup`, and `testing`, each read on demand.
 - `docs/decisions/` - ADRs recording this repo's own non-obvious design
   choices; the one `docs/` subtree.
 - `commands/` - shared Claude Code slash commands, symlinked into
@@ -50,9 +51,10 @@ Like a survival field kit: the **manual** (conventions) and the **instruments**
    @.fieldkit/CLAUDE.md
    ```
 
-   For a Python repo, also add `@.fieldkit/conventions/python.md`, or import
-   individual `conventions/*` files for only some. `.fieldkit` is gitignored, so
-   every clone, collaborator, and CI checkout recreates it.
+   For a Python repo, also add `@.fieldkit/conventions/python.md`; it stays slim
+   and indexes `python-code`, `python-setup`, and `testing`, which Claude reads
+   on demand. `.fieldkit` is gitignored, so every clone, collaborator, and CI
+   checkout recreates it.
 
 3. **Grant Claude access to the kit.** A consumer session runs in the consumer
    repo, so add your clone path to that repo's `.claude/settings.json`:
