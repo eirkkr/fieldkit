@@ -26,6 +26,6 @@ relative to the consumer repo root, via the `.fieldkit` symlink.
 
 | Before...                                  | Read                                   |
 | ------------------------------------------ | -------------------------------------- |
-| Writing or editing Python source          | .fieldkit/conventions/python-code.md   |
+| Writing or editing Python source           | .fieldkit/conventions/python-code.md   |
 | Setting up a project or managing deps      | .fieldkit/conventions/python-setup.md  |
 | Writing or reviewing tests                 | .fieldkit/conventions/testing.md       |
