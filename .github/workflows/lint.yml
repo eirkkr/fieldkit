@@ -1,13 +1,10 @@
 name: Lint
 
-on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+on: pull_request
 
 jobs:
   lint:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.draft == false
     steps:
       - uses: actions/checkout@v4
 
