@@ -16,3 +16,4 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 009 | [User-level commands, per-repo conventions](009-user-level-commands-not-conventions.md) | Accepted   |
 | 010 | [Python hub and on-demand spokes](010-python-hub-and-spokes.md)        | Accepted   |
 | 011 | [WIP on branches; gate PR creation](011-wip-on-branches.md)            | Accepted   |
+| 012 | [Per-consumer reconcile marker](012-reconcile-marker.md)                | Accepted   |
