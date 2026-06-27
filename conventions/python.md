@@ -47,14 +47,6 @@ and classes, then private helpers (callers above callees). Order class members:
 
 Within a group, put callers above callees and more central members higher.
 
-## Blank-line spacing
-
-Relies on review (no linter). Any statement spanning more than one line is
-surrounded by a blank line on each side, unless it's the first or last statement
-in its block. Applies to simple statements (assignments, calls, returns,
-raises), not to compound headers (`if`, `for`, `with`, `def`, `class`, `try`,
-`except`).
-
 ## Exception handling
 
 On Python 3.14+ (PEP 758), an `except` clause catching several types is
