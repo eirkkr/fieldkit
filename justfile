@@ -2,11 +2,10 @@
 default:
     @just --list
 
-# Symlink kit slash commands into the user-level Claude commands dir.
+# Set up slash commands and Claude settings.
 install:
-    mkdir -p ~/.claude/commands
-    ln -sf "{{ justfile_directory() }}/commands/kit-reconcile.md" ~/.claude/commands/kit-reconcile.md
-    @echo "Linked /kit-reconcile into ~/.claude/commands"
+    @"{{ justfile_directory() }}/scripts/link-commands.sh" "{{ justfile_directory() }}"
+    @"{{ justfile_directory() }}/scripts/register-dir.sh" "{{ justfile_directory() }}"
 
 # Lint all markdown.
 check:

@@ -56,15 +56,9 @@ Like a survival field kit: the **manual** (conventions) and the **instruments**
    on demand. `.fieldkit` is gitignored, so every clone, collaborator, and CI
    checkout recreates it.
 
-3. **Grant Claude access to the kit.** A consumer session runs in the consumer
-   repo, so add your clone path to that repo's `.claude/settings.json`:
-
-   ```json
-   { "permissions": { "additionalDirectories": ["~/src/fieldkit"] } }
-   ```
-
-   or run `/add-dir ~/src/fieldkit` in-session. Point it at the real clone path,
-   not the symlink.
+3. **Grant Claude access to the kit.** `just install` adds the kit path to
+   `~/.claude/settings.json` (`permissions.additionalDirectories`) so all
+   consumer sessions can read it without a prompt - no per-repo config needed.
 
 4. **Start sessions from the repo root.** The load-on-demand files are
    referenced relative to the consumer repo root, so launch `claude` there, not
@@ -138,14 +132,15 @@ the agent, so it stays out of every session's context.
 
 Markdown is linted with [pymarkdown](https://github.com/jackdewinter/pymarkdown)
 (line length 80, table rows exempt; config in `.pymarkdown`). Needs
-[just](https://just.systems) and [uv](https://docs.astral.sh/uv/) - the recipes
-run the linter via `uvx`, so no install step is required.
+[just](https://just.systems) and [uv](https://docs.astral.sh/uv/) - `uvx` runs
+the linter without a separate install step; `just install` uses Python's stdlib
+`json` module to patch `~/.claude/settings.json`.
 
 | Task                       | Command        |
 | -------------------------- | -------------- |
 | Lint all docs              | `just check`   |
 | Auto-fix issues            | `just fix`     |
-| Wire slash commands (once) | `just install` |
+| Wire slash commands and settings (once) | `just install` |
 
 ## Status
 
