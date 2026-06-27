@@ -40,3 +40,8 @@ Alternatives rejected:
 - `conventions/github.md` already matched this model (draft PRs need no approval;
   the gates are ready-for-review and the pre-merge message), so only `CLAUDE.md`,
   `workflow.md`, and `git.md` changed.
+
+> Amended by [011](011-wip-on-branches.md): drafts are dropped and WIP lives on
+> the branch; the ready-for-review gate is relocated onto PR creation. The
+> principle here stands - opening a PR and merging remain gated, and branch
+> pushes join act-then-show.
