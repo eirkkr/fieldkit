@@ -14,3 +14,4 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 007 | [Agents don't run linters](007-agents-dont-run-linters.md)             | Accepted   |
 | 008 | [Gate on outward or irreversible actions](008-outward-irreversible.md) | Accepted   |
 | 009 | [User-level commands, per-repo conventions](009-user-level-commands-not-conventions.md) | Accepted   |
+| 010 | [Python hub and on-demand spokes](010-python-hub-and-spokes.md)        | Accepted   |

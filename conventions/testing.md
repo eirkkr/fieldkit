@@ -1,6 +1,7 @@
 # Testing
 
-Generic pytest conventions for Python repos. Import this only where it applies.
+Generic pytest conventions for Python repos. See [python.md](python.md) for the
+index and the always-on `uv run` rule.
 
 ## Structure and naming
 
