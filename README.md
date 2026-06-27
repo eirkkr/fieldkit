@@ -94,8 +94,21 @@ session in the consumer repo, run:
 
 It reviews the kit's recent history, then reconciles this repo's agent-facing
 docs and tooling to the current conventions, working on a branch and showing the
-changes for approval before editing. Pass a git range to catch up several
-changes at once, e.g. `/kit-reconcile main~3..main`.
+changes for approval before editing.
+
+Each consumer tracks how far it has caught up in a committed `.fieldkit-rev`
+file - the kit commit it was last reconciled to. With no argument the command
+reconciles every kit commit since that marker, then advances it; a no-op
+reconcile still opens a marker-only PR, recording the repo was checked. On a repo
+with no marker yet it reviews just the latest commit, warns, and creates the
+file. Override the range with `/kit-reconcile N` (the last N commits) or
+`/kit-reconcile latest` (the latest only). See
+[ADR 012](docs/decisions/012-reconcile-marker.md).
+
+`/kit-reconcile` reconciles *instructions*, not the codebase. When a convention
+change also implies source edits, it surfaces the affected conventions and offers
+to file issues; the actual code sweep is a separate, still-to-be-built
+`/kit-audit` command.
 
 The command is defined in `commands/kit-reconcile.md` and wired up by
 `just install` (see Setup); editing that file updates it everywhere.
