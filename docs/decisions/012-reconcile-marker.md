@@ -23,9 +23,9 @@ future `/kit-audit` command, tracked by its own issue.
 
 The marker solves "I forget what commit we've reconciled up to" - it turns the
 range into something computed, not remembered. It lives in the consumer because
-the kit's own history cannot know each consumer's state, and it is committed -
-unlike the gitignored `.fieldkit` symlink ([ADR 006](006-symlink-kit-reference.md))
-- so it travels to every clone, collaborator, and CI checkout. Plain text so the
+the kit's own history cannot know each consumer's state, and it is committed
+(unlike the gitignored `.fieldkit` symlink, [ADR 006](006-symlink-kit-reference.md))
+so it travels to every clone, collaborator, and CI checkout. Plain text so the
 bump diffs visibly in the reconcile PR. It must be stored, not derived: a
 consumer's git history records nothing about the kit's SHA.
 
@@ -35,9 +35,9 @@ arbitrary non-HEAD window is exotic and not worth the surface area; keeping ever
 mode HEAD-anchored is simpler to document.
 
 The marker must advance even on a no-op reconcile, or it never catches up and
-re-reviews clean commits forever. A marker-only PR - not a bare commit on `main`
-- keeps this within the never-commit-to-main convention, and the trivial PR is
-the audit trail.
+re-reviews clean commits forever. A marker-only PR (not a bare commit on `main`)
+keeps this within the never-commit-to-main convention, and the trivial PR is the
+audit trail.
 
 Splitting instructions from codebase: most kit changes (workflow, git, PR
 process) have zero code impact, so welding a repo-wide source sweep onto every
