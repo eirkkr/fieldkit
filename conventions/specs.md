@@ -1,8 +1,7 @@
 # Writing implementation specs
 
 How to write a specification another contributor - or a fresh agent - can
-implement without re-deriving your context. Applies when you plan substantial
-work for someone else (or a future session) to build.
+implement without re-deriving your context.
 
 ## What a spec is
 

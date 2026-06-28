@@ -30,9 +30,10 @@ pushes) is act-then-show: do it, surface it, correct after.
 repo root - the directory the session is started from. Read
 .fieldkit/conventions/<file> from there, via the .fieldkit symlink. -->
 
-| Before...                              | Read                               |
-| -------------------------------------- | ---------------------------------- |
-| Any GitHub action (issue, PR, comment) | .fieldkit/conventions/github.md    |
-| Recording a design decision (ADR)      | .fieldkit/conventions/decisions.md |
-| Writing an implementation spec or plan | .fieldkit/conventions/specs.md     |
-| Building a feature that calls an LLM   | .fieldkit/conventions/ai.md        |
+| Before...                                          | Read                                        |
+| -------------------------------------------------- | ------------------------------------------- |
+| Any GitHub action (issue, PR, comment)             | .fieldkit/conventions/github.md             |
+| Recording a design decision (ADR)                  | .fieldkit/conventions/decisions.md          |
+| Writing an implementation spec or plan             | .fieldkit/conventions/specs.md              |
+| Building a feature that calls an LLM               | .fieldkit/conventions/ai.md                 |
+| Invoking Python in any form (script, inline, call) | .fieldkit/conventions/python/run.md         |

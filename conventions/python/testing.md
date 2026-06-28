@@ -1,7 +1,6 @@
 # Testing
 
-Generic pytest conventions for Python repos. See [python.md](python.md) for the
-index and the always-on `uv run` rule.
+pytest conventions for Python repos.
 
 ## Structure and naming
 

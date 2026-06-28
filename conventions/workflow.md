@@ -3,9 +3,9 @@
 - Act-then-show: make the change, then surface it for review and correct after.
   Agree direction first only for genuinely new conventions or design decisions -
   refinements and routine edits need none.
-- Anything learned that's worth keeping goes in docs or CLAUDE.md, not
-  machine-local memory. Route by scope: generic cross-repo lessons into the
-  shared conventions kit; repo-specific ones into that repo's own docs.
+- Anything learned that's worth keeping goes in docs or CLAUDE.md. Route by
+  scope: generic cross-repo lessons into the shared conventions kit;
+  repo-specific ones into that repo's own docs.
 - Before any suppression (`# type: ignore`, `# noqa`, tool exclusion), check
   whether the underlying issue can be fixed instead. Suppress only when the tool
   is genuinely wrong about the file's context (e.g. a generated or vendored
@@ -27,12 +27,6 @@
   flags, failing fast while iterating.
 - Run the narrowest relevant selection while iterating; widen to the full suite
   before declaring work done.
-
-## Design decisions
-
-- Record non-obvious design decisions - rationale plus alternatives rejected - as
-  a numbered ADR in `docs/decisions/`, not in memory or a convention doc. See
-  `conventions/decisions.md` for the format and register.
 
 ## Reviewing and auditing
 
