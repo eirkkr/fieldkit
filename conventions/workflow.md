@@ -28,12 +28,6 @@
 - Run the narrowest relevant selection while iterating; widen to the full suite
   before declaring work done.
 
-## Design decisions
-
-- Record non-obvious design decisions - rationale plus alternatives rejected - as
-  a numbered ADR in `docs/decisions/`, not in memory or a convention doc. See
-  `conventions/decisions.md` for the format and register.
-
 ## Reviewing and auditing
 
 - A green CI / lint pass confirms only machine-enforced rules. Audit conventions
