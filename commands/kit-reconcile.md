@@ -13,18 +13,17 @@ so the next run knows where it left off.
 ## Resolve the range
 
 The marker file `.fieldkit-rev` at this repo's root records the kit commit this
-repo was last reconciled to - its first whitespace-delimited token is the SHA,
-anything after `#` is a human comment. The kit squash-merges, so each commit on
+repo was last reconciled to as a bare SHA. The kit squash-merges, so each commit on
 its `main` is one change. Resolve the range from `$ARGUMENTS`:
 
-- **No argument, marker present:** `<marker-sha>..HEAD` - every kit commit since
+- **No argument, marker present:** `<marker-sha>..main` - every kit commit since
   the last reconcile.
 - **No argument, marker absent:** the latest kit commit only. Warn that
   `.fieldkit-rev` is missing, so older changes were not reviewed.
-- **A number `N`:** `HEAD~N..HEAD` - the last N kit commits.
+- **A number `N`:** `main~N..main` - the last N kit commits.
 - **`latest`:** the latest kit commit only.
 
-Read the kit history for that range with `git -C .fieldkit log` and
+Read the kit history for that range with `git -C .fieldkit log main` and
 `git -C .fieldkit show <commit>`.
 
 ## Reconcile this repo
@@ -47,8 +46,7 @@ separate job.
 ## Advance the marker and open the PR
 
 Set `.fieldkit-rev` to the kit HEAD you reconciled to
-(`git -C .fieldkit rev-parse HEAD`), with a trailing `# <date> <subject>` comment
-for humans, and commit the bump alongside the reconcile edits. This also creates
+(`git -C .fieldkit rev-parse main`) and commit the bump alongside the reconcile edits. This also creates
 the file on a repo that had no marker yet. If the audit found nothing to change,
 still bump the marker and open a marker-only PR - that records the repo was
 checked up to this commit.
