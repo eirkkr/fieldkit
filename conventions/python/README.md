@@ -24,8 +24,8 @@ in scripts - use `uv run python` rather than `python3` or `python`.
 Read the matching file before the action; don't load it otherwise. Paths are
 relative to the consumer repo root, via the `.fieldkit` symlink.
 
-| Before...                                  | Read                                   |
-| ------------------------------------------ | -------------------------------------- |
-| Writing or editing Python source           | .fieldkit/conventions/python-code.md   |
-| Setting up a project or managing deps      | .fieldkit/conventions/python-setup.md  |
-| Writing or reviewing tests                 | .fieldkit/conventions/testing.md       |
+| Before...                             | Read                                          |
+| ------------------------------------- | --------------------------------------------- |
+| Writing or editing Python source      | .fieldkit/conventions/python/code.md          |
+| Setting up a project or managing deps | .fieldkit/conventions/python/setup.md         |
+| Writing or reviewing tests            | .fieldkit/conventions/python/testing.md       |
