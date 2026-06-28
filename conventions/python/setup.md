@@ -1,7 +1,10 @@
 # Python project setup and dependencies
 
 Conventions for scaffolding a Python project and managing its dependencies with
-uv. See [README.md](README.md) for the index and the always-on `uv run` rule.
+uv. See [README.md](README.md) for the index.
+
+Prefix all tool invocations with `uv run` so the project venv is used rather
+than the system Python - including `uv run python`, not `python3` or `python`.
 
 ## Project setup
 

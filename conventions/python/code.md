@@ -2,8 +2,10 @@
 
 Conventions for authoring Python source: docstrings, imports, member ordering,
 and exception handling. Several rules below have no automated enforcement and
-rely on review. See [README.md](README.md) for the index and the always-on
-`uv run` rule.
+rely on review. See [README.md](README.md) for the index.
+
+Prefix all tool invocations with `uv run` (e.g. `uv run ruff check .`) so the
+project venv is used rather than the system Python.
 
 ## Docstrings
 

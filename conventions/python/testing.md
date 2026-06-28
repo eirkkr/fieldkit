@@ -1,7 +1,10 @@
 # Testing
 
 Generic pytest conventions for Python repos. See [README.md](README.md) for
-the index and the always-on `uv run` rule.
+the index.
+
+Run tests with `uv run pytest` so the project venv is used rather than the
+system Python.
 
 ## Structure and naming
 
