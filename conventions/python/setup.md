@@ -1,7 +1,7 @@
 # Python project setup and dependencies
 
 Conventions for scaffolding a Python project and managing its dependencies with
-uv. See [README.md](README.md) for the index.
+uv.
 
 ## Project setup
 

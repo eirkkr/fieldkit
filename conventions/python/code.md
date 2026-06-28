@@ -2,7 +2,7 @@
 
 Conventions for authoring Python source: docstrings, imports, member ordering,
 and exception handling. Several rules below have no automated enforcement and
-rely on review. See [README.md](README.md) for the index.
+rely on review.
 
 ## Docstrings
 

@@ -1,7 +1,6 @@
 # Testing
 
-Generic pytest conventions for Python repos. See [README.md](README.md) for
-the index.
+pytest conventions for Python repos.
 
 ## Structure and naming
 

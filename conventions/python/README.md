@@ -4,8 +4,7 @@ Language-specific conventions for Python repos.
 
 ## Load on Demand
 
-Read the matching file before the action; don't load it otherwise. Paths are
-relative to the consumer repo root, via the `.fieldkit` symlink.
+Read the matching file before the action; don't load it otherwise.
 
 | Before...                             | Read                                          |
 | ------------------------------------- | --------------------------------------------- |
