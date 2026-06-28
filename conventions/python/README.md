@@ -1,9 +1,6 @@
 # Python conventions
 
-Language-specific conventions for Python repos. `@`-import this file in a Python
-repo as an index to the detail files, which you read on demand for the task at
-hand. Several of the linked rules have no automated enforcement and rely on
-review.
+Language-specific conventions for Python repos.
 
 ## Load on Demand
 
