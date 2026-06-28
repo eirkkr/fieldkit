@@ -56,9 +56,11 @@ Like a survival field kit: the **manual** (conventions) and the **instruments**
    demand. `.fieldkit` is gitignored, so every clone, collaborator, and CI
    checkout recreates it.
 
-3. **Grant Claude access to the kit.** `just install` adds the kit path to
-   `~/.claude/settings.json` (`permissions.additionalDirectories`) so all
-   consumer sessions can read it without a prompt - no per-repo config needed.
+3. **Grant Claude access to the kit.** `just install` patches
+   `~/.claude/settings.json`: adds the kit path to
+   `permissions.additionalDirectories` so all consumer sessions can read it
+   without a prompt, and sets `autoMemoryEnabled: false` so learnings go into
+   docs or CLAUDE.md rather than machine-local memory files.
 
 4. **Start sessions from the repo root.** The load-on-demand files are
    referenced relative to the consumer repo root, so launch `claude` there, not
