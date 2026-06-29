@@ -14,7 +14,6 @@ See the README for the one-time symlink setup.
 
 @conventions/workflow.md
 @conventions/git.md
-@conventions/style.md
 
 ## Load on Demand
 
