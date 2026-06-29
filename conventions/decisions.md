@@ -23,9 +23,13 @@ One file per decision in `docs/decisions/`, named `NNN-kebab-title.md`
 
 `docs/decisions/README.md` indexes every ADR:
 
+<!-- markdownlint-disable MD057 -->
+
 | #   | Decision                 | Status   |
 | --- | ------------------------ | -------- |
 | 001 | [Short title](001-...md) | Accepted |
+
+<!-- markdownlint-enable MD057 -->
 
 Add a row per ADR. Status is `Accepted` once adopted (`Proposed` while under
 discussion, `Superseded` when replaced).

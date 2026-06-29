@@ -2,9 +2,9 @@
 
 ## Decision
 
-Markdown linting runs `pymarkdownlnt` through `uvx` at a pinned version
-(`uvx pymarkdownlnt@0.9.38`) from the justfile, with rule config in
-`.pymarkdown`. There is no `pyproject.toml`, lockfile, or virtual environment.
+Markdown linting runs `rumdl` through `uvx` at a pinned version
+(`uvx rumdl@0.2.26`) from the justfile. There is no `pyproject.toml`, lockfile,
+or virtual environment.
 
 ## Reason
 
@@ -20,5 +20,5 @@ reproducible results without a lockfile.
 - `just check` / `just fix` work with no setup beyond `just` and `uv`.
 - Upgrading the linter means editing the pinned version in the justfile rather
   than running a lock update.
-- `.pymarkdown` is the linter's default config name, so direct `pymarkdownlnt`
-  invocations pick it up too.
+- rumdl's built-in defaults (line-length=80, tables exempt) match the project
+  requirements, so no config file is needed.

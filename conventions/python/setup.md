@@ -44,7 +44,7 @@ maximum depends on the package:
   `>=X.Y,<X+1` - e.g. installed `pytest 9.1.1` → `>=9.1,<10`
 - **Dependencies (major == 0):** cap at the next minor - 0.x semver treats
   the minor as the breaking-change boundary.
-  `>=0.Y,<0.Y+1` - e.g. installed `pymarkdownlnt 0.9.38` → `>=0.9,<0.10`
+  `>=0.Y,<0.Y+1` - e.g. installed `rumdl 0.2.26` → `>=0.2,<0.3`
 - **`requires-python`:** pin to the latest installed minor and cap at the next
   minor. `>=X.Y,<X.Y+1` - e.g. installed Python `3.14.4` → `>=3.14,<3.15`
 
@@ -52,6 +52,6 @@ Common mistakes to avoid:
 
 - `>=9.1.1,<10` - patch in the floor; use `>=9.1,<10`
 - `>=9,<10` - major in the floor; use `>=9.1,<10`
-- `>=0.9.38,<0.10` - patch in the floor for a 0.x package; use `>=0.9,<0.10`
+- `>=0.2.26,<0.3` - patch in the floor for a 0.x package; use `>=0.2,<0.3`
 - `>=0.9,<1` - capping a 0.x package at major; use `>=0.9,<0.10`
 - `>=3.11` - an old Python version with no upper bound; use `>=3.14,<3.15`

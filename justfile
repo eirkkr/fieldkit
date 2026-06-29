@@ -9,8 +9,8 @@ install:
 
 # Lint all markdown.
 check:
-    uvx pymarkdownlnt@0.9.38 scan -r .
+    uvx rumdl@0.2.26 check .
 
 # Auto-fix markdown issues.
 fix:
-    uvx pymarkdownlnt@0.9.38 fix -r .
+    uvx rumdl@0.2.26 check --fix .
