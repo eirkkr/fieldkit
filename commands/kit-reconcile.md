@@ -13,8 +13,8 @@ so the next run knows where it left off.
 ## Resolve the range
 
 The marker file `.fieldkit-rev` at this repo's root records the kit commit this
-repo was last reconciled to as a bare SHA. The kit squash-merges, so each commit on
-its `main` is one change. Resolve the range from `$ARGUMENTS`:
+repo was last reconciled to as a bare SHA. The kit squash-merges, so each
+commit on its `main` is one change. Resolve the range from `$ARGUMENTS`:
 
 - **No argument, marker present:** `<marker-sha>..main` - every kit commit since
   the last reconcile.
@@ -46,10 +46,10 @@ separate job.
 ## Advance the marker and open the PR
 
 Set `.fieldkit-rev` to the kit HEAD you reconciled to
-(`git -C .fieldkit rev-parse main`) and commit the bump alongside the reconcile edits. This also creates
-the file on a repo that had no marker yet. If the audit found nothing to change,
-still bump the marker and open a marker-only PR - that records the repo was
-checked up to this commit.
+(`git -C .fieldkit rev-parse main`) and commit the bump alongside the reconcile
+edits. This also creates the file on a repo that had no marker yet. If the
+audit found nothing to change, still bump the marker and open a marker-only PR -
+that records the repo was checked up to this commit.
 
 Follow the kit's git conventions: show me the proposed changes for approval
 before editing, work on a branch, and open a PR.

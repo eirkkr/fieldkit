@@ -132,16 +132,16 @@ the agent, so it stays out of every session's context.
 
 ## Development
 
-Markdown is linted with [pymarkdown](https://github.com/jackdewinter/pymarkdown)
-(line length 80, table rows exempt; config in `.pymarkdown`). Needs
-[just](https://just.systems) and [uv](https://docs.astral.sh/uv/) - `uvx` runs
-the linter without a separate install step; `just install` uses Python's stdlib
-`json` module to patch `~/.claude/settings.json`.
+Markdown is linted with [rumdl](https://rumdl.dev) (line length 80, table rows
+exempt; default config). Needs [just](https://just.systems) and
+[uv](https://docs.astral.sh/uv/) - `uvx` runs the linter without a separate
+install step; `just install` uses Python's stdlib `json` module to patch
+`~/.claude/settings.json`.
 
-| Task                       | Command        |
-| -------------------------- | -------------- |
-| Lint all docs              | `just check`   |
-| Auto-fix issues            | `just fix`     |
+| Task                                    | Command        |
+| --------------------------------------- | -------------- |
+| Lint all docs                           | `just check`   |
+| Auto-fix issues                         | `just fix`     |
 | Wire slash commands and settings (once) | `just install` |
 
 ## Status
