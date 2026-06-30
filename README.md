@@ -10,7 +10,7 @@ Like a survival field kit: the **manual** (conventions) and the **instruments**
 - `CLAUDE.md` - the entry point a consumer repo `@`-imports; pulls in the
   language-agnostic conventions and points to the opt-in language-specific ones.
 - `conventions/` - the convention docs themselves: `workflow`, `git`, `github`,
-  `style`, `decisions` (language-agnostic), and `python/` for Python repos -
+  `decisions`, `specs`, `ai` (language-agnostic), and `python/` for Python repos -
   a slim `README.md` hub indexing `code`, `setup`, and `testing`, each read on
   demand.
 - `docs/decisions/` - ADRs recording this repo's own non-obvious design
@@ -53,8 +53,8 @@ Like a survival field kit: the **manual** (conventions) and the **instruments**
 
    For a Python repo, also add `@.fieldkit/conventions/python/README.md`; it
    stays slim and indexes `code`, `setup`, and `testing`, which Claude reads on
-   demand. `.fieldkit` is gitignored, so every clone, collaborator, and CI
-   checkout recreates it.
+   demand. `.fieldkit` is gitignored - every collaborator or CI checkout runs
+   this step once to recreate the symlink.
 
 3. **Grant Claude access to the kit.** `just install` patches
    `~/.claude/settings.json`: adds the kit path to
@@ -132,19 +132,6 @@ the agent, so it stays out of every session's context.
 
 ## Development
 
-Markdown is linted with [rumdl](https://rumdl.dev) (line length 80, table rows
-exempt; default config). Needs [just](https://just.systems) and
-[uv](https://docs.astral.sh/uv/) - `uvx` runs the linter without a separate
-install step; `just install` uses Python's stdlib `json` module to patch
-`~/.claude/settings.json`.
+Requires [just](https://just.systems) and [uv](https://docs.astral.sh/uv/). Run
+`just` to list available commands.
 
-| Task                                    | Command        |
-| --------------------------------------- | -------------- |
-| Lint all docs                           | `just check`   |
-| Auto-fix issues                         | `just fix`     |
-| Wire slash commands and settings (once) | `just install` |
-
-## Status
-
-`conventions/` and the `CLAUDE.md` entry point are in place. Still to do: wire
-the consumer repos. See the open setup issue for the full build plan.
