@@ -1,6 +1,8 @@
 ---
+name: kit-reconcile
 description: Reconcile this repo to the latest shared-conventions-kit changes
 argument-hint: "[N | latest]"
+disable-model-invocation: true
 ---
 
 # Reconcile this repo to the latest kit changes

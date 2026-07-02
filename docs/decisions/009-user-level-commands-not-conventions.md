@@ -43,3 +43,7 @@ directory.
 - If usage ever narrows to almost exclusively the owner's own repos, global
   conventions could be revisited - it trades containment for convenience and
   would supersede this decision.
+
+Superseded by [ADR 014](014-skills-not-commands.md): the asset kind moved from
+slash commands to Skills, but the user-level pull / per-repo push split this
+ADR established is unchanged.
