@@ -5,8 +5,8 @@
 Replace `commands/` with `skills/`: the kit's shared, pull-style Claude Code
 assets are now distributed as Skills, not legacy slash-command files. `just
 install` symlinks each skill's directory (e.g. `skills/kit-reconcile/`) into
-`~/.claude/skills/`, making it available in every repo without per-repo wiring
-- the same reach ADR 009 established for commands.
+`~/.claude/skills/`, making it available in every repo without any per-repo
+wiring - the same reach ADR 009 established for commands.
 
 The source stays at a plain top-level `skills/`, not `.claude/skills/`.
 Claude Code auto-discovers `.claude/skills/` as *this repo's own* project
