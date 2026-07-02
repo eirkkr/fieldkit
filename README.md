@@ -10,9 +10,8 @@ Like a survival field kit: the **manual** (conventions) and the **instruments**
 - `CLAUDE.md` - the entry point a consumer repo `@`-imports; pulls in the
   language-agnostic conventions and points to the opt-in language-specific ones.
 - `conventions/` - the convention docs themselves: `workflow`, `git`, `github`,
-  `decisions`, `specs`, `ai` (language-agnostic), and `python/` for Python repos -
-  a slim `README.md` hub indexing `code`, `setup`, and `testing`, each read on
-  demand.
+  `decisions`, `specs`, `ai`, and `python/` for Python repos - a slim
+  `README.md` hub indexing `code`, `setup`, and `testing`, each read on demand.
 - `docs/decisions/` - ADRs recording this repo's own non-obvious design
   choices; the one `docs/` subtree.
 - `skills/` - shared Claude Code skills, symlinked into `~/.claude/skills` by
@@ -134,4 +133,3 @@ the agent, so it stays out of every session's context.
 
 Requires [just](https://just.systems) and [uv](https://docs.astral.sh/uv/). Run
 `just` to list available commands.
-
