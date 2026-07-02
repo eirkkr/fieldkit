@@ -13,8 +13,9 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 006 | [Symlink kit reference](006-symlink-kit-reference.md)                                   | Accepted   |
 | 007 | [Agents don't run linters](007-agents-dont-run-linters.md)                              | Accepted   |
 | 008 | [Gate on outward or irreversible actions](008-outward-irreversible.md)                  | Accepted   |
-| 009 | [User-level commands, per-repo conventions](009-user-level-commands-not-conventions.md) | Accepted   |
+| 009 | [User-level commands, per-repo conventions](009-user-level-commands-not-conventions.md) | Superseded |
 | 010 | [Python hub and on-demand spokes](010-python-hub-and-spokes.md)                         | Accepted   |
 | 011 | [WIP on branches; gate PR creation](011-wip-on-branches.md)                             | Accepted   |
 | 012 | [Per-consumer reconcile marker](012-reconcile-marker.md)                                | Accepted   |
 | 013 | [Style rules in tooling, not LLM context](013-style-rules-in-tooling-not-context.md)    | Accepted   |
+| 014 | [Skills, not slash commands](014-skills-not-commands.md)                                | Accepted   |

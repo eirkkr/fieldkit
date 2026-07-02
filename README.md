@@ -15,10 +15,10 @@ Like a survival field kit: the **manual** (conventions) and the **instruments**
   demand.
 - `docs/decisions/` - ADRs recording this repo's own non-obvious design
   choices; the one `docs/` subtree.
-- `commands/` - shared Claude Code slash commands, symlinked into
-  `~/.claude/commands` by `just install` (see Setup).
-- further areas as needs emerge - e.g. more Claude Code assets (skills, agents,
-  hooks), shared scripts, editor/CI config.
+- `skills/` - shared Claude Code skills, symlinked into `~/.claude/skills` by
+  `just install` (see Setup).
+- further areas as needs emerge - e.g. more Claude Code assets (agents, hooks),
+  shared scripts, editor/CI config.
 
 ## Setup
 
@@ -28,9 +28,9 @@ Like a survival field kit: the **manual** (conventions) and the **instruments**
    git clone https://github.com/eirkkr/fieldkit.git ~/src/fieldkit
    ```
 
-   Then wire the kit's slash commands into your user-level Claude config (once
-   per machine - the command sources are version-controlled here, but the
-   symlink into `~/.claude` is not):
+   Then wire the kit's skills into your user-level Claude config (once per
+   machine - the skill sources are version-controlled here, but the symlink
+   into `~/.claude` is not):
 
    ```bash
    cd ~/src/fieldkit && just install
@@ -106,7 +106,7 @@ change also implies source edits, it surfaces the affected conventions and offer
 to file issues; the actual code sweep is a separate, still-to-be-built
 `/kit-audit` command.
 
-The command is defined in `commands/kit-reconcile.md` and wired up by
+The skill is defined in `skills/kit-reconcile/SKILL.md` and wired up by
 `just install` (see Setup); editing that file updates it everywhere.
 
 ## Feeding failures back to an agent
