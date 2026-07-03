@@ -11,7 +11,9 @@ implement without re-deriving your context.
   meet it?
 - Record non-obvious or reversed decisions as ADRs (see `decisions.md`): the
   spec states the decision, the ADR holds the why and the rejected
-  alternatives.
+  alternatives. Write the ADR when the decision settles - while drafting the
+  spec, not as a deferred doc task - so the rationale does not accumulate in
+  the spec prose and drift from the record.
 - Flag provisional or placeholder content loudly, so a reader does not mistake
   a rough draft for a settled rule.
 
