@@ -2,10 +2,13 @@
 set -euo pipefail
 kit="$1"
 mkdir -p ~/.claude/skills
-dest=~/.claude/skills/kit-reconcile
-if [ -L "$dest" ] && [ "$(readlink "$dest")" = "$kit/skills/kit-reconcile" ]; then
-    echo "Already linked /kit-reconcile, no change"
-else
-    ln -sfn "$kit/skills/kit-reconcile" "$dest"
-    echo "Linked /kit-reconcile into ~/.claude/skills"
-fi
+for skill_dir in "$kit"/skills/*/; do
+    name="$(basename "$skill_dir")"
+    dest=~/.claude/skills/"$name"
+    if [ -L "$dest" ] && [ "$(readlink "$dest")" = "$kit/skills/$name" ]; then
+        echo "Already linked /$name, no change"
+    else
+        ln -sfn "$kit/skills/$name" "$dest"
+        echo "Linked /$name into ~/.claude/skills"
+    fi
+done

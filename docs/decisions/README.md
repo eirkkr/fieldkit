@@ -19,3 +19,5 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 012 | [Per-consumer reconcile marker](012-reconcile-marker.md)                                | Accepted   |
 | 013 | [Style rules in tooling, not LLM context](013-style-rules-in-tooling-not-context.md)    | Accepted   |
 | 014 | [Skills, not slash commands](014-skills-not-commands.md)                                | Accepted   |
+| 015 | [Delegate mechanical, ungated git steps only](015-mechanical-subagent-boundary.md)      | Accepted   |
+| 016 | [Pair a thin skill with a worker agent](016-skill-agent-pair.md)                        | Accepted   |
