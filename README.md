@@ -16,8 +16,10 @@ Like a survival field kit: the **manual** (conventions) and the **instruments**
   choices; the one `docs/` subtree.
 - `skills/` - shared Claude Code skills, symlinked into `~/.claude/skills` by
   `just install` (see Setup).
-- further areas as needs emerge - e.g. more Claude Code assets (agents, hooks),
-  shared scripts, editor/CI config.
+- `agents/` - shared Claude Code subagents, symlinked into `~/.claude/agents`
+  by `just install` (see Setup).
+- further areas as needs emerge - e.g. more Claude Code assets (hooks), shared
+  scripts, editor/CI config.
 
 ## Setup
 
