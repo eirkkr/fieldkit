@@ -61,7 +61,11 @@ Like a survival field kit: the **manual** (conventions) and the **instruments**
    `~/.claude/settings.json`: adds the kit path to
    `permissions.additionalDirectories` so all consumer sessions can read it
    without a prompt, and sets `autoMemoryEnabled: false` so learnings go into
-   docs or CLAUDE.md rather than machine-local memory files.
+   docs or CLAUDE.md rather than machine-local memory files. It also sets
+   `includeCoAuthoredBy: false` so commits and PRs carry no AI attribution -
+   if the existing file already differs from that, it shows the diff and asks
+   before changing it. Each of these only touches its own key, leaving the
+   rest of the file alone.
 
 4. **Start sessions from the repo root.** The load-on-demand files are
    referenced relative to the consumer repo root, so launch `claude` there, not
