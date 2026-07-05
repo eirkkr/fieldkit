@@ -1,8 +1,6 @@
 # Git conventions
 
 - Never commit directly to `main`. Branch, commit there, open a PR.
-- No AI attribution: no `Co-Authored-By: Claude` trailer, no "Generated with
-  Claude Code" footer on commits, PRs, or issues - even if tooling adds it.
 
 ## Branches
 
