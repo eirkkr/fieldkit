@@ -22,3 +22,4 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 015 | [Delegate mechanical, ungated git steps only](015-mechanical-subagent-boundary.md)                        | Accepted   |
 | 016 | [Pair a thin skill with a worker agent](016-skill-agent-pair.md)                                          | Accepted   |
 | 017 | [Disable AI attribution via settings, not instructions](017-attribution-via-settings-not-instructions.md) | Accepted   |
+| 018 | [Rely on venv activation, not an inline uv run rule](018-venv-activation-not-uv-run.md)                   | Accepted   |

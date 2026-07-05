@@ -44,3 +44,6 @@ ADR 002 makes for the safety-critical GitHub rule.
 - Spokes are siblings under `conventions/`, consistent with the flat structure
   ([ADR 005](005-flat-repo-structure.md)); they link back to the hub for the
   index and the always-on rule.
+- [ADR 018](018-venv-activation-not-uv-run.md) later drops the inline `uv run`
+  rule (and its `run.md` spoke) in favor of the human activating the venv
+  before launching Claude. The hub-and-spokes split above is unaffected.
