@@ -35,4 +35,3 @@ repo root - the directory the session is started from. Read
 | Recording a design decision (ADR)                  | .fieldkit/conventions/decisions.md          |
 | Writing an implementation spec or plan             | .fieldkit/conventions/specs.md              |
 | Building a feature that calls an LLM               | .fieldkit/conventions/ai.md                 |
-| Invoking Python in any form (script, inline, call) | .fieldkit/conventions/python/run.md         |
