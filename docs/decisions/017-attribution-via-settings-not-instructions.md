@@ -2,11 +2,15 @@
 
 ## Decision
 
-`just install` sets `includeCoAuthoredBy: false` in `~/.claude/settings.json`
-(via `scripts/disable-attribution.sh`) instead of relying on a
-conventions/git.md instruction telling the agent not to add attribution. The
-old instruction bullet, and its cross-reference in
+`just install` sets `attribution: {commit: "", pr: "", sessionUrl: false}` in
+`~/.claude/settings.json` (via `scripts/disable-attribution.sh`) instead of
+relying on a conventions/git.md instruction telling the agent not to add
+attribution. The old instruction bullet, and its cross-reference in
 `agents/commit-push/AGENT.md`, have been removed.
+
+Uses the `attribution` setting rather than the older `includeCoAuthoredBy`
+boolean: Claude Code's docs mark `includeCoAuthoredBy` deprecated and note
+`attribution` takes precedence over it.
 
 ## Reason
 
@@ -22,7 +26,7 @@ Alternatives rejected:
 - **Keep the instruction in conventions/git.md.** Costs context every session
   and isn't guaranteed - the very reason the bullet hedged with "even if
   tooling adds it."
-- **Set `includeCoAuthoredBy` per-repo in a committed `.claude/settings.json`.**
+- **Set `attribution` per-repo in a committed `.claude/settings.json`.**
   Attribution preference is a personal, machine-wide choice, not a per-project
   one, and would need wiring in every consumer repo. Matches the user-level vs
   per-repo split from [ADR 009](009-user-level-commands-not-conventions.md):
@@ -42,5 +46,6 @@ Alternatives rejected:
 - Consumers no longer need to read a convention to get this behavior - it
   applies globally after `just install`, independent of which repo a session
   runs in.
-- If Claude Code ever changes or removes `includeCoAuthoredBy`, this ADR and
-  `scripts/disable_attribution.py` are what to update, not conventions/git.md.
+- If Claude Code ever changes or removes the `attribution` setting, this ADR
+  and `scripts/disable_attribution.py` are what to update, not
+  conventions/git.md.

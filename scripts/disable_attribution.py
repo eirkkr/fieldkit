@@ -9,24 +9,29 @@ import json
 import pathlib
 
 SETTINGS = pathlib.Path.home() / ".claude" / "settings.json"
+DISABLED = {"commit": "", "pr": "", "sessionUrl": False}
 
 
 def main() -> None:
     old_text = SETTINGS.read_text() if SETTINGS.exists() else None
     data = json.loads(old_text) if old_text is not None else {}
 
-    if data.get("includeCoAuthoredBy") is False:
+    existing_attribution = data.get("attribution")
+    if not isinstance(existing_attribution, dict):
+        existing_attribution = {}
+
+    if all(existing_attribution.get(k) == v for k, v in DISABLED.items()):
         print("Attribution already disabled in ~/.claude/settings.json, no change")
         return
 
     new_data = dict(data)
-    new_data["includeCoAuthoredBy"] = False
+    new_data["attribution"] = {**existing_attribution, **DISABLED}
     new_text = json.dumps(new_data, indent=2) + "\n"
 
     if old_text is None:
         SETTINGS.parent.mkdir(parents=True, exist_ok=True)
         SETTINGS.write_text(new_text)
-        print("Created ~/.claude/settings.json with includeCoAuthoredBy: false")
+        print("Created ~/.claude/settings.json with attribution disabled")
         return
 
     diff = difflib.unified_diff(
