@@ -46,3 +46,7 @@ Alternatives rejected:
   two-tier decision itself is unchanged.
 - Future always-relevant rules get added directly to `CLAUDE.md`; there is no
   remaining precedent for a single-purpose always-on convention file.
+- The "Load Always" heading itself was renamed to "Always-on" as a same-branch
+  follow-up: nothing is `@`-imported there anymore, so "Load" no longer
+  described what the section does. "Load on Demand" is unchanged - reading a
+  file on trigger is still an accurate description of that tier.

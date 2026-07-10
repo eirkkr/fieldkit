@@ -10,7 +10,7 @@ See the README for the one-time symlink setup.
 - These are the generic, cross-repo rules. Repo-specific conventions, setup, and
   architecture live in the consumer repo's own docs.
 
-## Load Always
+## Always-on
 
 - Act-then-show by default: make the change, surface it for review, correct
   after. Agree direction first, before acting, in two cases: a genuinely new
@@ -59,17 +59,17 @@ Situational conventions, not carried in context. Read the matching file before
 the action; don't load it otherwise.
 
 Branch, commit, PR, and merge actions normally go through the `push`, `pr`,
-and `merge` skills - each reads the convention doc it needs itself. Read
-`git.md` directly only for a git action those skills don't cover.
+and `merge` skills - each reads `git.md`/`github.md` itself. Read those
+directly only for a git or GitHub action the skills don't cover.
 
 <!-- Read-tool targets (not @-imports). Paths are relative to the consumer
 repo root - the directory the session is started from. Read
 .fieldkit/conventions/<file> from there, via the .fieldkit symlink. -->
 
-| Before...                                                         | Read                               |
-| ----------------------------------------------------------------- | ---------------------------------- |
-| A git action `push`/`pr`/`merge` don't cover (rebase, tag, amend) | .fieldkit/conventions/git.md       |
-| Any GitHub action (issue, PR, comment)                            | .fieldkit/conventions/github.md    |
-| Recording a design decision (ADR)                                 | .fieldkit/conventions/decisions.md |
-| Writing an implementation spec or plan                            | .fieldkit/conventions/specs.md     |
-| Building a feature that calls an LLM                              | .fieldkit/conventions/ai.md        |
+| Before...                                                                       | Read                               |
+| ------------------------------------------------------------------------------- | ---------------------------------- |
+| A git action `push`/`pr`/`merge` don't cover (rebase, tag, amend)               | .fieldkit/conventions/git.md       |
+| A GitHub action `pr`/`merge` don't cover (issues, comments, PR edits)           | .fieldkit/conventions/github.md    |
+| Recording a design decision (ADR)                                               | .fieldkit/conventions/decisions.md |
+| Writing an implementation spec or plan                                          | .fieldkit/conventions/specs.md     |
+| Building a feature that calls an LLM                                            | .fieldkit/conventions/ai.md        |
