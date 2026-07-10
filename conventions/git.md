@@ -1,6 +1,7 @@
 # Git conventions
 
-- Never commit directly to `main`. Branch, commit there, open a PR.
+- Never commit directly to the default branch. Branch, commit there, open a
+  PR.
 
 ## Branches
 
@@ -8,9 +9,6 @@
   `type/short-description`, lowercase, hyphen-separated.
 - Allowed prefixes: `feature/`, `bugfix/`, `hotfix/`, `release/`, `chore/`. No
   others (`refactor/`, `fix/`, `test/`, etc.).
-- Recurring tasks reuse one canonical branch name (no dates or run-number
-  suffixes); delete it after its PR merges so the name is free again. E.g.
-  dependency updates always use `chore/update-deps`.
 
 ## Commits
 
@@ -27,7 +25,7 @@
 - Always `git push` before `gh pr merge` (squash merge uses remote state).
 - Work in progress stays on the branch - push freely (act-then-show), but don't
   open a PR until the work is ready for review. When it is, surface a compare
-  link (`.../compare/main...branch`) and a short summary, and get approval before
+  link (`.../compare/<base>...branch`) and a short summary, and get approval before
   opening the PR - opening it asserts readiness. The pre-merge message is the
   merge gate.
 - Squash-merge: synthesise a subject + body summarising the whole change; don't

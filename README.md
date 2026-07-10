@@ -7,11 +7,11 @@ Like a survival field kit: the **manual** (conventions) and the **instruments**
 
 ## Layout
 
-- `CLAUDE.md` - the entry point a consumer repo `@`-imports; pulls in the
-  language-agnostic conventions and points to the opt-in language-specific ones.
-- `conventions/` - the convention docs themselves: `workflow`, `git`, `github`,
-  `decisions`, `specs`, `ai`, and `python/` for Python repos - a slim
-  `README.md` hub indexing `code`, `setup`, and `testing`, each read on demand.
+- `CLAUDE.md` - the entry point a consumer repo `@`-imports; holds the
+  always-on rules directly and points to the opt-in, load-on-demand ones.
+- `conventions/` - the load-on-demand docs: `git`, `github`, `decisions`,
+  `specs`, `ai`, and `python/` for Python repos - a slim `README.md` hub
+  indexing `code`, `setup`, and `testing`, each read on demand.
 - `docs/decisions/` - ADRs recording this repo's own non-obvious design
   choices; the one `docs/` subtree.
 - `skills/` - shared Claude Code skills, symlinked into `~/.claude/skills` by

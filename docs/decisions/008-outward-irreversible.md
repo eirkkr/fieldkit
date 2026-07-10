@@ -45,3 +45,10 @@ Alternatives rejected:
 > the branch; the ready-for-review gate is relocated onto PR creation. The
 > principle here stands - opening a PR and merging remain gated, and branch
 > pushes join act-then-show.
+
+<!-- -->
+
+> The "stated once" restatement drifted into two overlapping copies (in
+> `CLAUDE.md` and `workflow.md`); [020](020-fold-workflow-into-claude-md.md)
+> collapses them back into one paragraph in `CLAUDE.md`. No change to the
+> principle itself.

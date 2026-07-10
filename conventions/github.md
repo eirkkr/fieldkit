@@ -2,9 +2,8 @@
 
 - Show a draft and wait for approval before creating or editing issues or
   comments. Treat like destructive ops: confirm first.
-- PRs: opening one needs approval - it asserts the branch is ready for review.
-  Once open, update title and body directly, no pre-approval. Two gates need
-  approval: opening the PR, and the pre-merge message (see [git.md](git.md)).
+- PRs: gates and mechanics live in [git.md](git.md). Once open, update title
+  and body directly - no pre-approval needed for those edits.
 - Before drafting an issue, check for duplicates/broader scope:
   `gh issue list --search "<2-3 keywords>"`.
 - Out-of-scope work -> file a narrow issue and defer; don't bundle it in.

@@ -24,3 +24,9 @@ the rest when relevant.
   regardless - an acceptable price for the routing.
 - On-demand references must resolve from the consumer's working directory (see
   [ADR 003](003-absolute-import-paths.md)).
+
+> Always-on membership has since changed: `style` was removed
+> ([013](013-style-rules-in-tooling-not-context.md)), `git` moved on-demand
+> ([019](019-git-on-demand-via-skills.md)), and `workflow` was folded
+> directly into `CLAUDE.md` ([020](020-fold-workflow-into-claude-md.md)). The
+> two-tier decision here is unchanged.
