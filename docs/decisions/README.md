@@ -19,7 +19,9 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 012 | [Per-consumer reconcile marker](012-reconcile-marker.md)                                                  | Accepted   |
 | 013 | [Style rules in tooling, not LLM context](013-style-rules-in-tooling-not-context.md)                      | Accepted   |
 | 014 | [Skills, not slash commands](014-skills-not-commands.md)                                                  | Accepted   |
-| 015 | [Delegate mechanical, ungated git steps only](015-mechanical-subagent-boundary.md)                        | Accepted   |
+| 015 | [Delegate mechanical, ungated git steps only](015-mechanical-subagent-boundary.md)                        | Superseded |
 | 016 | [Pair a thin skill with a worker agent](016-skill-agent-pair.md)                                          | Accepted   |
 | 017 | [Disable AI attribution via settings, not instructions](017-attribution-via-settings-not-instructions.md) | Accepted   |
 | 018 | [Rely on venv activation, not an inline uv run rule](018-venv-activation-not-uv-run.md)                   | Accepted   |
+| 019 | [Route git actions through skills; git.md on demand](019-git-on-demand-via-skills.md)                     | Accepted   |
+| 020 | [Fold workflow.md into CLAUDE.md](020-fold-workflow-into-claude-md.md)                                    | Accepted   |

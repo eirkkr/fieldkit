@@ -12,8 +12,11 @@ distributed the same way - symlinked out to consumers by `just install`
 (`skills/` into `~/.claude/skills`, `agents/` into `~/.claude/agents`), per
 ADR 014's pull-style mechanism, now extended to agents.
 
-`commit-push` is the first instance: `skills/commit-push/SKILL.md` dispatches
-to `subagent_type: commit-push`, defined in `agents/commit-push/AGENT.md`.
+`commit-push` is the first instance: `skills/push/SKILL.md` dispatches to
+`subagent_type: commit-push`, defined in `agents/commit-push/AGENT.md`. The
+skill name is shortened for typing frequency; nothing requires the skill and
+agent directory names to match, as `pr`/`pr-prep` and `merge`/`merge-prep`
+also show.
 
 ## Reason
 

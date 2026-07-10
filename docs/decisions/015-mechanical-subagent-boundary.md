@@ -47,3 +47,10 @@ cost for repeated subagent overhead, the wrong trade.
 - Future mechanical steps should be judged against this same test before
   becoming a subagent: is it ungated, and is there enough real work to
   justify the isolation.
+
+## Superseded
+
+Superseded by [ADR 019](019-git-on-demand-via-skills.md): `pr-prep` and
+`merge-prep` subagents now exist for PR/merge drafting, and branch creation
+moved into `/push`'s worker agent - both premises this ADR argued from no
+longer hold.
