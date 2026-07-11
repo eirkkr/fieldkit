@@ -18,6 +18,9 @@ Like a survival field kit: the **manual** (conventions) and the **instruments**
   `just install` (see Setup).
 - `agents/` - shared Claude Code subagents, symlinked into `~/.claude/agents`
   by `just install` (see Setup).
+- `statusline/` - the shared Claude Code status line script, symlinked to
+  `~/.claude/statusline-command.sh` and wired up via `settings.json`'s
+  `statusLine` key by `just install` (see Setup).
 - further areas as needs emerge - e.g. more Claude Code assets (hooks), shared
   scripts, editor/CI config.
 
@@ -63,9 +66,10 @@ Like a survival field kit: the **manual** (conventions) and the **instruments**
    without a prompt, and sets `autoMemoryEnabled: false` so learnings go into
    docs or CLAUDE.md rather than machine-local memory files. It also sets
    `attribution: {commit: "", pr: "", sessionUrl: false}` so commits and PRs
-   carry no AI attribution - if the existing file already differs from that,
-   it shows the diff and asks before changing it. Each of these only touches
-   its own key, leaving the rest of the file alone.
+   carry no AI attribution, and `statusLine` to run the kit's linked
+   `statusline-command.sh` - if the existing file already differs from either
+   of those, it shows the diff and asks before changing it. Each of these
+   only touches its own key, leaving the rest of the file alone.
 
 4. **Start sessions from the repo root.** The load-on-demand files are
    referenced relative to the consumer repo root, so launch `claude` there, not
