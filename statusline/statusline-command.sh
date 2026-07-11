@@ -73,7 +73,7 @@ fi
 # ── 5-hour rate limit ──
 if [ -n "$five_hour_pct" ]; then
   five_hour_int=$(printf '%.0f' "$five_hour_pct")
-  five_hour_part="Sess $(usage_color "$five_hour_int")${five_hour_int}%${RESET}"
+  five_hour_part="5h $(usage_color "$five_hour_int")${five_hour_int}%${RESET}"
   five_hour_left=$(time_remaining "$five_hour_reset")
   [ -n "$five_hour_left" ] && five_hour_part="${five_hour_part} ${DIM}${five_hour_left}${RESET}"
 fi
@@ -81,7 +81,7 @@ fi
 # ── Weekly (7-day) rate limit ──
 if [ -n "$weekly_pct" ]; then
   weekly_int=$(printf '%.0f' "$weekly_pct")
-  weekly_part="Wk $(usage_color "$weekly_int")${weekly_int}%${RESET}"
+  weekly_part="7d $(usage_color "$weekly_int")${weekly_int}%${RESET}"
   weekly_left=$(time_remaining "$weekly_reset")
   [ -n "$weekly_left" ] && weekly_part="${weekly_part} ${DIM}${weekly_left}${RESET}"
 fi
@@ -92,7 +92,7 @@ cost_part="${YELLOW}$(printf '$%.2f' "$cost")${RESET}"
 # ── Code velocity ──
 velocity="${GREEN}+${lines_add}${RESET} ${RED}-${lines_del}${RESET}"
 
-# ── Groups: git (repo, branch, velocity) | context (model, ctx) | usage (Sess, Wk, cost) ──
+# ── Groups: git (repo, branch, velocity) | context (model, ctx) | usage (5h, 7d, cost) ──
 git_group=""
 [ -n "$repo" ] && git_group="${BOLD}${YELLOW}${repo}${RESET}"
 [ -n "$branch" ] && git_group="${git_group:+$git_group }${BOLD}${CYAN}${branch}${RESET}"
