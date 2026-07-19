@@ -79,7 +79,7 @@ Run `npm install` to produce `package-lock.json`; commit both. Add
 - DoD: `npm ci` from repo root succeeds; `node_modules/.bin/openspec
   --version` prints 1.6.0; `git status` clean of node_modules.
 
-### 2. Install step (CLI only)
+### 2. Install step (CLI only) [x]
 
 New `scripts/install-openspec.sh`, copying the shape of
 `scripts/link-skills.sh` (bash, `set -euo pipefail`, `$1` = kit dir,

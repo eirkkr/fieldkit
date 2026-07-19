@@ -4,6 +4,7 @@ default:
 
 # Set up skills, agents, statusline, and Claude settings.
 install:
+    @"{{ justfile_directory() }}/scripts/install-openspec.sh" "{{ justfile_directory() }}"
     @"{{ justfile_directory() }}/scripts/link-skills.sh" "{{ justfile_directory() }}"
     @"{{ justfile_directory() }}/scripts/link-agents.sh" "{{ justfile_directory() }}"
     @"{{ justfile_directory() }}/scripts/link-statusline.sh" "{{ justfile_directory() }}"
