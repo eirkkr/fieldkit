@@ -131,7 +131,7 @@ are `commands`-delivery artifacts that skills-only delivery never
 generates - harmless (prose suggestion, not a tool call the skill invokes)
 but will never resolve for a user following it literally.
 
-### 4. Per-repo enable script
+### 4. Per-repo enable script [x]
 
 New `scripts/enable-openspec.sh`, run *from a consumer repo's root* (not
 passed the kit dir - it finds the kit via the repo's own `.fieldkit`
