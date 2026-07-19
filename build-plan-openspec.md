@@ -166,7 +166,7 @@ gain the new symlink; say so in the recipe's output.
 - DoD: running the recipe against the currently pinned version is a no-op
   diff; recipe carries its own `#` description line in `justfile`.
 
-### 6. Rework conventions
+### 6. Rework conventions [x]
 
 - Rewrite `conventions/specs.md` around OpenSpec: open with the workflow
   (skills, `openspec/` layout, changes archived on completion), then map the
