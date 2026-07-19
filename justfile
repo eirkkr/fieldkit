@@ -12,6 +12,10 @@ install:
     @"{{ justfile_directory() }}/scripts/disable-attribution.sh" "{{ justfile_directory() }}"
     @"{{ justfile_directory() }}/scripts/register-statusline.sh" "{{ justfile_directory() }}"
 
+# Bump the pinned openspec CLI and regenerate repo-skills/ from it.
+openspec-refresh:
+    @"{{ justfile_directory() }}/scripts/openspec-refresh.sh" "{{ justfile_directory() }}"
+
 # Lint all markdown.
 check:
     uvx rumdl@0.2.26 check .

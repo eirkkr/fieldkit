@@ -151,7 +151,7 @@ symlink). Idempotent, same message style as `link-skills.sh`:
 - DoD: running twice in a scratch repo - first run creates `openspec/` and
   the symlinks, second prints no-change messages; the symlinks resolve.
 
-### 5. Refresh recipe
+### 5. Refresh recipe [x]
 
 Add `just openspec-refresh`: bump/reinstall the package (`npm install
 @fission-ai/openspec@latest` or edited pin + `npm install`), regenerate the
