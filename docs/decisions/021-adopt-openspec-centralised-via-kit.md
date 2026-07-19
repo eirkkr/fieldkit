@@ -13,7 +13,9 @@ and with adoption opt-in per repo:
   directory `repo-skills/` (skills delivery, not slash commands - ADR 014,
   and upstream subdirectory-command visibility issue
   Fission-AI/OpenSpec#1076). Unlike `skills/`, this directory is *not*
-  linked user-level by `just install`.
+  linked user-level by `just install`. Each vendored SKILL.md is patched
+  with `disable-model-invocation: true`, so even in adopting repos the
+  skills cost no context until a session invokes one (`/openspec-...`).
 - A repo opts in by running `.fieldkit/scripts/enable-openspec.sh` from its
   root, which runs `openspec init --tools none` (creating the committed
   `openspec/` content directory) and commits symlinks
@@ -51,6 +53,14 @@ the kit's own always-wanted skills (pull, user-level). Opting in through
 committed symlinks also means the skills appear exactly where an `openspec/`
 directory exists, and kit-side refreshes still propagate through the links.
 
+The same logic recurses inside an adopting repo: most sessions (lint fixes,
+pushing a branch) don't touch specs, so the skills are also hidden
+per-session via `disable-model-invocation: true` - zero idle context, with
+invocation from the `/` menu as the per-session opt-in. The cost is that
+Claude won't proactively suggest the workflow; acceptable because OpenSpec's
+commands are deliberate, user-initiated actions, driven the same way as
+`/push` and `/pr`.
+
 Alternatives rejected:
 
 - **GitHub Spec Kit** (`specify-cli`). Its uv-based install suits the
@@ -87,7 +97,8 @@ Alternatives rejected:
   the `@`-import already makes (ADR 006).
 - The kit owns skill regeneration: version bumps re-run generation here (a
   `just openspec-refresh` recipe) instead of `openspec update` per repo;
-  adopting repos pick changes up through their symlinks.
+  adopting repos pick changes up through their symlinks. Regeneration must
+  re-apply the `disable-model-invocation` patch.
 - `specs.md`'s manual build-plan mechanics are superseded by the OpenSpec
   workflow; its durable content guidance (explicit contracts, walking
   skeleton, definitions-of-done) survives, reframed around OpenSpec's

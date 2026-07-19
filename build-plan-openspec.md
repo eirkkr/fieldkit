@@ -14,7 +14,9 @@ generated Claude skills are vendored under a new `repo-skills/` directory.
 Adoption is opt-in per repo: an adopting repo runs
 `.fieldkit/scripts/enable-openspec.sh`, which creates its `openspec/` content
 dir and commits `.claude/skills/openspec-*` symlinks through `.fieldkit`.
-Repos that don't opt in carry zero OpenSpec context.
+Repos that don't opt in carry zero OpenSpec context, and even adopting repos
+pay nothing per session until a skill is invoked (the vendored skills carry
+`disable-model-invocation: true`).
 
 ## What research found
 
@@ -40,7 +42,9 @@ Repos that don't opt in carry zero OpenSpec context.
   `.claude/skills/<name>` entry may be a **symlink to a directory outside
   the repo** (documented, followed normally); a user-level skill *shadows* a
   project-level skill of the same name - so the kit must not link the
-  OpenSpec skills user-level.
+  OpenSpec skills user-level. `disable-model-invocation: true` in a skill's
+  frontmatter drops its idle context cost to zero while keeping it in the
+  `/` menu for manual invocation.
 - Kit patterns to copy: `scripts/link-skills.sh` (idempotent symlink loop,
   "Already linked /name, no change" on repeat runs), the `install` recipe in
   `justfile`, ADRs 009/014 for asset placement.
@@ -105,9 +109,12 @@ kit directory `repo-skills/` - *not* `skills/` (which `link-skills.sh`
 links user-level) and *not* `.claude/skills/` (ADR 014 keeps shipped source
 inert in the kit repo). Audit each SKILL.md for assumptions that break when
 symlinked into another repo (paths relative to the generating repo,
-references to repo-committed files other than `openspec/`).
+references to repo-committed files other than `openspec/`). Patch
+`disable-model-invocation: true` into each SKILL.md's frontmatter (ADR 021:
+skills are invoked deliberately from the `/` menu and cost no idle context).
 
-- DoD: `repo-skills/openspec-*/SKILL.md` committed; `just install` leaves
+- DoD: `repo-skills/openspec-*/SKILL.md` committed, each frontmatter
+  carrying `disable-model-invocation: true`; `just install` leaves
   `~/.claude/skills/` free of them; SKILL.md audit notes recorded in the PR
   description (or fixes applied).
 
@@ -135,7 +142,8 @@ symlink). Idempotent, same message style as `link-skills.sh`:
 
 Add `just openspec-refresh`: bump/reinstall the package (`npm install
 @fission-ai/openspec@latest` or edited pin + `npm install`), regenerate the
-skills in a temp dir as in task 3, and rsync the `openspec-*` dirs back into
+skills in a temp dir as in task 3, re-apply the `disable-model-invocation`
+frontmatter patch, and rsync the `openspec-*` dirs back into
 `repo-skills/` (delete-and-replace so removed files don't linger). This
 replaces per-repo `openspec update` - the kit owns regeneration and
 adopting repos pick changes up through their symlinks. Note: if a refresh
@@ -183,8 +191,10 @@ In a scratch consumer repo (throwaway dir, `git init`, `.fieldkit` symlink):
    `openspec validate --all` all succeed.
 3. `openspec update` there generates no tool files (config has tools none),
    i.e. it cannot fight the symlinked skills.
-4. Start Claude Code in that repo and confirm the OpenSpec skills resolve
-   (listed, invocable, drive the CLI).
+4. Start Claude Code in that repo and confirm the OpenSpec skills appear in
+   the `/` menu but contribute no descriptions to context
+   (`disable-model-invocation`), and that invoking one loads it and drives
+   the CLI.
 5. In a second scratch repo *without* the enable script, confirm no
    OpenSpec skills appear in the session's skill listing.
 
