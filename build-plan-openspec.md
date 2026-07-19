@@ -99,7 +99,7 @@ the CLI only - skills are deliberately not linked user-level (ADR 021).
   no-change messages; `openspec --version` works from `$HOME`;
   `~/.claude/skills/` contains no `openspec-*` entries.
 
-### 3. Vendor the generated skills under `repo-skills/`
+### 3. Vendor the generated skills under `repo-skills/` [x]
 
 In a scratch dir (not the kit), run `openspec init --tools claude` with
 delivery set to **skills only** - find the exact mechanism first (check
@@ -117,6 +117,19 @@ skills are invoked deliberately from the `/` menu and cost no idle context).
   carrying `disable-model-invocation: true`; `just install` leaves
   `~/.claude/skills/` free of them; SKILL.md audit notes recorded in the PR
   description (or fixes applied).
+
+Findings, folded into Open Items below and the PR description: delivery mode
+is a global config key (`openspec config set delivery skills`), not an
+`init` flag; the 6 generated dirs are `openspec-{apply-change,archive-change,
+explore,propose,sync-specs,update-change}`; `--tools none` needs no
+config.yaml tools entry (verified `new change`/`status`/`validate` all work
+against it). Audit: no generating-repo-relative paths or non-`openspec/`
+file references found. One non-blocking quirk left as-is (upstream content,
+re-vendored verbatim by task 5's refresh): several SKILL.md bodies tell the
+user to run `/opsx:apply`, `/opsx:continue`, `/opsx:archive` etc., but those
+are `commands`-delivery artifacts that skills-only delivery never
+generates - harmless (prose suggestion, not a tool call the skill invokes)
+but will never resolve for a user following it literally.
 
 ### 4. Per-repo enable script
 
@@ -200,13 +213,21 @@ In a scratch consumer repo (throwaway dir, `git init`, `.fieldkit` symlink):
 
 - DoD: all five checks pass; then retire this file.
 
-## Open items (resolve during task 3)
+## Open items (resolved during task 3)
 
-- Exact flag/config for skills-only delivery at init time (`--profile`?
-  `openspec config profile` global default? per-run flag).
-- Exact names of the generated skill dirs (docs say `openspec-*`); adjust
-  `repo-skills/` contents, the enable script's glob, ADR 021 wording, and
-  this plan's DoDs to reality.
-- Whether any generated asset expects `openspec/config.yaml` to list
-  `claude` as a tool in consumer repos; if so, fold the minimal config tweak
-  into `enable-openspec.sh` instead of `--tools none`.
+- Skills-only delivery: no `init` flag - it's the global config key
+  `delivery` (`both` by default). Set once per machine with
+  `openspec config set delivery skills`, then `openspec init --tools claude`
+  generates only `.claude/skills/openspec-*` (no `.claude/commands/`).
+  `just install`/`enable-openspec.sh` don't need to set this themselves:
+  it only affects `openspec init`/`update` runs against real tool configs,
+  and the kit's own regeneration (task 3, task 5) is the only place that
+  runs `init --tools claude`.
+- Generated skill dirs are exactly: `openspec-apply-change`,
+  `openspec-archive-change`, `openspec-explore`, `openspec-propose`,
+  `openspec-sync-specs`, `openspec-update-change` - matches the
+  `openspec-*` glob assumed elsewhere in this plan, no adjustment needed.
+- `openspec/config.yaml` from `--tools none` carries no `tools` field at all
+  and needs none added - verified `new change`, `status --json`, and
+  `validate` all work against it standalone. No config tweak needed in
+  `enable-openspec.sh`.
