@@ -3,19 +3,22 @@
 ## Decision
 
 Adopt [OpenSpec](https://github.com/Fission-AI/OpenSpec) as the spec-driven
-development workflow across consumer repos, with the kit - not each repo -
-carrying the machinery:
+development workflow, with the kit - not each repo - carrying the machinery,
+and with adoption opt-in per repo:
 
 - The CLI (`@fission-ai/openspec`, npm) is pinned by a `package.json` +
   `package-lock.json` in this repo; `just install` runs `npm ci` here and
   symlinks the binary into `~/.local/bin/openspec`.
-- OpenSpec's generated Claude Code skills are vendored under the kit's
-  `skills/` (skills delivery, not slash commands - ADR 014, and upstream
-  subdirectory-command visibility issue Fission-AI/OpenSpec#1076) and
-  symlinked user-level by the existing `link-skills.sh`.
-- A consumer repo's entire footprint is one `openspec init --tools none`,
-  which creates only the committed `openspec/` content directory (specs,
-  changes, config) - no per-repo tool files or npm install.
+- OpenSpec's generated Claude Code skills are vendored under a new kit
+  directory `repo-skills/` (skills delivery, not slash commands - ADR 014,
+  and upstream subdirectory-command visibility issue
+  Fission-AI/OpenSpec#1076). Unlike `skills/`, this directory is *not*
+  linked user-level by `just install`.
+- A repo opts in by running `.fieldkit/scripts/enable-openspec.sh` from its
+  root, which runs `openspec init --tools none` (creating the committed
+  `openspec/` content directory) and commits symlinks
+  `.claude/skills/openspec-* -> ../../.fieldkit/repo-skills/openspec-*`.
+  Repos that don't opt in carry nothing.
 - `conventions/specs.md` is reworked from a manual build-plan flow into
   guidance for OpenSpec artifacts (proposal/design/tasks).
 
@@ -34,9 +37,19 @@ light enough for gradual adoption in mature, issue-driven repos.
 
 Centralisation works because the generated skills contain no repo-local
 machinery: they shell out to the `openspec` CLI, which the kit pins and puts
-on PATH. That makes them ordinary pull-style assets under ADR 009/014 -
-version-controlled here, symlinked user-level, inert in repos that never
-invoke them.
+on PATH, so a single kit copy can serve every repo through symlinks (a
+project-level `.claude/skills/<name>` entry may be a symlink to a directory
+outside the repo - documented Claude Code behaviour).
+
+Per-repo opt-in, rather than the user-level linking the kit uses for its own
+skills, follows ADR 009's placement logic. A skill's description loads into
+the system prompt of every session in scope, so a user-level OpenSpec set
+would tax every repo - including small ones that will never adopt it - for
+nothing. That context cost makes these skills behave more like the
+conventions (push, per-repo opt-in via the `.fieldkit` symlink) than like
+the kit's own always-wanted skills (pull, user-level). Opting in through
+committed symlinks also means the skills appear exactly where an `openspec/`
+directory exists, and kit-side refreshes still propagate through the links.
 
 Alternatives rejected:
 
@@ -44,10 +57,15 @@ Alternatives rejected:
   toolchain, but `specify init` copies load-bearing scaffold into every repo
   (`.specify/` templates and shell scripts, `.claude/commands/speckit.*`),
   and the slash commands invoke those repo-local scripts - so they cannot be
-  lifted to user level, every repo drifts to the version that initialised
+  lifted out of the repo, every repo drifts to the version that initialised
   it, and upgrades are per-repo chores. Its `constitution.md` duplicates the
   always-on conventions layer this kit already provides, and its per-feature
   spec bundles have no living-spec layer for changes to merge into.
+- **User-level linking with per-repo opt-out.** Claude Code supports
+  silencing a user-level skill per project (`skillOverrides: "off"` in
+  `.claude/settings.json`), but that inverts the burden: every repo that
+  *doesn't* use OpenSpec must enumerate and silence the skill names, and
+  must revisit the list whenever a refresh adds a skill.
 - **Staying manual.** The hand-rolled flow works (RunDrafter proves it) but
   is exactly the per-repo ceremony the kit exists to remove: every plan
   re-creates structure, and nothing enforces the spec/change lifecycle.
@@ -58,12 +76,18 @@ Alternatives rejected:
   `node_modules/`). Accepted as contained: consumers never touch npm, and the
   lockfile pins the tool centrally.
 - Node >= 20.19.0 becomes a machine prerequisite for `just install`.
+- The kit now has two skill tiers: `skills/` (user-level, linked everywhere
+  by `just install`) and `repo-skills/` (per-repo opt-in, linked by the
+  enable script). `link-skills.sh` must not touch `repo-skills/`.
+- The kit must never also link the OpenSpec skills user-level: a user-level
+  skill shadows a project-level one of the same name, which would defeat the
+  per-repo links.
+- Adopting repos commit `.claude/skills` symlinks that resolve through
+  `.fieldkit` and dangle on machines without the kit clone - the same trade
+  the `@`-import already makes (ADR 006).
 - The kit owns skill regeneration: version bumps re-run generation here (a
   `just openspec-refresh` recipe) instead of `openspec update` per repo;
-  consumers pick changes up through the user-level symlinks.
-- The OpenSpec skills are visible in every repo, including ones that never
-  adopted it - pull-style and inert until invoked, the same trade ADR 009
-  accepted.
+  adopting repos pick changes up through their symlinks.
 - `specs.md`'s manual build-plan mechanics are superseded by the OpenSpec
   workflow; its durable content guidance (explicit contracts, walking
   skeleton, definitions-of-done) survives, reframed around OpenSpec's

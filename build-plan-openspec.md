@@ -8,11 +8,13 @@ final commit.
 ## Summary
 
 Wire [OpenSpec](https://github.com/Fission-AI/OpenSpec) into the kit so
-consumer repos get the full workflow with zero per-repo tooling: the CLI is
-pinned here by npm lockfile and symlinked onto PATH, the generated Claude
-skills are vendored under `skills/` and reach `~/.claude/skills/` through the
-existing `link-skills.sh`, and a consumer repo's only step is
-`openspec init --tools none`.
+consumer repos get the full workflow with no per-repo tooling of their own:
+the CLI is pinned here by npm lockfile and symlinked onto PATH, and the
+generated Claude skills are vendored under a new `repo-skills/` directory.
+Adoption is opt-in per repo: an adopting repo runs
+`.fieldkit/scripts/enable-openspec.sh`, which creates its `openspec/` content
+dir and commits `.claude/skills/openspec-*` symlinks through `.fieldkit`.
+Repos that don't opt in carry zero OpenSpec context.
 
 ## What research found
 
@@ -32,19 +34,27 @@ existing `link-skills.sh`, and a consumer repo's only step is
   Claude Code's commands->skills merge (Fission-AI/OpenSpec#1076).
 - Generated skills shell out to the `openspec` CLI (resolved against the
   consumer repo's cwd) - no repo-local scripts or templates - which is what
-  makes user-level centralisation viable.
+  makes centralisation viable.
+- Claude Code skill scoping (per current docs): a skill's description loads
+  into the system prompt of every session in scope; a project-level
+  `.claude/skills/<name>` entry may be a **symlink to a directory outside
+  the repo** (documented, followed normally); a user-level skill *shadows* a
+  project-level skill of the same name - so the kit must not link the
+  OpenSpec skills user-level.
 - Kit patterns to copy: `scripts/link-skills.sh` (idempotent symlink loop,
   "Already linked /name, no change" on repeat runs), the `install` recipe in
-  `justfile`, ADRs 009/014 for the pull-style user-level asset model.
+  `justfile`, ADRs 009/014 for asset placement.
 - `~/.local/bin` is on PATH.
 
 ## Global definition-of-done
 
 `just install` on a clean machine (with Node >= 20.19.0) yields a working
-`openspec` on PATH and the OpenSpec skills in `~/.claude/skills/`; a second
-run is a no-op. A consumer repo needs only `openspec init --tools none`. All
-docs that describe the old manual build-plan flow are brought into line. No
-formatter/lint runs (CI enforces markdown style).
+`openspec` on PATH and does **not** add OpenSpec skills to
+`~/.claude/skills/`. An adopting repo needs only one run of
+`.fieldkit/scripts/enable-openspec.sh`; a repo that skips it shows no
+OpenSpec skills in its sessions. All docs that describe the old manual
+build-plan flow are brought into line. No formatter/lint runs (CI enforces
+markdown style).
 
 ## Tasks
 
@@ -65,7 +75,7 @@ Run `npm install` to produce `package-lock.json`; commit both. Add
 - DoD: `npm ci` from repo root succeeds; `node_modules/.bin/openspec
   --version` prints 1.6.0; `git status` clean of node_modules.
 
-### 2. Install step
+### 2. Install step (CLI only)
 
 New `scripts/install-openspec.sh`, copying the shape of
 `scripts/link-skills.sh` (bash, `set -euo pipefail`, `$1` = kit dir,
@@ -78,40 +88,64 @@ idempotent with "no change" messages):
 3. `ln -sfn "$kit/node_modules/.bin/openspec" ~/.local/bin/openspec` with
    the same already-linked guard as `link-skills.sh`.
 
-Append the script to the `install` recipe in `justfile`.
+Append the script to the `install` recipe in `justfile`. This step handles
+the CLI only - skills are deliberately not linked user-level (ADR 021).
 
 - DoD: `just install` twice - first run installs and links, second prints
-  no-change messages; `openspec --version` works from `$HOME`.
+  no-change messages; `openspec --version` works from `$HOME`;
+  `~/.claude/skills/` contains no `openspec-*` entries.
 
-### 3. Vendor the generated skills
+### 3. Vendor the generated skills under `repo-skills/`
 
 In a scratch dir (not the kit), run `openspec init --tools claude` with
 delivery set to **skills only** - find the exact mechanism first (check
 `openspec init --help` and `openspec config profile`; open item below). Copy
-the generated `.claude/skills/openspec-*` directories into the kit's
-`skills/` (top level, *not* `.claude/skills/` - ADR 014 keeps shipped source
-inert in the kit repo). Audit each SKILL.md for assumptions that break at
-user level (paths relative to the generating repo, references to
-repo-committed files other than `openspec/`). `link-skills.sh` needs no
-changes.
+the generated `.claude/skills/openspec-*` directories into a new top-level
+kit directory `repo-skills/` - *not* `skills/` (which `link-skills.sh`
+links user-level) and *not* `.claude/skills/` (ADR 014 keeps shipped source
+inert in the kit repo). Audit each SKILL.md for assumptions that break when
+symlinked into another repo (paths relative to the generating repo,
+references to repo-committed files other than `openspec/`).
 
-- DoD: `just install` links the new skills; `ls -l ~/.claude/skills/` shows
-  `openspec-*` symlinks into the kit; SKILL.md audit notes recorded in the
-  PR description (or fixes applied).
+- DoD: `repo-skills/openspec-*/SKILL.md` committed; `just install` leaves
+  `~/.claude/skills/` free of them; SKILL.md audit notes recorded in the PR
+  description (or fixes applied).
 
-### 4. Refresh recipe
+### 4. Per-repo enable script
+
+New `scripts/enable-openspec.sh`, run *from a consumer repo's root* (not
+passed the kit dir - it finds the kit via the repo's own `.fieldkit`
+symlink). Idempotent, same message style as `link-skills.sh`:
+
+1. Verify `./.fieldkit` resolves and `openspec` is on PATH; exit with a
+   pointer to the kit README otherwise.
+2. If no `openspec/` dir: run `openspec init --tools none`.
+3. `mkdir -p .claude/skills`; for each `.fieldkit/repo-skills/openspec-*/`,
+   `ln -sfn` a *relative* symlink
+   `.claude/skills/<name> -> ../../.fieldkit/repo-skills/<name>` (relative,
+   so the link works for any clone location; it dangles harmlessly on
+   machines without the kit, same as the `@`-import).
+4. Remind (echo) that `openspec/` and the `.claude/skills` symlinks should
+   be committed.
+
+- DoD: running twice in a scratch repo - first run creates `openspec/` and
+  the symlinks, second prints no-change messages; the symlinks resolve.
+
+### 5. Refresh recipe
 
 Add `just openspec-refresh`: bump/reinstall the package (`npm install
 @fission-ai/openspec@latest` or edited pin + `npm install`), regenerate the
 skills in a temp dir as in task 3, and rsync the `openspec-*` dirs back into
-`skills/` (delete-and-replace so removed files don't linger). This replaces
-per-repo `openspec update` - the kit owns regeneration.
+`repo-skills/` (delete-and-replace so removed files don't linger). This
+replaces per-repo `openspec update` - the kit owns regeneration and
+adopting repos pick changes up through their symlinks. Note: if a refresh
+adds a *new* skill dir, adopting repos need `enable-openspec.sh` re-run to
+gain the new symlink; say so in the recipe's output.
 
 - DoD: running the recipe against the currently pinned version is a no-op
-  diff; recipe documented by a comment line in `justfile` (recipes carry
-  their own `#` description).
+  diff; recipe carries its own `#` description line in `justfile`.
 
-### 5. Rework conventions
+### 6. Rework conventions
 
 - Rewrite `conventions/specs.md` around OpenSpec: open with the workflow
   (skills, `openspec/` layout, changes archived on completion), then map the
@@ -127,36 +161,42 @@ per-repo `openspec update` - the kit owns regeneration.
   ADR-review rule ("bring docs that teach the old pattern into line",
   CLAUDE.md) is satisfied for this change.
 
-### 6. README
+### 7. README
 
 - Prerequisites: Node >= 20.19.0 (alongside existing `just`/`uv` prereqs).
-- Consumer-repo checklist: add `openspec init --tools none` (creates the
-  committed `openspec/` dir; skills and CLI come from the kit - no per-repo
-  tool files or npm).
+- Consumer-repo checklist: adopting repos run
+  `.fieldkit/scripts/enable-openspec.sh` from the repo root, then commit
+  `openspec/` and the `.claude/skills` symlinks. Repos that don't want
+  OpenSpec do nothing and carry no OpenSpec context.
 
-- DoD: a new consumer repo can be onboarded from the README alone.
+- DoD: a new consumer repo can be onboarded (with or without OpenSpec) from
+  the README alone.
 
-### 7. End-to-end verification
+### 8. End-to-end verification
 
-In a scratch consumer repo (throwaway dir, `git init`):
+In a scratch consumer repo (throwaway dir, `git init`, `.fieldkit` symlink):
 
-1. `openspec init --tools none` - confirm only `openspec/` is created (no
-   `.claude/` writes).
+1. `.fieldkit/scripts/enable-openspec.sh` - confirm it creates only
+   `openspec/` and the `.claude/skills/openspec-*` symlinks; second run is a
+   no-op.
 2. `openspec new change test-change`, `openspec status`,
    `openspec validate --all` all succeed.
 3. `openspec update` there generates no tool files (config has tools none),
-   i.e. it cannot fight the user-level skills.
+   i.e. it cannot fight the symlinked skills.
 4. Start Claude Code in that repo and confirm the OpenSpec skills resolve
-   and drive the CLI.
+   (listed, invocable, drive the CLI).
+5. In a second scratch repo *without* the enable script, confirm no
+   OpenSpec skills appear in the session's skill listing.
 
-- DoD: all four checks pass; then retire this file.
+- DoD: all five checks pass; then retire this file.
 
 ## Open items (resolve during task 3)
 
 - Exact flag/config for skills-only delivery at init time (`--profile`?
   `openspec config profile` global default? per-run flag).
 - Exact names of the generated skill dirs (docs say `openspec-*`); adjust
-  `skills/` contents, ADR 021 wording, and this plan's DoDs to reality.
+  `repo-skills/` contents, the enable script's glob, ADR 021 wording, and
+  this plan's DoDs to reality.
 - Whether any generated asset expects `openspec/config.yaml` to list
-  `claude` as a tool in consumer repos; if so, document the minimal
-  config.yaml tweak in the README step instead of `--tools none`.
+  `claude` as a tool in consumer repos; if so, fold the minimal config tweak
+  into `enable-openspec.sh` instead of `--tools none`.
