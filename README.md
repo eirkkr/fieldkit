@@ -16,6 +16,10 @@ Like a survival field kit: the **manual** (conventions) and the **instruments**
   choices; the one `docs/` subtree.
 - `skills/` - shared Claude Code skills, symlinked into `~/.claude/skills` by
   `just install` (see Setup).
+- `repo-skills/` - vendored OpenSpec Claude Code skills, symlinked into an
+  *opt-in* consumer repo's `.claude/skills` by
+  `.fieldkit/scripts/enable-openspec.sh` (not by `just install` - see
+  "Adopting OpenSpec in a consumer repo").
 - `agents/` - shared Claude Code subagents, symlinked into `~/.claude/agents`
   by `just install` (see Setup).
 - `statusline/` - the shared Claude Code status line script, symlinked to
@@ -25,6 +29,10 @@ Like a survival field kit: the **manual** (conventions) and the **instruments**
   scripts, editor/CI config.
 
 ## Setup
+
+Requires [just](https://just.systems), [uv](https://docs.astral.sh/uv/), and
+Node >= 20.19.0 (for the pinned `openspec` CLI; `just install` only checks the
+version - upgrade yourself first, e.g. `sudo n lts`).
 
 1. **Clone the kit.** Anywhere - it no longer hardcodes its location:
 
@@ -78,6 +86,30 @@ Like a survival field kit: the **manual** (conventions) and the **instruments**
 5. **First run.** Accept Claude Code's external-import dialog for `@.fieldkit` -
    declining permanently disables it. Verify with `/memory`: `CLAUDE.md` and the
    convention files should show as loaded.
+
+## Adopting OpenSpec in a consumer repo
+
+OpenSpec ([ADR 021](docs/decisions/021-adopt-openspec-centralised-via-kit.md))
+is opt-in per repo. `just install` (Setup step 1) already puts the pinned
+`openspec` CLI on `PATH`, but adds no OpenSpec skills anywhere - a repo that
+skips the steps below carries no OpenSpec context at all.
+
+To opt in, from the consumer repo root (after Setup steps 1-2):
+
+```bash
+.fieldkit/scripts/enable-openspec.sh
+```
+
+This creates the repo's `openspec/` content dir (`specs/`, `changes/`,
+`config.yaml`) and symlinks `.claude/skills/openspec-*` to the kit's vendored
+copies in `repo-skills/`. It's idempotent - rerun it after an
+`openspec-refresh` (below) that adds a new skill. Commit both `openspec/` and
+the `.claude/skills` symlinks.
+
+The kit owns keeping the vendored skills current: `just openspec-refresh`
+bumps the pinned `openspec` version and regenerates `repo-skills/` from it.
+Adopting repos pick up the change through their symlinks next session; no
+per-repo `openspec update` needed.
 
 ## Updating a shared rule
 
@@ -141,5 +173,5 @@ the agent, so it stays out of every session's context.
 
 ## Development
 
-Requires [just](https://just.systems) and [uv](https://docs.astral.sh/uv/). Run
-`just` to list available commands.
+Requires [just](https://just.systems), [uv](https://docs.astral.sh/uv/), and
+Node >= 20.19.0. Run `just` to list available commands.

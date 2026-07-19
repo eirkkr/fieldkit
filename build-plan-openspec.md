@@ -182,7 +182,7 @@ gain the new symlink; say so in the recipe's output.
   ADR-review rule ("bring docs that teach the old pattern into line",
   CLAUDE.md) is satisfied for this change.
 
-### 7. README
+### 7. README [x]
 
 - Prerequisites: Node >= 20.19.0 (alongside existing `just`/`uv` prereqs).
 - Consumer-repo checklist: adopting repos run
