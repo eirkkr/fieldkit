@@ -1,6 +1,6 @@
-# Build plan: OpenSpec centralized via the kit
+# Build plan: OpenSpec centralised via the kit
 
-Implements [ADR 021](docs/decisions/021-adopt-openspec-centralized-via-kit.md).
+Implements [ADR 021](docs/decisions/021-adopt-openspec-centralised-via-kit.md).
 Self-contained: a fresh session can execute this without re-deriving context.
 Tick tasks in the commit that does the work; retire (delete) this file in the
 final commit.
@@ -32,7 +32,7 @@ existing `link-skills.sh`, and a consumer repo's only step is
   Claude Code's commands->skills merge (Fission-AI/OpenSpec#1076).
 - Generated skills shell out to the `openspec` CLI (resolved against the
   consumer repo's cwd) - no repo-local scripts or templates - which is what
-  makes user-level centralization viable.
+  makes user-level centralisation viable.
 - Kit patterns to copy: `scripts/link-skills.sh` (idempotent symlink loop,
   "Already linked /name, no change" on repeat runs), the `install` recipe in
   `justfile`, ADRs 009/014 for the pull-style user-level asset model.

@@ -1,4 +1,4 @@
-# 021 - Adopt OpenSpec for specs, centralized via the kit
+# 021 - Adopt OpenSpec for specs, centralised via the kit
 
 ## Decision
 
@@ -32,7 +32,7 @@ ticked in the implementing commit and retired when done). The tool codifies
 the existing convention instead of imposing a new one, and its `init` is
 light enough for gradual adoption in mature, issue-driven repos.
 
-Centralization works because the generated skills contain no repo-local
+Centralisation works because the generated skills contain no repo-local
 machinery: they shell out to the `openspec` CLI, which the kit pins and puts
 on PATH. That makes them ordinary pull-style assets under ADR 009/014 -
 version-controlled here, symlinked user-level, inert in repos that never
@@ -44,7 +44,7 @@ Alternatives rejected:
   toolchain, but `specify init` copies load-bearing scaffold into every repo
   (`.specify/` templates and shell scripts, `.claude/commands/speckit.*`),
   and the slash commands invoke those repo-local scripts - so they cannot be
-  lifted to user level, every repo drifts to the version that initialized
+  lifted to user level, every repo drifts to the version that initialised
   it, and upgrades are per-repo chores. Its `constitution.md` duplicates the
   always-on conventions layer this kit already provides, and its per-feature
   spec bundles have no living-spec layer for changes to merge into.
