@@ -69,7 +69,7 @@ Upgrade Node: `sudo n lts` (or any version >= 20.19.0). Not scriptable in
 
 - DoD: `node --version` reports >= 20.19.0.
 
-### 1. Pin the CLI
+### 1. Pin the CLI [x]
 
 Add root `package.json`: `"private": true`, single dependency
 `"@fission-ai/openspec": "1.6.0"` (exact pin; lockfile pins transitives).
