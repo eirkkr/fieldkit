@@ -71,5 +71,5 @@ repo root - the directory the session is started from. Read
 | A git action `push`/`pr`/`merge` don't cover (rebase, tag, amend)               | .fieldkit/conventions/git.md       |
 | A GitHub action `pr`/`merge` don't cover (issues, comments, PR edits)           | .fieldkit/conventions/github.md    |
 | Recording a design decision (ADR)                                               | .fieldkit/conventions/decisions.md |
-| Writing an implementation spec or plan                                          | .fieldkit/conventions/specs.md     |
+| Working an OpenSpec change (repo has `openspec/`) or writing a spec by hand     | .fieldkit/conventions/specs.md     |
 | Building a feature that calls an LLM                                            | .fieldkit/conventions/ai.md        |

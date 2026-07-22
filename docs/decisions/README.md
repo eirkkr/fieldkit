@@ -25,3 +25,4 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 018 | [Rely on venv activation, not an inline uv run rule](018-venv-activation-not-uv-run.md)                   | Accepted   |
 | 019 | [Route git actions through skills; git.md on demand](019-git-on-demand-via-skills.md)                     | Accepted   |
 | 020 | [Fold workflow.md into CLAUDE.md](020-fold-workflow-into-claude-md.md)                                    | Accepted   |
+| 021 | [Adopt OpenSpec, centralised via the kit](021-adopt-openspec-centralised-via-kit.md)                      | Accepted   |

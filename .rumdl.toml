@@ -2,3 +2,8 @@
 [MD060]
 enabled = true
 style = "aligned"
+
+[global]
+# Vendored from the openspec CLI (repo-skills/, task 3) and overwritten
+# verbatim by `just openspec-refresh` - not hand-edited, so not linted.
+exclude = ["repo-skills/openspec-*/"]
