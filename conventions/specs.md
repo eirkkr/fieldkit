@@ -12,12 +12,8 @@ described here; this file is the content guidance for what goes in them.
   `openspec/changes/<name>/` (a proposal in flight). A change is archived to
   `openspec/changes/archive/` on completion, syncing its delta into the
   living specs.
-- Drive the lifecycle through the `openspec-*` skills from the `/` menu
-  (`disable-model-invocation: true` keeps them out of idle context - invoke
-  deliberately): `openspec-propose` scaffolds a change's artifacts,
-  `openspec-apply-change` implements its tasks, `openspec-archive-change`
-  closes it out and offers to sync specs, `openspec-sync-specs` and
-  `openspec-explore`/`openspec-update-change` cover the rest.
+- Invoke the `openspec-*` skills from the `/` menu deliberately -
+  `disable-model-invocation: true` keeps them out of idle context.
 - A change's artifacts are `proposal.md` (what & why), `design.md` (how),
   and `tasks.md` (implementation steps) - the sections below map the
   durable guidance from the old manual flow onto these three.
