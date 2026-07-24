@@ -30,5 +30,7 @@
   merge gate.
 - Squash-merge: synthesise a subject + body summarising the whole change; don't
   concatenate commit messages. Append `(#PR)` to a custom `--subject` manually
-  (GitHub omits it when you provide a custom subject). Include `Closes #X`.
-  Show the proposed message for approval before merging.
+  (GitHub omits it when you provide a custom subject). Only add `Closes #X`
+  when the PR actually resolves a tracked issue - `X` is that issue's number,
+  never the PR's own. Omit the line entirely when there's no linked issue;
+  don't invent one. Show the proposed message for approval before merging.

@@ -21,7 +21,10 @@ that's an approval-gated step this agent doesn't take.
 5. Read `git log <base>..<branch>` and `git diff <base>...<branch>` for the
    whole change set - not just the latest commit.
 6. Draft a squash subject + body summarizing the whole change, not a
-   concatenation of commit messages. Add `Closes #X` if the PR closes an
-   issue.
+   concatenation of commit messages. Add `Closes #X` only if the PR body
+   already references a tracked issue it resolves (`X` is that issue's
+   number, never the PR's own) - check for an existing
+   `Closes`/`Fixes`/`Resolves #` reference rather than guessing. Omit the
+   line if there's no linked issue.
 7. Report back: PR number and URL, mergeability status, and the draft
    subject/body. Don't run `gh pr merge`.
