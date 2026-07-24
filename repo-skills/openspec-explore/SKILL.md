@@ -8,7 +8,6 @@ metadata:
   author: openspec
   version: "1.0"
   generatedBy: "1.6.0"
-disable-model-invocation: true
 ---
 
 Enter explore mode. Think deeply. Visualize freely. Follow the conversation wherever it goes.

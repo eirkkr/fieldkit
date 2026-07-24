@@ -103,3 +103,11 @@ Alternatives rejected:
   workflow; its durable content guidance (explicit contracts, walking
   skeleton, definitions-of-done) survives, reframed around OpenSpec's
   artifacts.
+
+## Superseded
+
+Superseded in part by [ADR 022](022-openspec-skills-model-discoverable.md):
+the vendored skills are no longer patched with
+`disable-model-invocation: true`, so Claude can invoke them without a
+deliberate `/` command. Everything else here - centralisation via the kit,
+per-repo opt-in, the vendoring mechanism - is unchanged.
