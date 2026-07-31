@@ -27,3 +27,4 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 020 | [Fold workflow.md into CLAUDE.md](020-fold-workflow-into-claude-md.md)                                    | Accepted   |
 | 021 | [Adopt OpenSpec, centralised via the kit](021-adopt-openspec-centralised-via-kit.md)                      | Superseded |
 | 022 | [Make OpenSpec skills model-discoverable](022-openspec-skills-model-discoverable.md)                      | Accepted   |
+| 023 | [Block default-branch commits with a git hook](023-block-default-branch-commits-via-hook.md)              | Accepted   |

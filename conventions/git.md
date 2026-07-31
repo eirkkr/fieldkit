@@ -1,7 +1,7 @@
 # Git conventions
 
 - Never commit directly to the default branch. Branch, commit there, open a
-  PR.
+  PR. The kit's `pre-commit` hook enforces this once installed (see Hooks).
 
 ## Branches
 
@@ -34,3 +34,15 @@
   when the PR actually resolves a tracked issue - `X` is that issue's number,
   never the PR's own. Omit the line entirely when there's no linked issue;
   don't invent one. Show the proposed message for approval before merging.
+
+## Hooks
+
+- The kit ships a `pre-commit` hook refusing commits on the default branch,
+  backing the rule above structurally. Install it from the repo root with
+  `.fieldkit/scripts/enable-hooks.sh` - once per clone, since `.git/hooks`
+  isn't version controlled.
+- It reads the default branch from `origin/HEAD`, falling back to the
+  `fieldkit.defaultBranch` git config, then `main`. Set that config in a repo
+  where `origin/HEAD` isn't set.
+- Don't reach for `--no-verify` to get past it - the refusal means the commit
+  belongs on a branch. Create one and commit there.

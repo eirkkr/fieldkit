@@ -25,8 +25,11 @@ Like a survival field kit: the **manual** (conventions) and the **instruments**
 - `statusline/` - the shared Claude Code status line script, symlinked to
   `~/.claude/statusline-command.sh` and wired up via `settings.json`'s
   `statusLine` key by `just install` (see Setup).
-- further areas as needs emerge - e.g. more Claude Code assets (hooks), shared
-  scripts, editor/CI config.
+- `hooks/` - shared git hooks, symlinked into an *opt-in* consumer repo's
+  `.git/hooks` by `.fieldkit/scripts/enable-hooks.sh` (not by `just install` -
+  `.git/hooks` is per-clone; see "Blocking commits to the default branch").
+- further areas as needs emerge - e.g. more Claude Code assets (settings
+  hooks), shared scripts, editor/CI config.
 
 ## Setup
 
@@ -110,6 +113,35 @@ The kit owns keeping the vendored skills current: `just openspec-refresh`
 bumps the pinned `openspec` version and regenerates `repo-skills/` from it.
 Adopting repos pick up the change through their symlinks next session; no
 per-repo `openspec update` needed.
+
+## Blocking commits to the default branch
+
+`conventions/git.md` says never to commit directly to the default branch, but
+that's instruction-only - it holds only if whatever is committing has read it.
+The kit ships a `pre-commit` hook
+([ADR 023](docs/decisions/023-block-default-branch-commits-via-hook.md)) that
+enforces it structurally, firing on the actual `git commit` regardless of what
+triggered it - you, a raw agent `git` call, or a subagent that skipped the
+`push` skill.
+
+It's opt-in per repo, and per *clone* - `.git/hooks` isn't version controlled,
+so a fresh checkout needs it again. From the repo root:
+
+```bash
+.fieldkit/scripts/enable-hooks.sh
+```
+
+This symlinks `.git/hooks/pre-commit` to the kit's copy, so kit updates land
+without reinstalling. It's idempotent, leaves any other hooks in `.git/hooks`
+alone, and refuses rather than clobbers if a real `pre-commit` file is already
+there. The kit repo installs the hook on itself the same way, running
+`./scripts/enable-hooks.sh` from its own root.
+
+The hook reads the default branch from `origin/HEAD`, falling back to the
+`fieldkit.defaultBranch` git config, then `main`. `git commit --no-verify`
+bypasses it - deliberately left as your escape hatch, and deliberately absent
+from the hook's own output so an agent that hits the block branches instead of
+routing around it.
 
 ## Updating a shared rule
 
