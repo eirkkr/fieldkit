@@ -28,3 +28,4 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 021 | [Adopt OpenSpec, centralised via the kit](021-adopt-openspec-centralised-via-kit.md)                      | Superseded |
 | 022 | [Make OpenSpec skills model-discoverable](022-openspec-skills-model-discoverable.md)                      | Accepted   |
 | 023 | [Block default-branch commits with a git hook](023-block-default-branch-commits-via-hook.md)              | Accepted   |
+| 024 | [Fix and catch formatter drift in one Stop hook](024-stop-hook-for-formatter-drift.md)                    | Accepted   |

@@ -11,6 +11,12 @@ install:
     @"{{ justfile_directory() }}/scripts/register-dir.sh" "{{ justfile_directory() }}"
     @"{{ justfile_directory() }}/scripts/disable-attribution.sh" "{{ justfile_directory() }}"
     @"{{ justfile_directory() }}/scripts/register-statusline.sh" "{{ justfile_directory() }}"
+    @"{{ justfile_directory() }}/scripts/register-stop-hook.sh" "{{ justfile_directory() }}"
+
+# Set this clone's fix command for the format-drift Stop hook (per clone).
+setup:
+    git config fieldkit.fixCommand "just fix"
+    @echo "Set fieldkit.fixCommand - the Stop hook will run 'just fix' at turn end"
 
 # Bump the pinned openspec CLI and regenerate repo-skills/ from it.
 openspec-refresh:
