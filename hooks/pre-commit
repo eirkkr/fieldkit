@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Refuse commits on the repo's default branch - see conventions/git.md.
+# Installed per clone by scripts/enable-hooks.sh.
+
+branch="$(git symbolic-ref --quiet --short HEAD || true)"
+
+# Detached HEAD: a rebase, bisect, or a commit checked out directly. The
+# default branch isn't checked out, so there's nothing to block.
+if [ -z "$branch" ]; then
+    exit 0
+fi
+
+default="$(git config fieldkit.defaultBranch || true)"
+if [ -z "$default" ]; then
+    default="$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD || true)"
+    default="${default#origin/}"
+fi
+default="${default:-main}"
+
+if [ "$branch" = "$default" ]; then
+    echo "Refusing to commit directly to '$default'." >&2
+    echo "Branch first, then commit there - see conventions/git.md." >&2
+    exit 1
+fi
