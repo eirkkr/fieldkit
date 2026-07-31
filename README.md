@@ -25,11 +25,14 @@ Like a survival field kit: the **manual** (conventions) and the **instruments**
 - `statusline/` - the shared Claude Code status line script, symlinked to
   `~/.claude/statusline-command.sh` and wired up via `settings.json`'s
   `statusLine` key by `just install` (see Setup).
-- `hooks/` - shared git hooks, symlinked into an *opt-in* consumer repo's
-  `.git/hooks` by `.fieldkit/scripts/enable-hooks.sh` (not by `just install` -
-  `.git/hooks` is per-clone; see "Blocking commits to the default branch").
-- further areas as needs emerge - e.g. more Claude Code assets (settings
-  hooks), shared scripts, editor/CI config.
+- `hooks/` - shared hooks of both kinds, told apart by filename: the git
+  `pre-commit` hook, symlinked into an *opt-in* consumer repo's `.git/hooks` by
+  `.fieldkit/scripts/enable-hooks.sh` (not by `just install` - `.git/hooks` is
+  per-clone; see "Blocking commits to the default branch"), and the Claude Code
+  `stop-format-drift.py` session hook, registered machine-wide by `just install`
+  (see "Catching formatter drift").
+- further areas as needs emerge - e.g. more Claude Code assets, shared scripts,
+  editor/CI config.
 
 ## Setup
 
@@ -77,9 +80,10 @@ version - upgrade yourself first, e.g. `sudo n lts`).
    without a prompt, and sets `autoMemoryEnabled: false` so learnings go into
    docs or CLAUDE.md rather than machine-local memory files. It also sets
    `attribution: {commit: "", pr: "", sessionUrl: false}` so commits and PRs
-   carry no AI attribution, and `statusLine` to run the kit's linked
-   `statusline-command.sh` - if the existing file already differs from either
-   of those, it shows the diff and asks before changing it. Each of these
+   carry no AI attribution, `statusLine` to run the kit's linked
+   `statusline-command.sh`, and a `hooks.Stop` entry for the format-drift hook
+   (see "Catching formatter drift") - if the existing file already differs from
+   any of those, it shows the diff and asks before changing it. Each of these
    only touches its own key, leaving the rest of the file alone.
 
 4. **Start sessions from the repo root.** The load-on-demand files are
@@ -143,6 +147,52 @@ always wins. `git commit --no-verify`
 bypasses it - deliberately left as your escape hatch, and deliberately absent
 from the hook's own output so an agent that hits the block branches instead of
 routing around it.
+
+## Auto-fixing and catching formatter drift
+
+A formatter - your editor on save, or an auto-fixer - can rewrite a file *after*
+Claude edited it, sometimes after Claude has already committed and pushed for
+the turn, leaving the reformat stranded until someone notices. The kit ships a
+Claude Code `Stop` hook
+([ADR 024](docs/decisions/024-stop-hook-for-formatter-drift.md)) that fires as a
+turn ends and does two things in one process:
+
+1. Runs your repo's fix command, if it has one (see below).
+2. Stops Claude from finishing when the working tree holds changes to files its
+   own last commit included that it didn't write itself - asking it to check the
+   diff, re-run affected tests, and commit and push them.
+
+Both live in one hook on purpose: Claude Code runs all of an event's hooks *in
+parallel*, so a separate fixer and detector would race rather than run in order.
+
+`just install` registers it in `~/.claude/settings.json`, so it applies to every
+session on the machine - no per-repo step. Unlike the `pre-commit` hook it needs
+no per-clone install, since it lives in `~/.claude`, not `.git/`.
+
+To turn on step 1, name the command in the repo's git config - there's no
+default, and repos that set nothing skip straight to step 2:
+
+```bash
+git config fieldkit.fixCommand "just fix"
+```
+
+Its output is discarded rather than fed back to Claude, and a failing or hanging
+fixer can never block the turn. This is the per-repo opt-in auto-fixer
+[ADR 007](docs/decisions/007-agents-dont-run-linters.md) anticipated: agents
+still don't run linters, and the kit still owns no format command of its own -
+only the mechanism.
+
+Like `fieldkit.defaultBranch`, it's per *clone*, so a fresh checkout needs it
+set again. Git config can't be committed, so put the command in a `setup`-style
+recipe rather than leaving it as folklore - that keeps it version-controlled and
+reviewable while still needing a deliberate human run, so no command is ever
+auto-executed out of repo content. The kit does this to itself with
+`just setup`.
+
+The hook stays quiet unless the drift pattern actually holds: it exits silently
+outside a git repo, on a clean tree, before the session's first commit, on files
+Claude edited itself, and on untracked files. When it does fire, Claude can
+judge that the change wasn't formatter output, say so, and finish anyway.
 
 ## Updating a shared rule
 
@@ -208,3 +258,11 @@ the agent, so it stays out of every session's context.
 
 Requires [just](https://just.systems), [uv](https://docs.astral.sh/uv/), and
 Node >= 20.19.0. Run `just` to list available commands.
+
+The kit uses its own tooling on itself. Two steps are per *clone* rather than
+per machine, so run them again after a fresh checkout:
+
+```bash
+just setup                 # fix command for the format-drift Stop hook
+./scripts/enable-hooks.sh  # pre-commit hook blocking default-branch commits
+```
