@@ -14,7 +14,15 @@ HOOK_FILE = "stop-format-drift.py"
 
 
 def command_for(kit: str) -> str:
-    return f"python3 {kit}/hooks/{HOOK_FILE}"
+    """The registered command, made unable to wedge a session.
+
+    A `Stop` hook exiting non-zero is read as a blocking error, and the hook
+    signals a real block through JSON on stdout rather than its exit code. So
+    any non-zero exit is a malfunction - a checked-out branch predating the
+    hook file, an unreadable clone, a crash - and `|| true` keeps it inert
+    instead of refusing to end every turn.
+    """
+    return f"python3 {kit}/hooks/{HOOK_FILE} || true"
 
 
 def with_hook(data: dict, command: str) -> dict | None:

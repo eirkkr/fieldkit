@@ -142,6 +142,13 @@ Alternatives rejected:
   that diffs against both parents.
 - Registration is per machine and needs a `just install` rerun on an existing
   install, like every other `~/.claude` step.
+- The registered command ends in `|| true`. A `Stop` hook exiting non-zero is
+  read as a blocking error, and the registered path points into a working tree
+  whose contents vary by branch - so checking out a branch that predates the
+  hook file makes `python3` exit 2 and blocks every turn with a file-not-found
+  message until the branch is switched back. Since the hook signals a genuine
+  block through stdout JSON and never through its exit code, treating every
+  non-zero exit as inert loses nothing and removes a way to wedge a session.
 - Only `Edit`, `Write`, and `NotebookEdit` count as Claude's own writes. A file
   Claude changes by running a command in `Bash` looks external and can trigger
   a block - correct often enough (a generator's output does belong in a commit)
