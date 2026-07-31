@@ -137,8 +137,9 @@ alone, and refuses rather than clobbers if a real `pre-commit` file is already
 there. The kit repo installs the hook on itself the same way, running
 `./scripts/enable-hooks.sh` from its own root.
 
-The hook reads the default branch from `origin/HEAD`, falling back to the
-`fieldkit.defaultBranch` git config, then `main`. `git commit --no-verify`
+The hook takes the default branch from the `fieldkit.defaultBranch` git config
+when set, otherwise `origin/HEAD`, otherwise `main` - so an explicit override
+always wins. `git commit --no-verify`
 bypasses it - deliberately left as your escape hatch, and deliberately absent
 from the hook's own output so an agent that hits the block branches instead of
 routing around it.

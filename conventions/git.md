@@ -41,8 +41,8 @@
   backing the rule above structurally. Install it from the repo root with
   `.fieldkit/scripts/enable-hooks.sh` - once per clone, since `.git/hooks`
   isn't version controlled.
-- It reads the default branch from `origin/HEAD`, falling back to the
-  `fieldkit.defaultBranch` git config, then `main`. Set that config in a repo
-  where `origin/HEAD` isn't set.
+- It takes the default branch from the `fieldkit.defaultBranch` git config
+  when set, otherwise `origin/HEAD`, otherwise `main`. Set that config to
+  override the guess, or in a repo whose `origin/HEAD` isn't set.
 - Don't reach for `--no-verify` to get past it - the refusal means the commit
   belongs on a branch. Create one and commit there.

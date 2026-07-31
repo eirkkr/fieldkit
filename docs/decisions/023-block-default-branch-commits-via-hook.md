@@ -9,8 +9,8 @@ root, symlinks `.git/hooks/pre-commit` to the kit's copy. `just install`
 doesn't run it - that recipe wires machine-level state under `~/.claude` and
 `~/.local/bin`, while `.git/hooks` lives inside each clone.
 
-The hook resolves the default branch from `origin/HEAD`, falling back to a
-`fieldkit.defaultBranch` git config, then `main`. It exits 0 on a detached
+The hook takes the default branch from a `fieldkit.defaultBranch` git config
+when set, otherwise `origin/HEAD`, otherwise `main`. It exits 0 on a detached
 HEAD, so rebases and bisects are unaffected. `git commit --no-verify` remains
 the escape hatch, and the hook's own message doesn't mention it.
 
@@ -73,6 +73,8 @@ Alternatives rejected:
   `git revert` and `git cherry-pick` onto it. Those belong on a branch under
   the same rule, so the refusal is correct rather than a false positive.
   Merge commits are unaffected - git runs `pre-merge-commit` for those.
-- The hook trusts `origin/HEAD`, which a clone may not have set. The
-  `fieldkit.defaultBranch` config covers that, and the `main` fallback keeps
-  the common case working with no configuration.
+- `origin/HEAD` is only a guess, and a clone may not have it set at all - this
+  one didn't. The `fieldkit.defaultBranch` config takes precedence over it
+  rather than merely filling in when it's missing, so a repo can always state
+  the answer outright; the `main` fallback keeps the common case working with
+  no configuration.
