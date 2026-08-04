@@ -29,3 +29,4 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 022 | [Make OpenSpec skills model-discoverable](022-openspec-skills-model-discoverable.md)                      | Accepted   |
 | 023 | [Block default-branch commits with a git hook](023-block-default-branch-commits-via-hook.md)              | Accepted   |
 | 024 | [Fix and catch formatter drift in one Stop hook](024-stop-hook-for-formatter-drift.md)                    | Accepted   |
+| 025 | [State skill routing and push cadence always-on](025-skill-routing-stated-always-on.md)                   | Accepted   |

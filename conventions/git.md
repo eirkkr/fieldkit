@@ -17,17 +17,20 @@
   characters in the subject, hard limit 72.
 - Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`.
 - For more context, add a body after a blank line, wrapped at 72.
+- Commit often - each coherent piece of work as it lands, not one batch at the
+  end of a session. Small commits are easier to review, revert, and reword,
+  and no approval is needed for any of them.
 
 ## Pull requests and merging
 
 - PR title follows the same Conventional Commits format; no issue numbers in the
   title. Reference the issue with `Closes #X` in the body.
 - Always `git push` before `gh pr merge` (squash merge uses remote state).
-- Work in progress stays on the branch - push freely (act-then-show), but don't
-  open a PR until the work is ready for review. When it is, surface a compare
-  link (`.../compare/<base>...branch`) and a short summary, and get approval before
-  opening the PR - opening it asserts readiness. The pre-merge message is the
-  merge gate.
+- Work in progress stays on the branch - push freely and without asking
+  (act-then-show), but don't open a PR until the work is ready for review. When
+  it is, surface a compare link (`.../compare/<base>...branch`) and a short
+  summary, and get approval before opening the PR - opening it asserts
+  readiness. The pre-merge message is the merge gate.
 - Squash-merge: synthesise a subject + body summarising the whole change; don't
   concatenate commit messages. Append `(#PR)` to a custom `--subject` manually
   (GitHub omits it when you provide a custom subject). Only add `Closes #X`
