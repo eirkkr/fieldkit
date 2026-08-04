@@ -44,7 +44,8 @@
   the PR closes - rather than reading a number off the body or inferring one.
   Nothing back means no linked issue: omit the line entirely. Never fall back
   to the PR's own number; issues and PRs share one number space, so a wrong
-  guess still resolves to something. Show the proposed message for approval before merging.
+  guess still resolves to something. Show the proposed message for approval
+  before merging.
 
 ## Hooks
 
