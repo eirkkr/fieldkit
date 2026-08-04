@@ -2,7 +2,7 @@
 name: pr-prep
 description: Draft a pull request title, body, and compare link for the current branch
 tools: Bash, Read
-model: haiku
+model: sonnet
 ---
 
 # Draft a pull request

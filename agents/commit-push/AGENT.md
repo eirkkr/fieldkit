@@ -2,7 +2,7 @@
 name: commit-push
 description: Commit and push the current repo's pending changes to a branch
 tools: Bash, Read
-model: haiku
+model: sonnet
 ---
 
 # Commit and push pending changes

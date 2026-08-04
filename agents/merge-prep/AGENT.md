@@ -2,7 +2,7 @@
 name: merge-prep
 description: Check merge readiness and draft a squash-merge message for the current PR
 tools: Bash, Read
-model: haiku
+model: sonnet
 ---
 
 # Prepare a PR for merging
