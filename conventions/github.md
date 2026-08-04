@@ -2,8 +2,11 @@
 
 - Show a draft and wait for approval before creating or editing issues or
   comments. Treat like destructive ops: confirm first.
-- PRs: gates and mechanics live in [git.md](git.md). Once open, update title
-  and body directly - no pre-approval needed for those edits.
+- PRs: gates and mechanics live in [git.md](git.md). Once open, keep the title
+  and body in sync as the branch grows - but show the revised text and wait
+  for approval before applying it. The description is what reviewers read and
+  what the squash message is built from, so an unattended rewrite can quietly
+  drop context the human put there.
 - Before drafting an issue, check for duplicates/broader scope:
   `gh issue list --search "<2-3 keywords>"`.
 - Out-of-scope work -> file a narrow issue and defer; don't bundle it in.

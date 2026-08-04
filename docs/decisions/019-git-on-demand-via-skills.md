@@ -59,3 +59,8 @@ Alternatives rejected:
 - Direct git or GitHub work outside the three skills must still read the
   matching convention doc first per the Load-on-Demand table; nothing is
   removed, only demoted.
+
+> Amended by [025](025-skill-routing-stated-always-on.md): the routing rule
+> itself moves from the Load-on-Demand preamble to an Always-on bullet, since
+> the preamble is only read once the agent already suspects it needs a lookup.
+> `git.md`'s on-demand tier, decided here, stands.

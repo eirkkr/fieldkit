@@ -2,7 +2,7 @@
 name: commit-push
 description: Commit and push the current repo's pending changes to a branch
 tools: Bash, Read
-model: haiku
+model: sonnet
 ---
 
 # Commit and push pending changes
@@ -23,6 +23,13 @@ Don't assume - verify by running commands.
    names and the stat.
 6. Stage only the relevant files by name (no `-A`/`.`).
 7. Push the branch (`-u origin <branch>` on first push).
-8. Don't open a PR or merge - stop after pushing.
-9. Report back a branch link (`git remote get-url origin` →
-   `<repo-url>/tree/<branch>`) and push status.
+8. If the branch already has an open PR (`gh pr view --json
+   number,url,title,body`), check its description still describes what's now
+   on the branch - new commits routinely add scope the body never mentions.
+   If it's gone stale, draft a revised body (keeping the human's own wording
+   where it still holds) and include it in the report for approval. Don't run
+   `gh pr edit` yourself.
+9. Don't open a PR or merge - stop after pushing.
+10. Report back a branch link (`git remote get-url origin` →
+    `<repo-url>/tree/<branch>`), push status, and the PR-body draft if step 8
+    produced one.

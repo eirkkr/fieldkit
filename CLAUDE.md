@@ -16,6 +16,20 @@ See the README for the one-time symlink setup.
   design decision, even if the action itself is local; and anything
   outward-facing or irreversible - creating or editing an issue or comment,
   opening a PR, or merging.
+- Git and GitHub actions go through the `push`, `pr`, and `merge` skills -
+  don't reach for `git commit`, `git push`, `gh pr create`, or `gh pr merge`
+  directly, even mid-task and even when the step looks trivial. Read-only
+  inspection (`git status`, `git diff`, `git log`) stays direct, as do
+  actions no skill covers - read the matching doc below for those.
+- Committing and pushing a branch are act-then-show - don't ask first. Commit
+  each coherent piece of work as it lands and push it, rather than batching a
+  session into one commit at the end. A branch is cheap to amend or discard,
+  and the `pre-commit` hook keeps the default branch out of reach. The gates
+  are opening a PR, merging, and editing an open PR's title or body - nothing
+  else waits for approval. A gate on a *follow-up* never gates the push
+  itself: push first, then raise whatever the push turned up. Flagging a
+  conflict or an open question is likewise not a reason to hold the commit -
+  land the work, then ask.
 - Route anything learned that's worth keeping by scope: generic cross-repo
   lessons into the shared conventions kit, repo-specific ones into that
   repo's own docs.
@@ -58,9 +72,9 @@ See the README for the one-time symlink setup.
 Situational conventions, not carried in context. Read the matching file before
 the action; don't load it otherwise.
 
-Branch, commit, PR, and merge actions normally go through the `push`, `pr`,
-and `merge` skills - each reads `git.md`/`github.md` itself. Read those
-directly only for a git or GitHub action the skills don't cover.
+The `push`, `pr`, and `merge` skills each read `git.md`/`github.md`
+themselves, so routing through them (see Always-on) needs no lookup here. The
+rows below are for the actions those skills don't cover.
 
 <!-- Read-tool targets (not @-imports). Paths are relative to the consumer
 repo root - the directory the session is started from. Read

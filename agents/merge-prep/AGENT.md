@@ -2,7 +2,7 @@
 name: merge-prep
 description: Check merge readiness and draft a squash-merge message for the current PR
 tools: Bash, Read
-model: haiku
+model: sonnet
 ---
 
 # Prepare a PR for merging
@@ -21,10 +21,11 @@ that's an approval-gated step this agent doesn't take.
 5. Read `git log <base>..<branch>` and `git diff <base>...<branch>` for the
    whole change set - not just the latest commit.
 6. Draft a squash subject + body summarizing the whole change, not a
-   concatenation of commit messages. Add `Closes #X` only if the PR body
-   already references a tracked issue it resolves (`X` is that issue's
-   number, never the PR's own) - check for an existing
-   `Closes`/`Fixes`/`Resolves #` reference rather than guessing. Omit the
-   line if there's no linked issue.
+   concatenation of commit messages. For `Closes #X`, don't read a number off
+   the PR body or infer one - ask GitHub what this PR actually closes: `gh pr
+   view --json closingIssuesReferences -q
+   '.closingIssuesReferences[].number'`. Use only a number it returns. If it
+   returns nothing, the PR closes no issue: omit the line entirely rather
+   than substituting the PR's own number.
 7. Report back: PR number and URL, mergeability status, and the draft
    subject/body. Don't run `gh pr merge`.
