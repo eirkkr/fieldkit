@@ -30,3 +30,4 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 023 | [Block default-branch commits with a git hook](023-block-default-branch-commits-via-hook.md)              | Accepted   |
 | 024 | [Fix and catch formatter drift in one Stop hook](024-stop-hook-for-formatter-drift.md)                    | Accepted   |
 | 025 | [State skill routing and push cadence always-on](025-skill-routing-stated-always-on.md)                   | Accepted   |
+| 026 | [Keep PR descriptions in sync, gated on approval](026-pr-description-sync-on-push.md)                     | Accepted   |

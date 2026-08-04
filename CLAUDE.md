@@ -24,8 +24,12 @@ See the README for the one-time symlink setup.
 - Committing and pushing a branch are act-then-show - don't ask first. Commit
   each coherent piece of work as it lands and push it, rather than batching a
   session into one commit at the end. A branch is cheap to amend or discard,
-  and the `pre-commit` hook keeps the default branch out of reach. Only the
-  gates above (PR, merge) wait for approval.
+  and the `pre-commit` hook keeps the default branch out of reach. The gates
+  are opening a PR, merging, and editing an open PR's title or body - nothing
+  else waits for approval. A gate on a *follow-up* never gates the push
+  itself: push first, then raise whatever the push turned up. Flagging a
+  conflict or an open question is likewise not a reason to hold the commit -
+  land the work, then ask.
 - Route anything learned that's worth keeping by scope: generic cross-repo
   lessons into the shared conventions kit, repo-specific ones into that
   repo's own docs.

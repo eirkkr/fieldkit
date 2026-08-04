@@ -52,3 +52,10 @@ Alternatives rejected:
 > `CLAUDE.md` and `workflow.md`); [020](020-fold-workflow-into-claude-md.md)
 > collapses them back into one paragraph in `CLAUDE.md`. No change to the
 > principle itself.
+
+<!-- -->
+
+> Amended by [026](026-pr-description-sync-on-push.md): the carve-out noted
+> above for `github.md`'s ungated PR title/body edits is withdrawn - those
+> edits are now drafted and approved like other outward-facing changes. The
+> principle here is unchanged; 026 argues the carve-out never fit it.
