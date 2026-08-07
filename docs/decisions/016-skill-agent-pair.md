@@ -62,3 +62,10 @@ Alternatives rejected:
 > orchestrator using context the isolated agent structurally can't have, not
 > a reimplementation of the agent's mechanical work. The two-file pairing
 > itself, and `commit-push`'s renamed-to-`push` example of it, stand.
+>
+> Amended by [030](030-ungate-merge.md): `merge-prep` is renamed to `merge`
+> there, and `pr-prep` to `pr` in the same batch, so neither name above
+> refers to anything that still exists. Every skill/agent pair in the kit
+> now matches by name. The claim they were cited for - that nothing
+> *requires* the names to match - is unaffected; it simply has no live
+> example left.
