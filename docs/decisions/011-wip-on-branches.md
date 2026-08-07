@@ -65,6 +65,8 @@ Alternatives rejected:
 > (merge); everything else in this ADR (WIP on the branch, the compare link,
 > CI running only on real PRs) is unaffected.
 
+<!-- -->
+
 > Amended by [030](030-ungate-merge.md): the pre-merge message gate this
 > ADR kept is dropped too - CI/mergeability becomes an unconditional check
 > instead of a human-confirmed one, replacing rather than removing the

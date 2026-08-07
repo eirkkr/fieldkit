@@ -14,9 +14,9 @@ the approval for that push; pushing is already ungated/act-then-show, so
 there's nothing to ask separately before doing it.
 
 Decide the title and body yourself, from context already in hand plus
-`conventions/git.md`/`conventions/github.md`'s conventions - read `git log
-<base>..HEAD` / `git diff <base>...HEAD` yourself if you need the branch's
-full change set to pin them down:
+`conventions/git.md`/`conventions/github.md`'s conventions - read
+`git log <base>..HEAD` / `git diff <base>...HEAD` yourself if you need the
+branch's full change set to pin them down:
 
 - Title: Conventional Commits format, under 70 characters.
 - Body: 1-3 bullet summary points plus a test plan checklist.

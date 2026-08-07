@@ -60,16 +60,22 @@ Alternatives rejected:
 > edits are now drafted and approved like other outward-facing changes. The
 > principle here is unchanged; 026 argues the carve-out never fit it.
 
+<!-- -->
+
 > Amended by [028](028-ungate-pr-creation.md): opening a PR moves back to
 > act-then-show, on the argument that it's cheap to correct after the fact
 > like the rest of the local git workflow, not that it stopped being
 > outward-facing. Merging and editing an *open* PR's title/body - the
 > genuinely irreversible or human-authored-content risks - stay gated.
 
+<!-- -->
+
 > Amended by [029](029-ungate-pr-body-edits.md): editing an open PR's
 > title/body joins the act-then-show side too, on the same cheap-to-correct
 > argument 028 made for creation. Merging is the only gate this ADR's model
 > still protects.
+
+<!-- -->
 
 > Amended by [030](030-ungate-merge.md): merging drops the approval gate
 > too, replaced by an unconditional CI/mergeability check. Nothing this ADR
