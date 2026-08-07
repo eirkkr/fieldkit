@@ -18,10 +18,13 @@ If it's not open, has conflicts, or has checks failing or still pending,
 stop and report what's blocking it. Calling `/merge` is approval to merge
 once CI is green - not approval to merge regardless of what CI says.
 
-Once it's clean, decide the squash subject and body yourself: read `git log
-<base>..<branch>` and `git diff <base>...<branch>` for the whole change set,
-not just the latest commit. Synthesize a subject + body summarizing the
-whole change, not a concatenation of commit messages. For `Closes #X`, don't
+Once it's clean, decide the squash subject and body yourself. Start from
+context already in hand plus `git log <base>..<branch>` for the branch's
+full run of commit messages, not just the latest one - that's usually
+enough to synthesize a subject + body summarizing the whole change, not a
+concatenation of the commits. Only fall back to `git diff <base>...<branch>`
+when the commit messages and your own context don't add up to a clear
+picture of the whole change. For `Closes #X`, don't
 read a number off the PR body or infer one - ask GitHub what this PR
 actually closes: `gh pr view --json closingIssuesReferences -q
 '.closingIssuesReferences[].number'`. Use only a number it returns; if it
