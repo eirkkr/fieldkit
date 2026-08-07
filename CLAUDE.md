@@ -48,6 +48,12 @@ See the README for the one-time symlink setup.
 - Route anything learned that's worth keeping by scope: generic cross-repo
   lessons into the shared conventions kit, repo-specific ones into that
   repo's own docs.
+- `conventions/*.md` are read by humans and agents alike - state git/GitHub
+  mechanics as plain facts, not instructions to an agent. This file's own
+  process vocabulary (act-then-show, gate, dispatching a subagent) belongs
+  here or in the skill/agent files that execute it, never in a `conventions`
+  doc - a human reading one shouldn't need `CLAUDE.md` open to parse a term
+  in it.
 - Before any suppression (`# type: ignore`, `# noqa`, tool exclusion), try
   fixing the underlying issue first. Suppress only when the tool is
   genuinely wrong about the file's context (e.g. a generated or vendored

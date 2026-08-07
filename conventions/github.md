@@ -2,7 +2,7 @@
 
 - Show a draft and wait for approval before creating or editing issues or
   comments. Treat like destructive ops: confirm first.
-- PRs: gates and mechanics live in [git.md](git.md). Once open, keep the title
+- PRs: mechanics live in [git.md](git.md). Once open, keep the title
   and body in sync as the branch grows - revise it directly when it drifts,
   keeping the human's own wording where it still holds. The description is
   what reviewers read and what the squash message is built from, so it's
