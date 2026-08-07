@@ -33,8 +33,10 @@
 - Work in progress stays on the branch - push freely and without asking
   (act-then-show), but don't open a PR until the work is ready for review.
   Opening it is act-then-show too: draft the title and body yourself, open
-  it, then surface the link, title, and body - no approval needed first. The
-  pre-merge message is the merge gate.
+  it, then surface the link, title, and body. Merging is act-then-show as
+  well, conditioned on CI/mergeability rather than approval - see
+  Squash-merge below. No step in this whole lifecycle waits on a human
+  sign-off.
 - Once a PR is open, every later push to that branch has to leave the
   description still true. Checking is part of the push, not a separate
   step: push first, check the body against the branch as pushed, and apply
@@ -46,8 +48,9 @@
   the PR closes - rather than reading a number off the body or inferring one.
   Nothing back means no linked issue: omit the line entirely. Never fall back
   to the PR's own number; issues and PRs share one number space, so a wrong
-  guess still resolves to something. Show the proposed message for approval
-  before merging.
+  guess still resolves to something. Merge as soon as the message is
+  synthesised, checking mergeability and CI status first - a red or
+  still-running check blocks the merge outright, no approval step does.
 
 ## Hooks
 
