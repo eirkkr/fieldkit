@@ -67,3 +67,9 @@ Alternatives rejected:
 > invoke `/pr` at all is gated again when it isn't the user directly typing
 > `/pr` - only the draft this ADR ungated stays ungated once the skill is
 > running.
+>
+> Amended by [033](033-pr-agent-opens-the-pr.md): `gh pr create` moves out of
+> `skills/pr/SKILL.md` and into `agents/pr`, so the consequence above about
+> the skill running it once the subagent reports back no longer describes the
+> flow. That it runs without waiting for approval, this ADR's actual
+> decision, is unchanged.

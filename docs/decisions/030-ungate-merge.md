@@ -83,3 +83,9 @@ Alternatives rejected:
 > Amended by [032](032-merge-waits-out-pending-ci.md): a still-running check
 > no longer stops the flow the way this ADR specified - the agent waits for
 > it instead. A failing check still stops it exactly as this ADR set out.
+>
+> Amended by [033](033-pr-agent-opens-the-pr.md): the rejected alternative
+> above contrasts this ADR's single-boundary choice with `skills/pr` running
+> `gh pr create` directly. `pr` has since moved to the same shape decided
+> here, so the contrast no longer holds - the reasoning for keeping merge
+> whole does, and 033 adopts it rather than reversing it.
