@@ -64,3 +64,9 @@ Alternatives rejected:
 > itself moves from the Load-on-Demand preamble to an Always-on bullet, since
 > the preamble is only read once the agent already suspects it needs a lookup.
 > `git.md`'s on-demand tier, decided here, stands.
+
+> Amended by [027](027-push-decisions-move-to-caller.md): branch-name choice
+> moves back out of `agents/push` (renamed from `commit-push`) and into
+> `skills/push`, which now reads `git.md` itself to make that call. `git.md`'s
+> on-demand tier, decided here, still stands - only which half of the pair
+> reads it changed.

@@ -54,3 +54,11 @@ Alternatives rejected:
 - The skill must stay thin - if task logic starts accumulating in the
   `SKILL.md` body instead of the `AGENT.md`, that's a sign the split has
   eroded.
+
+> Amended by [027](027-push-decisions-move-to-caller.md): for `push`
+> specifically, `SKILL.md` now decides the branch name, commit message,
+> file list, and PR-staleness verdict - real logic, not dispatch prose. 027
+> argues that's not the erosion this bullet warns against, since it's the
+> orchestrator using context the isolated agent structurally can't have, not
+> a reimplementation of the agent's mechanical work. The two-file pairing
+> itself, and `commit-push`'s renamed-to-`push` example of it, stand.
