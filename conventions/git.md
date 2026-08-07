@@ -31,15 +31,14 @@
   in the body - and when it doesn't, there's simply no such line.
 - Always `git push` before `gh pr merge` (squash merge uses remote state).
 - Work in progress stays on the branch - push freely and without asking
-  (act-then-show), but don't open a PR until the work is ready for review. When
-  it is, surface a compare link (`.../compare/<base>...branch`) and a short
-  summary, and get approval before opening the PR - opening it asserts
-  readiness. The pre-merge message is the merge gate.
+  (act-then-show), but don't open a PR until the work is ready for review.
+  Opening it is act-then-show too: draft the title and body yourself, open
+  it, then surface the link, title, and body - no approval needed first. The
+  pre-merge message is the merge gate.
 - Once a PR is open, every later push to that branch has to leave the
-  description still true. This gates the edit, not the push - push first,
-  then check the body against the branch as pushed; if the work has outgrown
-  it, draft the revision and get that approved before
-  applying it (see [github.md](github.md)).
+  description still true. Checking is part of the push, not a separate
+  step: push first, check the body against the branch as pushed, and apply
+  a revision right away if it's gone stale (see [github.md](github.md)).
 - Squash-merge: synthesise a subject + body summarising the whole change; don't
   concatenate commit messages. Append `(#PR)` to a custom `--subject` manually
   (GitHub omits it when you provide a custom subject). Take `Closes #X` from

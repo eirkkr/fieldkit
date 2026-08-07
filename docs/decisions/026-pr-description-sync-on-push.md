@@ -60,3 +60,9 @@ Alternatives rejected:
 > `skills/push` - the caller already holds the diff, so it judges directly
 > instead of delegating to the agent's copy of the same comparison. The gate
 > itself (approval before `gh pr edit`; the push never gated) is unchanged.
+
+> Amended by [029](029-ungate-pr-body-edits.md): the approval gate this ADR
+> introduced is dropped - the human now trusts the drafted revision without
+> a pre-application review. Everything else here (catch drift at push time,
+> keep the human's own wording where it holds) stands; only the wait before
+> applying it is gone.
