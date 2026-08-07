@@ -10,7 +10,8 @@ model: haiku
 The caller decides the title and body, and has already made sure the branch
 exists and is pushed (via `/push`) before dispatching here - take all of it
 as given, don't rediscover, diff, push, or second-guess any of it. Don't
-open the PR - that's an approval-gated step this agent doesn't take.
+open the PR - `skills/pr` runs `gh pr create` itself right after this
+report.
 
 1. Find the base branch: `gh repo view --json defaultBranchRef -q
    .defaultBranchRef.name`.

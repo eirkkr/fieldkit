@@ -12,3 +12,17 @@ for skill_dir in "$kit"/skills/*/; do
         echo "Linked /$name into ~/.claude/skills"
     fi
 done
+
+# Prune links this kit made for skills that were renamed or removed - a
+# plain "add/update" pass above never revisits a name that's gone.
+for dest in ~/.claude/skills/*; do
+    [ -L "$dest" ] || continue
+    target="$(readlink "$dest")"
+    case "$target" in
+        "$kit"/skills/*)
+            [ -d "$target" ] && continue
+            rm "$dest"
+            echo "Removed stale skill link $(basename "$dest") ($target no longer exists)"
+            ;;
+    esac
+done
