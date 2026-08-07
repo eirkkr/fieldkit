@@ -36,8 +36,9 @@ See the README for the one-time symlink setup.
   convinced the current branch's work is genuinely unrelated - and that
   conviction is a gate, unlike the commit it would precede: explain why and
   get confirmation *before* creating the branch, not after. New branches
-  always come off the default branch (see git.md), never stacked on
-  another.
+  come off the default branch (see git.md); stacking one on another is an
+  anti-pattern, and on the rare occasion that seems genuinely warranted
+  instead, it's the same gate - explain why and confirm first.
 - Route anything learned that's worth keeping by scope: generic cross-repo
   lessons into the shared conventions kit, repo-specific ones into that
   repo's own docs.
