@@ -54,3 +54,9 @@ Alternatives rejected:
 - Staleness is a judgement call the agent makes, so it will sometimes propose
   a rewrite that isn't warranted. Cheap to decline, and the failure mode
   points the safe way.
+
+> Amended by [027](027-push-decisions-move-to-caller.md): the staleness
+> check and draft move from `commit-push` (now `agents/push`) to
+> `skills/push` - the caller already holds the diff, so it judges directly
+> instead of delegating to the agent's copy of the same comparison. The gate
+> itself (approval before `gh pr edit`; the push never gated) is unchanged.
