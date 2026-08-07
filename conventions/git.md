@@ -9,6 +9,9 @@
   `type/short-description`, lowercase, hyphen-separated.
 - Allowed prefixes: `feature/`, `bugfix/`, `hotfix/`, `release/`, `chore/`. No
   others (`refactor/`, `fix/`, `test/`, etc.).
+- Branch off the default branch. Branching off another branch is an
+  anti-pattern - it stacks work on something that can still change or get
+  discarded.
 
 ## Commits
 

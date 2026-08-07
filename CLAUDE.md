@@ -30,6 +30,9 @@ See the README for the one-time symlink setup.
   itself: push first, then raise whatever the push turned up. Flagging a
   conflict or an open question is likewise not a reason to hold the commit -
   land the work, then ask.
+- New branches come off the default branch (see git.md) - never stack one
+  branch on another. On the rare occasion that seems genuinely warranted,
+  treat it as a gate: explain why and get confirmation before creating it.
 - Route anything learned that's worth keeping by scope: generic cross-repo
   lessons into the shared conventions kit, repo-specific ones into that
   repo's own docs.
