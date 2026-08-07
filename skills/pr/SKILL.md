@@ -32,12 +32,13 @@ Launch the `pr` subagent (`subagent_type: pr`) in the foreground with the
 title and body stated explicitly, plus `$ARGUMENTS` for whatever extra
 context was given. The agent takes them as given, and assumes the branch is
 already pushed - it doesn't rediscover, diff, push, or second-guess any of
-it. Relay its report (compare link, title, body - or an existing PR's URL if
-one is already open on this branch, in which case stop here - there's
-nothing to create).
+it. It runs `gh pr create` itself - don't run it here, and don't read its
+report as a draft awaiting a second dispatch. Relay that report (the PR
+link, title, and body - or an existing PR's URL if one was already open on
+this branch, in which case there was nothing to create).
 
 Reaching this skill already means opening the PR is approved - either the
-user typed `/pr` directly, or the caller asked and got a yes first. From
-here it's act-then-show, not a second review: run `gh pr create` with the
-title and body straight away, then surface the PR link, title, and body so
-it can be corrected if it's off.
+user typed `/pr` directly, or the caller asked and got a yes first. So the
+agent opens it straight away, with no review of the draft in between;
+surfacing the link, title, and body afterward is what lets it be corrected
+if it's off.
