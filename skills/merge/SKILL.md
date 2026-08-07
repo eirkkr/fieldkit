@@ -7,15 +7,17 @@ description: Merge the current branch's pull request via squash merge
 
 If there's no open PR for this branch yet - including uncommitted or
 unpushed work - follow `skills/pr/SKILL.md` first (which itself follows
-`skills/push/SKILL.md` if needed to get the branch pushed). This `/merge`
-invocation is implicit approval for both; they're already ungated
-act-then-show, so there's nothing to ask before doing them.
+`skills/push/SKILL.md` if needed to get the branch pushed). Reaching this
+skill already means merging is approved - either the user typed `/merge`
+directly, or the caller asked and got a yes first - and that covers opening
+the PR and pushing along the way too, so there's nothing further to ask
+before doing them.
 
 Check the PR is actually mergeable before drafting anything: `gh pr view
 --json
 number,title,state,mergeable,statusCheckRollup,baseRefName,headRefName,url`.
 If it's not open, has conflicts, or has checks failing or still pending,
-stop and report what's blocking it. Calling `/merge` is approval to merge
+stop and report what's blocking it. Reaching this skill is approval to merge
 once CI is green - not approval to merge regardless of what CI says.
 
 Once it's clean, decide the squash subject and body yourself. Start from

@@ -9,9 +9,9 @@ argument-hint: "[short summary of the change, optional]"
 If there's uncommitted work, or the branch isn't pushed yet - including
 still being on the default branch, with no branch to open a PR from at all -
 follow `skills/push/SKILL.md` first: decide the branch, commit message, and
-file list, and dispatch its `push` subagent. This `/pr` invocation is itself
-the approval for that push; pushing is already ungated/act-then-show, so
-there's nothing to ask separately before doing it.
+file list, and dispatch its `push` subagent. Pushing is already
+ungated/act-then-show regardless of how this skill was reached, so there's
+nothing to ask separately before doing it.
 
 Decide the title and body yourself, from context already in hand plus
 `conventions/git.md`/`conventions/github.md`'s conventions - read
@@ -36,6 +36,8 @@ it. Relay its report (compare link, title, body - or an existing PR's URL if
 one is already open on this branch, in which case stop here - there's
 nothing to create).
 
-Opening a PR is act-then-show, not gated: run `gh pr create` with the title
-and body straight away, then surface the PR link, title, and body so it can
-be corrected if it's off.
+Reaching this skill already means opening the PR is approved - either the
+user typed `/pr` directly, or the caller asked and got a yes first. From
+here it's act-then-show, not a second review: run `gh pr create` with the
+title and body straight away, then surface the PR link, title, and body so
+it can be corrected if it's off.

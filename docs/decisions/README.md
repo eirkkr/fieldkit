@@ -35,3 +35,4 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 028 | [Make opening a PR act-then-show, not gated](028-ungate-pr-creation.md)                                   | Accepted   |
 | 029 | [Make PR title/body edits act-then-show too](029-ungate-pr-body-edits.md)                                 | Accepted   |
 | 030 | [Ungate merging; caller drafts the squash message](030-ungate-merge.md)                                   | Accepted   |
+| 031 | [Re-gate PR/merge invocation, unless directly invoked](031-regate-pr-and-merge-invocation.md)              | Accepted   |
