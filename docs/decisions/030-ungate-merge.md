@@ -74,3 +74,12 @@ Alternatives rejected:
   so a check-then-merge race (CI flips red in the gap) is the one scenario
   this doesn't fully cover. Accepted: the same narrow race a synchronous
   human-approval gate wouldn't have caught either.
+
+> Amended by [031](031-regate-pr-and-merge-invocation.md): the decision to
+> invoke `/merge` at all is gated again when it isn't the user directly
+> typing `/merge` - only the squash-message draft this ADR ungated stays
+> ungated once the skill is running.
+>
+> Amended by [032](032-merge-waits-out-pending-ci.md): a still-running check
+> no longer stops the flow the way this ADR specified - the agent waits for
+> it instead. A failing check still stops it exactly as this ADR set out.

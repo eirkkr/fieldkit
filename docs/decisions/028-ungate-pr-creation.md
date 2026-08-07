@@ -62,3 +62,8 @@ Alternatives rejected:
 > PR's title or body" gate this ADR left standing is dropped too, on the
 > same reasoning extended one step further. Merging is now the only gate
 > left in the `push`/`pr`/`merge` trio.
+>
+> Amended by [031](031-regate-pr-and-merge-invocation.md): the decision to
+> invoke `/pr` at all is gated again when it isn't the user directly typing
+> `/pr` - only the draft this ADR ungated stays ungated once the skill is
+> running.

@@ -46,7 +46,8 @@
   Nothing back means no linked issue: omit the line entirely. Never fall back
   to the PR's own number; issues and PRs share one number space, so a wrong
   guess still resolves to something. Merge once CI is green and the PR has
-  no conflicts; a red or still-running check blocks it outright.
+  no conflicts; a red check or unresolved conflicts block it outright, a
+  still-running check is waited out instead.
 
 ## Hooks
 

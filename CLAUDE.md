@@ -21,21 +21,24 @@ See the README for the one-time symlink setup.
   directly, even mid-task and even when the step looks trivial. Read-only
   inspection (`git status`, `git diff`, `git log`) stays direct, as do
   actions no skill covers - read the matching doc below for those.
-- Committing, pushing, opening a PR, keeping its title/body in sync, and
-  merging are all act-then-show - don't ask first for any of them. Commit
-  each coherent piece of work as it lands and push it, rather than batching
-  a session into one commit at the end; once the branch is ready, open the
-  PR too, revise its title/body directly whenever it drifts, and merge once
-  CI is green - synthesizing the squash message yourself rather than
-  waiting on approval for any of it. A branch is cheap to amend or discard,
-  a PR's title and body are a `gh pr edit` away from a fix, and the
-  `pre-commit` hook keeps the default branch out of reach. Merging is
-  conditioned on CI, not on approval: a red or still-running check blocks it
-  outright - stop and report, don't merge around it - but a green one merges
-  straight away, with no human sign-off in between. A gate on a *follow-up*
-  never gates the action that precedes it: push, open the PR, or merge
-  first, then raise whatever it turned up. Flagging a conflict or an open
-  question is likewise not a reason to hold the work - land it, then ask.
+- Committing and pushing - including keeping an open PR's title/body in sync
+  as the branch grows - are act-then-show: don't ask first. Commit each
+  coherent piece of work as it lands and push it, rather than batching a
+  session into one commit at the end; revise a stale PR description
+  directly, no approval needed. A branch is cheap to amend or discard, and
+  the `pre-commit` hook keeps the default branch out of reach.
+- Opening a PR and merging are gated the other way: ask before doing either,
+  unless the user typed `/pr` or `/merge` directly - that invocation is
+  itself the approval, covering the push it may need first too. Once
+  approved (by either path), draft the title/body or squash message
+  yourself and go straight to it - the approval is for whether to act, not
+  a preview of the draft, so there's no separate review step for that.
+  Merging is further conditioned on CI, on top of approval: a red or
+  still-running check blocks it outright - stop and report, don't merge
+  around it - but a green one merges straight away once approved, with no
+  additional sign-off. A gate on a *follow-up* never gates the action that
+  precedes it - don't hold a push on an unrelated open question, land it,
+  then ask.
 - Default to committing onto whatever branch you're already on, even if its
   existing work looks unrelated to what you're about to add. Reach for a new
   branch only when starting from the default branch, or when you're
