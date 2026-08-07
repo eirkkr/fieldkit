@@ -79,3 +79,7 @@ Alternatives rejected:
 > invoke `/merge` at all is gated again when it isn't the user directly
 > typing `/merge` - only the squash-message draft this ADR ungated stays
 > ungated once the skill is running.
+>
+> Amended by [032](032-merge-waits-out-pending-ci.md): a still-running check
+> no longer stops the flow the way this ADR specified - the agent waits for
+> it instead. A failing check still stops it exactly as this ADR set out.
