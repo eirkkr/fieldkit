@@ -31,3 +31,7 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 024 | [Fix and catch formatter drift in one Stop hook](024-stop-hook-for-formatter-drift.md)                    | Accepted   |
 | 025 | [State skill routing and push cadence always-on](025-skill-routing-stated-always-on.md)                   | Accepted   |
 | 026 | [Keep PR descriptions in sync, gated on approval](026-pr-description-sync-on-push.md)                     | Accepted   |
+| 027 | [Move push's judgment calls to the caller](027-push-decisions-move-to-caller.md)                          | Accepted   |
+| 028 | [Make opening a PR act-then-show, not gated](028-ungate-pr-creation.md)                                   | Accepted   |
+| 029 | [Make PR title/body edits act-then-show too](029-ungate-pr-body-edits.md)                                 | Accepted   |
+| 030 | [Ungate merging; caller drafts the squash message](030-ungate-merge.md)                                   | Accepted   |

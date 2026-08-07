@@ -58,3 +58,17 @@ Alternatives rejected:
   CI on open-but-unready PRs suppressed, a WIP label is the documented fallback.
 - 008's principle (gate on outward or irreversible actions) stands; only its
   draft-PR and ready-for-review specifics are amended here.
+
+> Amended by [028](028-ungate-pr-creation.md): the ready-for-review gate
+> relocated here onto PR creation is now dropped entirely - opening a PR
+> joins branch pushes as act-then-show. The lifecycle collapses to one gate
+> (merge); everything else in this ADR (WIP on the branch, the compare link,
+> CI running only on real PRs) is unaffected.
+
+<!-- -->
+
+> Amended by [030](030-ungate-merge.md): the pre-merge message gate this
+> ADR kept is dropped too - CI/mergeability becomes an unconditional check
+> instead of a human-confirmed one, replacing rather than removing the
+> protection this ADR's "human approval confirms CI is green" reasoning
+> named. The lifecycle is now zero gates, all mechanical checks.
