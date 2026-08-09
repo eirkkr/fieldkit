@@ -47,9 +47,44 @@ described here; this file is the content guidance for what goes in them.
 - Break work into ordered tasks, each with an explicit **definition-of-done**
   and, where one exists, a "copy/adapt this existing file" reference. Size the
   detail for the least-skilled likely implementer.
+- One task is **one action with one done-condition**, naming the files it
+  touches, written in about five lines or fewer. Split on "and": adding a
+  dependency, configuring it, and proving it loads are three tasks. The
+  exception is an atomic pair - a rename and its call sites - where the tree
+  is broken in between.
 - **Walking-skeleton first:** get the whole thing running end to end (fixtures
   or stubs for unbuilt parts) before deepening any one part; then change one
   thing at a time on a tested base. Build order is not feature order.
+- Tasks are grouped into **stages**. A stage is the smallest group that
+  leaves the tree green and says one thing - 3-6 tasks, 8 at the most. When
+  the choice is open, split: a smaller stage is a cheaper review.
 - Progress lives in `tasks.md`'s own checkboxes, ticked as
   `openspec-apply-change` (or you, by hand) completes each task; `openspec
   status` reads them back. No separate progress doc to keep in sync.
+
+## Review (the `review-gated` schema)
+
+Review runs at three scopes ([ADR 034](../docs/decisions/034-review-gated-openspec-schema.md)).
+Only the second and third involve a human.
+
+- **Per task.** The implementer checks the work against that task's own
+  `Done when ...` condition before ticking the box. A box whose condition
+  could not be verified stays unticked.
+- **Per stage.** Every stage's last task is a `REVIEW GATE`, and it is a
+  full stop: the gate is not ticked and the next stage does not start until
+  a human approves. The stage is green before the gate is reached - nobody
+  is asked to sign off on a broken tree. The review note is written into
+  `tasks.md` under the gate, so it outlives the session and archives with
+  the change. It covers what changed since the previous gate, any departure
+  from the plan, how to verify (exact commands, plus manual steps), what to
+  look at closely, and what is deliberately not done yet.
+- **Per change.** The last stage of every change is the final review: the
+  built code against the change's own proposal, design and delta specs, in
+  both directions - unmet requirements, and things built that nothing asked
+  for. The artifacts are corrected to describe what was actually built
+  (durable decisions become ADRs), the diff is hand-walked for the
+  conventions CI cannot see, and then it iterates with the human until they
+  are satisfied. A change is not complete, and is not archived, before that.
+
+A gate sent back is fixed inside its own stage, not carried into the next
+one.
