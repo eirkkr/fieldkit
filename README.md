@@ -144,6 +144,21 @@ repo ignores it too. Add to the repo's rumdl config (StudyNav's
 The leading `**/` matters - the language server passes an absolute path,
 already resolved to the kit.
 
+The linked files also **dangle in any checkout without a `.fieldkit` symlink**,
+CI included, exactly as the `.claude/skills` links already do. That's harmless
+until a tool walks them: anything that reads every file in the tree will fail
+on them with an IO error, and unlike the skills links these sit inside the
+linted tree. StudyNav hit this with `ruff format`, which reads Markdown, and
+excludes the directory:
+
+```toml
+[tool.ruff]
+extend-exclude = ["openspec/schemas"]
+```
+
+`rumdl` and `djlint` were unaffected - a directory sweep skips symlinks. Check
+whatever else walks your repo's tree wholesale.
+
 The kit owns keeping the vendored skills current: `just openspec-refresh`
 bumps the pinned `openspec` version, regenerates `repo-skills/` from it, and
 re-applies `repo-skills-overlay/*.md` on top - the rsync is `--delete`, so

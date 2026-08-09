@@ -119,6 +119,14 @@ Alternatives rejected:
   up the schema link and the `config.yaml` selection. Existing in-flight
   changes keep the schema named in their own `.openspec.yaml`; only new
   changes get gates.
+- The linked files dangle in any checkout without a `.fieldkit` symlink, CI
+  included - the same property the `.claude/skills` links already have, but
+  now inside the linted tree, where a tool that walks every file fails on
+  them with an IO error rather than ignoring them. Adopting repos must
+  exclude `openspec/schemas` from any such tool; StudyNav needed it for
+  `ruff format`, which reads Markdown. Copying the schema in instead would
+  avoid this, at the cost of the per-repo drift centralisation exists to
+  prevent.
 - Each adopting repo also needs a `per-file-ignores` entry of its own for
   the linked templates (see the README). `rumdl check` doesn't need it - it
   resolves the symlink and finds the kit's config - but rumdl's language
