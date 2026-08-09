@@ -20,6 +20,11 @@ Like a survival field kit: the **manual** (conventions) and the **instruments**
   *opt-in* consumer repo's `.claude/skills` by
   `.fieldkit/scripts/enable-openspec.sh` (not by `just install` - see
   "Adopting OpenSpec in a consumer repo").
+- `repo-skills-overlay/` - the kit's own additions to those vendored skills,
+  appended by `just openspec-refresh` after it regenerates them; one
+  `<skill-name>.md` per skill patched.
+- `schemas/` - kit-owned OpenSpec workflow schemas, linked file-by-file into
+  an opt-in consumer repo's `openspec/schemas/`.
 - `agents/` - shared Claude Code subagents, symlinked into `~/.claude/agents`
   by `just install` (see Setup).
 - `statusline/` - the shared Claude Code status line script, symlinked to
@@ -108,13 +113,26 @@ To opt in, from the consumer repo root (after Setup steps 1-2):
 ```
 
 This creates the repo's `openspec/` content dir (`specs/`, `changes/`,
-`config.yaml`) and symlinks `.claude/skills/openspec-*` to the kit's vendored
-copies in `repo-skills/`. It's idempotent - rerun it after an
-`openspec-refresh` (below) that adds a new skill. Commit both `openspec/` and
-the `.claude/skills` symlinks.
+`config.yaml`), symlinks `.claude/skills/openspec-*` to the kit's vendored
+copies in `repo-skills/`, links the `review-gated` schema into
+`openspec/schemas/`, and selects it in `config.yaml`. It's idempotent - rerun
+it after an `openspec-refresh` (below) that adds a new skill, or after the
+kit gains a new schema file. Commit `openspec/` and the `.claude/skills`
+symlinks.
+
+The workflow is `review-gated`
+([ADR 034](docs/decisions/034-review-gated-openspec-schema.md)), the kit's
+replacement for the stock `spec-driven` schema: bite-sized tasks, a human
+review gate ending every stage, and a final whole-change review before
+archive. `conventions/specs.md` describes what that asks of an author and a
+reviewer. The schema itself lives in `schemas/review-gated/`; note that its
+files are linked individually rather than the directory being linked,
+because OpenSpec's schema discovery doesn't follow a symlinked directory.
 
 The kit owns keeping the vendored skills current: `just openspec-refresh`
-bumps the pinned `openspec` version and regenerates `repo-skills/` from it.
+bumps the pinned `openspec` version, regenerates `repo-skills/` from it, and
+re-applies `repo-skills-overlay/*.md` on top - the rsync is `--delete`, so
+kit additions to a vendored skill live in the overlay or they don't survive.
 Adopting repos pick up the change through their symlinks next session; no
 per-repo `openspec update` needed.
 

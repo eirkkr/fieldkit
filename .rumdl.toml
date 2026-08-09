@@ -4,6 +4,16 @@ enabled = true
 style = "aligned"
 
 [global]
-# Vendored from the openspec CLI (repo-skills/, task 3) and overwritten
-# verbatim by `just openspec-refresh` - not hand-edited, so not linted.
+# Generated: `just openspec-refresh` overwrites repo-skills/ from the openspec
+# CLI, then appends the kit's repo-skills-overlay/*.md (ADR 034). Neither half
+# is hand-edited here, so it isn't linted - but repo-skills-overlay/ is the
+# kit's own prose and is.
 exclude = ["repo-skills/openspec-*/"]
+
+# Fragments, not documents: schema templates are filled into an artifact and
+# overlays are appended to a SKILL.md, so neither owns the file's H1. The
+# proposal/spec templates are also upstream copies kept verbatim (ADR 034),
+# so their list spacing isn't ours to reflow.
+[per-file-ignores]
+"schemas/*/templates/*.md" = ["MD041", "MD032"]
+"repo-skills-overlay/*.md" = ["MD041"]

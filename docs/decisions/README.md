@@ -38,3 +38,4 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 031 | [Re-gate PR/merge invocation, unless directly invoked](031-regate-pr-and-merge-invocation.md)             | Accepted   |
 | 032 | [Merge waits out pending CI instead of stopping](032-merge-waits-out-pending-ci.md)                       | Accepted   |
 | 033 | [Let the pr agent open the PR itself](033-pr-agent-opens-the-pr.md)                                       | Accepted   |
+| 034 | [Gate OpenSpec stages on human review](034-review-gated-openspec-schema.md)                               | Accepted   |
