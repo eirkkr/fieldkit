@@ -14,6 +14,12 @@ exclude = ["repo-skills/openspec-*/"]
 # overlays are appended to a SKILL.md, so neither owns the file's H1. The
 # proposal/spec templates are also upstream copies kept verbatim (ADR 034),
 # so their list spacing isn't ours to reflow.
+#
+# Keep the leading `**/`. These globs are matched against the path as it was
+# passed in, and an editor's language server passes an absolute one - which a
+# repo-relative glob silently fails to match, so the ignore applies on the
+# command line but not in the IDE. It also covers a consumer repo opening
+# these files through its openspec/schemas symlinks.
 [per-file-ignores]
-"schemas/*/templates/*.md" = ["MD041", "MD032"]
-"repo-skills-overlay/*.md" = ["MD041"]
+"**/schemas/*/templates/*.md" = ["MD041", "MD032"]
+"**/repo-skills-overlay/*.md" = ["MD041"]
