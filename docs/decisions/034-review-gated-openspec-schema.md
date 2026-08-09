@@ -119,6 +119,13 @@ Alternatives rejected:
   up the schema link and the `config.yaml` selection. Existing in-flight
   changes keep the schema named in their own `.openspec.yaml`; only new
   changes get gates.
+- Each adopting repo also needs a `per-file-ignores` entry of its own for
+  the linked templates (see the README). `rumdl check` doesn't need it - it
+  resolves the symlink and finds the kit's config - but rumdl's language
+  server reads only the workspace-root config, so without it an editor
+  flags `MD041` on files the repo doesn't own. The globs need a leading
+  `**/` in both places: rumdl matches them against the path as passed, and
+  a language server passes an absolute one.
 - `repo-skills/` is no longer verbatim upstream. It is still generated, so
   it stays lint-excluded, but a diff against a stock `openspec init` will
   now show the overlay sections.

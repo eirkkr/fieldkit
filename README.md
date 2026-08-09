@@ -129,6 +129,21 @@ reviewer. The schema itself lives in `schemas/review-gated/`; note that its
 files are linked individually rather than the directory being linked,
 because OpenSpec's schema discovery doesn't follow a symlinked directory.
 
+One thing the script can't do for you: the linked templates are fragments
+with no H1, and while `rumdl check` in the consumer repo resolves the symlink
+and honours the kit's own ignore for them, rumdl's language server reads only
+the workspace-root config - so an editor will flag `MD041` on them until the
+repo ignores it too. Add to the repo's rumdl config (StudyNav's
+`pyproject.toml` has the worked example):
+
+```toml
+[tool.rumdl.per-file-ignores]
+"**/schemas/*/templates/*.md" = ["MD041", "MD032"]
+```
+
+The leading `**/` matters - the language server passes an absolute path,
+already resolved to the kit.
+
 The kit owns keeping the vendored skills current: `just openspec-refresh`
 bumps the pinned `openspec` version, regenerates `repo-skills/` from it, and
 re-applies `repo-skills-overlay/*.md` on top - the rsync is `--delete`, so
