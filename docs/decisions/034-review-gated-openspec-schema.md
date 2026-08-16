@@ -13,9 +13,13 @@ Three levels of review, by scope:
   tick a box it could not verify. No human involved.
 - **L2, per stage.** Every stage's last task is a `REVIEW GATE`: a hard
   stop. The agent never ticks it and never starts the next stage. It writes
-  a review note into `tasks.md` under the gate - what changed since the last
-  gate, departures from the plan, how to verify, what to look at closely,
-  and what is deliberately not done yet - then waits.
+  a review note into `tasks.md` under the gate - the stage's own diff as a
+  PR file-view link and a `git diff` command, what changed since the last
+  gate,
+  departures from the plan, how to verify, what to look at closely, what is
+  deliberately not done yet, and a `Reviewed at` heading awaiting approval -
+  then waits. Approval fills that heading with the commit approved, which is
+  the base the next gate's diff runs from, and only then is the box ticked.
 - **L3, per change.** Every change ends with a final-review stage that
   checks the built code against the change's own proposal, design and delta
   specs in both directions, reconciles the artifacts with what was actually
@@ -57,6 +61,31 @@ bite-sized so a gate lands often, a stage must end green so the reviewer is
 never asked to judge a half-wired tree, and the note is written into
 `tasks.md` rather than only spoken, so it survives the session, and archives
 with the change as the record of what was reviewed and when.
+
+The stage's diff is written into the note because "what changed since the
+last gate" is only useful if the reviewer can get to it: assembling it means
+knowing where the last gate ended, which is what they came to the note to
+find out. The PR's file view leads because it alone holds state - files tick
+off as they are read, a file a later stage touches again un-ticks itself,
+comments survive the session the way the note does - with a `git diff`
+command beside it for the terminal. A compare link was carried as a third
+until the file view proved to subsume it; it now appears only where there is
+no PR. Both end at the literal `HEAD`, which the file view resolves to the
+PR's tip, so neither goes stale when a stage is sent back and fixes land.
+
+A change's first gate opens that PR as a draft rather than asking first: a PR
+before the first gate has nothing to show, so opening it is part of reaching
+the gate. The draft state is what makes it ungated - no review is requested
+and nothing merges, while CI reports on the stage independently of the
+agent's claim that it is green. The final stage marks it ready, the draft
+having meant "stages still to come".
+
+`Reviewed at` supplies the base. Recording it at approval rather than at
+writing is what makes it true: a stage sent back and fixed bookmarks the
+commit after the fixes, the tree actually approved. It is a commit, not a
+branch name, which moves and would change an earlier stage's diff long after
+it was reviewed - and because a range needs both ends inside the PR, a first
+gate, whose base predates it, links the plain file view instead.
 
 "What to look at closely" and "not done yet" are in the note for asymmetric
 reasons. The first is the line a confident-sounding summary omits, and it is
@@ -115,6 +144,11 @@ Alternatives rejected:
 - Changes take more round trips by construction. That is the point, but it
   makes stage sizing the main cost lever - an over-large change with
   ten stages will feel heavy, and the answer is a smaller change.
+- A recorded `Reviewed at` commit is only as stable as the branch's history.
+  Rewriting an approved commit - a rebase, an amend - strands the SHA in
+  abandoned history, where it still resolves and still produces a diff,
+  silently against the wrong base. Nothing detects this; a change in flight
+  is a branch to add commits to, not to rewrite.
 - Adopting repos must re-run `.fieldkit/scripts/enable-openspec.sh` to pick
   up the schema link and the `config.yaml` selection. Existing in-flight
   changes keep the schema named in their own `.openspec.yaml`; only new

@@ -42,3 +42,5 @@ Iterate until they are satisfied.
 - [ ] 3.5 FINAL REVIEW - present the change as a whole and iterate with the
       reviewer until they are satisfied. Stop here. Only the reviewer closes
       this box.
+- [ ] 3.6 Mark the PR ready for review and bring its description up to the
+      finished change. Done when it is no longer a draft.
