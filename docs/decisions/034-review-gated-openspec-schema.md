@@ -13,12 +13,12 @@ Three levels of review, by scope:
   tick a box it could not verify. No human involved.
 - **L2, per stage.** Every stage's last task is a `REVIEW GATE`: a hard
   stop. The agent never ticks it and never starts the next stage. It writes
-  a review note into `tasks.md` under the gate - what changed since the last
-  gate, departures from the plan, how to verify, what to look at closely,
-  what is deliberately not done yet, and an empty `Reviewed at` heading -
-  then waits. Approval fills that heading with the approved commit and the
-  two ways of reading the branch from it (a `git diff` command and the
-  remote's compare view), and only then is the box ticked.
+  a review note into `tasks.md` under the gate - the stage's own diff as a
+  `git diff` command and a compare link, what changed since the last gate,
+  departures from the plan, how to verify, what to look at closely, what is
+  deliberately not done yet, and a `Reviewed at` heading awaiting approval -
+  then waits. Approval fills that heading with the commit approved, which is
+  the base the next gate's diff runs from, and only then is the box ticked.
 - **L3, per change.** Every change ends with a final-review stage that
   checks the built code against the change's own proposal, design and delta
   specs in both directions, reconciles the artifacts with what was actually
@@ -61,16 +61,20 @@ never asked to judge a half-wired tree, and the note is written into
 `tasks.md` rather than only spoken, so it survives the session, and archives
 with the change as the record of what was reviewed and when.
 
-`Reviewed at` exists because "what changed since the last gate" needs a
-boundary that outlives the reviewer's memory of where they stopped. Without
-one, a reviewer returning to a change in flight re-derives it from the commit
-log, and re-reads whatever they misjudge. Recording it at approval rather
+The stage's diff is written into the note as a command and a link because
+"what changed since the last gate" is only useful if the reviewer can get to
+it. Assembling it themselves means knowing where the last gate ended, which
+is the thing they came to the note to find out. Both forms are given because
+the terminal and the browser are both places review happens, and both are
+left open at the far end so neither goes stale when a review sends the stage
+back and fixes land on top.
+
+`Reviewed at` exists to supply that base. Recording it at approval rather
 than when the note is written is what makes it true: a stage sent back and
 fixed bookmarks the commit after the fixes, which is the tree that was
-actually approved. Both readings are stored because the terminal and the
-browser are both places review happens, and the compare link names the branch
-rather than a second commit so it keeps showing everything since the bookmark
-as later stages land.
+actually approved. It is a commit rather than a branch name because the
+default branch moves, which would change an earlier stage's diff long after
+it was reviewed.
 
 "What to look at closely" and "not done yet" are in the note for asymmetric
 reasons. The first is the line a confident-sounding summary omits, and it is

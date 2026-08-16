@@ -78,17 +78,21 @@ Only the second and third involve a human.
   the change. It covers what changed since the previous gate, any departure
   from the plan, how to verify (exact commands, plus manual steps), what to
   look at closely, and what is deliberately not done yet.
-- **The gate's bookmark.** Every review note ends with a `Reviewed at`
-  heading, left empty while the stage is under review. Approving the gate
-  fills it with the commit that was approved and ticks the box, in that
-  order - so a stage sent back and fixed records the commit after the fixes,
-  not the one first presented. A reviewer returning to the change reads where
-  they left off out of `tasks.md` rather than reconstructing it. Under the
-  commit sit both ways of picking the branch up from it: `git diff
-  <commit>..HEAD` for a terminal, and the remote's compare view -
-  `<forge>/compare/<commit>...<branch>` - for a browser. The link names the
-  branch rather than a second commit, so it goes on showing everything since
-  the bookmark as later stages land. The bookmark holds only while the
+- **The stage's diff, written out.** Each note opens with both ways of
+  reading the stage under review: `git diff <base>..HEAD` for a terminal, and
+  the remote's `<forge>/compare/<base>...<branch>` view for a browser. Spelt
+  out in full, so the reviewer copies or clicks rather than assembling them.
+  The far end is left open - `HEAD`, the branch - so both stay right while
+  the review runs and fixes land.
+- **The gate's bookmark.** That base is the previous gate's commit, and it is
+  recorded because nothing else knows it. Every review note ends with a
+  `Reviewed at` heading, marked awaiting approval while the stage is under
+  review; approving the gate fills it with the commit approved and ticks the
+  box, in that order - so a stage sent back and fixed records the commit
+  after the fixes, not the one first presented. A change's first gate has no
+  predecessor, so its base is `git merge-base <default-branch> HEAD`, the
+  whole branch so far - the commit, not the branch name, which moves and
+  would shift the diff underneath the note. The bookmark holds only while the
   branch's history does: rewriting an approved commit strands the SHA in
   abandoned history, where it still resolves and still diffs, silently
   against the wrong base.

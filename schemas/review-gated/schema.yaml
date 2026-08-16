@@ -267,50 +267,56 @@ apply:
     The note is the reviewer's whole picture of this stage. Cover, in this
     order, and keep it tight - complete, not long:
 
-    1. **What changed** - per file or behaviour, since the previous gate.
+    1. **Review this stage** - how to see the diff being reviewed, both ways:
+       a `git diff` command for a terminal, and the remote's compare view for
+       a browser. Written out in full, not described - the reviewer copies or
+       clicks, never assembles. Both run from the same base:
+
+           **Review this stage**
+
+           Everything since stage 2 was approved at `a80f8c30`:
+
+               git diff a80f8c30..HEAD
+
+               https://github.com/<owner>/<repo>/compare/a80f8c30...<branch>
+
+       The base is the previous gate's `Reviewed at` commit. For a change's
+       first gate it is `git merge-base <default-branch> HEAD` - the commit
+       the branch left the default branch at - which is the whole branch so
+       far; use that commit, not the branch name, since the default branch
+       moves and would change the diff underneath the note. The far end is
+       open - `HEAD` in the command, the branch in the link - so both stay
+       right while the review runs and fixes land. Take owner and repo from
+       `git remote get-url origin`, and if the remote is not a forge that
+       serves a compare view, leave the link out and keep the command.
+    2. **What changed** - per file or behaviour, since the previous gate.
        Enough that they know where to look without reading the diff first.
-       The previous gate's `Reviewed at` commit is the base: read the stage
-       with `git diff <that commit>..HEAD`. For the first gate of a change,
-       it is the commit the branch left the default branch at.
-    2. **Departures from the plan** - anything built differently than
+    3. **Departures from the plan** - anything built differently than
        design.md or tasks.md said, and why. Say "none" if none.
-    3. **How to verify** - the exact commands to run and what a good result
+    4. **How to verify** - the exact commands to run and what a good result
        looks like, plus any manual step (what to click, what to expect).
-    4. **Look closely at** - the judgement calls and the risky part. Point
+    5. **Look closely at** - the judgement calls and the risky part. Point
        them at what you are least sure of. This is the most valuable line in
        the note; never leave it out to look confident.
-    5. **Not done yet** - known gaps that later stages cover, so the
+    6. **Not done yet** - known gaps that later stages cover, so the
        reviewer does not report them as defects.
-    6. **Reviewed at** - the heading, with a placeholder comment under it and
-       nothing else. It is the reviewer's bookmark into the branch, and it is
-       filled in at approval, not now.
+    7. **Reviewed at** - the heading, and under it `_Awaiting approval._` and
+       what ticking it will record. Visible text, not an HTML comment: it
+       stands there for the length of the review, and a comment renders as
+       dead space under a heading, which reads as something having failed.
+       It is filled in at approval, not now.
 
     Then stop and wait. If the reviewer sends the stage back, fix it and
     rewrite the note; do not open a new stage to carry the fix.
 
     When the reviewer approves, and only then, close the gate in one step:
-    fill in **Reviewed at**, replacing the placeholder comment, then tick the
-    box. It holds the approved commit and both ways of reading the branch
-    from it - the command for a terminal, the link for a browser:
-
-        **Reviewed at**
-
-        `a80f8c30`, which the next stage is read from:
-
-            git diff a80f8c30..HEAD
-
-        https://github.com/<owner>/<repo>/compare/a80f8c30...<branch>
-
-    The commit is `git rev-parse --short HEAD` at approval - the tree they
-    approved, after any fixes the review asked for, not the commit the note
-    was first written against. Never write a SHA into a gate the reviewer has
-    not approved: a bookmark that is not where they stopped reading is worse
-    than none.
-
-    Point the compare link at the *branch*, never at a second SHA, so it goes
-    on showing everything since the bookmark as later stages land. Take owner
-    and repo from `git remote get-url origin`, and if the remote is not a
-    forge that serves a compare view, leave the link out and keep the rest.
+    replace `_Awaiting approval._` under **Reviewed at** with
+    `git rev-parse --short HEAD`, then tick the box. That commit is the tree
+    they approved - after any fixes the review asked for, not the commit the
+    note was first written against - and it is the base the next gate's
+    `Review this stage` runs from, which is the whole reason it is recorded.
+    Never write a SHA into a gate the reviewer has not approved: a bookmark
+    that is not where they stopped reading is worse than none.
 
     ## L3 - the final stage
 
