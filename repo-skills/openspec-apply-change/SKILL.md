@@ -174,23 +174,34 @@ At a review gate:
 - Do NOT start the next stage, however small its first task looks.
 - Confirm the stage is green first (run the repo's test command). A gate
   reached on a red tree is not reached.
+- At a change's first gate, open a draft PR for the branch if none is open.
+  It is the surface the note points at, and a draft asks nothing of anyone.
 - Write the review note into `tasks.md`, indented under the gate's checkbox,
   before reporting. Then show the same note in your reply.
 - Stop and wait.
 
-The note covers, in order: **what changed** since the previous gate, per file
-or behaviour; **departures from the plan** and why ("none" if none); **how to
-verify**, as exact commands plus any manual step; **look closely at**, naming
-the judgement calls and what you are least sure of; and **not done yet**, the
-known gaps later stages cover. Complete, not long.
+The note covers, in order: **review this stage**, the PR's file view
+(`/pull/<n>/files/<base>..HEAD`) and `git diff <base>..HEAD`, both written
+out, where `<base>` is the previous gate's recorded commit; **what changed**
+since the previous gate, per file or behaviour; **departures from the plan**
+and why ("none" if none); **how to verify**, as exact commands plus any
+manual step; **look closely at**, naming the judgement calls and what you are
+least sure of; **not done yet**, the known gaps later stages cover; and
+**reviewed at**, left marked awaiting approval. Complete, not long.
 
 If the reviewer sends the stage back, fix it within that stage and rewrite
-the note. Do not open the next stage to carry the fix.
+the note. Do not open the next stage to carry the fix. The links do not need
+rewriting - both ends stay valid as fixes land.
+
+When the reviewer approves, record `git rev-parse --short HEAD` under
+**Reviewed at** and only then tick the box. That commit is the base the next
+gate's links run from.
 
 The final stage is the whole-change review. Its closing task stops the same
 way, except that it iterates: present the change, take feedback, revise,
 present again, until the reviewer says they are satisfied. Only then is the
-change complete, and only then may it be archived.
+change complete, and only then may it be archived. Once they are satisfied,
+take the PR out of draft and bring its description up to the finished change.
 
 `openspec instructions apply --change "<name>" --json` returns the schema's
 own statement of these rules in its instruction field. Follow it; this
