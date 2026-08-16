@@ -289,11 +289,28 @@ apply:
     rewrite the note; do not open a new stage to carry the fix.
 
     When the reviewer approves, and only then, close the gate in one step:
-    write `git rev-parse --short HEAD` under **Reviewed at**, replacing the
-    placeholder, then tick the box. HEAD means the tree they approved - after
-    any fixes the review asked for, not the commit the note was first written
-    against. Never write a SHA into a gate the reviewer has not approved: a
-    bookmark that is not where they stopped reading is worse than none.
+    fill in **Reviewed at**, replacing the placeholder comment, then tick the
+    box. It holds the approved commit and both ways of reading the branch
+    from it - the command for a terminal, the link for a browser:
+
+        **Reviewed at**
+
+        `a80f8c30`, which the next stage is read from:
+
+            git diff a80f8c30..HEAD
+
+        https://github.com/<owner>/<repo>/compare/a80f8c30...<branch>
+
+    The commit is `git rev-parse --short HEAD` at approval - the tree they
+    approved, after any fixes the review asked for, not the commit the note
+    was first written against. Never write a SHA into a gate the reviewer has
+    not approved: a bookmark that is not where they stopped reading is worse
+    than none.
+
+    Point the compare link at the *branch*, never at a second SHA, so it goes
+    on showing everything since the bookmark as later stages land. Take owner
+    and repo from `git remote get-url origin`, and if the remote is not a
+    forge that serves a compare view, leave the link out and keep the rest.
 
     ## L3 - the final stage
 

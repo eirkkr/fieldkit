@@ -82,12 +82,16 @@ Only the second and third involve a human.
   heading, left empty while the stage is under review. Approving the gate
   fills it with the commit that was approved and ticks the box, in that
   order - so a stage sent back and fixed records the commit after the fixes,
-  not the one first presented. The next gate's note then covers exactly
-  `git diff <that commit>..HEAD`, and a reviewer returning to the change
-  reads where they left off out of `tasks.md` rather than reconstructing it.
-  The bookmark holds only while the branch's history does: rewriting an
-  approved commit strands the SHA in abandoned history, where it still
-  resolves and still diffs, silently against the wrong base.
+  not the one first presented. A reviewer returning to the change reads where
+  they left off out of `tasks.md` rather than reconstructing it. Under the
+  commit sit both ways of picking the branch up from it: `git diff
+  <commit>..HEAD` for a terminal, and the remote's compare view -
+  `<forge>/compare/<commit>...<branch>` - for a browser. The link names the
+  branch rather than a second commit, so it goes on showing everything since
+  the bookmark as later stages land. The bookmark holds only while the
+  branch's history does: rewriting an approved commit strands the SHA in
+  abandoned history, where it still resolves and still diffs, silently
+  against the wrong base.
 - **Per change.** The last stage of every change is the final review: the
   built code against the change's own proposal, design and delta specs, in
   both directions - unmet requirements, and things built that nothing asked
