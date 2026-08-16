@@ -15,7 +15,10 @@ Three levels of review, by scope:
   stop. The agent never ticks it and never starts the next stage. It writes
   a review note into `tasks.md` under the gate - what changed since the last
   gate, departures from the plan, how to verify, what to look at closely,
-  and what is deliberately not done yet - then waits.
+  what is deliberately not done yet, and an empty `Reviewed at` heading -
+  then waits. Approval fills that heading with the approved commit and the
+  two ways of reading the branch from it (a `git diff` command and the
+  remote's compare view), and only then is the box ticked.
 - **L3, per change.** Every change ends with a final-review stage that
   checks the built code against the change's own proposal, design and delta
   specs in both directions, reconciles the artifacts with what was actually
@@ -57,6 +60,17 @@ bite-sized so a gate lands often, a stage must end green so the reviewer is
 never asked to judge a half-wired tree, and the note is written into
 `tasks.md` rather than only spoken, so it survives the session, and archives
 with the change as the record of what was reviewed and when.
+
+`Reviewed at` exists because "what changed since the last gate" needs a
+boundary that outlives the reviewer's memory of where they stopped. Without
+one, a reviewer returning to a change in flight re-derives it from the commit
+log, and re-reads whatever they misjudge. Recording it at approval rather
+than when the note is written is what makes it true: a stage sent back and
+fixed bookmarks the commit after the fixes, which is the tree that was
+actually approved. Both readings are stored because the terminal and the
+browser are both places review happens, and the compare link names the branch
+rather than a second commit so it keeps showing everything since the bookmark
+as later stages land.
 
 "What to look at closely" and "not done yet" are in the note for asymmetric
 reasons. The first is the line a confident-sounding summary omits, and it is
@@ -115,6 +129,11 @@ Alternatives rejected:
 - Changes take more round trips by construction. That is the point, but it
   makes stage sizing the main cost lever - an over-large change with
   ten stages will feel heavy, and the answer is a smaller change.
+- A recorded `Reviewed at` commit is only as stable as the branch's history.
+  Rewriting an approved commit - a rebase, an amend - strands the SHA in
+  abandoned history, where it still resolves and still produces a diff,
+  silently against the wrong base. Nothing detects this; a change in flight
+  is a branch to add commits to, not to rewrite.
 - Adopting repos must re-run `.fieldkit/scripts/enable-openspec.sh` to pick
   up the schema link and the `config.yaml` selection. Existing in-flight
   changes keep the schema named in their own `.openspec.yaml`; only new
