@@ -63,35 +63,29 @@ never asked to judge a half-wired tree, and the note is written into
 with the change as the record of what was reviewed and when.
 
 The stage's diff is written into the note because "what changed since the
-last gate" is only useful if the reviewer can get to it. Assembling it
-themselves means knowing where the last gate ended, which is the thing they
-came to the note to find out. The PR's file view leads because it is the only
-one that holds state: files tick off as they are read, a file a later stage
-touches again un-ticks itself, and comments survive the session the way the
-note itself does. A `git diff` command sits beside it for the terminal. Both
-end at the literal `HEAD` - which the file view resolves to the PR's tip - so
-neither goes stale when a review sends the stage back and fixes land on top,
-and neither is ever rewritten. A compare link was carried for a while as a
-third; the file view does everything it did and remembers what has been read,
-so it now appears only where there is no PR to link.
+last gate" is only useful if the reviewer can get to it: assembling it means
+knowing where the last gate ended, which is what they came to the note to
+find out. The PR's file view leads because it alone holds state - files tick
+off as they are read, a file a later stage touches again un-ticks itself,
+comments survive the session the way the note does - with a `git diff`
+command beside it for the terminal. A compare link was carried as a third
+until the file view proved to subsume it; it now appears only where there is
+no PR. Both end at the literal `HEAD`, which the file view resolves to the
+PR's tip, so neither goes stale when a stage is sent back and fixes land.
 
-A change's first gate opens that PR as a draft, rather than asking first. A
-PR before the first gate has nothing to show, and the gate is where its
-absence is first felt, so opening it is part of reaching the gate. The draft
-state is what makes this ungated: it requests no one's review and merges
-nothing, while CI reports on the stage independently of the agent's claim
-that it is green. It is marked ready in the final stage, once the whole-change
-review closes - the draft meant "stages still to come", and leaving it set
-would contradict what that review just decided. A range URL needs both ends
-inside the PR, so a first gate, whose base predates it, links the plain file
-view - at that gate, the same set of changes.
+A change's first gate opens that PR as a draft rather than asking first: a PR
+before the first gate has nothing to show, so opening it is part of reaching
+the gate. The draft state is what makes it ungated - no review is requested
+and nothing merges, while CI reports on the stage independently of the
+agent's claim that it is green. The final stage marks it ready, the draft
+having meant "stages still to come".
 
-`Reviewed at` exists to supply that base. Recording it at approval rather
-than when the note is written is what makes it true: a stage sent back and
-fixed bookmarks the commit after the fixes, which is the tree that was
-actually approved. It is a commit rather than a branch name because the
-default branch moves, which would change an earlier stage's diff long after
-it was reviewed.
+`Reviewed at` supplies the base. Recording it at approval rather than at
+writing is what makes it true: a stage sent back and fixed bookmarks the
+commit after the fixes, the tree actually approved. It is a commit, not a
+branch name, which moves and would change an earlier stage's diff long after
+it was reviewed - and because a range needs both ends inside the PR, a first
+gate, whose base predates it, links the plain file view instead.
 
 "What to look at closely" and "not done yet" are in the note for asymmetric
 reasons. The first is the line a confident-sounding summary omits, and it is

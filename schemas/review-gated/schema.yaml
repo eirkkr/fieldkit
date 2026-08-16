@@ -269,10 +269,8 @@ apply:
     The note is the reviewer's whole picture of this stage. Cover, in this
     order, and keep it tight - complete, not long:
 
-    1. **Review this stage** - how to see the diff being reviewed, two ways:
-       the PR's file view for a browser, and a `git diff` command for a
-       terminal. Written out in full, not described - the reviewer copies or
-       clicks, never assembles. Both run from the same base:
+    1. **Review this stage** - the diff itself, written out both ways so the
+       reviewer clicks or copies rather than assembles:
 
            **Review this stage**
 
@@ -282,36 +280,26 @@ apply:
 
                git diff a80f8c30..HEAD
 
-       The PR link leads, because it is the only view that holds state: files
-       tick off as they are read, a file touched again by a later stage
-       un-ticks itself, and comments outlive the session. Both ends matter.
-       The base is the previous gate's `Reviewed at` commit. The far end is
-       the literal word `HEAD`, which the file view resolves to the PR's tip
-       - so the link goes on showing the whole stage as fixes land during the
-       review, and never needs rewriting. Do not pin it to a commit.
+       The PR view leads: it alone holds state - files tick off as they are
+       read, a file a later stage touches again un-ticks itself, comments
+       outlive the session.
 
-       A range needs both ends *inside* the PR, and a first gate's base is
-       the branch point, which predates it - that URL 404s. So a first gate
-       links plain `/pull/<n>/files`, the same set of changes at that point,
-       and every later gate uses the range.
+       The base is the previous gate's `Reviewed at` commit, or for a first
+       gate `git merge-base <default-branch> HEAD`. Always that commit, never
+       the branch name, which moves and would shift an already-reviewed diff.
+       The far end is the literal `HEAD`, which the file view resolves to the
+       PR's tip; pinning it to a commit stops the link following the fixes a
+       review asks for.
 
-       The base for a first gate is `git merge-base <default-branch> HEAD`.
-       Use that commit rather than the branch name, in the command as well:
-       the default branch moves, and would change an already-reviewed stage's
-       diff underneath the note.
-
-       Where there is no PR - the reviewer declined one, or the remote is not
-       a forge that serves them - put the compare view in its place, and say
-       which is missing:
+       A range needs both ends inside the PR, so a first gate - whose base
+       predates it - links plain `/pull/<n>/files`: the same changes, at that
+       point. With no PR, put the compare view in its place and say what is
+       missing, rather than dropping the line:
 
            No PR is open, so this is the compare view, without the
            file-by-file checkboxes:
 
                https://github.com/<owner>/<repo>/compare/a80f8c30...<branch>
-
-       A missing line reads as an oversight; a stated absence is a choice
-       the reviewer can act on. With no forge at all, the command stands
-       alone.
     2. **What changed** - per file or behaviour, since the previous gate.
        Enough that they know where to look without reading the diff first.
     3. **Departures from the plan** - anything built differently than
@@ -323,22 +311,18 @@ apply:
        the note; never leave it out to look confident.
     6. **Not done yet** - known gaps that later stages cover, so the
        reviewer does not report them as defects.
-    7. **Reviewed at** - the heading, and under it `_Awaiting approval._` and
+    7. **Reviewed at** - the heading, with `_Awaiting approval._` under it and
        what ticking it will record. Visible text, not an HTML comment: it
-       stands there for the length of the review, and a comment renders as
-       dead space under a heading, which reads as something having failed.
-       It is filled in at approval, not now.
+       stands for the length of the review, and a comment renders as dead
+       space that reads as something having failed.
 
-    At a change's first gate, if no PR is open on the branch, open one as a
-    draft before writing the note. It is the surface the note points at, so
-    opening it is part of reaching the gate rather than something to raise
-    first - and unlike opening a PR for review, it asks nothing of anyone. A
-    draft requests no review and merges nothing, while buying the file view
-    with its checkboxes, a place for comments that outlive the session, and
-    CI's own verdict on the stage beside the agent's claim that it is green.
-    It stays a draft for the length of the change and is marked ready only in
-    the final stage. A reviewer who would rather not have one says so, and it
-    is not raised again; the note then carries the compare view instead.
+    At a change's first gate, open a draft PR for the branch if none is open.
+    It is the surface the note points at, so opening it is part of reaching
+    the gate - and a draft asks nothing of anyone: no review requested,
+    nothing merged, while CI reports on the stage beside the agent's own
+    claim that it is green. It stays a draft until the final stage marks it
+    ready. A reviewer who would rather not have one says so, and it is not
+    raised again.
 
     Then stop and wait. If the reviewer sends the stage back, fix it and
     rewrite the note; do not open a new stage to carry the fix.

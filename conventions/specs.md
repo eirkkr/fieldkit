@@ -78,46 +78,36 @@ Only the second and third involve a human.
   the change. It covers what changed since the previous gate, any departure
   from the plan, how to verify (exact commands, plus manual steps), what to
   look at closely, and what is deliberately not done yet.
-- **The stage's diff, written out.** Each note opens with two ways of reading
-  the stage under review: the PR's `/pull/<n>/files/<base>..HEAD` view, and
-  `git diff <base>..HEAD` for a terminal. Spelt out in full, so the reviewer
-  copies or clicks rather than assembling them. The PR link leads because it
-  is the only view that holds state - files tick off as they are read, a file
-  a later stage touches again un-ticks itself, and comments outlive the
-  session.
-- **A change gets a draft PR at its first gate**, opened as part of reaching
-  that gate. A draft asks nothing of anyone: no review is requested and
-  nothing merges, while CI reports on the stage independently of the agent's
-  word that it is green. It stays a draft until the final stage marks it
-  ready. Where a reviewer would rather not have one, or the remote is no
-  forge, the note carries the compare view in its place and says which is
-  missing.
-- **Both links stay open at the far end.** The literal `HEAD` is what the PR
-  file view resolves to the PR's tip, so a link written at the gate goes on
-  showing the whole stage as fixes land during the review, and is never
-  rewritten. A range needs both ends inside the PR, so a first gate - whose
-  base is the branch point, predating the PR - links the plain file view
-  instead, which at that gate is the same set of changes.
-- **The gate's bookmark.** That base is the previous gate's commit, and it is
-  recorded because nothing else knows it. Every review note ends with a
-  `Reviewed at` heading, marked awaiting approval while the stage is under
-  review; approving the gate fills it with the commit approved and ticks the
-  box, in that order - so a stage sent back and fixed records the commit
-  after the fixes, not the one first presented. A change's first gate has no
-  predecessor, so its base is `git merge-base <default-branch> HEAD`, the
-  whole branch so far - the commit, not the branch name, which moves and
-  would shift the diff underneath the note. The bookmark holds only while the
-  branch's history does: rewriting an approved commit strands the SHA in
-  abandoned history, where it still resolves and still diffs, silently
-  against the wrong base.
+- **The stage's diff, written out.** Each note opens with both ways of
+  reading the stage: the PR's `/pull/<n>/files/<base>..HEAD` view and
+  `git diff <base>..HEAD`, spelt out so the reviewer clicks or copies rather
+  than assembling them. The PR view leads because it alone holds state -
+  files tick off as they are read, a file a later stage touches again
+  un-ticks itself, comments outlive the session. A change opens a draft PR at
+  its first gate to have it: a draft asks nothing of anyone, CI reports on
+  each stage independently of the agent's word, and the final stage marks it
+  ready. Without one, the note carries the compare view and says what is
+  missing. Both links end at the literal `HEAD`, which resolves to the PR's
+  tip, so neither goes stale as fixes land mid-review.
+- **The gate's bookmark.** The base is the previous gate's approved commit,
+  recorded because nothing else knows it: every note ends with a `Reviewed
+  at` heading, marked awaiting approval until the gate closes, then filled
+  with the commit approved before the box is ticked - so a stage sent back
+  and fixed records the tree after the fixes, not the one first presented. A
+  first gate has no predecessor, so it uses `git merge-base <default-branch>
+  HEAD` and links the plain file view, a range needing both ends inside the
+  PR. Always the commit, never the branch name, which moves. The bookmark
+  holds only while the branch's history does: rewriting an approved commit
+  strands the SHA in abandoned history, where it still resolves and still
+  diffs, silently against the wrong base.
 - **Per change.** The last stage of every change is the final review: the
   built code against the change's own proposal, design and delta specs, in
   both directions - unmet requirements, and things built that nothing asked
   for. The artifacts are corrected to describe what was actually built
-  (durable decisions become ADRs), the PR comes out of draft with its
-  description brought up to the finished change, the diff is hand-walked for
-  the
-  conventions CI cannot see, and then it iterates with the human until they
+  (durable decisions become ADRs), the diff is hand-walked for the
+  conventions CI cannot see, the PR comes out of draft with its description
+  brought up to the finished change, and then it iterates with the human
+  until they
   are satisfied. A change is not complete, and is not archived, before that.
 
 A gate sent back is fixed inside its own stage, not carried into the next
