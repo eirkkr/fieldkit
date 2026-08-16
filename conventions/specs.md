@@ -78,21 +78,26 @@ Only the second and third involve a human.
   the change. It covers what changed since the previous gate, any departure
   from the plan, how to verify (exact commands, plus manual steps), what to
   look at closely, and what is deliberately not done yet.
-- **The stage's diff, written out.** Each note opens with three ways of
-  reading the stage under review: `git diff <base>..HEAD` for a terminal, the
-  remote's `<forge>/compare/<base>...<branch>` view for a browser, and the
-  PR's `/pull/<n>/files/<base>..<tip>` view, the only one with per-file
-  viewed checkboxes and inline comments. Spelt out in full, so the reviewer
-  copies or clicks rather than assembling them. With no PR open, the note
-  says so on that line rather than dropping it. A first gate is offered a
-  draft PR before the reading starts, and asked only that once.
-- **What is pinned and what is not.** The command and the compare link are
-  left open at the far end - `HEAD`, the branch - so they stay right while
-  the review runs and fixes land. The PR range link cannot be: both ends must
-  be commits within the PR, so it names the tip at the time of writing, and
-  is rewritten with the note if the stage is sent back. A first gate has no
-  in-PR base to name, its branch point being the commit before the PR starts,
-  so it links the PR's plain file view - the same changes, at that gate.
+- **The stage's diff, written out.** Each note opens with two ways of reading
+  the stage under review: the PR's `/pull/<n>/files/<base>..HEAD` view, and
+  `git diff <base>..HEAD` for a terminal. Spelt out in full, so the reviewer
+  copies or clicks rather than assembling them. The PR link leads because it
+  is the only view that holds state - files tick off as they are read, a file
+  a later stage touches again un-ticks itself, and comments outlive the
+  session.
+- **A change gets a draft PR at its first gate**, opened as part of reaching
+  that gate. A draft asks nothing of anyone: no review is requested and
+  nothing merges, while CI reports on the stage independently of the agent's
+  word that it is green. It stays a draft until the final stage marks it
+  ready. Where a reviewer would rather not have one, or the remote is no
+  forge, the note carries the compare view in its place and says which is
+  missing.
+- **Both links stay open at the far end.** The literal `HEAD` is what the PR
+  file view resolves to the PR's tip, so a link written at the gate goes on
+  showing the whole stage as fixes land during the review, and is never
+  rewritten. A range needs both ends inside the PR, so a first gate - whose
+  base is the branch point, predating the PR - links the plain file view
+  instead, which at that gate is the same set of changes.
 - **The gate's bookmark.** That base is the previous gate's commit, and it is
   recorded because nothing else knows it. Every review note ends with a
   `Reviewed at` heading, marked awaiting approval while the stage is under
@@ -109,7 +114,9 @@ Only the second and third involve a human.
   built code against the change's own proposal, design and delta specs, in
   both directions - unmet requirements, and things built that nothing asked
   for. The artifacts are corrected to describe what was actually built
-  (durable decisions become ADRs), the diff is hand-walked for the
+  (durable decisions become ADRs), the PR comes out of draft with its
+  description brought up to the finished change, the diff is hand-walked for
+  the
   conventions CI cannot see, and then it iterates with the human until they
   are satisfied. A change is not complete, and is not archived, before that.
 

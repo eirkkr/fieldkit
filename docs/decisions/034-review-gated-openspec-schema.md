@@ -14,8 +14,8 @@ Three levels of review, by scope:
 - **L2, per stage.** Every stage's last task is a `REVIEW GATE`: a hard
   stop. The agent never ticks it and never starts the next stage. It writes
   a review note into `tasks.md` under the gate - the stage's own diff as a
-  `git diff` command, a compare link and a PR file-view link, what changed
-  since the last gate,
+  PR file-view link and a `git diff` command, what changed since the last
+  gate,
   departures from the plan, how to verify, what to look at closely, what is
   deliberately not done yet, and a `Reviewed at` heading awaiting approval -
   then waits. Approval fills that heading with the commit approved, which is
@@ -62,25 +62,29 @@ never asked to judge a half-wired tree, and the note is written into
 `tasks.md` rather than only spoken, so it survives the session, and archives
 with the change as the record of what was reviewed and when.
 
-The stage's diff is written into the note as a command and a link because
-"what changed since the last gate" is only useful if the reviewer can get to
-it. Assembling it themselves means knowing where the last gate ended, which
-is the thing they came to the note to find out. Both forms are given because
-the terminal and the browser are both places review happens, and both are
-left open at the far end so neither goes stale when a review sends the stage
-back and fixes land on top. The PR file view is given as a third because it
-is the only one that holds state: files tick off as they are read, and
-comments survive the session the way the note itself does. It is the one link
-that cannot be left open-ended - a PR range needs both ends inside the PR -
-so it is pinned and rewritten with the note, and a first gate, whose base
-predates the PR, links the plain file view instead.
+The stage's diff is written into the note because "what changed since the
+last gate" is only useful if the reviewer can get to it. Assembling it
+themselves means knowing where the last gate ended, which is the thing they
+came to the note to find out. The PR's file view leads because it is the only
+one that holds state: files tick off as they are read, a file a later stage
+touches again un-ticks itself, and comments survive the session the way the
+note itself does. A `git diff` command sits beside it for the terminal. Both
+end at the literal `HEAD` - which the file view resolves to the PR's tip - so
+neither goes stale when a review sends the stage back and fixes land on top,
+and neither is ever rewritten. A compare link was carried for a while as a
+third; the file view does everything it did and remembers what has been read,
+so it now appears only where there is no PR to link.
 
-A first gate offers to open that PR as a draft, and asks only once. The offer
-sits there rather than in the change's setup because a PR before the first
-gate has nothing to show, and because the gate is where its absence is first
-felt. A draft is the form that fits: it requests no one's review and merges
+A change's first gate opens that PR as a draft, rather than asking first. A
+PR before the first gate has nothing to show, and the gate is where its
+absence is first felt, so opening it is part of reaching the gate. The draft
+state is what makes this ungated: it requests no one's review and merges
 nothing, while CI reports on the stage independently of the agent's claim
-that it is green.
+that it is green. It is marked ready in the final stage, once the whole-change
+review closes - the draft meant "stages still to come", and leaving it set
+would contradict what that review just decided. A range URL needs both ends
+inside the PR, so a first gate, whose base predates it, links the plain file
+view - at that gate, the same set of changes.
 
 `Reviewed at` exists to supply that base. Recording it at approval rather
 than when the note is written is what makes it true: a stage sent back and

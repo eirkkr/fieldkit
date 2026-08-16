@@ -219,11 +219,13 @@ artifacts:
       - [ ] 7.5 FINAL REVIEW - present the change as a whole and iterate with
             the reviewer until they are satisfied. Stop here. Only the
             reviewer closes this box.
+      - [ ] 7.6 Mark the PR ready for review and bring its description up to
+            the finished change. Done when it is no longer a draft.
       ```
 
-      Adapt the wording, but keep all five beats: verify against spec, find
+      Adapt the wording, but keep all six beats: verify against spec, find
       the gaps in both directions, reconcile the artifacts, hand-audit the
-      diff, then iterate with the human.
+      diff, iterate with the human, then take the PR out of draft.
 
       Reference specs for what to build and design for how. Every task must
       be verifiable - you know when it is done, and so does the reviewer.
@@ -267,47 +269,49 @@ apply:
     The note is the reviewer's whole picture of this stage. Cover, in this
     order, and keep it tight - complete, not long:
 
-    1. **Review this stage** - how to see the diff being reviewed, three
-       ways: a `git diff` command for a terminal, the remote's compare view
-       for a browser, and the PR's file view, which is the only one of the
-       three with per-file "viewed" checkboxes and inline comment threads.
-       Written out in full, not described - the reviewer copies or clicks,
-       never assembles. All three run from the same base:
+    1. **Review this stage** - how to see the diff being reviewed, two ways:
+       the PR's file view for a browser, and a `git diff` command for a
+       terminal. Written out in full, not described - the reviewer copies or
+       clicks, never assembles. Both run from the same base:
 
            **Review this stage**
 
            Everything since stage 2 was approved at `a80f8c30`:
 
+               https://github.com/<owner>/<repo>/pull/<n>/files/a80f8c30..HEAD
+
                git diff a80f8c30..HEAD
+
+       The PR link leads, because it is the only view that holds state: files
+       tick off as they are read, a file touched again by a later stage
+       un-ticks itself, and comments outlive the session. Both ends matter.
+       The base is the previous gate's `Reviewed at` commit. The far end is
+       the literal word `HEAD`, which the file view resolves to the PR's tip
+       - so the link goes on showing the whole stage as fixes land during the
+       review, and never needs rewriting. Do not pin it to a commit.
+
+       A range needs both ends *inside* the PR, and a first gate's base is
+       the branch point, which predates it - that URL 404s. So a first gate
+       links plain `/pull/<n>/files`, the same set of changes at that point,
+       and every later gate uses the range.
+
+       The base for a first gate is `git merge-base <default-branch> HEAD`.
+       Use that commit rather than the branch name, in the command as well:
+       the default branch moves, and would change an already-reviewed stage's
+       diff underneath the note.
+
+       Where there is no PR - the reviewer declined one, or the remote is not
+       a forge that serves them - put the compare view in its place, and say
+       which is missing:
+
+           No PR is open, so this is the compare view, without the
+           file-by-file checkboxes:
 
                https://github.com/<owner>/<repo>/compare/a80f8c30...<branch>
 
-               https://github.com/<owner>/<repo>/pull/<n>/files/a80f8c30..<tip>
-
-       The base is the previous gate's `Reviewed at` commit. For a change's
-       first gate it is `git merge-base <default-branch> HEAD` - the commit
-       the branch left the default branch at - which is the whole branch so
-       far; use that commit, not the branch name, since the default branch
-       moves and would change the diff underneath the note. Take owner and
-       repo from `git remote get-url origin`, and if the remote is not a
-       forge that serves these views, keep the command and drop the links.
-
-       The first two are left open at the far end - `HEAD` in the command,
-       the branch in the link - so they stay right while the review runs and
-       fixes land on top. The PR range link cannot be: both of its ends must
-       be commits *within* the PR, so `<tip>` is `git rev-parse HEAD` when
-       the note is written, and the link is rewritten along with the note if
-       the stage is sent back. A first gate has no in-PR base to name - the
-       branch point is the commit before the PR starts, and the range 404s -
-       so it links plain `/pull/<n>/files`, which for a first gate is the
-       same set of changes anyway.
-
-       When no PR is open, say so on its own line rather than dropping it:
-
-           No PR is open on this branch, so there is no file-by-file view.
-
        A missing line reads as an oversight; a stated absence is a choice
-       the reviewer can act on.
+       the reviewer can act on. With no forge at all, the command stands
+       alone.
     2. **What changed** - per file or behaviour, since the previous gate.
        Enough that they know where to look without reading the diff first.
     3. **Departures from the plan** - anything built differently than
@@ -325,13 +329,16 @@ apply:
        dead space under a heading, which reads as something having failed.
        It is filled in at approval, not now.
 
-    At a change's first gate, if no PR is open on the branch, ask whether to
-    open one as a draft before the reviewer starts reading. A draft requests
-    nobody's review and merges nothing, but it buys the file view with its
-    checkboxes, a place for comments that outlive the session, and CI's own
-    verdict on the stage beside the claim that it is green. Ask once. If the
-    answer is no, the note says no PR is open and later gates do not ask
-    again - the reviewer can call for one whenever they want it.
+    At a change's first gate, if no PR is open on the branch, open one as a
+    draft before writing the note. It is the surface the note points at, so
+    opening it is part of reaching the gate rather than something to raise
+    first - and unlike opening a PR for review, it asks nothing of anyone. A
+    draft requests no review and merges nothing, while buying the file view
+    with its checkboxes, a place for comments that outlive the session, and
+    CI's own verdict on the stage beside the agent's claim that it is green.
+    It stays a draft for the length of the change and is marked ready only in
+    the final stage. A reviewer who would rather not have one says so, and it
+    is not raised again; the note then carries the compare view instead.
 
     Then stop and wait. If the reviewer sends the stage back, fix it and
     rewrite the note; do not open a new stage to carry the fix.
@@ -352,6 +359,12 @@ apply:
     feedback, revise, and present again. Iterate until they say they are
     satisfied. Do not archive, and do not treat the change as complete,
     until they do.
+
+    Once they are, mark the PR ready for review (`gh pr ready`) and bring its
+    description up to the finished change. The draft state carried a meaning
+    for the whole change - stages still landing, gates still to come - and
+    leaving it set says the opposite of what the final review just decided.
+    Merging is a separate act, and still the reviewer's to call.
 
     ## Otherwise
 

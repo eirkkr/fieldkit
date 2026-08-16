@@ -33,6 +33,11 @@ See the README for the one-time symlink setup.
   approved (by either path), draft the title/body or squash message
   yourself and go straight to it - the approval is for whether to act, not
   a preview of the draft, so there's no separate review step for that.
+  One exception on the opening side: the draft PR a review-gated change
+  opens at its first gate (see `conventions/specs.md`) is part of reaching
+  that gate rather than a request for anyone's attention, and needs no
+  approval - nor does marking it ready once the final review closes. Its
+  merge is gated like any other.
   Merging is further conditioned on CI, on top of approval: a red or
   still-running check blocks it outright - stop and report, don't merge
   around it - but a green one merges straight away once approved, with no
