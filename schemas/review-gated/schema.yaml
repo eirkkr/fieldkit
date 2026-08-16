@@ -269,6 +269,9 @@ apply:
 
     1. **What changed** - per file or behaviour, since the previous gate.
        Enough that they know where to look without reading the diff first.
+       The previous gate's `Reviewed at` commit is the base: read the stage
+       with `git diff <that commit>..HEAD`. For the first gate of a change,
+       it is the commit the branch left the default branch at.
     2. **Departures from the plan** - anything built differently than
        design.md or tasks.md said, and why. Say "none" if none.
     3. **How to verify** - the exact commands to run and what a good result
@@ -278,9 +281,19 @@ apply:
        the note; never leave it out to look confident.
     5. **Not done yet** - known gaps that later stages cover, so the
        reviewer does not report them as defects.
+    6. **Reviewed at** - the heading, with a placeholder comment under it and
+       nothing else. It is the reviewer's bookmark into the branch, and it is
+       filled in at approval, not now.
 
     Then stop and wait. If the reviewer sends the stage back, fix it and
     rewrite the note; do not open a new stage to carry the fix.
+
+    When the reviewer approves, and only then, close the gate in one step:
+    write `git rev-parse --short HEAD` under **Reviewed at**, replacing the
+    placeholder, then tick the box. HEAD means the tree they approved - after
+    any fixes the review asked for, not the commit the note was first written
+    against. Never write a SHA into a gate the reviewer has not approved: a
+    bookmark that is not where they stopped reading is worse than none.
 
     ## L3 - the final stage
 
