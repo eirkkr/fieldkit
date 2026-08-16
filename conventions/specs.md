@@ -78,12 +78,21 @@ Only the second and third involve a human.
   the change. It covers what changed since the previous gate, any departure
   from the plan, how to verify (exact commands, plus manual steps), what to
   look at closely, and what is deliberately not done yet.
-- **The stage's diff, written out.** Each note opens with both ways of
-  reading the stage under review: `git diff <base>..HEAD` for a terminal, and
-  the remote's `<forge>/compare/<base>...<branch>` view for a browser. Spelt
-  out in full, so the reviewer copies or clicks rather than assembling them.
-  The far end is left open - `HEAD`, the branch - so both stay right while
-  the review runs and fixes land.
+- **The stage's diff, written out.** Each note opens with three ways of
+  reading the stage under review: `git diff <base>..HEAD` for a terminal, the
+  remote's `<forge>/compare/<base>...<branch>` view for a browser, and the
+  PR's `/pull/<n>/files/<base>..<tip>` view, the only one with per-file
+  viewed checkboxes and inline comments. Spelt out in full, so the reviewer
+  copies or clicks rather than assembling them. With no PR open, the note
+  says so on that line rather than dropping it. A first gate is offered a
+  draft PR before the reading starts, and asked only that once.
+- **What is pinned and what is not.** The command and the compare link are
+  left open at the far end - `HEAD`, the branch - so they stay right while
+  the review runs and fixes land. The PR range link cannot be: both ends must
+  be commits within the PR, so it names the tip at the time of writing, and
+  is rewritten with the note if the stage is sent back. A first gate has no
+  in-PR base to name, its branch point being the commit before the PR starts,
+  so it links the PR's plain file view - the same changes, at that gate.
 - **The gate's bookmark.** That base is the previous gate's commit, and it is
   recorded because nothing else knows it. Every review note ends with a
   `Reviewed at` heading, marked awaiting approval while the stage is under
