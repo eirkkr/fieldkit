@@ -118,6 +118,10 @@ Alternatives rejected:
   second group pointing at a deleted file. Anyone not re-running `just install`
   keeps the old registration, which `|| true` renders inert rather than
   wedging their turns.
+- Both groups were exercised end to end in a live session before merge, not
+  only against scratch repos: a planted formatting error in a committed file
+  and another in an uncommitted one, in the same turn, producing one block
+  listing each under its own heading.
 - Testing "is this path in HEAD" is wrong, and was the first attempt: a tracked
   file under edit is in HEAD while the reformatted lines are not, so the hook
   fired on ordinary work in progress. The snapshot pair already tells the two
