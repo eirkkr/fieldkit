@@ -42,20 +42,40 @@ MOVED = (
 )
 
 
-def git(cwd, *args):
-    """Run a git command, returning stdout, or None if it failed."""
+def main():
     try:
-        done = subprocess.run(
-            ("git", *args), cwd=cwd, capture_output=True, text=True, check=False
+        payload = json.load(sys.stdin)
+    except ValueError:
+        return
+    if not isinstance(payload, dict) or payload.get("stop_hook_active"):
+        return
+
+    root = git(payload.get("cwd") or os.getcwd(), "rev-parse", "--show-toplevel")
+    if root is None:
+        return
+    root = os.path.realpath(root.strip())
+
+    base = head(root)
+    command, rewritten, dirtied = run_fixer(root, base)
+    if not rewritten:
+        return
+
+    committed, uncommitted = split(root, base, rewritten, dirtied)
+    lines = [f"`{command}` rewrote these files:", ""]
+    lines += listing(COMMITTED, committed)
+    lines += listing(UNCOMMITTED, uncommitted)
+    if head(root) != base:
+        lines.append(MOVED)
+
+    print(
+        json.dumps(
+            {
+                "systemMessage": f"Applied fixes ({command})",
+                "decision": "block",
+                "reason": "\n".join(lines).rstrip(),
+            }
         )
-    except OSError:
-        return None
-    return done.stdout if done.returncode == 0 else None
-
-
-def paths(output):
-    """The non-empty lines of a git command's output, as a set."""
-    return {line for line in (output or "").splitlines() if line}
+    )
 
 
 def head(root):
@@ -67,36 +87,6 @@ def head(root):
     exactly as they would have anyway, leaving every path to the untracked pass.
     """
     return (git(root, "rev-parse", "HEAD") or "HEAD").strip()
-
-
-def digest(path):
-    """SHA-1 of a file's bytes, or None when it can't be read."""
-    sha = hashlib.sha1(usedforsecurity=False)
-    try:
-        with open(path, "rb") as handle:
-            for chunk in iter(lambda: handle.read(65536), b""):
-                sha.update(chunk)
-    except OSError:
-        return None
-    return sha.hexdigest()
-
-
-def snapshot(root, base):
-    """Digest every file that differs from `base` or isn't tracked.
-
-    A file matching `base` needs no entry, and its absence is the signal: should
-    the fixer rewrite one, it starts differing and appears in the second
-    snapshot alone. That is exactly the set whose reformat a commit has been
-    left behind by.
-
-    `base` is a resolved commit rather than `HEAD` so that both snapshots share
-    one baseline. Against a moving `HEAD` a file could leave the second snapshot
-    only because something committed it, which reads identically to the fixer
-    having rewritten it.
-    """
-    names = paths(git(root, "diff", "--name-only", base))
-    names |= paths(git(root, "ls-files", "--others", "--exclude-standard"))
-    return {name: digest(os.path.join(root, name)) for name in names}
 
 
 def run_fixer(root, base):
@@ -146,40 +136,50 @@ def listing(heading, names):
     return [heading, *("  " + name for name in sorted(names)), ""]
 
 
-def main():
+def snapshot(root, base):
+    """Digest every file that differs from `base` or isn't tracked.
+
+    A file matching `base` needs no entry, and its absence is the signal: should
+    the fixer rewrite one, it starts differing and appears in the second
+    snapshot alone. That is exactly the set whose reformat a commit has been
+    left behind by.
+
+    `base` is a resolved commit rather than `HEAD` so that both snapshots share
+    one baseline. Against a moving `HEAD` a file could leave the second snapshot
+    only because something committed it, which reads identically to the fixer
+    having rewritten it.
+    """
+    names = paths(git(root, "diff", "--name-only", base))
+    names |= paths(git(root, "ls-files", "--others", "--exclude-standard"))
+    return {name: digest(os.path.join(root, name)) for name in names}
+
+
+def digest(path):
+    """SHA-1 of a file's bytes, or None when it can't be read."""
+    sha = hashlib.sha1(usedforsecurity=False)
     try:
-        payload = json.load(sys.stdin)
-    except ValueError:
-        return
-    if not isinstance(payload, dict) or payload.get("stop_hook_active"):
-        return
+        with open(path, "rb") as handle:
+            for chunk in iter(lambda: handle.read(65536), b""):
+                sha.update(chunk)
+    except OSError:
+        return None
+    return sha.hexdigest()
 
-    root = git(payload.get("cwd") or os.getcwd(), "rev-parse", "--show-toplevel")
-    if root is None:
-        return
-    root = os.path.realpath(root.strip())
 
-    base = head(root)
-    command, rewritten, dirtied = run_fixer(root, base)
-    if not rewritten:
-        return
+def paths(output):
+    """The non-empty lines of a git command's output, as a set."""
+    return {line for line in (output or "").splitlines() if line}
 
-    committed, uncommitted = split(root, base, rewritten, dirtied)
-    lines = [f"`{command}` rewrote these files:", ""]
-    lines += listing(COMMITTED, committed)
-    lines += listing(UNCOMMITTED, uncommitted)
-    if head(root) != base:
-        lines.append(MOVED)
 
-    print(
-        json.dumps(
-            {
-                "systemMessage": f"Applied fixes ({command})",
-                "decision": "block",
-                "reason": "\n".join(lines).rstrip(),
-            }
+def git(cwd, *args):
+    """Run a git command, returning stdout, or None if it failed."""
+    try:
+        done = subprocess.run(
+            ("git", *args), cwd=cwd, capture_output=True, text=True, check=False
         )
-    )
+    except OSError:
+        return None
+    return done.stdout if done.returncode == 0 else None
 
 
 if __name__ == "__main__":

@@ -17,6 +17,39 @@ HOOK_FILE = "stop-autofix.py"
 LEGACY_HOOK_FILES = ("stop-format-drift.py",)
 
 
+def main() -> None:
+    command = command_for(sys.argv[1].rstrip("/"))
+    old_text = SETTINGS.read_text() if SETTINGS.exists() else None
+    data = json.loads(old_text) if old_text is not None else {}
+
+    new_data = with_hook(data, command)
+    if new_data is None:
+        print("Autofix Stop hook already registered in ~/.claude/settings.json, no change")
+        return
+    new_text = json.dumps(new_data, indent=2) + "\n"
+
+    if old_text is None:
+        SETTINGS.parent.mkdir(parents=True, exist_ok=True)
+        SETTINGS.write_text(new_text)
+        print("Created ~/.claude/settings.json with the autofix Stop hook")
+        return
+
+    diff = difflib.unified_diff(
+        old_text.splitlines(keepends=True),
+        new_text.splitlines(keepends=True),
+        fromfile="current ~/.claude/settings.json",
+        tofile="proposed ~/.claude/settings.json",
+    )
+    print("~/.claude/settings.json already exists and differs from the expected result:")
+    print("".join(diff))
+    reply = input("Apply this change to register the autofix Stop hook? [y/N] ").strip().lower()
+    if reply == "y":
+        SETTINGS.write_text(new_text)
+        print("Updated ~/.claude/settings.json")
+    else:
+        print("Skipped - left ~/.claude/settings.json unchanged")
+
+
 def command_for(kit: str) -> str:
     """The registered command, made unable to wedge a session.
 
@@ -55,39 +88,6 @@ def with_hook(data: dict, command: str) -> dict | None:
     # Stop ignores the matcher field, so the group carries only its hooks.
     groups.append({"hooks": [{"type": "command", "command": command}]})
     return new_data
-
-
-def main() -> None:
-    command = command_for(sys.argv[1].rstrip("/"))
-    old_text = SETTINGS.read_text() if SETTINGS.exists() else None
-    data = json.loads(old_text) if old_text is not None else {}
-
-    new_data = with_hook(data, command)
-    if new_data is None:
-        print("Autofix Stop hook already registered in ~/.claude/settings.json, no change")
-        return
-    new_text = json.dumps(new_data, indent=2) + "\n"
-
-    if old_text is None:
-        SETTINGS.parent.mkdir(parents=True, exist_ok=True)
-        SETTINGS.write_text(new_text)
-        print("Created ~/.claude/settings.json with the autofix Stop hook")
-        return
-
-    diff = difflib.unified_diff(
-        old_text.splitlines(keepends=True),
-        new_text.splitlines(keepends=True),
-        fromfile="current ~/.claude/settings.json",
-        tofile="proposed ~/.claude/settings.json",
-    )
-    print("~/.claude/settings.json already exists and differs from the expected result:")
-    print("".join(diff))
-    reply = input("Apply this change to register the autofix Stop hook? [y/N] ").strip().lower()
-    if reply == "y":
-        SETTINGS.write_text(new_text)
-        print("Updated ~/.claude/settings.json")
-    else:
-        print("Skipped - left ~/.claude/settings.json unchanged")
 
 
 if __name__ == "__main__":
