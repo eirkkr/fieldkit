@@ -15,22 +15,24 @@ rely on review.
 
 ## Imports
 
-- A package's `__all__` is its public surface. Import public symbols from the
-  owning package, not the module that defines them (even a private `_`-module).
-- Annotation-only imports under `TYPE_CHECKING` count as public usage (they
-  are a real cross-package contract). Test imports do not: a symbol used only
+- A package's `__all__` is its public surface. Import a public symbol from the
+  package that owns it - not from the module that defines it (even a private
+  `_`-module), and not from a parent package.
+- Re-export only what something imports through the package. That rules out a
+  symbol used only inside its own package (in-package callers import it from
+  its defining module), and one whose outside callers reach its defining
+  module directly.
+- An annotation-only import under `TYPE_CHECKING` counts as public usage - it
+  is a real cross-package contract. A test import doesn't: a symbol used only
   by tests stays private.
-- An annotation-only import can live under `if TYPE_CHECKING:` without
-  `from __future__ import annotations` on Python 3.14+, where PEP 649 defers
-  annotation evaluation by default. Below 3.14, a runtime-evaluated annotation
-  - notably a module- or class-level variable annotation - still needs the
-  symbol imported at runtime, so don't move it.
-- A symbol used only within its own package isn't re-exported; in-package
-  callers import it directly from its defining module.
-- Re-export a public symbol from the package that owns it, not from a parent.
+- On Python 3.14+ an annotation-only import can sit under `if TYPE_CHECKING:`
+  without `from __future__ import annotations`, since PEP 649 defers annotation
+  evaluation. Below 3.14 a runtime-evaluated annotation - notably a module- or
+  class-level variable annotation - still needs the symbol imported at runtime,
+  so don't move it.
 - A module that `__init__` imports during initialisation can't import back from
-  the package (it's only half-built at that point); import shared symbols
-  directly from the source file instead, even when they are public.
+  the package (it's only half-built at that point); it imports shared symbols
+  directly from the source file, even public ones.
 - Name a module by what it exposes. A `_`-prefix marks a module as internal to
   its package, not part of its public surface.
 
