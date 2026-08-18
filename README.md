@@ -34,8 +34,8 @@ Like a survival field kit: the **manual** (conventions) and the **instruments**
   `pre-commit` hook, symlinked into an *opt-in* consumer repo's `.git/hooks` by
   `.fieldkit/scripts/enable-hooks.sh` (not by `just install` - `.git/hooks` is
   per-clone; see "Blocking commits to the default branch"), and the Claude Code
-  `stop-format-drift.py` session hook, registered machine-wide by `just install`
-  (see "Catching formatter drift").
+  `stop-autofix.py` session hook, registered machine-wide by `just install`
+  (see "Auto-fixing and catching formatter drift").
 - further areas as needs emerge - e.g. more Claude Code assets, shared scripts,
   editor/CI config.
 
@@ -198,17 +198,17 @@ routing around it.
 
 ## Auto-fixing and catching formatter drift
 
-A formatter - your editor on save, or an auto-fixer - can rewrite a file *after*
-Claude edited it, sometimes after Claude has already committed and pushed for
-the turn, leaving the reformat stranded until someone notices. The kit ships a
-Claude Code `Stop` hook
-([ADR 024](docs/decisions/024-stop-hook-for-formatter-drift.md)) that fires as a
-turn ends and does two things in one process:
+An auto-fixer can rewrite a file *after* Claude edited it, sometimes after
+Claude has already committed and pushed for the turn, leaving the reformat
+stranded until someone notices. The kit ships a Claude Code `Stop` hook
+([ADR 035](docs/decisions/035-measure-the-fixer-not-the-transcript.md)) that
+fires as a turn ends and does two things in one process:
 
-1. Runs your repo's fix command, if it has one (see below).
-2. Stops Claude from finishing when the working tree holds changes to files its
-   own last commit included that it didn't write itself - asking it to check the
-   diff, re-run affected tests, and commit and push them.
+1. Runs your repo's fix command, if it has one (see below), digesting the
+   working tree either side of the run to see which files it rewrote.
+2. Stops Claude from finishing when one of those files is in its own last
+   commit - that commit no longer carries the reformat - asking it to check the
+   diff, re-run affected tests, and commit and push it.
 
 Both live in one hook on purpose: Claude Code runs all of an event's hooks *in
 parallel*, so a separate fixer and detector would race rather than run in order.
@@ -237,10 +237,12 @@ reviewable while still needing a deliberate human run, so no command is ever
 auto-executed out of repo content. The kit does this to itself with
 `just setup`.
 
-The hook stays quiet unless the drift pattern actually holds: it exits silently
-outside a git repo, on a clean tree, before the session's first commit, on files
-Claude edited itself, and on untracked files. When it does fire, Claude can
-judge that the change wasn't formatter output, say so, and finish anyway.
+The hook stays quiet unless the fixer actually stranded something: it exits
+silently outside a git repo, on a clean tree, before the session's first commit,
+when the fix command changed nothing, and when what it changed isn't in that
+commit. It only ever names files it watched your own fix command rewrite, so it
+can't mistake your editing for drift - and it says nothing about formatting it
+didn't run, an editor's format-on-save included.
 
 ## Updating a shared rule
 

@@ -153,3 +153,11 @@ Alternatives rejected:
   Claude changes by running a command in `Bash` looks external and can trigger
   a block - correct often enough (a generator's output does belong in a commit)
   to leave as is.
+
+---
+
+**Superseded by [ADR 035](035-measure-the-fixer-not-the-transcript.md).** The
+detect step's transcript scan could not see edits made through Bash or by a
+subagent, so it read ordinary post-commit editing as formatter drift.
+Attribution now comes from measuring the fix command's own effect, and the hook
+is renamed `hooks/stop-autofix.py`.

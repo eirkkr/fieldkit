@@ -1,4 +1,4 @@
-"""Register the kit's format-drift Stop hook in ~/.claude/settings.json.
+"""Register the kit's autofix Stop hook in ~/.claude/settings.json.
 
 Run via `just install` (scripts/register-stop-hook.sh); not meant to be invoked
 directly. Takes the kit directory as its one argument.
@@ -10,7 +10,11 @@ import pathlib
 import sys
 
 SETTINGS = pathlib.Path.home() / ".claude" / "settings.json"
-HOOK_FILE = "stop-format-drift.py"
+HOOK_FILE = "stop-autofix.py"
+# Names the hook has had before. Matched alongside the current one so a
+# rename rewrites the existing entry in place, rather than appending a
+# second group pointing at a file that no longer exists (ADR 035).
+LEGACY_HOOK_FILES = ("stop-format-drift.py",)
 
 
 def command_for(kit: str) -> str:
@@ -28,18 +32,20 @@ def command_for(kit: str) -> str:
 def with_hook(data: dict, command: str) -> dict | None:
     """Settings with the Stop hook registered, or None if it already is.
 
-    Rewrites an existing entry in place when the kit has moved, so a relocated
-    clone doesn't leave a dead command behind, and leaves any other Stop hooks
-    the user has alone.
+    Rewrites an existing entry in place when the kit has moved or the hook has
+    been renamed, so neither leaves a dead command behind, and leaves any other
+    Stop hooks the user has alone.
     """
     new_data = json.loads(json.dumps(data))
     groups = new_data.setdefault("hooks", {}).setdefault("Stop", [])
     if not isinstance(groups, list):
         raise SystemExit("hooks.Stop in ~/.claude/settings.json isn't a list")
 
+    known = (HOOK_FILE, *LEGACY_HOOK_FILES)
     for group in groups:
         for hook in (group or {}).get("hooks", []):
-            if HOOK_FILE not in str(hook.get("command", "")):
+            registered = str(hook.get("command", ""))
+            if not any(name in registered for name in known):
                 continue
             if hook["command"] == command:
                 return None
@@ -58,14 +64,14 @@ def main() -> None:
 
     new_data = with_hook(data, command)
     if new_data is None:
-        print("Format-drift Stop hook already registered in ~/.claude/settings.json, no change")
+        print("Autofix Stop hook already registered in ~/.claude/settings.json, no change")
         return
     new_text = json.dumps(new_data, indent=2) + "\n"
 
     if old_text is None:
         SETTINGS.parent.mkdir(parents=True, exist_ok=True)
         SETTINGS.write_text(new_text)
-        print("Created ~/.claude/settings.json with the format-drift Stop hook")
+        print("Created ~/.claude/settings.json with the autofix Stop hook")
         return
 
     diff = difflib.unified_diff(
@@ -76,7 +82,7 @@ def main() -> None:
     )
     print("~/.claude/settings.json already exists and differs from the expected result:")
     print("".join(diff))
-    reply = input("Apply this change to register the format-drift Stop hook? [y/N] ").strip().lower()
+    reply = input("Apply this change to register the autofix Stop hook? [y/N] ").strip().lower()
     if reply == "y":
         SETTINGS.write_text(new_text)
         print("Updated ~/.claude/settings.json")

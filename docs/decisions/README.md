@@ -28,7 +28,7 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 021 | [Adopt OpenSpec, centralised via the kit](021-adopt-openspec-centralised-via-kit.md)                      | Superseded |
 | 022 | [Make OpenSpec skills model-discoverable](022-openspec-skills-model-discoverable.md)                      | Accepted   |
 | 023 | [Block default-branch commits with a git hook](023-block-default-branch-commits-via-hook.md)              | Accepted   |
-| 024 | [Fix and catch formatter drift in one Stop hook](024-stop-hook-for-formatter-drift.md)                    | Accepted   |
+| 024 | [Fix and catch formatter drift in one Stop hook](024-stop-hook-for-formatter-drift.md)                    | Superseded |
 | 025 | [State skill routing and push cadence always-on](025-skill-routing-stated-always-on.md)                   | Accepted   |
 | 026 | [Keep PR descriptions in sync, gated on approval](026-pr-description-sync-on-push.md)                     | Accepted   |
 | 027 | [Move push's judgment calls to the caller](027-push-decisions-move-to-caller.md)                          | Accepted   |
@@ -39,3 +39,4 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 032 | [Merge waits out pending CI instead of stopping](032-merge-waits-out-pending-ci.md)                       | Accepted   |
 | 033 | [Let the pr agent open the PR itself](033-pr-agent-opens-the-pr.md)                                       | Accepted   |
 | 034 | [Gate OpenSpec stages on human review](034-review-gated-openspec-schema.md)                               | Accepted   |
+| 035 | [Attribute formatter drift by measuring the fixer](035-measure-the-fixer-not-the-transcript.md)           | Accepted   |
