@@ -91,3 +91,8 @@ Alternatives rejected:
   ADR 024 scripted those steps because its signal was a guess that needed
   verifying; a measured one doesn't, and the standing conventions already cover
   what to do with an uncommitted change.
+- The dirty-tree guard now bounds when the block can fire at all. A turn that
+  ends with everything committed runs no fixer, so it strands nothing; the
+  block needs a session that both committed a markdown file and left the
+  tree dirty. Narrower than ADR 024's framing suggests, and the narrowing
+  is the guard's, not this change's.  
