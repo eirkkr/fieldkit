@@ -34,8 +34,8 @@ Like a survival field kit: the **manual** (conventions) and the **instruments**
   `pre-commit` hook, symlinked into an *opt-in* consumer repo's `.git/hooks` by
   `.fieldkit/scripts/enable-hooks.sh` (not by `just install` - `.git/hooks` is
   per-clone; see "Blocking commits to the default branch"), and the Claude Code
-  `stop-format-drift.py` session hook, registered machine-wide by `just install`
-  (see "Catching formatter drift").
+  `stop-autofix.py` session hook, registered machine-wide by `just install`
+  (see "Auto-fixing and catching formatter drift").
 - further areas as needs emerge - e.g. more Claude Code assets, shared scripts,
   editor/CI config.
 
@@ -86,10 +86,11 @@ version - upgrade yourself first, e.g. `sudo n lts`).
    docs or CLAUDE.md rather than machine-local memory files. It also sets
    `attribution: {commit: "", pr: "", sessionUrl: false}` so commits and PRs
    carry no AI attribution, `statusLine` to run the kit's linked
-   `statusline-command.sh`, and a `hooks.Stop` entry for the format-drift hook
-   (see "Catching formatter drift") - if the existing file already differs from
-   any of those, it shows the diff and asks before changing it. Each of these
-   only touches its own key, leaving the rest of the file alone.
+   `statusline-command.sh`, and a `hooks.Stop` entry for the autofix hook
+   (see "Auto-fixing and catching formatter drift") - if the existing file
+   already differs from any of those, it shows the diff and asks before
+   changing it. Each of these only touches its own key, leaving the rest of the
+   file alone.
 
 4. **Start sessions from the repo root.** The load-on-demand files are
    referenced relative to the consumer repo root, so launch `claude` there, not
@@ -198,17 +199,19 @@ routing around it.
 
 ## Auto-fixing and catching formatter drift
 
-A formatter - your editor on save, or an auto-fixer - can rewrite a file *after*
-Claude edited it, sometimes after Claude has already committed and pushed for
-the turn, leaving the reformat stranded until someone notices. The kit ships a
-Claude Code `Stop` hook
-([ADR 024](docs/decisions/024-stop-hook-for-formatter-drift.md)) that fires as a
-turn ends and does two things in one process:
+An auto-fixer can rewrite a file *after* Claude edited it, sometimes after
+Claude has already committed and pushed for the turn, leaving the reformat
+stranded until someone notices. The kit ships a Claude Code `Stop` hook
+([ADR 035](docs/decisions/035-measure-the-fixer-not-the-transcript.md)) that
+fires as a turn ends and does two things in one process:
 
-1. Runs your repo's fix command, if it has one (see below).
-2. Stops Claude from finishing when the working tree holds changes to files its
-   own last commit included that it didn't write itself - asking it to check the
-   diff, re-run affected tests, and commit and push them.
+1. Runs your repo's fix command, if it has one (see below), digesting the
+   working tree either side of the run to see which files it rewrote.
+2. Stops Claude from finishing if it rewrote anything, splitting the files into
+   those whose committed content it changed - the commit they came from no
+   longer carries the reformat - and those that were uncommitted anyway. An
+   empty group is left out, so a turn that only touched uncommitted work reads
+   as one short list. What to do about either is left to Claude.
 
 Both live in one hook on purpose: Claude Code runs all of an event's hooks *in
 parallel*, so a separate fixer and detector would race rather than run in order.
@@ -218,7 +221,7 @@ session on the machine - no per-repo step. Unlike the `pre-commit` hook it needs
 no per-clone install, since it lives in `~/.claude`, not `.git/`.
 
 To turn on step 1, name the command in the repo's git config - there's no
-default, and repos that set nothing skip straight to step 2:
+default, and repos that set nothing get a hook that does nothing:
 
 ```bash
 git config fieldkit.fixCommand "just fix"
@@ -237,10 +240,17 @@ reviewable while still needing a deliberate human run, so no command is ever
 auto-executed out of repo content. The kit does this to itself with
 `just setup`.
 
-The hook stays quiet unless the drift pattern actually holds: it exits silently
-outside a git repo, on a clean tree, before the session's first commit, on files
-Claude edited itself, and on untracked files. When it does fire, Claude can
-judge that the change wasn't formatter output, say so, and finish anyway.
+The hook stays quiet unless your fix command actually changed something: it
+exits silently outside a git repo, with no command configured, and whenever the
+command leaves the tree as it found it. It only ever names files it watched that
+command rewrite, so it can't mistake your editing for drift - and it says
+nothing about formatting it didn't run, an editor's format-on-save included.
+
+It runs on every turn, including turns that ended with everything committed -
+that being the case where a reformat would otherwise be stranded behind a commit
+with nothing left dirty to reveal it. The flip side is that a repo carrying old
+formatting debt will have it listed on the first turn, and every turn after,
+until it's committed.
 
 ## Updating a shared rule
 
