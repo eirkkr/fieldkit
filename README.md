@@ -238,6 +238,9 @@ reviewable while still needing a deliberate human run, so no command is ever
 auto-executed out of repo content. The kit does this to itself with
 `just setup`.
 
+Whichever of the two groups is empty is left out of the message entirely, so a
+turn that only reformatted uncommitted work reads as a single short list.
+
 The hook stays quiet unless your fix command actually changed something: it
 exits silently outside a git repo, with no command configured, and whenever the
 command leaves the tree as it found it. It only ever names files it watched that

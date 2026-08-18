@@ -123,7 +123,7 @@ Alternatives rejected:
   and another in an uncommitted one, in the same turn, producing one block
   listing each under its own heading. The committed case needed the commit to
   land before the turn ended, since a background push that finishes later leaves
-  the file dirty and the reformat lands in the other group instead.   
+  the file dirty and the reformat lands in the other group instead.
 - Testing "is this path in HEAD" is wrong, and was the first attempt: a tracked
   file under edit is in HEAD while the reformatted lines are not, so the hook
   fired on ordinary work in progress. The snapshot pair already tells the two
