@@ -206,9 +206,10 @@ fires as a turn ends and does two things in one process:
 
 1. Runs your repo's fix command, if it has one (see below), digesting the
    working tree either side of the run to see which files it rewrote.
-2. Stops Claude from finishing when one of those files is in its own last
-   commit - that commit no longer carries the reformat - asking it to check the
-   diff, re-run affected tests, and commit and push it.
+2. Stops Claude from finishing if it rewrote anything, splitting the files into
+   those whose committed content it changed - the commit they came from no
+   longer carries the reformat - and those that were uncommitted anyway. What to
+   do about either is left to Claude.
 
 Both live in one hook on purpose: Claude Code runs all of an event's hooks *in
 parallel*, so a separate fixer and detector would race rather than run in order.
@@ -218,7 +219,7 @@ session on the machine - no per-repo step. Unlike the `pre-commit` hook it needs
 no per-clone install, since it lives in `~/.claude`, not `.git/`.
 
 To turn on step 1, name the command in the repo's git config - there's no
-default, and repos that set nothing skip straight to step 2:
+default, and repos that set nothing get a hook that does nothing:
 
 ```bash
 git config fieldkit.fixCommand "just fix"
@@ -237,12 +238,17 @@ reviewable while still needing a deliberate human run, so no command is ever
 auto-executed out of repo content. The kit does this to itself with
 `just setup`.
 
-The hook stays quiet unless the fixer actually stranded something: it exits
-silently outside a git repo, on a clean tree, before the session's first commit,
-when the fix command changed nothing, and when what it changed isn't in that
-commit. It only ever names files it watched your own fix command rewrite, so it
-can't mistake your editing for drift - and it says nothing about formatting it
-didn't run, an editor's format-on-save included.
+The hook stays quiet unless your fix command actually changed something: it
+exits silently outside a git repo, with no command configured, and whenever the
+command leaves the tree as it found it. It only ever names files it watched that
+command rewrite, so it can't mistake your editing for drift - and it says
+nothing about formatting it didn't run, an editor's format-on-save included.
+
+It runs on every turn, including turns that ended with everything committed -
+that being the case where a reformat would otherwise be stranded behind a commit
+with nothing left dirty to reveal it. The flip side is that a repo carrying old
+formatting debt will have it listed on the first turn, and every turn after,
+until it's committed.
 
 ## Updating a shared rule
 
