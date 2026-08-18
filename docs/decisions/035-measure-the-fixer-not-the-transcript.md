@@ -5,9 +5,10 @@ Supersedes [ADR 024](024-stop-hook-for-formatter-drift.md).
 ## Decision
 
 The hook keeps its two steps and its block, but stops inferring authorship.
-`run_fixer` digests the working tree either side of the fix command and returns
-the paths that differ; the hook blocks when one of those paths is also in this
-session's own last commit.
+`run_fixer` digests the working tree either side of the fix command. The hook
+blocks when the fixer *dirtied* a path that had matched HEAD and that this
+session's own last commit included - together, the two conditions that mean the
+commit lost the reformat.
 
 It is renamed `hooks/stop-autofix.py`, for what it does rather than for what it
 used to detect, and the block's message is cut to a statement of what the fixer
@@ -91,8 +92,17 @@ Alternatives rejected:
   ADR 024 scripted those steps because its signal was a guess that needed
   verifying; a measured one doesn't, and the standing conventions already cover
   what to do with an uncommitted change.
-- The dirty-tree guard now bounds when the block can fire at all. A turn that
-  ends with everything committed runs no fixer, so it strands nothing; the
-  block needs a session that both committed a markdown file and left the
-  tree dirty. Narrower than ADR 024's framing suggests, and the narrowing
-  is the guard's, not this change's.  
+- Two conditions bound when the block can fire at all. The dirty-tree guard
+  means a turn ending with everything committed runs no fixer, so it strands
+  nothing; and the fixer has to dirty a file that was clean. Between them the
+  block needs a session that committed a file, left the tree dirty by some other
+  route, and then had the fixer rewrite the committed one. Narrower than
+  ADR 024's framing suggests, and the first narrowing is the guard's, not this
+  change's.
+- Testing "is this path in HEAD" instead is wrong, and was the first attempt: a
+  tracked file under edit is in HEAD while the reformatted lines are not, so the
+  hook fired on ordinary work in progress. The snapshot pair already tells the
+  two apart - a path absent from the pre-fix snapshot matched HEAD until the
+  fixer touched it - so the fix cost nothing but asking the right question.
+  Found by running the hook for real against a planted formatting error, which
+  is the only way it surfaced.
