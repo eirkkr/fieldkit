@@ -9,9 +9,9 @@ what matters. `run_fixer` digests the working tree either side of the fix
 command; the hook blocks whenever that command rewrote anything, and splits what
 it rewrote two ways:
 
-- **Committed** - paths the fixer dirtied that HEAD also tracks. They carried
-  committed content until the fix landed, so the commit they came from no longer
-  carries the reformat.
+- **Committed** - paths the fixer dirtied that the baseline also tracks. They
+  carried committed content until the fix landed, so the commit they came from
+  no longer carries the reformat.
 - **Uncommitted** - everything else it rewrote. Already modified, or not tracked
   at all, so the reformat joins the uncommitted work around it.
 
@@ -91,65 +91,57 @@ Alternatives rejected:
   changed nothing. That is the cost of covering the turn that commits
   everything, and it is real: a slow fixer is paid for on every stop, bounded
   only by the 120s timeout. Repos with an expensive fixer should make it
-  incremental rather than set `fieldkit.fixCommand` to something whole-repo.
+  incremental rather than point `fieldkit.fixCommand` at something whole-repo.
 - Pre-existing formatting debt now surfaces. The first run in a repo that has
   never been fixed will list files nobody touched this session under
-  "Committed", and will keep listing them every turn until they are committed
-  or the repo is cleaned up. Arguably the right nag, but it is a behaviour
-  change from ADR 024, where an untouched file could never appear.
+  "Committed", and will keep listing them every turn until they are committed.
+  Arguably the right nag, but a behaviour change from ADR 024, where an
+  untouched file could never appear.
 - Formatting the hook didn't run - an editor's format-on-save, most likely - is
   not flagged. ADR 024 claimed that coverage, but it rested on the same broken
   inference, so what is genuinely lost is small. If it proves to matter, it
   needs a mechanism that observes the editor, not the transcript.
-- False positives are structurally gone rather than reduced: the hook names only
-  files it watched a command it ran rewrite, and says which side of the commit
-  line each one falls on.
 - **The transcript is no longer read.** ADR 024 accepted a dependency on an
   undocumented internal format and contained the risk; there is now no risk to
   contain. The hook reads nothing but git and the working tree.
-- Snapshot cost is a `git diff --name-only HEAD`, a `git ls-files --others`, and
-  a SHA-1 over the dirty and untracked files only, taken twice, plus one
-  `git ls-tree` when something changed. Files matching HEAD are skipped, and
-  their absence is load-bearing: a fixer rewriting one makes it appear in the
-  second snapshot alone, which is exactly the committed-content signal.
+- The guarantee is narrower than "no false positives", though stronger than
+  ADR 024's: the hook names only files it watched a command it ran rewrite, so
+  it cannot mistake editing for drift. It can still misread *which* files those
+  are, and did twice - both times by comparing against the wrong baseline
+  rather than by guessing at authorship.
+- Those two both surfaced only by running the hook for real, never from
+  reasoning about it. Asking "is this path in HEAD" misreads a tracked file
+  under edit, which is in HEAD while its reformatted lines are not; and diffing
+  each snapshot against `HEAD` lets a commit landing between them drop a path
+  out of the second, which is indistinguishable from a rewrite. Both are fixed
+  by reading the snapshot pair against one fixed commit - a path absent from
+  the pre-fix snapshot matched that commit until the fixer touched it.
+- A commit landing mid-run still makes the *grouping* ambiguous: whether content
+  was committed when the fixer touched it has no single answer once the commit
+  lands halfway through. Nothing is measurable there, so the hook says so rather
+  than printing a confident guess. The likeliest source is the kit's own `push`
+  agent, which outlives the turn that launched it, so `skills/push/SKILL.md` now
+  waits for the commit to appear first - worth doing on its own terms, since an
+  unwaited agent's report is unverified. Other sources remain (a second session,
+  a human at a terminal, a `fixCommand` that commits); the pinned baseline is
+  what covers those.
+- Both groups were exercised end to end in a live session before merge, not only
+  against scratch repos: a planted formatting error in a committed file and
+  another in an uncommitted one, in the same turn, producing one block listing
+  each under its own heading.
+- Snapshot cost is a `git diff --name-only` against the baseline, a
+  `git ls-files --others`, and a SHA-1 over the dirty and untracked files only,
+  taken twice, plus one `git ls-tree` when something changed. Paths matching the
+  baseline are skipped, and their absence is load-bearing: a fixer rewriting one
+  makes it appear in the second snapshot alone, which is the committed-content
+  signal itself.
 - The block drops ADR 024's numbered instructions and its "say so and finish if
   it isn't formatter output" escape hatch, both of which existed because the old
   signal was a guess. `stop_hook_active` still caps this at one block per turn.
-- `hooks/` gains no new dependency; the hook remains standard library only, and
-  is down to 160 lines from 230.
 - The rename would strand the command already in `~/.claude/settings.json`, so
   `register_stop_hook.py` matches a `LEGACY_HOOK_FILES` tuple beside the current
   name and rewrites the entry in place. Without it a re-register appends a
   second group pointing at a deleted file. Anyone not re-running `just install`
-  keeps the old registration, which `|| true` renders inert rather than
-  wedging their turns.
-- Both groups were exercised end to end in a live session before merge, not
-  only against scratch repos: a planted formatting error in a committed file
-  and another in an uncommitted one, in the same turn, producing one block
-  listing each under its own heading. The committed case needed the commit to
-  land before the turn ended, since a background push that finishes later leaves
-  the file dirty and the reformat lands in the other group instead.
-- The snapshot pair is only sound against a fixed baseline. Taken against
-  `HEAD`, a commit landing between them drops a file out of the second snapshot
-  because it is now committed, which is indistinguishable from the fixer having
-  rewritten it - a false positive of exactly the kind this ADR exists to remove.
-  Reproduced with a `fixCommand` that commits, then closed by resolving `HEAD`
-  once and diffing both snapshots against that commit.
-- A commit landing mid-run still makes the *grouping* ambiguous, because whether
-  content was committed when the fixer touched it has no single answer once the
-  commit lands halfway through. There is nothing to measure here, so the hook
-  reports the ambiguity instead of hiding it.
-- The likeliest source of such a commit is the kit's own `push` skill, whose
-  agent outlives the turn that launched it. `skills/push/SKILL.md` now waits for
-  the commit to appear before the turn ends. That is worth doing on its own
-  terms - an unwaited agent's report is unverified, and this session relayed two
-  that the repo contradicted - and it removes the common case of this race as a
-  side effect. Other sources remain: a second session, a human at a terminal, a
-  `fixCommand` that commits. The pinned baseline is what covers those.
-- Testing "is this path in HEAD" is wrong, and was the first attempt: a tracked
-  file under edit is in HEAD while the reformatted lines are not, so the hook
-  fired on ordinary work in progress. The snapshot pair already tells the two
-  apart - a path absent from the pre-fix snapshot matched HEAD until the fixer
-  touched it - so the fix cost nothing but asking the right question. Found by
-  running the hook for real against a planted formatting error, which is the
-  only way it surfaced.
+  keeps the old registration, which `|| true` renders inert rather than wedging
+  their turns.
+- `hooks/` gains no new dependency; the hook remains standard library only.

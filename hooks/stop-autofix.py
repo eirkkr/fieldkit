@@ -11,9 +11,9 @@ parallel - as separate hooks these would race:
    commit, so a commit landing mid-run can't make an untouched file read as
    rewritten.
 2. Block the stop when it rewrote anything, splitting the files two ways: those
-   that matched HEAD until the fixer touched them, whose reformat the commit
-   they came from no longer carries, and those already differing from HEAD,
-   whose reformat joins the uncommitted work around it.
+   that matched the baseline until the fixer touched them, whose reformat the
+   commit they came from no longer carries, and those already differing from it,
+   whose reformat joins the uncommitted work around them.
 
 The hook reports and stops there. It never commits, and it never says what to
 do about what it found - that is Claude's call. See ADR 035, which supersedes
@@ -54,7 +54,19 @@ def git(cwd, *args):
 
 
 def paths(output):
+    """The non-empty lines of a git command's output, as a set."""
     return {line for line in (output or "").splitlines() if line}
+
+
+def head(root):
+    """The current commit, or the literal "HEAD" when the repo has none.
+
+    Both snapshots and the split diff against this one value, so a commit
+    landing mid-run can't shift the baseline under the comparison. The literal
+    stands in for a repo with nothing committed: it makes those git calls fail
+    exactly as they would have anyway, leaving every path to the untracked pass.
+    """
+    return (git(root, "rev-parse", "HEAD") or "HEAD").strip()
 
 
 def digest(path):
@@ -114,7 +126,7 @@ def run_fixer(root, base):
     return command, rewritten, set(after) - set(before)
 
 
-def split(root, rewritten, dirtied, base):
+def split(root, base, rewritten, dirtied):
     """The rewritten paths, split into committed and uncommitted content.
 
     A path the fixer dirtied that `base` also tracks was carrying committed
@@ -147,16 +159,16 @@ def main():
         return
     root = os.path.realpath(root.strip())
 
-    base = (git(root, "rev-parse", "HEAD") or "HEAD").strip()
+    base = head(root)
     command, rewritten, dirtied = run_fixer(root, base)
     if not rewritten:
         return
 
-    committed, uncommitted = split(root, rewritten, dirtied, base)
-    lines = [f"`{command}` rewrote files, and the changes are uncommitted:", ""]
+    committed, uncommitted = split(root, base, rewritten, dirtied)
+    lines = [f"`{command}` rewrote these files:", ""]
     lines += listing(COMMITTED, committed)
     lines += listing(UNCOMMITTED, uncommitted)
-    if (git(root, "rev-parse", "HEAD") or "HEAD").strip() != base:
+    if head(root) != base:
         lines.append(MOVED)
 
     print(

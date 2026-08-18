@@ -86,10 +86,11 @@ version - upgrade yourself first, e.g. `sudo n lts`).
    docs or CLAUDE.md rather than machine-local memory files. It also sets
    `attribution: {commit: "", pr: "", sessionUrl: false}` so commits and PRs
    carry no AI attribution, `statusLine` to run the kit's linked
-   `statusline-command.sh`, and a `hooks.Stop` entry for the format-drift hook
-   (see "Catching formatter drift") - if the existing file already differs from
-   any of those, it shows the diff and asks before changing it. Each of these
-   only touches its own key, leaving the rest of the file alone.
+   `statusline-command.sh`, and a `hooks.Stop` entry for the autofix hook
+   (see "Auto-fixing and catching formatter drift") - if the existing file
+   already differs from any of those, it shows the diff and asks before
+   changing it. Each of these only touches its own key, leaving the rest of the
+   file alone.
 
 4. **Start sessions from the repo root.** The load-on-demand files are
    referenced relative to the consumer repo root, so launch `claude` there, not
@@ -208,8 +209,9 @@ fires as a turn ends and does two things in one process:
    working tree either side of the run to see which files it rewrote.
 2. Stops Claude from finishing if it rewrote anything, splitting the files into
    those whose committed content it changed - the commit they came from no
-   longer carries the reformat - and those that were uncommitted anyway. What to
-   do about either is left to Claude.
+   longer carries the reformat - and those that were uncommitted anyway. An
+   empty group is left out, so a turn that only touched uncommitted work reads
+   as one short list. What to do about either is left to Claude.
 
 Both live in one hook on purpose: Claude Code runs all of an event's hooks *in
 parallel*, so a separate fixer and detector would race rather than run in order.
@@ -237,9 +239,6 @@ recipe rather than leaving it as folklore - that keeps it version-controlled and
 reviewable while still needing a deliberate human run, so no command is ever
 auto-executed out of repo content. The kit does this to itself with
 `just setup`.
-
-Whichever of the two groups is empty is left out of the message entirely, so a
-turn that only reformatted uncommitted work reads as a single short list.
 
 The hook stays quiet unless your fix command actually changed something: it
 exits silently outside a git repo, with no command configured, and whenever the

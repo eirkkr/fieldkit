@@ -28,20 +28,11 @@ given, plus the revised title/body to apply if the PR needed one. The agent
 takes all of this as given; it doesn't rediscover, diff, or second-guess any
 of it.
 
-Then wait for the commit to land before the turn ends - the agent runs in the
-background, and a turn that ends first leaves it committing into a repo nobody
-is watching. Poll `git log -1` until the commit appears, bounded by a timeout,
-rather than ending the turn on the launch. Two things go wrong otherwise:
-
-- **The report is unverified.** The agent reports success from its own view.
-  Confirm the commit exists, and that it contains what was meant to be in it,
-  before relaying anything as done.
-- **It races the `Stop` hook.** That hook runs the repo's fix command as the
-  turn ends, and a commit landing during that run is measured against a
-  different baseline than the one the hook started from
-  ([ADR 035](../../docs/decisions/035-measure-the-fixer-not-the-transcript.md)).
-  The hook pins its baseline and says when this happened, but the grouping it
-  reports is approximate once it has.
-
-Relay the agent's report only after that check, correcting it where the repo
-says otherwise.
+Then wait for the commit to land before the turn ends: poll `git log -1` until
+it appears, bounded by a timeout. The agent runs in the background, so a turn
+that ends on the launch leaves two things broken. The agent's report is
+unverified - confirm the commit exists and holds what was meant to be in it,
+and correct the report where the repo says otherwise. And the commit races the
+`Stop` hook, which runs the repo's fix command as the turn ends and measures
+what it changed against the commit it started from
+([ADR 035](../../docs/decisions/035-measure-the-fixer-not-the-transcript.md)).
