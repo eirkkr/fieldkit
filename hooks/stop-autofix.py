@@ -7,7 +7,9 @@ parallel - as separate hooks these would race:
 1. If the repo names one in `fieldkit.fixCommand` (git config), run it. Its
    output is discarded, never fed back to the agent - see ADR 007. The working
    tree is digested either side of the run, so which files the fixer rewrote is
-   measured rather than inferred.
+   measured rather than inferred. Both digests are taken against one pinned
+   commit, so a commit landing mid-run can't make an untouched file read as
+   rewritten.
 2. Block the stop when it rewrote anything, splitting the files two ways: those
    that matched HEAD until the fixer touched them, whose reformat the commit
    they came from no longer carries, and those already differing from HEAD,
@@ -34,6 +36,10 @@ FIX_TIMEOUT = 120
 
 COMMITTED = "Committed - the commit these came from no longer carries the reformat:"
 UNCOMMITTED = "Uncommitted - the reformat joins changes already in the working tree:"
+MOVED = (
+    "A commit landed while the fixer ran, so both groups are measured against "
+    "the commit before it and a path may sit in the wrong one."
+)
 
 
 def git(cwd, *args):
@@ -63,20 +69,25 @@ def digest(path):
     return sha.hexdigest()
 
 
-def snapshot(root):
-    """Digest every file that differs from HEAD or isn't tracked.
+def snapshot(root, base):
+    """Digest every file that differs from `base` or isn't tracked.
 
-    A file matching HEAD needs no entry, and its absence is the signal: should
+    A file matching `base` needs no entry, and its absence is the signal: should
     the fixer rewrite one, it starts differing and appears in the second
     snapshot alone. That is exactly the set whose reformat a commit has been
     left behind by.
+
+    `base` is a resolved commit rather than `HEAD` so that both snapshots share
+    one baseline. Against a moving `HEAD` a file could leave the second snapshot
+    only because something committed it, which reads identically to the fixer
+    having rewritten it.
     """
-    names = paths(git(root, "diff", "--name-only", "HEAD"))
+    names = paths(git(root, "diff", "--name-only", base))
     names |= paths(git(root, "ls-files", "--others", "--exclude-standard"))
     return {name: digest(os.path.join(root, name)) for name in names}
 
 
-def run_fixer(root):
+def run_fixer(root, base):
     """Run the repo's configured fix command.
 
     Returns the command, every path it rewrote, and the subset it dirtied from a
@@ -86,7 +97,7 @@ def run_fixer(root):
     command = (git(root, "config", FIX_CONFIG) or "").strip()
     if not command:
         return "", set(), set()
-    before = snapshot(root)
+    before = snapshot(root, base)
     try:
         subprocess.run(
             command,
@@ -98,20 +109,20 @@ def run_fixer(root):
         )
     except (OSError, subprocess.SubprocessError):
         return command, set(), set()
-    after = snapshot(root)
+    after = snapshot(root, base)
     rewritten = {n for n in set(before) | set(after) if before.get(n) != after.get(n)}
     return command, rewritten, set(after) - set(before)
 
 
-def split(root, rewritten, dirtied):
+def split(root, rewritten, dirtied, base):
     """The rewritten paths, split into committed and uncommitted content.
 
-    A path the fixer dirtied that HEAD also tracks was carrying committed
+    A path the fixer dirtied that `base` also tracks was carrying committed
     content until the fix landed, so that commit is now missing it. Everything
     else was already uncommitted - modified, or not tracked at all - and the
     reformat simply joins it.
     """
-    tracked = paths(git(root, "ls-tree", "-r", "--name-only", "HEAD"))
+    tracked = paths(git(root, "ls-tree", "-r", "--name-only", base))
     committed = dirtied & tracked
     return committed, rewritten - committed
 
@@ -136,14 +147,17 @@ def main():
         return
     root = os.path.realpath(root.strip())
 
-    command, rewritten, dirtied = run_fixer(root)
+    base = (git(root, "rev-parse", "HEAD") or "HEAD").strip()
+    command, rewritten, dirtied = run_fixer(root, base)
     if not rewritten:
         return
 
-    committed, uncommitted = split(root, rewritten, dirtied)
+    committed, uncommitted = split(root, rewritten, dirtied, base)
     lines = [f"`{command}` rewrote files, and the changes are uncommitted:", ""]
     lines += listing(COMMITTED, committed)
     lines += listing(UNCOMMITTED, uncommitted)
+    if (git(root, "rev-parse", "HEAD") or "HEAD").strip() != base:
+        lines.append(MOVED)
 
     print(
         json.dumps(

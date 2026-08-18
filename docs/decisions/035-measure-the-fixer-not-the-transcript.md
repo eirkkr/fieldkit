@@ -24,6 +24,11 @@ single dirty-tree guard is gone - it meant a turn that committed everything ran
 no fixer at all, which is precisely the turn whose formatting most needs
 applying.
 
+Both digests are taken against one resolved commit rather than against `HEAD`,
+so a commit landing mid-run cannot make an untouched file read as rewritten.
+When `HEAD` does move across the run, the message says so: the grouping is then
+measured against the commit before it and can put a path on the wrong side.
+
 The hook is renamed `hooks/stop-autofix.py`, for what it does rather than for
 what it used to detect, and the block's message is cut to a statement of what
 the fixer changed - no numbered instructions.
@@ -124,6 +129,23 @@ Alternatives rejected:
   listing each under its own heading. The committed case needed the commit to
   land before the turn ended, since a background push that finishes later leaves
   the file dirty and the reformat lands in the other group instead.
+- The snapshot pair is only sound against a fixed baseline. Taken against
+  `HEAD`, a commit landing between them drops a file out of the second snapshot
+  because it is now committed, which is indistinguishable from the fixer having
+  rewritten it - a false positive of exactly the kind this ADR exists to remove.
+  Reproduced with a `fixCommand` that commits, then closed by resolving `HEAD`
+  once and diffing both snapshots against that commit.
+- A commit landing mid-run still makes the *grouping* ambiguous, because whether
+  content was committed when the fixer touched it has no single answer once the
+  commit lands halfway through. There is nothing to measure here, so the hook
+  reports the ambiguity instead of hiding it.
+- The likeliest source of such a commit is the kit's own `push` skill, whose
+  agent outlives the turn that launched it. `skills/push/SKILL.md` now waits for
+  the commit to appear before the turn ends. That is worth doing on its own
+  terms - an unwaited agent's report is unverified, and this session relayed two
+  that the repo contradicted - and it removes the common case of this race as a
+  side effect. Other sources remain: a second session, a human at a terminal, a
+  `fixCommand` that commits. The pinned baseline is what covers those.
 - Testing "is this path in HEAD" is wrong, and was the first attempt: a tracked
   file under edit is in HEAD while the reformatted lines are not, so the hook
   fired on ordinary work in progress. The snapshot pair already tells the two
