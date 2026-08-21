@@ -52,17 +52,14 @@ Within a group, put callers above callees and more central members higher.
 
 ## Enum values
 
-A member's value is declared with `enum.auto()` when nothing outside the enum
-reads it - that is, the members are only ever compared to each other. A
-hand-written number there is bookkeeping to maintain for no gain: it has to be
-kept consistent with whatever ordering the enum declares, and inserting a
-member renumbers the rest.
-
-Values are written out when something outside the enum reads them: a value
-persisted to a database or serialised onto the wire, one handed to a library
-that matches on it, or one that *is* the payload (an enum whose values are the
-classes it dispatches to). Such a value is part of a contract, and `auto()`
-would leave it to declaration order.
+- `enum.auto()` when nothing outside the enum reads the value - the members
+  are only ever compared to each other. A hand-written number there is
+  bookkeeping: it has to track whatever ordering the enum declares, and
+  inserting a member renumbers the rest.
+- Explicit values when something outside does read them - a value persisted or
+  serialised, one a library matches on, or one that *is* the payload (an enum
+  whose values are the classes it dispatches to). That value is part of a
+  contract, not an implementation detail.
 
 ## Exception handling
 
