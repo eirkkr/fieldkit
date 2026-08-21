@@ -1,8 +1,8 @@
 # Python code conventions
 
-Conventions for authoring Python source: docstrings, imports, member ordering,
-and exception handling. Several rules below have no automated enforcement and
-rely on review.
+Conventions for authoring Python source: docstrings, imports, member
+ordering, enum values, and exception handling. Several rules below have no
+automated enforcement and rely on review.
 
 ## Docstrings
 
@@ -49,6 +49,20 @@ and classes, then private helpers (callers above callees). Order class members:
 6. Private and static methods
 
 Within a group, put callers above callees and more central members higher.
+
+## Enum values
+
+A member's value is declared with `enum.auto()` when nothing outside the enum
+reads it - that is, the members are only ever compared to each other. A
+hand-written number there is bookkeeping to maintain for no gain: it has to be
+kept consistent with whatever ordering the enum declares, and inserting a
+member renumbers the rest.
+
+Values are written out when something outside the enum reads them: a value
+persisted to a database or serialised onto the wire, one handed to a library
+that matches on it, or one that *is* the payload (an enum whose values are the
+classes it dispatches to). Such a value is part of a contract, and `auto()`
+would leave it to declaration order.
 
 ## Exception handling
 
