@@ -33,6 +33,14 @@ automated enforcement and rely on review.
 - A module that `__init__` imports during initialisation can't import back from
   the package (it's only half-built at that point); it imports shared symbols
   directly from the source file, even public ones.
+- Import a helper module as a namespace when its bare symbols would be
+  ambiguous: `from pkg import _flasher as flasher`, called as
+  `flasher.success(...)` - aliasing drops the `_`, the path keeps it.
+  `current_actor()` could come from anywhere; `auth.current_actor()` says which
+  subsystem answers. Import a named type directly - the name already says what
+  it is.
+- Import a module the same way throughout a file; two forms read as two
+  dependencies.
 - Name a module by what it exposes. A `_`-prefix marks a module as internal to
   its package, not part of its public surface.
 
