@@ -78,6 +78,12 @@ Only the second and third involve a human.
   the change. It covers what changed since the previous gate, any departure
   from the plan, how to verify (exact commands, plus manual steps), what to
   look at closely, and what is deliberately not done yet.
+- **Green means the PR's checks, not the tests alone.** Linting is CI's
+  pass rather than the agent's, so work deferred to it is work nobody
+  looked at. Reaching a gate includes reading the PR's checks and
+  recording their state in the note, and a stage's last verification task
+  runs the repo's full check rather than its test command. A red check
+  means the stage is not ready, and is fixed before a reviewer sees it.
 - **The stage's diff, written out.** Each note opens with both ways of
   reading the stage: the PR's `/pull/<n>/files/<base>..HEAD` view and
   `git diff <base>..HEAD`, spelt out so the reviewer clicks or copies rather
