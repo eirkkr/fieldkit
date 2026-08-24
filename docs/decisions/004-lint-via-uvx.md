@@ -9,7 +9,7 @@ or virtual environment.
 ## Reason
 
 This repo has no application code or runtime dependencies - only a single
-linter. A full uv project (the studynav approach: `pyproject.toml`, `uv.lock`,
+linter. A full uv project (`pyproject.toml`, `uv.lock`,
 `uv sync`) was rejected as overhead disproportionate to one tool: it would add
 an install step and project scaffolding for no other benefit. `uvx` runs the
 tool on demand with no install, and pinning the version in the recipe gives

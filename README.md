@@ -1,9 +1,35 @@
 # Field Kit
 
-Shared dev conventions, tooling, and reusable assets, drawn on across my repos.
+One place to keep the dev conventions and Claude Code tooling that every repo
+you work in otherwise ends up re-stating for itself.
 
 Like a survival field kit: the **manual** (conventions) and the **instruments**
-(reusable tooling) live in one place, and every repo reaches into the same kit.
+(skills, subagents, hooks, a status line) live together, and every repo reaches
+into the same kit instead of carrying its own copy. A repo opts in with a
+one-line `@`-import; a rule edited here reaches all of them the next session.
+
+## What's actually in it
+
+- **Conventions** an agent reads as instructions - how to branch, commit, open
+  a PR, record a decision, write a spec, work in Python. Split into a small
+  always-on core and a larger set loaded only when the matching action comes
+  up, so a session pays for what it uses.
+- **Claude Code assets** - skills (`push`, `pr`, `merge`, `kit-reconcile`),
+  subagents, a git `pre-commit` hook that blocks commits to the default branch,
+  a `Stop` hook that catches formatter drift, a status line.
+- **The reasoning** - [`docs/decisions/`](docs/decisions/) holds an ADR per
+  non-obvious choice. If you only read one thing, read those: they are the part
+  that transfers, whatever your own setup looks like.
+
+## Is this for you?
+
+This is my personal kit, opinionated and shaped around how I work, published so
+it can be read rather than as a product. There is no stability promise and the
+conventions encode my preferences, not general best practice.
+
+You are welcome to fork it, lift individual conventions, or just mine the ADRs
+for ideas. Setup below assumes you have forked it and are running your own copy;
+the `eirkkr/fieldkit` remote is mine and you will not be able to push to it.
 
 ## Layout
 
@@ -134,8 +160,8 @@ One thing the script can't do for you: the linked templates are fragments
 with no H1, and while `rumdl check` in the consumer repo resolves the symlink
 and honours the kit's own ignore for them, rumdl's language server reads only
 the workspace-root config - so an editor will flag `MD041` on them until the
-repo ignores it too. Add to the repo's rumdl config (StudyNav's
-`pyproject.toml` has the worked example):
+repo ignores it too. Add to the repo's rumdl config (a Python consumer's
+`pyproject.toml` is the natural home):
 
 ```toml
 [tool.rumdl.per-file-ignores]
@@ -149,8 +175,8 @@ The linked files also **dangle in any checkout without a `.fieldkit` symlink**,
 CI included, exactly as the `.claude/skills` links already do. That's harmless
 until a tool walks them: anything that reads every file in the tree will fail
 on them with an IO error, and unlike the skills links these sit inside the
-linted tree. StudyNav hit this with `ruff format`, which reads Markdown, and
-excludes the directory:
+linted tree. A Python consumer hit this with `ruff format`, which reads
+Markdown, and excludes the directory:
 
 ```toml
 [tool.ruff]
@@ -255,10 +281,13 @@ until it's committed.
 ## Updating a shared rule
 
 Every consumer reads the same files, so editing one here affects **all** of
-them. Make changes in your kit clone, commit on a branch, and push - it's a
-normal git repo. You have push access as the owner; add collaborators with write
-access on GitHub if others consume it. Consumers pick up the change next
-session.
+them. Make changes in your own kit clone, commit on a branch, and push - it's a
+normal git repo, and consumers pick up the change next session.
+
+That blast radius is the reason the kit is worth having and the reason to be
+careful with it: there is no per-consumer pinning to soften a bad edit (see
+[ADR 006](docs/decisions/006-symlink-kit-reference.md) on why a submodule was
+rejected).
 
 ## Rolling out a rule change to consumers
 
@@ -311,6 +340,19 @@ part of its loop.) When you do need to feed command output back, do it cheaply:
 
 This is human-facing on purpose - it's how you operate the loop, not a rule for
 the agent, so it stays out of every session's context.
+
+## Licence
+
+MIT - see [LICENSE](LICENSE). Take what's useful.
+
+Two parts are not mine: `repo-skills/` is vendored verbatim from
+[OpenSpec](https://github.com/Fission-AI/OpenSpec) and `schemas/review-gated/`
+is derived from its stock `spec-driven` schema, both MIT. See
+[NOTICE](NOTICE).
+
+Issues and pull requests are welcome but may sit - this tracks one person's
+working setup, so a change that suits your workflow and not mine is better off
+in your fork.
 
 ## Development
 

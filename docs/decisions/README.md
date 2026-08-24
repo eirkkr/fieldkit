@@ -40,3 +40,4 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 033 | [Let the pr agent open the PR itself](033-pr-agent-opens-the-pr.md)                                       | Accepted   |
 | 034 | [Gate OpenSpec stages on human review](034-review-gated-openspec-schema.md)                               | Accepted   |
 | 035 | [Attribute formatter drift by measuring the fixer](035-measure-the-fixer-not-the-transcript.md)           | Accepted   |
+| 036 | [Publish publicly under MIT](036-public-mit-with-upstream-notice.md)                                      | Accepted   |
