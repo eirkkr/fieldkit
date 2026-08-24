@@ -37,6 +37,13 @@ report as a draft awaiting a second dispatch. Relay that report (the PR
 link, title, and body - or an existing PR's URL if one was already open on
 this branch, in which case there was nothing to create).
 
+Everything handed to the agent as title or body is published verbatim, so
+keep directives out of it - "don't add X", "use the wording below", notes
+about what not to do - or they end up in the PR for everyone to read. Those
+belong in the surrounding prompt, not inside the text being posted. Read the
+body back after it's opened (`gh pr view --json body`), which is also what
+catches it when this goes wrong.
+
 Reaching this skill already means opening the PR is approved - either the
 user typed `/pr` directly, or the caller asked and got a yes first. So the
 agent opens it straight away, with no review of the draft in between;

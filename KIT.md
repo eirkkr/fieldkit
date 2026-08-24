@@ -96,6 +96,11 @@ rules live in its root `CLAUDE.md`, which is not imported by consumers.
 - When editing a file, fix pre-existing convention violations in that file as
   part of the change; don't extend them. If the fix would span modules, file
   an issue instead.
+- Auditing prose for a phrase needs the text unwrapped first - hard-wrapped
+  Markdown splits phrases across lines, where a line-based `grep` misses them
+  and reports the file clean. Normalise whitespace before matching (e.g. read
+  the file and `' '.join(text.split())`), and treat a no-hit result from a
+  line-based search over wrapped prose as unproven, not as absence.
 
 ## Load on Demand
 
