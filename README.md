@@ -1,7 +1,7 @@
 # Field Kit
 
-One place to keep the dev conventions and Claude Code tooling that every repo
-you work in otherwise ends up re-stating for itself.
+One place to keep the dev conventions and Claude Code tooling that every repo I
+work in would otherwise re-state for itself.
 
 Like a survival field kit: the **manual** (conventions) and the **instruments**
 (skills, subagents, hooks, a status line) live together, and every repo reaches
