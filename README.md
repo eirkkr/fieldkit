@@ -76,8 +76,8 @@ Node >= 20.19.0 (for the pinned `openspec` CLI; `just install` only checks the
 version - upgrade yourself first, e.g. `sudo n lts`).
 
 1. **Clone the kit.** Fork it first if you intend to change anything - the
-   steps below push to whatever remote you cloned. Anywhere on disk; the kit no
-   longer hardcodes its location:
+   steps below push to whatever remote you cloned. Anywhere on disk - the kit
+   doesn't care where it lives:
 
    ```bash
    git clone https://github.com/<your-fork>/fieldkit.git ~/src/fieldkit

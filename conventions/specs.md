@@ -16,8 +16,8 @@ described here; this file is the content guidance for what goes in them.
   its own when a repo has `openspec/` activated, or you can invoke one
   directly from the `/` menu.
 - A change's artifacts are `proposal.md` (what & why), `design.md` (how),
-  and `tasks.md` (implementation steps) - the sections below map the
-  durable guidance from the old manual flow onto these three.
+  and `tasks.md` (implementation steps); the sections below say what belongs
+  in each.
 
 ## What a spec is
 
