@@ -1,10 +1,8 @@
 # Claude Guidance (this repo)
 
 Field Kit's own repo-specific rules. The shared, cross-repo rules consumers
-import live in [KIT.md](KIT.md) and are imported below - edit those there, not
-here.
-
-@KIT.md
+import live in [KIT.md](KIT.md) and are imported at the foot of this file -
+edit those there, not here.
 
 ## This repo is public
 
@@ -30,3 +28,10 @@ KIT.md's load-on-demand table gives targets as `.fieldkit/conventions/<file>`,
 which is correct in a consumer repo reaching the kit through its symlink. This
 repo has no `.fieldkit` symlink to itself ([ADR 014](docs/decisions/014-skills-not-commands.md)),
 so read those files at `conventions/<file>` instead.
+
+## Shared rules
+
+Everything below is [KIT.md](KIT.md), imported verbatim - the cross-repo rules
+every consumer gets. It carries its own heading.
+
+@KIT.md
