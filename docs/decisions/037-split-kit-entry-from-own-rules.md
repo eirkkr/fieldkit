@@ -55,3 +55,8 @@ per [ADR 005](005-flat-repo-structure.md).
   That mismatch predates this ADR and was previously unwritten.
 - Future repo-specific rules for the kit now have an obvious home, rather than
   pressure to generalise them into the shared file.
+- Import placement now matters and is documented. `KIT.md` keeps its own H1,
+  since it is also read standalone as the kit's manual, and imports expand in
+  place - so an import above a repo's own rules leaves them reading as
+  subsections of the generic guidance. Both the kit's `CLAUDE.md` and the
+  README's setup step put the import at the foot.

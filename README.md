@@ -102,6 +102,13 @@ version - upgrade yourself first, e.g. `sudo n lts`).
    @.fieldkit/KIT.md
    ```
 
+   Put the import at the **foot** of the consumer's `CLAUDE.md`, after its own
+   content. Imports expand in place and `KIT.md` carries its own H1, so an
+   import near the top drops a second top-level heading above the repo's own
+   rules, leaving them reading as subsections of the generic guidance. At the
+   foot it reads as an appendix instead. The kit's own `CLAUDE.md` does the
+   same.
+
    For a Python repo, also add `@.fieldkit/conventions/python/README.md`; it
    stays slim and indexes `code`, `setup`, and `testing`, which Claude reads on
    demand. `.fieldkit` is gitignored - every collaborator or CI checkout runs
