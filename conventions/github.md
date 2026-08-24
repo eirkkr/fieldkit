@@ -10,6 +10,12 @@
 - Before drafting an issue, check for duplicates/broader scope:
   `gh issue list --search "<2-3 keywords>"`.
 - Out-of-scope work -> file a narrow issue and defer; don't bundle it in.
+- In a public repo, don't name a private one. Issue text, PR descriptions,
+  comments, and commit messages are as public as the code, and a
+  `owner/repo#123` cross-reference or a `github.com` URL names it as plainly
+  as prose does. Refer to it by role instead - "a consumer repo", "a Python
+  consumer". The substance of a worked example - the finding, the numbers, the
+  file names - is fine; the repo's identity is what stays out.
 
 ## Issues
 

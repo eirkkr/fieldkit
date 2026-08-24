@@ -33,8 +33,10 @@ the `eirkkr/fieldkit` remote is mine and you will not be able to push to it.
 
 ## Layout
 
-- `CLAUDE.md` - the entry point a consumer repo `@`-imports; holds the
-  always-on rules directly and points to the opt-in, load-on-demand ones.
+- `KIT.md` - the entry point a consumer repo `@`-imports; holds the always-on
+  rules directly and points to the opt-in, load-on-demand ones.
+- `CLAUDE.md` - the kit's *own* repo-specific rules, not imported by consumers.
+  It imports `KIT.md`, so a session in this repo gets both.
 - `conventions/` - the load-on-demand docs: `git`, `github`, `decisions`,
   `specs`, `ai`, and `python/` for Python repos - a slim `README.md` hub
   indexing `code`, `setup`, and `testing`, each read on demand.
@@ -97,13 +99,20 @@ version - upgrade yourself first, e.g. `sudo n lts`).
    ```
 
    ```markdown
-   @.fieldkit/CLAUDE.md
+   @.fieldkit/KIT.md
    ```
 
    For a Python repo, also add `@.fieldkit/conventions/python/README.md`; it
    stays slim and indexes `code`, `setup`, and `testing`, which Claude reads on
    demand. `.fieldkit` is gitignored - every collaborator or CI checkout runs
    this step once to recreate the symlink.
+
+   > **Consumers wired before the split:** the import was
+   > `@.fieldkit/CLAUDE.md`, which no longer exists - that name is now the
+   > kit's own rules. Change the line to `@.fieldkit/KIT.md`. Claude Code
+   > reports an unresolved import rather than failing silently, and `/memory`
+   > confirms the fix. See
+   > [ADR 037](docs/decisions/037-split-kit-entry-from-own-rules.md).
 
 3. **Grant Claude access to the kit.** `just install` patches
    `~/.claude/settings.json`: adds the kit path to
@@ -123,8 +132,9 @@ version - upgrade yourself first, e.g. `sudo n lts`).
    a subdirectory. Worth repeating in each consumer repo's README.
 
 5. **First run.** Accept Claude Code's external-import dialog for `@.fieldkit` -
-   declining permanently disables it. Verify with `/memory`: `CLAUDE.md` and the
-   convention files should show as loaded.
+   declining permanently disables it. Verify with `/memory`: your own
+   `CLAUDE.md`, the kit's `KIT.md`, and the convention files should show as
+   loaded.
 
 ## Adopting OpenSpec in a consumer repo
 
