@@ -118,14 +118,6 @@ version - upgrade yourself first, e.g. `sudo n lts`).
    demand. `.fieldkit` is gitignored - every collaborator or CI checkout runs
    this step once to recreate the symlink.
 
-   > **Consumers wired before the split:** the import was
-   > `@.fieldkit/CLAUDE.md`, which no longer exists - that name is now the
-   > kit's own rules. Change the line to `@.fieldkit/KIT.md`, then check with
-   > `/memory` that `KIT.md` and the convention files load - an import that
-   > silently resolves to nothing looks identical to a session with no rules.
-   > See
-   > [ADR 037](docs/decisions/037-split-kit-entry-from-own-rules.md).
-
 3. **Grant Claude access to the kit.** `just install` patches
    `~/.claude/settings.json`: adds the kit path to
    `permissions.additionalDirectories` so all consumer sessions can read it

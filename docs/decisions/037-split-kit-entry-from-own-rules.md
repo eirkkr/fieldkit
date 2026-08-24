@@ -45,8 +45,10 @@ per [ADR 005](005-flat-repo-structure.md).
 - **Breaking for existing consumers.** `@.fieldkit/CLAUDE.md` no longer
   resolves; each consumer's import line becomes `@.fieldkit/KIT.md`. Until it
   is changed, that session runs without the kit's always-on rules, which is not
-  obvious from inside it - `/memory` is the check. The README carries the
-  migration note.
+  obvious from inside it - `/memory` is the check. The migration is recorded
+  here rather than in the README: it applies only to repos wired before this
+  split, so in the setup steps it would read as an instruction to fix something
+  a new reader never had.
 - A consumer importing the old path would otherwise have picked up rules
   written for the kit - the split prevents that, which is the point.
 - The kit's root `CLAUDE.md` also records that this repo has no `.fieldkit`
