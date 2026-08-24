@@ -1,19 +1,49 @@
 # Field Kit
 
-Shared dev conventions, tooling, and reusable assets, drawn on across my repos.
+One place to keep the dev conventions and Claude Code tooling that every repo I
+work in would otherwise re-state for itself.
 
 Like a survival field kit: the **manual** (conventions) and the **instruments**
-(reusable tooling) live in one place, and every repo reaches into the same kit.
+(skills, subagents, hooks, a status line) live together, and every repo reaches
+into the same kit instead of carrying its own copy. A repo opts in with a
+one-line `@`-import; a rule edited here reaches all of them the next session.
+
+## What's actually in it
+
+- **Conventions** an agent reads as instructions - how to branch, commit, open
+  a PR, record a decision, write a spec, work in Python. Split into a small
+  always-on core and a larger set loaded only when the matching action comes
+  up, so a session pays for what it uses.
+- **Claude Code assets** - skills (`push`, `pr`, `merge`, `kit-reconcile`),
+  subagents, a git `pre-commit` hook that blocks commits to the default branch,
+  a `Stop` hook that catches formatter drift, a status line.
+- **The reasoning** - [`docs/decisions/`](docs/decisions/) holds an ADR per
+  non-obvious choice. If you only read one thing, read those: they are the part
+  that transfers, whatever your own setup looks like.
+
+## Is this for you?
+
+This is my personal kit, opinionated and shaped around how I work, published so
+it can be read rather than as a product. There is no stability promise and the
+conventions encode my preferences, not general best practice.
+
+You are welcome to fork it, lift individual conventions, or just mine the ADRs
+for ideas. Setup below assumes you have forked it and are running your own copy;
+the `eirkkr/fieldkit` remote is mine and you will not be able to push to it.
 
 ## Layout
 
-- `CLAUDE.md` - the entry point a consumer repo `@`-imports; holds the
-  always-on rules directly and points to the opt-in, load-on-demand ones.
+- `KIT.md` - the entry point a consumer repo `@`-imports; holds the always-on
+  rules directly and points to the opt-in, load-on-demand ones.
+- `CLAUDE.md` - the kit's *own* repo-specific rules, not imported by consumers.
+  It imports `KIT.md`, so a session in this repo gets both.
 - `conventions/` - the load-on-demand docs: `git`, `github`, `decisions`,
   `specs`, `ai`, and `python/` for Python repos - a slim `README.md` hub
   indexing `code`, `setup`, and `testing`, each read on demand.
 - `docs/decisions/` - ADRs recording this repo's own non-obvious design
   choices; the one `docs/` subtree.
+- `LICENSE`, `NOTICE` - MIT, plus the upstream copyright for the OpenSpec
+  content in `repo-skills/` and `schemas/review-gated/` (see Licence).
 - `skills/` - shared Claude Code skills, symlinked into `~/.claude/skills` by
   `just install` (see Setup).
 - `repo-skills/` - vendored OpenSpec Claude Code skills, symlinked into an
@@ -45,10 +75,12 @@ Requires [just](https://just.systems), [uv](https://docs.astral.sh/uv/), and
 Node >= 20.19.0 (for the pinned `openspec` CLI; `just install` only checks the
 version - upgrade yourself first, e.g. `sudo n lts`).
 
-1. **Clone the kit.** Anywhere - it no longer hardcodes its location:
+1. **Clone the kit.** Fork it first if you intend to change anything - the
+   steps below push to whatever remote you cloned. Anywhere on disk - the kit
+   doesn't care where it lives:
 
    ```bash
-   git clone https://github.com/eirkkr/fieldkit.git ~/src/fieldkit
+   git clone https://github.com/<your-fork>/fieldkit.git ~/src/fieldkit
    ```
 
    Then wire the kit's skills into your user-level Claude config (once per
@@ -71,8 +103,15 @@ version - upgrade yourself first, e.g. `sudo n lts`).
    ```
 
    ```markdown
-   @.fieldkit/CLAUDE.md
+   @.fieldkit/KIT.md
    ```
+
+   Put the import at the **foot** of the consumer's `CLAUDE.md`, after its own
+   content. Imports expand in place and `KIT.md` carries its own H1, so an
+   import near the top drops a second top-level heading above the repo's own
+   rules, leaving them reading as subsections of the generic guidance. At the
+   foot it reads as an appendix instead. The kit's own `CLAUDE.md` does the
+   same.
 
    For a Python repo, also add `@.fieldkit/conventions/python/README.md`; it
    stays slim and indexes `code`, `setup`, and `testing`, which Claude reads on
@@ -97,8 +136,9 @@ version - upgrade yourself first, e.g. `sudo n lts`).
    a subdirectory. Worth repeating in each consumer repo's README.
 
 5. **First run.** Accept Claude Code's external-import dialog for `@.fieldkit` -
-   declining permanently disables it. Verify with `/memory`: `CLAUDE.md` and the
-   convention files should show as loaded.
+   declining permanently disables it. Verify with `/memory`: your own
+   `CLAUDE.md`, the kit's `KIT.md`, and the convention files should show as
+   loaded.
 
 ## Adopting OpenSpec in a consumer repo
 
@@ -134,8 +174,8 @@ One thing the script can't do for you: the linked templates are fragments
 with no H1, and while `rumdl check` in the consumer repo resolves the symlink
 and honours the kit's own ignore for them, rumdl's language server reads only
 the workspace-root config - so an editor will flag `MD041` on them until the
-repo ignores it too. Add to the repo's rumdl config (StudyNav's
-`pyproject.toml` has the worked example):
+repo ignores it too. Add to the repo's rumdl config (a Python consumer's
+`pyproject.toml` is the natural home):
 
 ```toml
 [tool.rumdl.per-file-ignores]
@@ -149,8 +189,8 @@ The linked files also **dangle in any checkout without a `.fieldkit` symlink**,
 CI included, exactly as the `.claude/skills` links already do. That's harmless
 until a tool walks them: anything that reads every file in the tree will fail
 on them with an IO error, and unlike the skills links these sit inside the
-linted tree. StudyNav hit this with `ruff format`, which reads Markdown, and
-excludes the directory:
+linted tree. A Python consumer hit this with `ruff format`, which reads
+Markdown, and excludes the directory:
 
 ```toml
 [tool.ruff]
@@ -255,10 +295,13 @@ until it's committed.
 ## Updating a shared rule
 
 Every consumer reads the same files, so editing one here affects **all** of
-them. Make changes in your kit clone, commit on a branch, and push - it's a
-normal git repo. You have push access as the owner; add collaborators with write
-access on GitHub if others consume it. Consumers pick up the change next
-session.
+them. Make changes in your own kit clone, commit on a branch, and push - it's a
+normal git repo, and consumers pick up the change next session.
+
+That blast radius is the reason the kit is worth having and the reason to be
+careful with it: there is no per-consumer pinning to soften a bad edit (see
+[ADR 006](docs/decisions/006-symlink-kit-reference.md) on why a submodule was
+rejected).
 
 ## Rolling out a rule change to consumers
 
@@ -311,6 +354,19 @@ part of its loop.) When you do need to feed command output back, do it cheaply:
 
 This is human-facing on purpose - it's how you operate the loop, not a rule for
 the agent, so it stays out of every session's context.
+
+## Licence
+
+MIT - see [LICENSE](LICENSE). Take what's useful.
+
+Two parts are not mine: `repo-skills/` is vendored verbatim from
+[OpenSpec](https://github.com/Fission-AI/OpenSpec) and `schemas/review-gated/`
+is derived from its stock `spec-driven` schema, both MIT. See
+[NOTICE](NOTICE).
+
+Issues and pull requests are welcome but may sit - this tracks one person's
+working setup, so a change that suits your workflow and not mine is better off
+in your fork.
 
 ## Development
 

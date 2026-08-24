@@ -157,8 +157,8 @@ Alternatives rejected:
   included - the same property the `.claude/skills` links already have, but
   now inside the linted tree, where a tool that walks every file fails on
   them with an IO error rather than ignoring them. Adopting repos must
-  exclude `openspec/schemas` from any such tool; StudyNav needed it for
-  `ruff format`, which reads Markdown. Copying the schema in instead would
+  exclude `openspec/schemas` from any such tool; a Python consumer needed it
+  for `ruff format`, which reads Markdown. Copying the schema in instead would
   avoid this, at the cost of the per-repo drift centralisation exists to
   prevent.
 - Each adopting repo also needs a `per-file-ignores` entry of its own for
