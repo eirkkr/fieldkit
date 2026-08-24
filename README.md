@@ -42,6 +42,8 @@ the `eirkkr/fieldkit` remote is mine and you will not be able to push to it.
   indexing `code`, `setup`, and `testing`, each read on demand.
 - `docs/decisions/` - ADRs recording this repo's own non-obvious design
   choices; the one `docs/` subtree.
+- `LICENSE`, `NOTICE` - MIT, plus the upstream copyright for the OpenSpec
+  content in `repo-skills/` and `schemas/review-gated/` (see Licence).
 - `skills/` - shared Claude Code skills, symlinked into `~/.claude/skills` by
   `just install` (see Setup).
 - `repo-skills/` - vendored OpenSpec Claude Code skills, symlinked into an
@@ -73,10 +75,12 @@ Requires [just](https://just.systems), [uv](https://docs.astral.sh/uv/), and
 Node >= 20.19.0 (for the pinned `openspec` CLI; `just install` only checks the
 version - upgrade yourself first, e.g. `sudo n lts`).
 
-1. **Clone the kit.** Anywhere - it no longer hardcodes its location:
+1. **Clone the kit.** Fork it first if you intend to change anything - the
+   steps below push to whatever remote you cloned. Anywhere on disk; the kit no
+   longer hardcodes its location:
 
    ```bash
-   git clone https://github.com/eirkkr/fieldkit.git ~/src/fieldkit
+   git clone https://github.com/<your-fork>/fieldkit.git ~/src/fieldkit
    ```
 
    Then wire the kit's skills into your user-level Claude config (once per
@@ -116,9 +120,10 @@ version - upgrade yourself first, e.g. `sudo n lts`).
 
    > **Consumers wired before the split:** the import was
    > `@.fieldkit/CLAUDE.md`, which no longer exists - that name is now the
-   > kit's own rules. Change the line to `@.fieldkit/KIT.md`. Claude Code
-   > reports an unresolved import rather than failing silently, and `/memory`
-   > confirms the fix. See
+   > kit's own rules. Change the line to `@.fieldkit/KIT.md`, then check with
+   > `/memory` that `KIT.md` and the convention files load - an import that
+   > silently resolves to nothing looks identical to a session with no rules.
+   > See
    > [ADR 037](docs/decisions/037-split-kit-entry-from-own-rules.md).
 
 3. **Grant Claude access to the kit.** `just install` patches
