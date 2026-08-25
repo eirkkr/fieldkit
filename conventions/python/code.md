@@ -60,29 +60,36 @@ Within a group, put callers above callees and more central members higher.
 
 ## Constants
 
-A module-level name is the default home for a fixed value. Python modules are
-already namespace objects, so a class or frozen dataclass wrapped around a
-group of constants adds an indentation level and an instance nobody needs. Two
-shapes cover nearly everything:
+Put a constant at the top of the module that uses it. Wrapping a group of them
+in a class or a frozen dataclass buys nothing - a module is already a namespace,
+so `limits.API_READ` reads just as well as `Limits.API_READ` would, with no
+class to write and no instance to make. The standard library works this way
+too: `errno.ENOENT`, `stat.S_IRUSR`, `string.punctuation`.
 
-- **Private to one module** - `_`-prefixed, declared at the top. Correct even
-  when a single function reads it: keeping it there lets a reader see the
-  module's whole authored-value surface without opening the functions.
-- **A shared vocabulary** - a module whose job is holding a related set of
-  public names, read dotted (`colls.HTTP_LOG`, `limits.API_READ`). The standard
-  library does this rather than wrap the names in a class: `errno.ENOENT`,
-  `stat.S_IRUSR`, `string.punctuation`.
+Two cases:
 
-Reach for an `Enum` instead when the set is branched on exhaustively (`match` +
-`assert_never`), iterated or membership-tested, or typed as a parameter so a
-stray string is an error. Absent all three it is churn: a name spelled once and
-handed to a library or a template is a string, and a `frozenset` is the right
-container for a pure membership test.
+- **One module uses it** - give it a leading underscore. Do this even if only
+  one function reads it, so a reader can see every fixed value the module sets
+  in one place, without opening the functions.
+- **Several modules use it** - give the whole group a module of its own, and
+  import that module by name so callers read `colls.HTTP_LOG`.
 
-A constant spelled in two languages - a form field name Python matches and a
-template renders - is the case the container choice doesn't fix, and the
-duplicate fails silently. Inject the value into the other language from the one
-that owns it.
+Use an `Enum` instead when one of these is true:
+
+- Something has to handle every value, and should fail to type-check when a new
+  one is added (`match` ending in `assert_never`).
+- Something loops over the values, or asks whether a value is one of them.
+- An argument should be typed as one of them, so any other string is an error.
+
+If none of them is true, an `Enum` is work for nothing. A name that is written
+once and handed to a library or a template is just a string, and a `frozenset`
+is enough on its own to ask whether a value is in the set.
+
+One problem no container solves: the same value written in two languages, such
+as a form field name that Python checks for and a template renders. Nothing
+ties the two copies together, and when they stop matching there is no error -
+the comparison simply stops being true. Pass the value from the side that owns
+it to the other side, so it is written once.
 
 ## Enum values
 
