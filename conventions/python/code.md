@@ -1,8 +1,8 @@
 # Python code conventions
 
 Conventions for authoring Python source: docstrings, imports, member
-ordering, enum values, and exception handling. Several rules below have no
-automated enforcement and rely on review.
+ordering, constants, enum values, and exception handling. Several rules
+below have no automated enforcement and rely on review.
 
 ## Docstrings
 
@@ -57,6 +57,43 @@ and classes, then private helpers (callers above callees). Order class members:
 6. Private and static methods
 
 Within a group, put callers above callees and more central members higher.
+
+## Constants
+
+A module-level name in `UPPER_SNAKE` is the default home for a fixed value.
+Python modules are already namespace objects, so a class or frozen dataclass
+wrapped around a group of them adds an indentation level and an instance
+nobody needs, without adding a guarantee. Two shapes cover nearly everything:
+
+- **Private to one module** - `_`-prefixed, declared at the top, used by that
+  module's functions. Correct even when only one function reads it: a local
+  in `UPPER_SNAKE` is a local wearing constant clothing, and renaming it to
+  lowercase loses the signal that the value is fixed. Keeping it at the top
+  also lets a reader see the module's whole authored-value surface without
+  opening the functions.
+- **A shared vocabulary** - a module whose job is holding a related set of
+  public names, imported as a namespace and read dotted (`colls.HTTP_LOG`,
+  `limits.API_READ`). This is what `errno`, `signal`, and `stat` are.
+
+Reach for an `Enum` instead when the set has one of three properties, none of
+which is tidiness:
+
+1. Something branches on it and should be exhaustive (`match` +
+   `assert_never`).
+2. Something iterates the set, or tests membership against it.
+3. A parameter should be typed "one of these", so a stray string is a type
+   error.
+
+Absent all three, an enum is churn: names that are only ever spelled once and
+handed to a library or a template are strings, and a `frozenset` is the right
+container for a pure membership test.
+
+Constants shared across languages - a form field name Python matches and a
+template renders, a key both a client and a server spell - are the case the
+container choice doesn't fix. Neither a module nor an enum stops the literal
+being written twice, and the duplicate fails silently: the comparison simply
+stops matching. Inject the value into the other language from the one that
+owns it rather than spelling it in both.
 
 ## Enum values
 
