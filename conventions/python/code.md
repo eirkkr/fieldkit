@@ -1,8 +1,8 @@
 # Python code conventions
 
 Conventions for authoring Python source: docstrings, imports, member
-ordering, enum values, and exception handling. Several rules below have no
-automated enforcement and rely on review.
+ordering, constants, enum values, and exception handling. Several rules
+below have no automated enforcement and rely on review.
 
 ## Docstrings
 
@@ -57,6 +57,43 @@ and classes, then private helpers (callers above callees). Order class members:
 6. Private and static methods
 
 Within a group, put callers above callees and more central members higher.
+
+## Constants
+
+Put a constant at the top of the module that uses it. Wrapping a group of them
+in a class or a frozen dataclass buys nothing - a module is already a namespace,
+so `limiter.API_READ` reads just as well as `Limits.API_READ` would, with no
+class to write and no instance to make. The standard library works this way
+too: `errno.ENOENT`, `stat.S_IRUSR`, `string.punctuation`.
+
+Two cases:
+
+- **One module uses it** - give it a leading underscore. Do this even if only
+  one function reads it, so a reader can see every fixed value the module sets
+  in one place, without opening the functions.
+- **Several modules use it** - give the whole group a module of its own, and
+  import that module by name so callers read `coll_names.HTTP_LOG`.
+
+Use an `Enum` instead when one of these is true:
+
+- Something has to handle every value, and should fail to type-check when a new
+  one is added (`match` ending in `assert_never`).
+- Something loops over the values, or asks whether a value is one of them.
+- An argument should be typed as one of them, so any other string is an error.
+
+If none of them is true, an `Enum` is work for nothing. A name that is written
+once and handed to a library or a template is just a string, and a `frozenset`
+is enough on its own to ask whether a value is in the set.
+
+None of this helps when the same value is also written outside Python. Take a
+submit button: Python defines `SAVE = "save"` and checks `if SAVE in
+request.form`, while the template hand-writes `name="save"`. Nothing connects
+the two, so renaming the constant just means Python stops finding the button -
+no error, no failing import, the button silently does nothing.
+
+Pick the side that owns the value and pass it to the other, so it is written
+once. For a template, that means handing the constants to the template engine
+and rendering `name="{{ SAVE }}"` instead of typing the string again.
 
 ## Enum values
 
