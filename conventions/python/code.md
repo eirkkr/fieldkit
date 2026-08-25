@@ -85,11 +85,15 @@ If none of them is true, an `Enum` is work for nothing. A name that is written
 once and handed to a library or a template is just a string, and a `frozenset`
 is enough on its own to ask whether a value is in the set.
 
-One problem no container solves: the same value written in two languages, such
-as a form field name that Python checks for and a template renders. Nothing
-ties the two copies together, and when they stop matching there is no error -
-the comparison simply stops being true. Pass the value from the side that owns
-it to the other side, so it is written once.
+None of this helps when the same value is also written outside Python. Take a
+submit button: Python defines `SAVE = "save"` and checks `if SAVE in
+request.form`, while the template hand-writes `name="save"`. Nothing connects
+the two, so renaming the constant just means Python stops finding the button -
+no error, no failing import, the button silently does nothing.
+
+Pick the side that owns the value and pass it to the other, so it is written
+once. For a template, that means handing the constants to the template engine
+and rendering `name="{{ SAVE }}"` instead of typing the string again.
 
 ## Enum values
 
