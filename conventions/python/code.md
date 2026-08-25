@@ -62,7 +62,7 @@ Within a group, put callers above callees and more central members higher.
 
 Put a constant at the top of the module that uses it. Wrapping a group of them
 in a class or a frozen dataclass buys nothing - a module is already a namespace,
-so `limits.API_READ` reads just as well as `Limits.API_READ` would, with no
+so `limiter.API_READ` reads just as well as `Limits.API_READ` would, with no
 class to write and no instance to make. The standard library works this way
 too: `errno.ENOENT`, `stat.S_IRUSR`, `string.punctuation`.
 
@@ -72,7 +72,7 @@ Two cases:
   one function reads it, so a reader can see every fixed value the module sets
   in one place, without opening the functions.
 - **Several modules use it** - give the whole group a module of its own, and
-  import that module by name so callers read `colls.HTTP_LOG`.
+  import that module by name so callers read `coll_names.HTTP_LOG`.
 
 Use an `Enum` instead when one of these is true:
 
