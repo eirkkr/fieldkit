@@ -69,8 +69,9 @@ shapes cover nearly everything:
   when a single function reads it: keeping it there lets a reader see the
   module's whole authored-value surface without opening the functions.
 - **A shared vocabulary** - a module whose job is holding a related set of
-  public names, read dotted (`colls.HTTP_LOG`, `limits.API_READ`). This is what
-  `errno`, `signal` and `stat` are.
+  public names, read dotted (`colls.HTTP_LOG`, `limits.API_READ`). The standard
+  library does this rather than wrap the names in a class: `errno.ENOENT`,
+  `stat.S_IRUSR`, `string.punctuation`.
 
 Reach for an `Enum` instead when the set is branched on exhaustively (`match` +
 `assert_never`), iterated or membership-tested, or typed as a parameter so a
