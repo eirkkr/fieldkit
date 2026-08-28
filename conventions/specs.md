@@ -90,11 +90,11 @@ Only the second and third involve a human.
   than assembling them. The PR view leads because it alone holds state -
   files tick off as they are read, a file a later stage touches again
   un-ticks itself, comments outlive the session. A change opens a draft PR at
-  its first gate to have it: a draft asks nothing of anyone, CI reports on
-  each stage independently of the agent's word, and the final stage marks it
-  ready. Without one, the note carries the compare view and says what is
-  missing. Both links end at the literal `HEAD`, which resolves to the PR's
-  tip, so neither goes stale as fixes land mid-review.
+  its first gate to have it: a draft asks nothing of anyone, and CI reports
+  on each stage independently of the agent's word. Without one, the note
+  carries the compare view and says what is missing. Both links end at the
+  literal `HEAD`, which resolves to the PR's tip, so neither goes stale as
+  fixes land mid-review.
 - **The gate's bookmark.** The base is the previous gate's approved commit,
   recorded because nothing else knows it: every note ends with a `Reviewed
   at` heading, marked awaiting approval until the gate closes, then filled
