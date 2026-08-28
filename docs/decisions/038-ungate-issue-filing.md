@@ -50,6 +50,9 @@ Alternatives rejected:
 - `conventions/github.md`'s "Show a draft and wait for approval ... confirm
   first" line is replaced with the act-then-show model, carrying the close
   exception.
+- The close gate doesn't reach the automatic close a merge performs: a PR
+  body carrying `Closes #X` closes `X` on merge, and merging is already
+  gated in its own right, so nothing is confirmed twice.
 - Duplicate-checking (`gh issue list --search`) becomes more load-bearing:
   with no human reading the draft first, that search is the only thing
   standing between a fresh finding and a redundant issue.
