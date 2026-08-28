@@ -344,8 +344,44 @@ apply:
     satisfied. Do not archive, and do not treat the change as complete,
     until they do.
 
-    Once they are, mark the PR ready for review (`gh pr ready`) and bring its
-    description up to the finished change. The draft state carried a meaning
+    It differs from an L2 gate in four ways:
+
+    1. **Its note opens with two diffs, not one.** The work since the last
+       approval leads, from the same base as an L2 gate - the previous
+       gate's `Reviewed at` commit. The whole change follows, based at
+       `git merge-base <default-branch> HEAD`:
+
+           **Review this stage**
+
+           Everything since stage 3 was approved at `a80f8c30`:
+
+               https://github.com/<owner>/<repo>/pull/<n>/files/a80f8c30..HEAD
+
+               git diff a80f8c30..HEAD
+
+           **Review the whole change**, based at `1f4b02e7`:
+
+               https://github.com/<owner>/<repo>/pull/<n>/files
+
+               git diff 1f4b02e7..HEAD
+
+       Name both base commits. Leaving the reviewer to work out where the
+       last approval was makes them assemble the range by hand.
+    2. **The diff walk comes before the artifacts are corrected.** Walking
+       the diff for the conventions CI cannot check turns up
+       artifact-shaped findings, so correcting first means correcting
+       twice. The walk changes nothing on its own.
+    3. **The reconciliation runs in three directions, not two.** Unmet
+       requirements; things built that no requirement asked for; and
+       requirements met only by construction, with no test behind them.
+       Name each of the third kind and say what would verify it.
+    4. **Every issue the change references is re-read.** In the artifacts,
+       in docstrings, in the docs the change touches: still open, and still
+       about the thing cited. Nothing else re-reads those references after
+       they are written.
+
+    Once the reviewer is satisfied, mark the PR ready (`gh pr ready`) and
+    bring its description up to the finished change. The draft state carried a meaning
     for the whole change - stages still landing, gates still to come - and
     leaving it set says the opposite of what the final review just decided.
     Merging is a separate act, and still the reviewer's to call.
