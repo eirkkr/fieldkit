@@ -1,13 +1,17 @@
 # GitHub and external actions
 
-- Show a draft and wait for approval before creating or editing issues or
-  comments. Treat like destructive ops: confirm first.
+- Filing an issue, commenting on one, and editing either need no prior
+  approval - file it, then show what was filed, and correct it after if the
+  wording missed. Closing an issue is the exception: it ends a thread someone
+  may still be relying on, so confirm first. The close a merge performs is
+  already covered - merging a PR whose body carries `Closes #X` closes `X`
+  automatically, and the approval to merge is the approval to close.
 - PRs: mechanics live in [git.md](git.md). Once open, keep the title
   and body in sync as the branch grows - revise it directly when it drifts,
   keeping the human's own wording where it still holds. The description is
   what reviewers read and what the squash message is built from, so it's
   worth getting right.
-- Before drafting an issue, check for duplicates/broader scope:
+- Before filing an issue, check for duplicates/broader scope:
   `gh issue list --search "<2-3 keywords>"`.
 - Out-of-scope work -> file a narrow issue and defer; don't bundle it in.
 - In a public repo, don't name a private one. Issue text, PR descriptions,

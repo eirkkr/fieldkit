@@ -327,9 +327,9 @@ file. Override the range with `/kit-reconcile N` (the last N commits) or
 [ADR 012](docs/decisions/012-reconcile-marker.md).
 
 `/kit-reconcile` reconciles *instructions*, not the codebase. When a convention
-change also implies source edits, it surfaces the affected conventions and offers
-to file issues; the actual code sweep is a separate, still-to-be-built
-`/kit-audit` command.
+change also implies source edits, it files an issue for each affected
+convention and reports them; the actual code sweep is a separate,
+still-to-be-built `/kit-audit` command.
 
 The skill is defined in `skills/kit-reconcile/SKILL.md` and wired up by
 `just install` (see Setup); editing that file updates it everywhere.

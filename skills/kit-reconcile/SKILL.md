@@ -41,9 +41,9 @@ Read the kit history for that range with `git -C .fieldkit log main` and
 The steps above reconcile *instructions*, not the *codebase*. Some convention
 changes also imply source edits this command does not make - a style or language
 rule the existing code now violates. For each changed convention in range, judge
-whether it has codebase implications. List the ones that do and ask me whether to
-file an issue for each before creating any. Don't sweep the code here; that's a
-separate job.
+whether it has codebase implications. File a narrow issue for each one that
+does, then list what was filed. Don't sweep the code here; that's a separate
+job.
 
 ## Advance the marker and open the PR
 
