@@ -42,6 +42,15 @@ present again, until the reviewer says they are satisfied. Only then is the
 change complete, and only then may it be archived. Once they are satisfied,
 take the PR out of draft and bring its description up to the finished change.
 
+Its note opens with two diffs rather than one: the work since the last
+approval, from the previous gate's recorded commit, then the whole change,
+from `git merge-base <default-branch> HEAD` - both written out, both naming
+their base commit. The stage itself walks the diff *before* correcting the
+artifacts, since the walk turns up artifact-shaped findings; reconciles code
+against the artifacts in three directions - unmet, unasked-for, and met but
+unverified; and re-reads every issue the change references to confirm it is
+still open and still about the thing cited.
+
 `openspec instructions apply --change "<name>" --json` returns the schema's
 own statement of these rules in its instruction field. Follow it; this
 section exists because the generated steps above were written for a schema
