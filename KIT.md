@@ -12,53 +12,42 @@ rules live in its root `CLAUDE.md`, which is not imported by consumers.
 
 ## Always-on
 
-- Act-then-show by default: make the change, surface it, correct after.
-  Agree direction first instead for two cases: a genuinely new convention or
-  design decision, even if the action itself is local; and anything
-  outward-facing or irreversible - closing an issue, for instance, ends a
-  thread someone may still be relying on.
+- Act-then-show by default: make the change, surface it, correct after. Ask
+  first for the actions the table marks that way, for anything else
+  outward-facing or irreversible, and for a genuinely new convention or
+  design decision - that last one is gated even when the change itself is
+  local.
 - Git and GitHub actions go through the `push`, `pr`, and `merge` skills -
   don't reach for `git commit`, `git push`, `gh pr create`, or `gh pr merge`
   directly, even mid-task and even when the step looks trivial. Read-only
   inspection (`git status`, `git diff`, `git log`) stays direct, as do
   actions no skill covers - read the matching doc below for those.
-- Committing and pushing - including keeping an open PR's title/body in sync
-  as the branch grows - are act-then-show: don't ask first. Commit each
-  coherent piece of work as it lands and push it, rather than batching a
-  session into one commit at the end; revise a stale PR description
-  directly, no approval needed. A branch is cheap to amend or discard, and
-  the `pre-commit` hook keeps the default branch out of reach.
-- Filing an issue, commenting on one, and editing either are act-then-show
-  as well: do it, then surface what was filed so it can be corrected. The
-  decision that an issue should exist is made when the finding is discussed,
-  not when its prose is drafted, and a wrong issue is editable, closable and
-  deletable by whoever owns the repo. Closing one stays gated, as above.
-- Opening a PR and merging are gated the other way: ask before doing either,
-  unless the user typed `/pr` or `/merge` directly - that invocation is
-  itself the approval, covering the push it may need first too. Once
-  approved (by either path), draft the title/body or squash message
-  yourself and go straight to it - the approval is for whether to act, not
-  a preview of the draft, so there's no separate review step for that.
-  One exception on the opening side: the draft PR a review-gated change
-  opens at its first gate (see `conventions/specs.md`) is part of reaching
-  that gate rather than a request for anyone's attention, and needs no
-  approval - nor does marking it ready once the final review closes. Its
-  merge is gated like any other.
-  Merging is further conditioned on CI, on top of approval: a red or
-  still-running check blocks it outright - stop and report, don't merge
-  around it - but a green one merges straight away once approved, with no
-  additional sign-off. A gate on a *follow-up* never gates the action that
-  precedes it - don't hold a push on an unrelated open question, land it,
-  then ask.
+
+| Action                                     | Approval      | Notes                                                          |
+| ------------------------------------------ | ------------- | -------------------------------------------------------------- |
+| Committing and pushing                     | act-then-show | each coherent piece as it lands, not one batch per session     |
+| Revising an open PR's title/body           | act-then-show | keep it true as the branch grows                               |
+| Filing an issue or comment, editing either | act-then-show | surface what was filed so it can be corrected                  |
+| Closing an issue                           | ask first     | except the automatic close of a `Closes #X` PR on merge        |
+| Creating a branch off a non-default branch | ask first     | explain why first; off the default branch it needs no approval |
+| Opening a PR                               | ask first     | unless the user typed `/pr`                                    |
+| Merging                                    | ask first     | unless the user typed `/merge`; also conditioned on CI         |
+
+- Typing `/pr` or `/merge` is itself the approval, and covers the push it may
+  need first. Approval is for whether to act, not a preview of the draft:
+  draft the title/body or squash message and go straight to it.
+- Merging is conditioned on CI on top of approval - a failed check or a
+  conflict stops it (report that, don't merge around it), a still-running
+  check is waited out, a green one merges with no further sign-off.
+- The draft PR a review-gated change opens at its first gate (see
+  `conventions/specs.md`) needs no approval, nor does marking it ready once
+  the final review closes; its merge is gated like any other.
 - Default to committing onto whatever branch you're already on, even if its
-  existing work looks unrelated to what you're about to add. Reach for a new
-  branch only when starting from the default branch, or when you're
-  convinced the current branch's work is genuinely unrelated - and that
-  conviction is a gate, unlike the commit it would precede: explain why and
-  get confirmation *before* creating the branch, not after. New branches
-  come off the default branch (see git.md); stacking one on another is an
-  anti-pattern, and on the rare occasion that seems genuinely warranted
-  instead, it's the same gate - explain why and confirm first.
+  existing work looks unrelated. New branches come off the default branch
+  (see git.md); stacking one on another is an anti-pattern, and where that
+  seems genuinely warranted it's the same gate.
+- A gate on a *follow-up* never gates the action that precedes it - don't
+  hold a push on an unrelated open question; land it, then ask.
 - Route anything learned that's worth keeping by scope: generic cross-repo
   lessons into the shared conventions kit, repo-specific ones into that
   repo's own docs.
