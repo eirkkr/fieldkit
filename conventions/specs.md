@@ -109,28 +109,23 @@ Only the second and third involve a human.
 - **Per change.** The last stage of every change is the final review: the
   built code against the change's own proposal, design and delta specs, in
   three directions - unmet requirements, things built that nothing asked
-  for, and requirements met but unverified, holding by construction with no
-  test behind them. A requirement that only happens to be true is one edit
-  away from being false with nobody watching.
+  for, and requirements met only by construction, with no test behind them.
+  The third is the one nothing else catches.
 - **The final gate's order of work.** The diff is hand-walked for the
-  conventions CI cannot see *before* the artifacts are corrected to describe
-  what was actually built (durable decisions become ADRs). The walk turns up
-  artifact-shaped findings, so correcting first means correcting twice; it
-  reads code and docs and changes neither, so it costs nothing to run first.
-  Then every issue the change references - in its artifacts, in docstrings,
-  in the docs it touches - is re-read: still open, and still about the thing
-  cited. An issue that closed mid-change leaves a doc pointing at a closed
-  tracker for a live limitation. Then the gate iterates with the human until
-  they are satisfied, and only once they are does the PR come out of draft
-  with its description brought up to the finished change. A change is not
-  complete, and is not archived, before that.
-- **The final note's two diffs.** A stage's note opens with one diff; this
-  one opens with two. The work since the last approval leads - the previous
-  gate's `Reviewed at` commit to `HEAD`, the only unreviewed part and the
-  only part the reviewer has to read. The whole change follows, from `git
-  merge-base <default-branch> HEAD`, because signing off the change is what
-  the gate is for. Both are spelt out as links and commands, as a stage's
-  are, and both name their base commit rather than describing it in prose.
+  conventions CI cannot see *before* the artifacts are corrected to what was
+  actually built (durable decisions become ADRs) - the walk turns up
+  artifact-shaped findings, so correcting first means correcting twice. Then
+  every issue the change references, in artifacts, docstrings and the docs it
+  touches, is re-read: still open, and still about the thing cited. Then the
+  gate iterates with the human until they are satisfied, and only then does
+  the PR come out of draft with its description brought up to the finished
+  change. A change is not complete, and is not archived, before that.
+- **The final note's two diffs.** The work since the last approval leads,
+  based at the previous gate's `Reviewed at` commit: the only unreviewed
+  work, and what the reviewer has to read. The whole change follows, based at
+  `git merge-base <default-branch> HEAD`, because signing off the change is
+  what the gate is for. Both are spelt out as a stage's one is, each naming
+  its base commit.
 
 A gate sent back is fixed inside its own stage, not carried into the next
 one.
