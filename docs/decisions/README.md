@@ -44,3 +44,4 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 037 | [Split the kit entry from its own rules](037-split-kit-entry-from-own-rules.md)                           | Accepted   |
 | 038 | [Make filing and editing issues act-then-show](038-ungate-issue-filing.md)                                | Accepted   |
 | 039 | [Compact the Always-on gate rules into a table](039-always-on-gate-table.md)                              | Accepted   |
+| 040 | [Verify a consumer's references into the kit on reconcile](040-reconcile-verifies-references.md)          | Accepted   |
