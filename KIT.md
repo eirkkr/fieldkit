@@ -15,8 +15,8 @@ rules live in its root `CLAUDE.md`, which is not imported by consumers.
 - Act-then-show by default: make the change, surface it, correct after.
   Agree direction first instead for two cases: a genuinely new convention or
   design decision, even if the action itself is local; and anything
-  outward-facing or irreversible - creating or editing an issue or
-  comment.
+  outward-facing or irreversible - closing an issue, for instance, ends a
+  thread someone may still be relying on.
 - Git and GitHub actions go through the `push`, `pr`, and `merge` skills -
   don't reach for `git commit`, `git push`, `gh pr create`, or `gh pr merge`
   directly, even mid-task and even when the step looks trivial. Read-only
@@ -28,6 +28,11 @@ rules live in its root `CLAUDE.md`, which is not imported by consumers.
   session into one commit at the end; revise a stale PR description
   directly, no approval needed. A branch is cheap to amend or discard, and
   the `pre-commit` hook keeps the default branch out of reach.
+- Filing an issue, commenting on one, and editing either are act-then-show
+  as well: do it, then surface what was filed so it can be corrected. The
+  decision that an issue should exist is made when the finding is discussed,
+  not when its prose is drafted, and a wrong issue is editable, closable and
+  deletable by whoever owns the repo. Closing one stays gated, as above.
 - Opening a PR and merging are gated the other way: ask before doing either,
   unless the user typed `/pr` or `/merge` directly - that invocation is
   itself the approval, covering the push it may need first too. Once

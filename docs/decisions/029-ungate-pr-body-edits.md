@@ -46,3 +46,8 @@ Alternatives rejected:
 > Amended by [030](030-ungate-merge.md): merging drops its gate too,
 > resolving the "worth revisiting wholesale" note above - the `push`/`pr`/
 > `merge` trio is now fully act-then-show.
+
+<!-- -->
+
+> Amended by [038](038-ungate-issue-filing.md): the issue/comment gate this
+> ADR left explicitly untouched is dropped too, apart from closing an issue.

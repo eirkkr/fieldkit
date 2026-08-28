@@ -82,3 +82,10 @@ Alternatives rejected:
 > originally gated is still gated on human approval; a genuinely new
 > convention or design decision is the only case left where direction is
 > agreed first.
+
+<!-- -->
+
+> Amended by [038](038-ungate-issue-filing.md): filing an issue, commenting
+> on one, and editing either move to act-then-show as well, on the same
+> cheap-to-correct argument. Closing an issue is the piece of this ADR's
+> outward-facing gate that survives.

@@ -42,3 +42,4 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 035 | [Attribute formatter drift by measuring the fixer](035-measure-the-fixer-not-the-transcript.md)           | Accepted   |
 | 036 | [Publish publicly under MIT](036-public-mit-with-upstream-notice.md)                                      | Accepted   |
 | 037 | [Split the kit entry from its own rules](037-split-kit-entry-from-own-rules.md)                           | Accepted   |
+| 038 | [Make filing and editing issues act-then-show](038-ungate-issue-filing.md)                                | Accepted   |
