@@ -8,9 +8,38 @@ disable-model-invocation: true
 # Reconcile this repo to the latest kit changes
 
 The shared conventions kit (imported here via `@.fieldkit`) has changed. This
-command catches this repo up: it works out which kit commits are new, reconciles
-this repo's agent-facing docs and tooling to them, and advances a stored marker
-so the next run knows where it left off.
+command catches this repo up: it checks this repo's references into the kit
+still resolve, works out which kit commits are new, reconciles this repo's
+agent-facing docs and tooling to them, and advances a stored marker so the next
+run knows where it left off.
+
+## Verify the references into the kit resolve
+
+Do this first, whatever the range below resolves to. A stale instruction still
+loads and quietly says the wrong thing; a reference that no longer resolves
+doesn't load at all, so the session runs with rules missing rather than wrong -
+and this session is the least likely to notice, since the failed import is what
+would have told it how to behave. References also break from a kit commit the
+marker has already passed, or from a local edit, and neither shows up in the
+range.
+
+From this repo's root, check:
+
+1. **The symlink.** `test -e .fieldkit/KIT.md`.
+2. **The imports.** Every `@.fieldkit/...` line in `CLAUDE.md`, and in anything
+   it imports in turn, names a file that exists.
+3. **The mentions.** Every other `.fieldkit/...` path in a tracked file -
+   READMEs, scripts, `.claude/` config. One `grep -rn '\.fieldkit/'` covers it.
+4. **The wiring.** Links into the kit that now dangle (`find . -xtype l`, plus
+   `.git/hooks/pre-commit`, which `find` won't reach). `.claude/skills/` and
+   `openspec/schemas/` are linked file by file, so a kit-side rename breaks
+   them.
+
+Fix each unresolved reference here rather than reporting it onward - usually a
+one-line path change. `git -C .fieldkit log --diff-filter=DR --name-status --
+<old-path>` finds where the target moved; if it was removed rather than moved,
+drop the reference and say so. For a dangling link, re-run the matching
+`.fieldkit/scripts/enable-*.sh` rather than re-pointing it by hand.
 
 ## Resolve the range
 

@@ -317,6 +317,14 @@ It reviews the kit's recent history, then reconciles this repo's agent-facing
 docs and tooling to the current conventions, working on a branch and showing the
 changes for approval before editing.
 
+It also checks, whatever the range, that this repo's references into the kit
+still resolve - the `.fieldkit` symlink, every `@.fieldkit/...` import, the
+`.fieldkit/...` paths in tracked files, and any link into the kit that now
+dangles. A stale instruction loads and says the wrong thing; a broken reference
+doesn't load at all, leaving the session with rules missing rather than wrong.
+Unresolved references are fixed in the same run - see
+[ADR 040](docs/decisions/040-reconcile-verifies-references.md).
+
 Each consumer tracks how far it has caught up in a committed `.fieldkit-rev`
 file - the kit commit it was last reconciled to. With no argument the command
 reconciles every kit commit since that marker, then advances it; a no-op
