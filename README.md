@@ -168,10 +168,11 @@ review gate ending every stage, and a final whole-change review before
 archive. A stage is also the unit of merge
 ([ADR 041](docs/decisions/041-stage-is-the-merge-unit.md)) - one branch, one
 PR, merged when its gate closes - so a change lands in instalments rather
-than as one large diff at the end. `conventions/specs.md` describes what that asks of an author and a
-reviewer. The schema itself lives in `schemas/review-gated/`; note that its
-files are linked individually rather than the directory being linked,
-because OpenSpec's schema discovery doesn't follow a symlinked directory.
+than as one large diff at the end. `conventions/specs.md` describes what
+that asks of an author and a reviewer. The schema itself lives in
+`schemas/review-gated/`; note that its files are linked individually rather
+than the directory being linked, because OpenSpec's schema discovery doesn't
+follow a symlinked directory.
 
 One thing the script can't do for you: the linked templates are fragments
 with no H1, and while `rumdl check` in the consumer repo resolves the symlink
