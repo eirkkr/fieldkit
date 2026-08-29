@@ -138,9 +138,11 @@ In either case, do not archive. Report which gates are open, and point at
 saying so explicitly - but ask, rather than folding this into the generic
 incomplete-tasks confirmation, and name what is being skipped.
 
-A PR still in draft is a softer signal of the same thing: the final stage
-takes it out of draft once the reviewer is satisfied, so a draft PR on the
-branch suggests that step never ran. Mention it; it does not block.
+An unmerged final-stage PR is a softer signal of the same thing: every stage
+merges when its gate closes, so a stage PR still open suggests the last gate
+never closed. Mention it; it does not block. Archiving is its own PR, cut
+from the default branch after the final stage has landed - never folded into
+a stage's PR.
 
 The final review is also where the delta specs were reconciled against what
 was actually built (its stage does that as a task). If it is closed, step 4's
