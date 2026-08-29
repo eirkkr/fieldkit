@@ -158,13 +158,21 @@ artifacts:
       ## Stages
 
       A stage is the smallest group of tasks that leaves the tree in a
-      coherent, reviewable state. Two hard rules:
+      coherent, reviewable state. It is also what gets merged: one stage is
+      one branch and one PR. Three hard rules:
 
       - **A stage must end green.** Tests pass, nothing is half-wired, the
         work is committable. A reviewer must never be asked to sign off on a
         broken tree.
       - **A stage must be one idea.** The reviewer should be able to say what
         the stage did in a sentence.
+      - **A stage must be independently mergeable.** It lands on the default
+        branch on approval, ahead of the stages after it, so anything not
+        finished by the end of the stage is either complete from the user's
+        point of view or unreachable - a route not registered, a command not
+        wired in, a flag off. Never merely present and untested. When green
+        alone would allow the boundary to fall in two places, this is what
+        chooses between them.
 
       Aim for 3-6 tasks per stage; 8 is the ceiling. If a stage exceeds it,
       split it - stage count is cheap, and a smaller stage is a cheaper
@@ -219,13 +227,14 @@ artifacts:
       - [ ] 7.5 FINAL REVIEW - present the change as a whole and iterate with
             the reviewer until they are satisfied. Stop here. Only the
             reviewer closes this box.
-      - [ ] 7.6 Mark the PR ready for review and bring its description up to
-            the finished change. Done when it is no longer a draft.
+      - [ ] 7.6 Archive the change once the final stage has merged. Done
+            when the change folder is under `archive/` and its delta is
+            synced into the living specs, in a PR of its own.
       ```
 
       Adapt the wording, but keep all six beats: verify against spec, find
       the gaps in both directions, reconcile the artifacts, hand-audit the
-      diff, iterate with the human, then take the PR out of draft.
+      diff, iterate with the human, then archive.
 
       Reference specs for what to build and design for how. Every task must
       be verifiable - you know when it is done, and so does the reviewer.
@@ -247,6 +256,10 @@ apply:
     `Done when ...` condition and run the narrowest test that covers it.
 
     - Tick `- [ ]` to `- [x]` only when the done-condition is literally met.
+    - Commit the task on its own, with the task number in the subject
+      (`feat: add is_dev_db (1.1)`). One commit per task is what lets the
+      reviewer walk the stage step by step at the gate; batching several
+      tasks into one commit takes that away.
     - If you cannot verify it, do NOT tick the box. Stop and say why.
     - If the task turned out to need work the plan did not anticipate, note
       it under the task in one line. That note feeds the stage's review.
@@ -270,36 +283,40 @@ apply:
     order, and keep it tight - complete, not long:
 
     1. **Review this stage** - the diff itself, written out both ways so the
-       reviewer clicks or copies rather than assembles:
+       reviewer clicks or copies rather than assembles, then the stage's
+       commits so it can be walked task by task:
 
            **Review this stage**
 
-           Everything since stage 2 was approved at `a80f8c30`:
+               https://github.com/<owner>/<repo>/pull/<n>/files
 
-               https://github.com/<owner>/<repo>/pull/<n>/files/a80f8c30..HEAD
+               git diff <default-branch>...HEAD
 
-               git diff a80f8c30..HEAD
+           Task by task:
+
+           - 1.1 add is_dev_db - https://github.com/<owner>/<repo>/commit/9c1d0a4e
+           - 1.2 cover is_dev_db - https://github.com/<owner>/<repo>/commit/3b77e215
 
        The PR view leads: it alone holds state - files tick off as they are
-       read, a file a later stage touches again un-ticks itself, comments
-       outlive the session.
+       read, a file a later fix touches again un-ticks itself, comments
+       outlive the session. The PR holds exactly this stage, so it needs no
+       range and no base commit - `/pull/<n>/files` IS the stage. Do not
+       reconstruct the old `<base>..HEAD` form; there is nothing before this
+       stage on this branch.
 
-       The base is the previous gate's `Reviewed at` commit, or for a first
-       gate `git merge-base <default-branch> HEAD`. Always that commit, never
-       the branch name, which moves and would shift an already-reviewed diff.
-       The far end is the literal `HEAD`, which the file view resolves to the
-       PR's tip; pinning it to a commit stops the link following the fixes a
-       review asks for.
+       The per-task lines are a walking aid, not a second review surface. A
+       commit URL renders that commit against its parent, which is exactly
+       "this task, on top of the last one". They work on any pushed commit,
+       so they cost nothing beyond committing per task.
 
-       A range needs both ends inside the PR, so a first gate - whose base
-       predates it - links plain `/pull/<n>/files`: the same changes, at that
-       point. With no PR, put the compare view in its place and say what is
-       missing, rather than dropping the line:
+       At a FIRST gate, add one more line, because nothing else will remember
+       it once the stages have merged separately and the final review needs
+       it:
 
-           No PR is open, so this is the compare view, without the
-           file-by-file checkboxes:
+           Change based at `1f4b02e7`.
 
-               https://github.com/<owner>/<repo>/compare/a80f8c30...<branch>
+       That is `git merge-base <default-branch> HEAD` at the start of the
+       change. Carry the same line forward, unchanged, in every later note.
     2. **What changed** - per file or behaviour, since the previous gate.
        Enough that they know where to look without reading the diff first.
     3. **Departures from the plan** - anything built differently than
@@ -316,25 +333,29 @@ apply:
        stands for the length of the review, and a comment renders as dead
        space that reads as something having failed.
 
-    At a change's first gate, open a draft PR for the branch if none is open.
-    It is the surface the note points at, so opening it is part of reaching
-    the gate - and a draft asks nothing of anyone: no review requested,
-    nothing merged, while CI reports on the stage beside the agent's own
-    claim that it is green. It stays a draft until the final stage marks it
-    ready. A reviewer who would rather not have one says so, and it is not
-    raised again.
+    EVERY gate opens a PR for the stage's branch. It is the surface the note
+    points at, so opening it is part of reaching the gate, and it needs no
+    approval of its own. Not a draft: the stage is done and is being asked
+    for, which is what a non-draft PR means. Opening it here is also what
+    starts CI, so the first run lands on a tree already green rather than on
+    half-finished work.
 
-    Then stop and wait. If the reviewer sends the stage back, fix it and
-    rewrite the note; do not open a new stage to carry the fix.
+    Then stop and wait. If the reviewer sends the stage back, fix it in this
+    stage's own branch and PR and rewrite the note; do not open a new stage,
+    and do not merge, to carry the fix.
 
-    When the reviewer approves, and only then, close the gate in one step:
-    replace `_Awaiting approval._` under **Reviewed at** with
-    `git rev-parse --short HEAD`, then tick the box. That commit is the tree
-    they approved - after any fixes the review asked for, not the commit the
-    note was first written against - and it is the base the next gate's
-    `Review this stage` runs from, which is the whole reason it is recorded.
-    Never write a SHA into a gate the reviewer has not approved: a bookmark
-    that is not where they stopped reading is worse than none.
+    When the reviewer approves, and only then, close the gate: replace
+    `_Awaiting approval._` under **Reviewed at** with
+    `git rev-parse --short HEAD`, tick the box, and merge the PR. That commit
+    is the tree they approved - after any fixes the review asked for, not the
+    commit the note was first written against - and it is recorded because
+    the squash-merge is about to discard the branch that holds it. Never
+    write a SHA into a gate the reviewer has not approved: a bookmark that is
+    not where they stopped reading is worse than none.
+
+    Then start the next stage on a fresh branch cut from the default branch,
+    which now has this stage in it. Never continue on the merged branch, and
+    never branch the next stage off this one before it merges.
 
     ## L3 - the final stage
 
@@ -346,27 +367,28 @@ apply:
 
     It differs from an L2 gate in four ways:
 
-    1. **Its note opens with two diffs, not one.** The work since the last
-       approval leads, from the same base as an L2 gate - the previous
-       gate's `Reviewed at` commit. The whole change follows, based at
-       `git merge-base <default-branch> HEAD`:
+    1. **Its note opens with two diffs, not one.** This stage's own diff
+       leads, exactly as any stage's does - its PR, its per-task lines. The
+       whole change follows, based at the `Change based at` commit the first
+       gate recorded. Most of the change has already merged, so that half is
+       git against the default branch rather than a PR view:
 
            **Review this stage**
 
-           Everything since stage 3 was approved at `a80f8c30`:
+               https://github.com/<owner>/<repo>/pull/<n>/files
 
-               https://github.com/<owner>/<repo>/pull/<n>/files/a80f8c30..HEAD
-
-               git diff a80f8c30..HEAD
+               git diff <default-branch>...HEAD
 
            **Review the whole change**, based at `1f4b02e7`:
 
-               https://github.com/<owner>/<repo>/pull/<n>/files
+               git log --oneline 1f4b02e7..<default-branch>
 
-               git diff 1f4b02e7..HEAD
+               git diff 1f4b02e7...<default-branch>
 
-       Name both base commits. Leaving the reviewer to work out where the
-       last approval was makes them assemble the range by hand.
+       Name the base commit, and list the merged stages by their PR numbers
+       beside the log command. The reviewer has seen each stage already; what
+       they have not seen is the shape of all of them together, which is what
+       this gate is for.
     2. **The diff walk comes before the artifacts are corrected.** Walking
        the diff for the conventions CI cannot check turns up
        artifact-shaped findings, so correcting first means correcting
@@ -380,11 +402,13 @@ apply:
        about the thing cited. Nothing else re-reads those references after
        they are written.
 
-    Once the reviewer is satisfied, mark the PR ready (`gh pr ready`) and
-    bring its description up to the finished change. The draft state carried a meaning
-    for the whole change - stages still landing, gates still to come - and
-    leaving it set says the opposite of what the final review just decided.
-    Merging is a separate act, and still the reviewer's to call.
+    Once the reviewer is satisfied, close this gate and merge it like any
+    other stage. Archiving is not part of it: that is its own PR, cut from
+    the default branch after the final stage has landed, moving the change
+    folder under `archive/` and syncing its delta into the living specs.
+    Until it merges the living specs still describe the pre-change behaviour,
+    which is expected - the change folder is the record while a change is in
+    flight.
 
     ## Otherwise
 

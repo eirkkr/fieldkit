@@ -165,7 +165,10 @@ The workflow is `review-gated`
 ([ADR 034](docs/decisions/034-review-gated-openspec-schema.md)), the kit's
 replacement for the stock `spec-driven` schema: bite-sized tasks, a human
 review gate ending every stage, and a final whole-change review before
-archive. `conventions/specs.md` describes what that asks of an author and a
+archive. A stage is also the unit of merge
+([ADR 041](docs/decisions/041-stage-is-the-merge-unit.md)) - one branch, one
+PR, merged when its gate closes - so a change lands in instalments rather
+than as one large diff at the end. `conventions/specs.md` describes what that asks of an author and a
 reviewer. The schema itself lives in `schemas/review-gated/`; note that its
 files are linked individually rather than the directory being linked,
 because OpenSpec's schema discovery doesn't follow a symlinked directory.

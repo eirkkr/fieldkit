@@ -176,3 +176,12 @@ Alternatives rejected:
   touch `schemas/review-gated/`, so the proposal/specs/design instructions
   it inherited can go stale. They are copied verbatim today apart from one
   added paragraph each, which keeps that merge readable.
+
+> Amended by [041](041-stage-is-the-merge-unit.md): the stage is now the unit
+> of merge as well as of review - each stage is its own branch and PR, merged
+> when its gate closes - so the single draft PR this ADR opens at a change's
+> first gate is retired, and the per-change PR lifecycle described above no
+> longer holds. The three review levels, the gate mechanics, and the
+> `Reviewed at` bookmark are unchanged; 041 adds one commit per task and
+> per-task links in the note.
+

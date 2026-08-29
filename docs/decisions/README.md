@@ -45,3 +45,4 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 038 | [Make filing and editing issues act-then-show](038-ungate-issue-filing.md)                                | Accepted   |
 | 039 | [Compact the Always-on gate rules into a table](039-always-on-gate-table.md)                              | Accepted   |
 | 040 | [Verify a consumer's references into the kit on reconcile](040-reconcile-verifies-references.md)          | Accepted   |
+| 041 | [Make the stage the unit of merge, not just of review](041-stage-is-the-merge-unit.md)                    | Accepted   |
