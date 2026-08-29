@@ -48,8 +48,9 @@ Iterate until they are satisfied.
       found. Record anything durable as an ADR rather than leaving it in
       design.md.
 - [ ] 3.7 FINAL REVIEW - present the change as a whole and iterate with the
-      reviewer until they are satisfied. The note opens with two diffs: since
-      the last approval, then the whole change, each naming its base commit.
-      Stop here. Only the reviewer closes this box.
-- [ ] 3.8 Mark the PR ready for review and bring its description up to the
-      finished change. Done when it is no longer a draft.
+      reviewer until they are satisfied. The note opens with two diffs: this
+      stage's own PR, then the whole change from the `Change based at`
+      commit. Stop here. Only the reviewer closes this box.
+- [ ] 3.8 Archive the change once this stage has merged. Done when the
+      change folder is under `archive/` and its delta is synced into the
+      living specs, in a PR of its own.

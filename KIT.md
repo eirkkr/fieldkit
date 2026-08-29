@@ -39,9 +39,9 @@ rules live in its root `CLAUDE.md`, which is not imported by consumers.
 - Merging is conditioned on CI on top of approval - a failed check or a
   conflict stops it (report that, don't merge around it), a still-running
   check is waited out, a green one merges with no further sign-off.
-- The draft PR a review-gated change opens at its first gate (see
-  `conventions/specs.md`) needs no approval, nor does marking it ready once
-  the final review closes; its merge is gated like any other.
+- The PR a review-gated change opens at each stage's gate (see
+  `conventions/specs.md`) needs no approval - one per stage, and opening it
+  is part of reaching the gate. Each one's merge is gated like any other.
 - Default to committing onto whatever branch you're already on, even if its
   existing work looks unrelated. New branches come off the default branch
   (see git.md); stacking one on another is an anti-pattern, and where that

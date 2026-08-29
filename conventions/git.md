@@ -12,6 +12,12 @@
 - Branch off the default branch. Branching off another branch is an
   anti-pattern - it stacks work on something that can still change or get
   discarded.
+- One branch is one unit of work, and for a review-gated OpenSpec change that
+  unit is the *stage*, not the whole change: each stage gets its own branch
+  off the default branch and merges when its review gate closes
+  ([specs.md](specs.md)). A change spanning five stages is five branches in
+  sequence, each cut from the previous one's merge - never stacked on a
+  branch still under review.
 
 ## Commits
 
