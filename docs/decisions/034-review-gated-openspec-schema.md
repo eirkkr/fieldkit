@@ -184,4 +184,3 @@ Alternatives rejected:
 > longer holds. The three review levels, the gate mechanics, and the
 > `Reviewed at` bookmark are unchanged; 041 adds one commit per task and
 > per-task links in the note.
-
