@@ -169,10 +169,16 @@ artifacts:
       - **A stage must be independently mergeable.** It lands on the default
         branch on approval, ahead of the stages after it, so anything not
         finished by the end of the stage is either complete from the user's
-        point of view or unreachable - a route not registered, a command not
-        wired in, a flag off. Never merely present and untested. When green
-        alone would allow the boundary to fall in two places, this is what
-        chooses between them.
+        point of view or unreachable. Never merely present and untested.
+        Three ways to reach that, cheapest first: leave it **not wired up**
+        (built and tested, but no route registered, no command added to its
+        group, no caller yet); put it **behind a flag** that a later stage
+        switches on and a later task removes; or build it **beside the old
+        path** and swap in one stage rather than half-migrating in each.
+        Prefer the first, and order stages so it falls out - a stage that
+        needs a flag is often a boundary drawn in the wrong place. When
+        green alone would allow the boundary to fall in two places, this
+        rule chooses between them.
 
       Aim for 3-6 tasks per stage; 8 is the ceiling. If a stage exceeds it,
       split it - stage count is cheap, and a smaller stage is a cheaper

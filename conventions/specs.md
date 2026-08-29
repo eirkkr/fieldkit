@@ -61,10 +61,21 @@ described here; this file is the content guidance for what goes in them.
 - A stage is also **independently mergeable**, because merging is what
   happens to it ([ADR 041](../docs/decisions/041-stage-is-the-merge-unit.md)).
   Green is not enough: anything half-built when the stage ends is either
-  complete from the user's point of view or unreachable - a route not
-  registered, a command not wired in, a flag off. Walking-skeleton ordering
-  tends to produce this anyway; here it is a requirement, and it is what
-  stage boundaries are chosen on when green alone would allow either.
+  complete from the user's point of view or unreachable. Three ways to get
+  there, cheapest first:
+  - **Not wired up.** The code is built and tested, but nothing reaches it -
+    a route not registered, a command not added to its group, a function with
+    no caller yet. Costs nothing and needs no cleanup.
+  - **Behind a flag.** Off by default, switched on by a later stage. For work
+    that has to be reachable to be exercised end to end. The flag belongs to
+    the change, and removing it is a task in the stage that finishes the work
+    - not a knob that outlives it.
+  - **Beside the old path.** Build the replacement alongside what exists and
+    swap in one stage, rather than half-migrating in each.
+
+  Walking-skeleton ordering tends to produce the first on its own, and
+  ordering stages so it does is cheaper than reaching for a flag: a stage
+  that needs one is often a boundary drawn in the wrong place.
 - **One commit per task**, its subject naming the task number. The reviewer
   then chooses their own granularity at the gate - walk the stage commit by
   commit when it is fiddly, read it as one diff when it is not.
@@ -102,31 +113,24 @@ second and third scopes involve a human.
   recording their state in the note, and a stage's last verification task
   runs the repo's full check rather than its test command. A red check
   means the stage is not ready, and is fixed before a reviewer sees it.
-  Workflows triggered on `pull_request` alone stay quiet until the PR opens,
-  so CI first sees the branch at the gate, against a tree already green.
 - **The stage's diff is the PR.** Because the PR holds exactly one stage,
   the note links `/pull/<n>/files` - no range to assemble, no base commit to
-  carry - with `git diff <default-branch>...HEAD` beside it for the
-  terminal. The PR view leads because it alone holds state: files tick off
-  as they are read, a file a later fix touches again un-ticks itself,
-  comments outlive the session.
-- **Per-task links walk the stage.** Under the stage diff the note lists one
-  line per task - its number, its subject, and its commit URL, which renders
-  that commit against its parent. They are a walking aid, not a second
-  review surface: the reviewer reads the stage whole or follows it task by
-  task, whichever the stage deserves. Squash-merge discards the commits, but
-  they are alive for the length of the review.
-- **The gate's bookmark.** Every note ends with a `Reviewed at` heading,
-  marked awaiting approval until the gate closes, then filled with the
-  commit approved before the box is ticked - so a stage sent back and fixed
-  records the tree after the fixes, not the one first presented. It is the
-  record of what was signed off, kept because nothing else holds it once the
-  PR is squashed; it is no longer load-bearing as a base, since the next
-  stage starts from the merge commit.
-- **The change's own base.** The first stage's note also records `Change
-  based at <commit>` - the default branch's tip when the change began. The
-  final review needs it, and nothing else remembers it once the stages have
-  merged separately.
+  carry - with `git diff <default-branch>...HEAD` beside it for the terminal.
+  The PR view leads because it alone holds state: files tick off as they are
+  read, a file a later fix touches again un-ticks itself, comments outlive
+  the session. Under it, one line per task - number, subject, commit URL,
+  which renders that commit against its parent. Those are a walking aid, not
+  a second review surface, so the reviewer takes the stage whole or task by
+  task as it deserves.
+- **Two bookmarks, both in the note.** `Reviewed at` ends every note, marked
+  awaiting approval until the gate closes, then filled with the commit
+  approved before the box is ticked - so a stage sent back and fixed records
+  the tree after the fixes. It is the record of what was signed off, since
+  the squash discards the branch holding it; it is not a base, as the next
+  stage starts from the merge commit. `Change based at <commit>` is recorded
+  by the first stage and carried forward unchanged: the default branch's tip
+  when the change began, which only the final review needs and nothing else
+  remembers once the stages have merged separately.
 - **Per change.** The last stage of every change is the final review: the
   built code against the change's own proposal, design and delta specs, in
   three directions - unmet requirements, things built that nothing asked
@@ -146,10 +150,9 @@ second and third scopes involve a human.
   merged, so it is a `git diff <base>...<default-branch>` and a
   `git log --oneline <base>..<default-branch>` over the stages that landed,
   rather than a PR view. Signing off the change as a whole is what the gate
-  is for, even when most of it is already in.
-- **Archiving is its own PR.** The final stage merges like any other; the
-  archive - moving the change folder and syncing its delta into the living
-  specs - follows in a small PR of its own, once the reviewer is satisfied.
+  is for, even when most of it is already in. The final stage then merges
+  like any other, and the archive - moving the change folder, syncing its
+  delta into the living specs - follows in a small PR of its own.
 
 A gate sent back is fixed inside its own stage, not carried into the next
 one - and inside its own PR, which has not merged yet.

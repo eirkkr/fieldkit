@@ -105,11 +105,12 @@ Alternatives rejected:
 
 - **A stage must now be independently mergeable, not merely green.** This is
   a stronger constraint than 034's, and the main new cost of authoring. Work
-  that is half-built when the stage ends must be unreachable rather than
-  merely untested - a route not registered, a command not wired in, a flag
-  off - or else complete from the user's point of view. Walking-skeleton
-  ordering mostly produces this already; it is now a rule rather than a
-  tendency.
+  half-built when the stage ends must be unreachable rather than merely
+  untested, or else complete from the user's point of view. The conventions
+  name three ways to get there - not wired up, behind a flag, or built beside
+  the old path - in that order of preference, since the first costs nothing
+  and the others leave something to remove. Walking-skeleton ordering mostly
+  produces the first already; it is now a rule rather than a tendency.
 - **A bad stage is fixed forward.** Abandoning a change used to cost a
   branch. Approved stages are now on the default branch, so a change
   abandoned late leaves merged work behind that has to be reverted
