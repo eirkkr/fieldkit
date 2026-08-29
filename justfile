@@ -22,9 +22,13 @@ setup:
 openspec-refresh:
     @"{{ justfile_directory() }}/scripts/openspec-refresh.sh" "{{ justfile_directory() }}"
 
-# Lint all markdown.
-check:
+# Lint all markdown and check the vendored skills carry current overlays.
+check: check-overlays
     uvx rumdl@0.2.26 check .
+
+# Check each vendored skill still ends with its overlay.
+check-overlays:
+    @"{{ justfile_directory() }}/scripts/check-skill-overlays.sh" "{{ justfile_directory() }}"
 
 # Auto-fix markdown issues.
 fix:
