@@ -52,7 +52,10 @@ the `eirkkr/fieldkit` remote is mine and you will not be able to push to it.
   "Adopting OpenSpec in a consumer repo").
 - `repo-skills-overlay/` - the kit's own additions to those vendored skills,
   appended by `just openspec-refresh` after it regenerates them; one
-  `<skill-name>.md` per skill patched.
+  `<skill-name>.md` per skill patched. Both halves are checked in, so editing
+  an overlay without regenerating leaves the vendored skill serving the old
+  text - which still loads and still reads plausibly. `just check` fails on
+  that drift.
 - `schemas/` - kit-owned OpenSpec workflow schemas, linked file-by-file into
   an opt-in consumer repo's `openspec/schemas/`.
 - `agents/` - shared Claude Code subagents, symlinked into `~/.claude/agents`
