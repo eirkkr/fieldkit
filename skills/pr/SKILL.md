@@ -13,10 +13,18 @@ file list, and dispatch its `push` subagent. Pushing is already
 ungated/act-then-show regardless of how this skill was reached, so there's
 nothing to ask separately before doing it.
 
-Decide the title and body yourself, from context already in hand plus
+Read `git diff <base>...HEAD` before drafting, and audit it for what CI
+cannot see: docs left teaching a pattern the branch changed, conventions
+enforced by review rather than by a linter, a doc page the repo's own
+guidance ties to a file the branch touched. A green pipeline is not evidence
+either way - it never reads prose. This is the moment for that audit,
+because a PR is where the branch stops being yours to quietly amend, and
+doc drift merges as easily as code.
+
+Then decide the title and body yourself, from context already in hand plus
 `conventions/git.md`/`conventions/github.md`'s conventions - read
-`git log <base>..HEAD` / `git diff <base>...HEAD` yourself if you need the
-branch's full change set to pin them down:
+`git log <base>..HEAD` alongside that diff if you need the branch's full
+change set to pin them down:
 
 - Title: Conventional Commits format, under 70 characters.
 - Body: 1-3 bullet summary points plus a test plan checklist.
@@ -26,7 +34,9 @@ branch's full change set to pin them down:
   happily, so it proves nothing. Use `gh api repos/{owner}/{repo}/issues/<N>
   -q '.pull_request.url // "issue"'` - any output but `issue` means `N` is a
   PR number, so the line is wrong. With no number in hand, omit the line
-  entirely; don't go looking for one to fill the slot.
+  entirely; don't go looking for one to fill the slot. Omitting it means
+  writing nothing - not a sentence reporting that there was no issue to
+  close. A body says what the change is, never what it left out.
 
 Launch the `pr` subagent (`subagent_type: pr`) in the foreground with the
 title and body stated explicitly, plus `$ARGUMENTS` for whatever extra
@@ -38,11 +48,18 @@ link, title, and body - or an existing PR's URL if one was already open on
 this branch, in which case there was nothing to create).
 
 Everything handed to the agent as title or body is published verbatim, so
-keep directives out of it - "don't add X", "use the wording below", notes
-about what not to do - or they end up in the PR for everyone to read. Those
-belong in the surrounding prompt, not inside the text being posted. Read the
-body back after it's opened (`gh pr view --json body`), which is also what
-catches it when this goes wrong.
+keep out of it anything addressed to yourself rather than to a reader. That
+covers directives - "don't add X", "use the wording below", notes about what
+not to do - and equally the quieter kind: narration accounting for a section
+that isn't there, why a reference was left off, how the wording was decided.
+Deliberating about something and then omitting it invites a line showing the
+working; that line is for the prompt, not the PR. All of it belongs in the
+surrounding prompt, not inside the text being posted.
+
+Read the body back after it's opened (`gh pr view --json body`). The test is
+whether every line of it makes sense to someone who never saw the prompt -
+anything that only makes sense as an answer to your own reasoning is the
+failure this catches.
 
 Reaching this skill already means opening the PR is approved - either the
 user typed `/pr` directly, or the caller asked and got a yes first. So the
