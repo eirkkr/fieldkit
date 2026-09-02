@@ -55,3 +55,24 @@ Common mistakes to avoid:
 - `>=0.2.26,<0.3` - patch in the floor for a 0.x package; use `>=0.2,<0.3`
 - `>=0.9,<1` - capping a 0.x package at major; use `>=0.9,<0.10`
 - `>=3.11` - an old Python version with no upper bound; use `>=3.14,<3.15`
+
+## Version pins the dependency tooling does not manage
+
+`uv tree --outdated` reports project and dev dependencies. Several pins sit
+outside that view and go stale silently, so a dependency update has to look
+at them by hand:
+
+- **`[build-system] requires`** - the build backend is not a dependency of
+  the project, so it never appears in the tree. `uv_build` versions with uv
+  itself, and an upper bound below the installed uv makes every `uv` command
+  warn. Raise it with uv's own minor, following the 0.x rule above.
+- **Tool versions pinned in a Dockerfile or CI** - a `COPY --from=ghcr.io/...`
+  line, a base image tag, an action's `version:` input, a service container's
+  image.
+- **`.python-version`** - the exact patch developers and CI run, which
+  `requires-python` only brackets.
+
+Where the same tool is pinned in more than one place, pin it to the same
+version everywhere and raise them together. One site pinned exactly while
+another follows the latest release will drift, and nothing compares them -
+the exactly-pinned one is the copy that quietly falls behind.
