@@ -39,3 +39,22 @@ discussion, `Superseded` when replaced).
 Don't rewrite history. When a later ADR changes an earlier one, set the old
 one's status to `Superseded` with a note at its foot pointing to the new one;
 the new ADR references what it replaces.
+
+## Reversing a decision
+
+Distinct from superseding: an ADR is accepted, and the evidence that
+overturns it comes from *acting on it* - a migration designed, a spike
+built. No later ADR replaces it, because the question is the same one.
+
+Rewrite that ADR in place and keep the original case intact rather than
+trimming it to fit the outcome, with a status line saying the reasoning
+below argues for a conclusion the ADR did not reach. Trimmed, it reads
+as though the answer was always obvious; parts of it usually survive the
+reversal and a reader needs to know which; and the reversal's argument
+is typically a set of corrections to named claims, which lose their
+referents once the claims are gone.
+
+Name the conditions for revisiting, and what would *not* be one - the
+second is as informative, and heads off an argument already weighed.
+Where an ADR anticipates its own rejection and says what should happen
+then, follow it: that instruction had the fullest view of the question.
