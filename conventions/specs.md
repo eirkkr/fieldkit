@@ -21,37 +21,28 @@ described here; this file is the content guidance for what goes in them.
 
 ## Specifying to decide, not only to build
 
-A change is usually written because the work is going to happen. It is
-also a legitimate way to find out **whether it should** - and that use
-needs saying, because nothing else in this file implies it.
+Writing a change is also a way to find out whether to do it. A proposal
+argues from what a change offers; a build plan is forced to price every
+part of it, and the two can disagree badly. Worth the days it costs
+where a decision is large, hard to undo, and argued mostly from
+principle.
 
-Writing the design is the cheapest instrument available for costing work
-that sounds obviously worthwhile. A proposal argues from what a change
-offers; a build plan is forced to say what every part of it costs, and
-the two can disagree badly. Where a decision is large, reversible only
-once, and argued mostly from principle, drafting the change before
-committing to it is worth the days it takes.
-
-**Watch the plan's growth as a signal, not just as an estimate
-correction.** A plan that stops growing has been understood. One still
-growing at the end of its own audit has not, and that is information
-about whether to proceed rather than about how long it will take. Track
-the task count across revisions: growth with no scope added means the
-work is larger than anyone can currently see, and the rate of discovery
-matters more than the total. Discovery that tapers is a plan converging;
-discovery that is still turning up defects on the last pass is not.
-
-**If the answer turns out to be no, the design is the most valuable
-thing produced and it has nowhere obvious to go.** The archive is for
-completed changes and syncs deltas into the living specs, which is
-exactly wrong here - it would assert the work shipped and leave specs
-describing behaviour that does not exist somewhere a later sync could
-reach. Move it to a directory that says what it is, outside the specs
-tooling's reach, and link it from the ADR recording the decision. Keep
-it in the tense it was written in; rewriting it to fit the outcome edits
-the evidence. What a later reader wants from it is the rejected
-alternatives, which are the expensive part of the thinking, and the task
-plan, which is the cost argument in a form no ADR can carry.
+- **Plan growth is a decision signal, not just a bad estimate.** A plan
+  that stops growing has been understood; one still growing at the end
+  of its own audit has not. Track the task count across revisions -
+  growth with no scope added means the work is bigger than anyone can
+  yet see, and discovery still turning up defects on the last pass is
+  the clearest sign to stop and re-decide.
+- **If the answer is no, the design is the most valuable thing produced,
+  and the archive is the wrong home for it.** The archive means
+  completed and syncs deltas into the living specs, which would assert
+  the work shipped and leave specs describing behaviour that does not
+  exist. Move it somewhere outside the specs tooling's reach, named for
+  what it is, and link it from the ADR. Keep its original tense -
+  rewriting it to fit the outcome edits the evidence.
+- What a later reader wants from it is the rejected alternatives and the
+  task plan: the expensive part of the thinking, and the cost argument
+  in a form no ADR can carry.
 
 ## What a spec is
 
@@ -77,21 +68,20 @@ plan, which is the cost argument in a form no ADR can carry.
   whatever is in it, bugs included.
 - When a change replaces a component - a library, a datastore, a
   framework - the risk is rarely in the features being replaced. Those
-  are visible, and get ported. It is in the **guarantees the old one
+  are visible and get ported. It is in the **guarantees the old one
   supplied incidentally**, which nothing wrote down because nothing had
-  to provide them. Audit for these explicitly: they are invisible in any
-  comparison of what each option *offers*, because they were never
-  anyone's feature.
+  to provide them. They are invisible in any comparison of what each
+  option *offers*, because they were never anyone's feature. The prompt
+  that finds them: what does the current design rely on that no line of
+  code asks for?
 
-  Worked example, from a consumer repo's evaluation of moving off a
-  document store. Three surfaced, none of them in the ADR that compared
-  the two databases: API keys could not outlive their user because they
-  were embedded in the user's document; a background thread could safely
-  share the request's connection because the driver's client was
-  thread-safe; and records written before a mid-file fault stayed
-  written, because each record's write stood alone. Each would have
-  shipped broken. The prompt that finds them is "what does the current
-  design rely on that no line of code asks for?".
+  One consumer's evaluation of leaving a document store surfaced three,
+  none in the ADR comparing the options, each of which would have
+  shipped broken: API keys could not outlive their user because they
+  were embedded in it; a thread could share the request's connection
+  because the driver's client was thread-safe; and records written
+  before a mid-file fault stayed written, because each write stood
+  alone.
 
 ## Build plan (tasks.md)
 

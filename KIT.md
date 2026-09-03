@@ -65,18 +65,13 @@ rules live in its root `CLAUDE.md`, which is not imported by consumers.
   exploration out of the main window - not for a cheaper model on a small
   task. A fresh subagent re-pays context from scratch, which dominates a
   small task's cost.
-- A count, or a claim about what a file contains, is re-derived from the
-  tree at the moment it is written into an ADR, spec, issue or commit
-  message - never recalled, and never carried across from an older
-  document. Numbers are the load-bearing part of an argument and the part
-  that rots first: the file that had fifteen imports has fourteen by the
-  time anyone quotes it, and the figure gets repeated because it is now
-  written down. Re-reading a file to confirm one number is cheap; a
-  decision argued from a stale one is not.
-- Reading part of a file is not reading it. A conclusion drawn from a
-  head-and-tail skim - "this document never addresses X" - is a claim
-  about the part that was not read. Either read the whole file or say
-  which part the conclusion rests on.
+- A count, or a claim about a file's contents, is re-derived from the
+  tree as it is written into an ADR, spec, issue or commit message -
+  never recalled, never carried over from an older document. Stale
+  figures get repeated precisely because they are already written down.
+- Reading part of a file is not reading it. "This document never
+  addresses X", drawn from a head-and-tail skim, is a claim about the
+  part that was not read.
 
 ### Linting and formatting
 
@@ -103,12 +98,10 @@ rules live in its root `CLAUDE.md`, which is not imported by consumers.
   part of the change; don't extend them. If the fix would span modules, file
   an issue instead.
 - An artifact edited many times needs reading end to end, as a document,
-  before it is called finished. Per-edit review cannot catch coherence
-  drift: every individual edit can be correct while the whole stops
-  describing itself, and the usual symptom is a stated goal that the body
-  has quietly outgrown. This is a different pass from auditing the diff,
-  it comes last, and it is cheapest immediately before the artifact is
-  acted on.
+  before it is called finished. Every edit can be correct while the whole
+  stops describing itself - the usual symptom is a stated goal the body
+  has outgrown. A separate pass from auditing the diff, and it comes
+  last.
 - Auditing prose for a phrase needs the text unwrapped first - hard-wrapped
   Markdown splits phrases across lines, where a line-based `grep` misses them
   and reports the file clean. Normalise whitespace before matching (e.g. read

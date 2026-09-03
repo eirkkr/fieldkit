@@ -42,34 +42,19 @@ the new ADR references what it replaces.
 
 ## Reversing a decision
 
-Distinct from superseding, and worth its own handling: an ADR is accepted,
-and the evidence that overturns it is produced *by acting on it* - a
-migration designed, a spike built, a rollout begun. There is no later ADR
-replacing it, because the question it asked is the same question.
+Distinct from superseding: an ADR is accepted, and the evidence that
+overturns it comes from *acting on it* - a migration designed, a spike
+built. No later ADR replaces it, because the question is the same one.
 
-Rewrite that ADR in place, and keep the original case intact rather than
-trimming it to fit the outcome. Add a section recording what changed and
-why, and say in the status line that the reasoning below argues for a
-conclusion the ADR did not reach. Three reasons the case stays:
+Rewrite that ADR in place and keep the original case intact rather than
+trimming it to fit the outcome, with a status line saying the reasoning
+below argues for a conclusion the ADR did not reach. Trimmed, it reads
+as though the answer was always obvious; parts of it usually survive the
+reversal and a reader needs to know which; and the reversal's argument
+is typically a set of corrections to named claims, which lose their
+referents once the claims are gone.
 
-- A decision reversed on evidence is only legible next to the case it
-  reversed. Trimmed, it reads as though the answer was always obvious,
-  which teaches nobody anything.
-- Parts of it usually survive the reversal untouched, and a reader needs
-  to know which. "Nothing had ever chosen this, and that is worth fixing"
-  can be the reason the question was asked and remain true whichever way
-  it resolves.
-- The reversal's own argument tends to be *specific corrections to named
-  claims* in the original. Delete the claims and the corrections lose
-  their referents.
-
-Name the conditions under which to revisit, in the ADR. That is what
-stops a settled question decaying into one nobody looked at again, and it
-is more useful than a status: a reader who meets one of the conditions
-knows the decision is theirs to reopen. Say what would *not* be a reason,
-too - it is as informative, and it heads off the argument that was
-already weighed.
-
+Name the conditions for revisiting, and what would *not* be one - the
+second is as informative, and heads off an argument already weighed.
 Where an ADR anticipates its own rejection and says what should happen
-then, follow it. That instruction was written with the fullest view of
-the question anyone has had.
+then, follow it: that instruction had the fullest view of the question.
