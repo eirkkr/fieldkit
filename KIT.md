@@ -61,6 +61,14 @@ rules live in its root `CLAUDE.md`, which is not imported by consumers.
   fixing the underlying issue first. Suppress only when the tool is
   genuinely wrong about the file's context (e.g. a generated or vendored
   file).
+- An exemption list records why each entry is exempt, in terms of the rule
+  it escapes. An entry describing what the code does instead ("uses the
+  raw driver", "runs at startup") cannot be audited: nothing in it says
+  whether a new case belongs, so the list grows by precedent. Write each
+  reason so it could be used to refuse an entry.
+- Known violations of a convention live in the issue tracker, not in the
+  convention document - the document outlives them, and a stale list of
+  files reads as permission.
 - Delegate to a subagent for context isolation - keeping large, throwaway
   exploration out of the main window - not for a cheaper model on a small
   task. A fresh subagent re-pays context from scratch, which dominates a
