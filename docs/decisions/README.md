@@ -46,3 +46,4 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 039 | [Compact the Always-on gate rules into a table](039-always-on-gate-table.md)                              | Accepted   |
 | 040 | [Verify a consumer's references into the kit on reconcile](040-reconcile-verifies-references.md)          | Accepted   |
 | 041 | [Make the stage the unit of merge, not just of review](041-stage-is-the-merge-unit.md)                    | Accepted   |
+| 042 | [Re-gate filing an issue, unless the user asked for one](042-regate-issue-filing.md)                      | Accepted   |
