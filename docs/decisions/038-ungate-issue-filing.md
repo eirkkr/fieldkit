@@ -59,3 +59,10 @@ Alternatives rejected:
 - Issues filed in a repo we don't own are unaffected by this ADR. A
   third-party repo's AI policy still has to be checked before anything is
   filed there; that gate is tracked separately and is not ungated here.
+
+> Amended by [042](042-regate-issue-filing.md): filing an issue is gated
+> again when the user did not ask for one, on 031's terms - the gate is on
+> whether to file, not on the draft. The ungating this ADR gave commenting
+> and editing stands, as does its argument that wording needs no approval.
+> What did not survive is the claim that the decision to file had already
+> been made by the time a draft existed.

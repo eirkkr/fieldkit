@@ -1,11 +1,12 @@
 # GitHub and external actions
 
-- Filing an issue, commenting on one, and editing either need no prior
-  approval - file it, then show what was filed, and correct it after if the
-  wording missed. Closing an issue is the exception: it ends a thread someone
-  may still be relying on, so confirm first. The close a merge performs is
-  already covered - merging a PR whose body carries `Closes #X` closes `X`
-  automatically, and the approval to merge is the approval to close.
+- Filing an issue is confirmed first, unless the person asked for one - that
+  request is the approval. What is approved is that the issue should exist,
+  not its wording; a filed issue is edited in place if it missed.
+- Commenting, and editing an issue or a comment, need no prior approval - do
+  it, then show what was written. Closing is confirmed first: it ends a
+  thread someone may still be relying on. The close a merge performs is
+  already covered, since the approval to merge is the approval to close.
 - PRs: mechanics live in [git.md](git.md). Once open, keep the title
   and body in sync as the branch grows - revise it directly when it drifts,
   keeping the human's own wording where it still holds. The description is
@@ -13,7 +14,9 @@
   worth getting right.
 - Before filing an issue, check for duplicates/broader scope:
   `gh issue list --search "<2-3 keywords>"`.
-- Out-of-scope work -> file a narrow issue and defer; don't bundle it in.
+- Out-of-scope work doesn't get bundled in. Whether it becomes an issue or
+  its own branch now depends on what else is queued, so the finding is
+  described and the choice put to the person asking.
 - In a public repo, don't name a private one. Issue text, PR descriptions,
   comments, and commit messages are as public as the code, and a
   `owner/repo#123` cross-reference or a `github.com` URL names it as plainly

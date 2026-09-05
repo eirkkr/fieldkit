@@ -27,15 +27,19 @@ rules live in its root `CLAUDE.md`, which is not imported by consumers.
 | ------------------------------------------ | ------------- | -------------------------------------------------------------- |
 | Committing and pushing                     | act-then-show | each coherent piece as it lands, not one batch per session     |
 | Revising an open PR's title/body           | act-then-show | keep it true as the branch grows                               |
-| Filing an issue or comment, editing either | act-then-show | surface what was filed so it can be corrected                  |
+| Filing an issue                            | ask first     | unless the user asked for one                                  |
+| Commenting on an issue, editing either     | act-then-show | surface what was filed so it can be corrected                  |
 | Closing an issue                           | ask first     | except the automatic close of a `Closes #X` PR on merge        |
 | Creating a branch off a non-default branch | ask first     | explain why first; off the default branch it needs no approval |
 | Opening a PR                               | ask first     | unless the user typed `/pr`                                    |
 | Merging                                    | ask first     | unless the user typed `/merge`; also conditioned on CI         |
 
 - Typing `/pr` or `/merge` is itself the approval, and covers the push it may
-  need first. Approval is for whether to act, not a preview of the draft:
-  draft the title/body or squash message and go straight to it.
+  need first; asking for an issue is the same. Approval is for whether to
+  act, not a preview of the draft: draft it and go straight to it.
+- An issue settles that a finding is handled later and separately, which
+  forecloses doing it now on the branch in hand. Say what the issue would
+  say, and file it on a yes.
 - Merging is conditioned on CI on top of approval - a failed check or a
   conflict stops it (report that, don't merge around it), a still-running
   check is waited out, a green one merges with no further sign-off.
