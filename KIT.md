@@ -35,14 +35,11 @@ rules live in its root `CLAUDE.md`, which is not imported by consumers.
 | Merging                                    | ask first     | unless the user typed `/merge`; also conditioned on CI         |
 
 - Typing `/pr` or `/merge` is itself the approval, and covers the push it may
-  need first. Asking for an issue is the same - "file an issue for that" is
-  the approval to file one. Approval is for whether to act, not a preview of
-  the draft: draft the title/body, squash message or issue and go straight
-  to it.
-- An issue decides that a finding is dealt with later and separately. Doing
-  the work now, on the branch in hand, is the alternative it forecloses, so
-  the choice between them is the human's: say what the issue would say, and
-  file it on a yes.
+  need first; asking for an issue is the same. Approval is for whether to
+  act, not a preview of the draft: draft it and go straight to it.
+- An issue settles that a finding is handled later and separately, which
+  forecloses doing it now on the branch in hand. Say what the issue would
+  say, and file it on a yes.
 - Merging is conditioned on CI on top of approval - a failed check or a
   conflict stops it (report that, don't merge around it), a still-running
   check is waited out, a green one merges with no further sign-off.

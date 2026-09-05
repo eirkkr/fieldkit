@@ -63,6 +63,6 @@ Alternatives rejected:
 > Amended by [042](042-regate-issue-filing.md): filing an issue is gated
 > again when the user did not ask for one, on 031's terms - the gate is on
 > whether to file, not on the draft. The ungating this ADR gave commenting
-> and editing stands, and so does its argument that the wording does not
-> need approving; what did not survive is the claim that the decision to
-> file had already been made by the time a draft existed.
+> and editing stands, as does its argument that wording needs no approval.
+> What did not survive is the claim that the decision to file had already
+> been made by the time a draft existed.
