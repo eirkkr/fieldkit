@@ -77,6 +77,15 @@ rules live in its root `CLAUDE.md`, which is not imported by consumers.
   tree as it is written into an ADR, spec, issue or commit message -
   never recalled, never carried over from an older document. Stale
   figures get repeated precisely because they are already written down.
+- An issue, ADR or spec is read by someone who has none of the conversation
+  that produced it. Everything needed to act on it belongs in the body: the
+  decisions still open, the docs that must change alongside the code, the
+  reasoning behind a choice that looks arbitrary without it. Catching
+  yourself planning to brief the next session is the signal that something
+  is missing from the artifact.
+- A later finding that changes what the body says is edited into the body,
+  not left in a comment beneath it. Someone acting on the body alone must
+  not be acting on a version already known to be superseded.
 - Reading part of a file is not reading it. "This document never
   addresses X", drawn from a head-and-tail skim, is a claim about the
   part that was not read.
