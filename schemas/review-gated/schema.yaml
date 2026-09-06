@@ -315,6 +315,17 @@ apply:
        "this task, on top of the last one". They work on any pushed commit,
        so they cost nothing beyond committing per task.
 
+       The walk covers every commit on the branch, not only the tasks. A
+       commit that is no task - a lint or format fix, a pass over the
+       stage's prose, a fix made after the stage was sent back, an earlier
+       write of this note - takes a line of its own with no number, saying
+       in a clause what it is. Leaving one out puts a change in the diff
+       that the walk never opens, which is the one thing the walk exists
+       to prevent, and deciding which commits deserve a line is how that
+       happens. "Every commit" means every commit on the branch as the
+       note is written: the commit that writes the note cannot name
+       itself.
+
        At a FIRST gate, add one more line, because nothing else will remember
        it once the stages have merged separately and the final review needs
        it:
