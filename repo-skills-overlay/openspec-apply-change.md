@@ -25,12 +25,14 @@ At a review gate:
 
 The note covers, in order: **review this stage**, the PR's file view
 (`/pull/<n>/files`) and `git diff <default-branch>...HEAD`, both written out,
-followed by one line per commit: its number, subject and commit URL for a
+followed by one line per commit: its number, subject and commit link for a
 task, and an unnumbered line saying what it is for anything else - a lint fix,
 a prose pass, a fix made after the stage was sent back - so the walk opens
-everything on the branch; the PR holds exactly this stage, so there is no
-range to assemble and no base commit to carry; at a first gate also
-`Change based at <commit>`, from
+everything on the branch. Link a commit through the PR
+(`/pull/<n>/commits/<sha>`, never `/commit/<sha>`), so that a file ticked off
+while walking is ticked off in the file view too. The PR holds exactly this
+stage, so there is no range to assemble and no base commit to carry; at a
+first gate also `Change based at <commit>`, from
 `git merge-base <default-branch> HEAD`, carried forward unchanged in every
 later note because the final review needs it; **what changed**
 since the previous gate, per file or behaviour; **departures from the plan**

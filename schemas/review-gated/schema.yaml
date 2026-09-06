@@ -290,7 +290,7 @@ apply:
 
     1. **Review this stage** - the diff itself, written out both ways so the
        reviewer clicks or copies rather than assembles, then the stage's
-       commits so it can be walked task by task:
+       commits so it can be walked commit by commit:
 
            **Review this stage**
 
@@ -298,22 +298,31 @@ apply:
 
                git diff <default-branch>...HEAD
 
-           Task by task:
+           Commit by commit, tasks numbered and everything else not:
 
-           - 1.1 add is_dev_db - https://github.com/<owner>/<repo>/commit/9c1d0a4e
-           - 1.2 cover is_dev_db - https://github.com/<owner>/<repo>/commit/3b77e215
+           - 1.1 add is_dev_db
+             https://github.com/<owner>/<repo>/pull/<n>/commits/9c1d0a4e
+           - 1.2 cover is_dev_db
+             https://github.com/<owner>/<repo>/pull/<n>/commits/3b77e215
 
-       The PR view leads: it alone holds state - files tick off as they are
-       read, a file a later fix touches again un-ticks itself, comments
+       The file view leads: the PR holds state - files tick off as they
+       are read, a file a later fix touches again un-ticks itself, comments
        outlive the session. The PR holds exactly this stage, so it needs no
        range and no base commit - `/pull/<n>/files` IS the stage. Do not
        reconstruct the old `<base>..HEAD` form; there is nothing before this
        stage on this branch.
 
-       The per-task lines are a walking aid, not a second review surface. A
-       commit URL renders that commit against its parent, which is exactly
-       "this task, on top of the last one". They work on any pushed commit,
-       so they cost nothing beyond committing per task.
+       The per-commit lines are a walking aid, not a second review surface.
+       Each renders its commit against its parent, which is exactly "this
+       task, on top of the last one".
+
+       Link them **through the PR** - `/pull/<n>/commits/<sha>`, not
+       `/commit/<sha>`. Both render the same diff, but only the PR form
+       carries the PR's state with it, so a file ticked off while walking
+       is ticked off in the file view too. A bare commit URL is a second,
+       stateless surface, which is what the file view leading was meant to
+       avoid. The PR is open before the note is written - opening it is
+       part of reaching the gate - so its number is always in hand.
 
        The walk covers every commit on the branch, not only the tasks. A
        commit that is no task - a lint or format fix, a pass over the

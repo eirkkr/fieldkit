@@ -160,12 +160,14 @@ second and third scopes involve a human.
   The PR view leads because it alone holds state: files tick off as they are
   read, a file a later fix touches again un-ticks itself, comments outlive
   the session. Under it, one line per commit on the branch - for a task, its
-  number, subject and commit URL, which renders that commit against its
+  number, subject and commit link, which renders that commit against its
   parent; for anything else, the same without a number and a clause saying
   what it is. Every commit, so that nothing on the branch goes unopened and
-  nobody has to judge which ones earn a line. Those are a walking aid, not a
-  second review surface, so the reviewer takes the stage whole or commit by
-  commit as it deserves.
+  nobody has to judge which ones earn a line. Those links go through the PR,
+  `/pull/<n>/commits/<sha>` rather than `/commit/<sha>`, so that the state
+  the file view holds is the same state a walk ticks off. They are a walking
+  aid, not a second review surface, so the reviewer takes the stage whole or
+  commit by commit as it deserves.
 - **Two bookmarks, both in the note.** `Reviewed at` ends every note, marked
   awaiting approval until the gate closes, then filled with the commit
   approved before the box is ticked - so a stage sent back and fixed records
