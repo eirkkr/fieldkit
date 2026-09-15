@@ -175,8 +175,8 @@ At a review gate:
 - Confirm the stage is green first (run the repo's test command). A gate
   reached on a red tree is not reached.
 - Commit each task on its own as you go, with the task number in the
-  subject. The gate's note links those commits so the stage can be walked
-  task by task.
+  subject. The gate's note links every commit on the branch so the stage can
+  be walked commit by commit.
 - Open a PR for the stage's branch - every gate, not just the first, and not
   a draft. The stage is one branch and one PR, so opening it is part of
   reaching the gate and needs no approval.

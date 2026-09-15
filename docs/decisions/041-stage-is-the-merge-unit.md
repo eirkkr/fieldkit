@@ -142,3 +142,16 @@ Alternatives rejected:
   it.** A workflow that opted drafts in, or a job that opted them out, was
   tuned for a PR that sat in draft across a whole change. Neither is needed
   once stage PRs are short-lived and never draft.
+
+> The per-task links have since become per-commit links, taken through the
+> PR. A stage picks up commits that are no task - a lint fix, a prose pass, a
+> fix after the stage was sent back - and a walk of tasks alone left one of
+> them, touching four reviewed files, unopened in a consumer repo; the note
+> now gives every commit on the branch a line, numbered only for a task. The
+> links also changed from `/commit/<sha>` to `/pull/<n>/commits/<sha>`, which
+> reverses two claims in the Reason above: the links now need the PR, and
+> review state is not meaningless to them - walking through the PR ticks off
+> files in the file view, where a bare commit URL was a second, stateless
+> surface. The rules live in [specs.md](../../conventions/specs.md) and the
+> review-gated schema. One commit per task, and the stage as the unit of
+> merge, are unchanged.
