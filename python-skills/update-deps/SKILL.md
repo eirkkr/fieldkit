@@ -9,26 +9,23 @@ argument-hint: "[update|review]"
 
 # Update Dependencies
 
-Dependency management for a uv project. The skill runs in one of two modes:
+Two modes:
 
 1. **Update** - find outdated packages, review changelogs, and bump them.
 2. **Review** - given already-bumped packages in the current diff, check
    changelogs and flag anything to adopt or address, without bumping further.
 
-Pick the mode rather than asking for it. `$ARGUMENTS` naming a mode settles
-it. Otherwise, if the branch's diff against the default branch changes a
-version in `pyproject.toml` or `uv.lock`, run Review; if not, run Update.
-State the mode chosen as the first line of the reply, so a wrong pick is
-corrected before any work rests on it.
+Pick the mode; don't ask. `$ARGUMENTS` naming one settles it. Otherwise run
+Review if the branch's diff against the default branch changes a version in
+`pyproject.toml` or `uv.lock`, else Update. State the mode in the reply's
+first line so a wrong pick is caught early.
 
-This skill assumes two things of the repo:
+The repo needs:
 
-- a `just check` recipe that runs its full lint, type-check, and test suite.
-  Running it after a bump is part of invoking this skill - that invocation is
-  the request to run the linters. If the recipe is missing, say so and stop
-  rather than guessing at a substitute.
-- optionally, a `docs/version-pins.md` listing the pins outside
-  `uv tree --outdated` (see Mode 1, step 4).
+- a `just check` recipe running the full lint, type-check, and test suite.
+  Invoking this skill is the request to run it. If it's missing, say so and
+  stop.
+- optionally, `docs/version-pins.md` (see Mode 1, step 4).
 
 ---
 
@@ -93,22 +90,18 @@ explicitly. This forces the adoption review to be visible rather than buried.
      the end. For major version bumps, do one at a time so failures
      attribute cleanly. The user can override this default.
 
-4. Check the version pins `uv tree --outdated` cannot see - the list in
-   `.fieldkit/conventions/python/setup.md` under "Version pins the dependency
-   tooling does not manage". None is a project dependency, so each goes stale
-   silently. Find them two ways, and reconcile the results:
-   - **Sweep the tree** for pin sites: `[build-system] requires` in
-     `pyproject.toml`, `.python-version`, `FROM` and `COPY --from=` lines in
-     any `Dockerfile`, `uses:` and `version:` in `.github/`, `image:` on
-     service containers and images started by a `docker run` step, and
-     `rev:` in `.pre-commit-config.yaml`.
-   - **Read `docs/version-pins.md`** if the repo has one. It records what a
-     sweep cannot infer: which sites must name the same version, why, and how
-     to confirm a raise worked.
+4. Check the pins `uv tree --outdated` can't see (see "Version pins the
+   dependency tooling does not manage" in
+   `.fieldkit/conventions/python/setup.md`). Find them two ways:
+   - **Sweep the tree:** `[build-system] requires`, `.python-version`,
+     `Dockerfile` `FROM` and `COPY --from=`, `uses:` and `version:` in
+     `.github/`, service `image:` tags, `docker run` images, and `rev:` in
+     `.pre-commit-config.yaml`.
+   - **Read `docs/version-pins.md`** if present: which pins must agree, why,
+     and how to verify a raise.
 
-   A sweep hit the file doesn't list, or a file entry the sweep no longer
-   finds, means the file is stale - propose the correction alongside the
-   bumps. With no file, report the sweep's pins and say none are recorded.
+   If the two disagree, the file is stale - propose a fix alongside the
+   bumps. With no file, report the sweep's pins.
 
 5. If new config options or rules are worth enabling, propose the change and
    wait for approval before editing config files. Adopting a newly-available
@@ -123,9 +116,9 @@ explicitly. This forces the adoption review to be visible rather than buried.
 
 ## Mode 2: Review
 
-1. Diff the branch against the default branch to identify version bumps in
-   `pyproject.toml` and `uv.lock` - a lock-only refresh changes only the
-   latter.
+1. Diff the branch against the default branch for version bumps in
+   `pyproject.toml` and `uv.lock` (a lock-only refresh touches only the
+   latter).
 
 2. For each bumped package, apply the changelog review procedure above. Do not
    bump versions further.
@@ -160,6 +153,6 @@ When bumping a linter (ruff, mypy, djlint, rumdl, etc):
   stubs PyPI page usually states the recommended action explicitly.
 - If `just check` fails after a bump, verify the failure is not pre-existing
   on the base branch before assuming the bump caused it (a quick
-  `git stash && <linter> && git stash pop` confirms). A pre-existing failure
-  is out of scope for the bump: say what an issue for it would contain and
-  ask whether to file it or fix it on this branch, then continue.
+  `git stash && <linter> && git stash pop` confirms). If it is, say what an
+  issue for it would contain and ask whether to file it or fix it here, then
+  continue.

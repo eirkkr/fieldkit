@@ -15,7 +15,8 @@ one-line `@`-import; a rule edited here reaches all of them the next session.
   always-on core and a larger set loaded only when the matching action comes
   up, so a session pays for what it uses.
 - **Claude Code assets** - skills (`push`, `pr`, `merge`, `kit-reconcile`,
-  and `update-deps` for Python repos), subagents, a git `pre-commit` hook that blocks commits to the default branch,
+  and `update-deps` for Python repos), subagents, a git `pre-commit` hook that
+  blocks commits to the default branch,
   a `Stop` hook that catches formatter drift, a status line.
 - **The reasoning** - [`docs/decisions/`](docs/decisions/) holds an ADR per
   non-obvious choice. If you only read one thing, read those: they are the part
@@ -122,8 +123,8 @@ version - upgrade yourself first, e.g. `sudo n lts`).
 
    For a Python repo, also add `@.fieldkit/conventions/python/README.md`; it
    stays slim and indexes `code`, `setup`, and `testing`, which Claude reads on
-   demand, and see "Enabling the Python skills in a consumer repo" for the
-   skills that go with it. `.fieldkit` is gitignored - every collaborator or CI checkout runs
+   demand; see also "Enabling the Python skills in a consumer repo".
+   `.fieldkit` is gitignored - every collaborator or CI checkout runs
    this step once to recreate the symlink.
 
 3. **Grant Claude access to the kit.** `just install` patches
@@ -221,30 +222,22 @@ per-repo `openspec update` needed.
 
 ## Enabling the Python skills in a consumer repo
 
-Skills that only make sense in a Python repo live in `python-skills/` and are
-opt-in per repo ([ADR 043](docs/decisions/043-python-skills-opt-in-per-repo.md)),
-so their descriptions stay out of every other session on the machine. From
-the consumer repo root:
+Python-only skills live in `python-skills/` and are opt-in per repo
+([ADR 043](docs/decisions/043-python-skills-opt-in-per-repo.md)), keeping
+them out of other sessions. From the consumer repo root:
 
 ```bash
 .fieldkit/scripts/enable-python.sh
 ```
 
-This symlinks each `python-skills/<name>` into `.claude/skills/`, prunes links
-to skills the kit has since removed, and leaves a real directory of the same
-name alone - delete a repo-local copy first to adopt the kit's. It's
-idempotent; rerun it when the kit adds a Python skill. Commit the
-`.claude/skills` symlinks.
+This symlinks each skill into `.claude/skills/` and prunes links to removed
+ones, but won't replace a real directory - delete a local copy first. Rerun
+it when the kit adds a skill, and commit the links.
 
-`update-deps` reviews changelogs and bumps dependencies with uv. It expects
-two things of the repo:
-
-- a `just check` recipe that runs the full lint and test suite - the script
-  warns when there isn't one, and the skill stops rather than guess.
-- optionally, `docs/version-pins.md`, recording the pins
-  `uv tree --outdated` can't see and which of them must agree
-  ([ADR 044](docs/decisions/044-repo-pins-in-a-consumer-file.md)). The skill
-  also sweeps the tree for pin sites and reports any the file is missing.
+`update-deps` reviews changelogs and bumps dependencies with uv. It needs a
+`just check` recipe (the script warns if missing), and reads an optional
+`docs/version-pins.md` listing pins `uv tree --outdated` can't see and which
+must agree ([ADR 044](docs/decisions/044-repo-pins-in-a-consumer-file.md)).
 
 ## Blocking commits to the default branch
 
