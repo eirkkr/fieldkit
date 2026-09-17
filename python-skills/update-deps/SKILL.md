@@ -100,7 +100,8 @@ explicitly. This forces the adoption review to be visible rather than buried.
    - **Sweep the tree** for pin sites: `[build-system] requires` in
      `pyproject.toml`, `.python-version`, `FROM` and `COPY --from=` lines in
      any `Dockerfile`, `uses:` and `version:` in `.github/`, `image:` on
-     service containers, and `rev:` in `.pre-commit-config.yaml`.
+     service containers and images started by a `docker run` step, and
+     `rev:` in `.pre-commit-config.yaml`.
    - **Read `docs/version-pins.md`** if the repo has one. It records what a
      sweep cannot infer: which sites must name the same version, why, and how
      to confirm a raise worked.

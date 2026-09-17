@@ -8,8 +8,8 @@ reconciles them:
 
 - **A sweep** of the tree for the pin sites the kit can name generically -
   `[build-system] requires`, `.python-version`, `FROM` and `COPY --from=` in
-  a `Dockerfile`, `uses:`/`version:` under `.github/`, service `image:` tags,
-  `.pre-commit-config.yaml` revs.
+  a `Dockerfile`, `uses:`/`version:` under `.github/`, service `image:` tags
+  and `docker run` images, `.pre-commit-config.yaml` revs.
 - **An optional consumer file, `docs/version-pins.md`**, recording what a
   sweep cannot infer: which sites must name the same version, why, and how to
   confirm a raise worked.
