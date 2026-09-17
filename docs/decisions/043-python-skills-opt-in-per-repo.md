@@ -54,6 +54,8 @@ Alternatives rejected:
 
 ## Consequences
 
+- ADR 014 carries a foot note narrowing its "future pull-style assets go
+  user-level" consequence to skills that apply in every repo.
 - The README's Layout and Setup sections describe `python-skills/` and the
   script; `conventions/python/README.md` points at the skill from its
   dependency row.

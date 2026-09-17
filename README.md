@@ -14,8 +14,8 @@ one-line `@`-import; a rule edited here reaches all of them the next session.
   a PR, record a decision, write a spec, work in Python. Split into a small
   always-on core and a larger set loaded only when the matching action comes
   up, so a session pays for what it uses.
-- **Claude Code assets** - skills (`push`, `pr`, `merge`, `kit-reconcile`),
-  subagents, a git `pre-commit` hook that blocks commits to the default branch,
+- **Claude Code assets** - skills (`push`, `pr`, `merge`, `kit-reconcile`,
+  and `update-deps` for Python repos), subagents, a git `pre-commit` hook that blocks commits to the default branch,
   a `Stop` hook that catches formatter drift, a status line.
 - **The reasoning** - [`docs/decisions/`](docs/decisions/) holds an ADR per
   non-obvious choice. If you only read one thing, read those: they are the part

@@ -122,7 +122,9 @@ explicitly. This forces the adoption review to be visible rather than buried.
 
 ## Mode 2: Review
 
-1. Run `git diff` to identify version bumps in `pyproject.toml`.
+1. Diff the branch against the default branch to identify version bumps in
+   `pyproject.toml` and `uv.lock` - a lock-only refresh changes only the
+   latter.
 
 2. For each bumped package, apply the changelog review procedure above. Do not
    bump versions further.
