@@ -76,3 +76,6 @@ Where the same tool is pinned in more than one place, pin it to the same
 version everywhere and raise them together. One site pinned exactly while
 another follows the latest release will drift, and nothing compares them -
 the exactly-pinned one is the copy that quietly falls behind.
+
+A repo can record its pin sites, and which must agree, in
+`docs/version-pins.md`; `update-deps` checks it against the tree.

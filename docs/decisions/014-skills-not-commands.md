@@ -49,3 +49,7 @@ Alternatives rejected:
 - Future pull-style assets (further skills, agents) follow this same path:
   version-controlled here under `skills/`, symlinked user-level by
   `just install`.
+
+> Amended by [043](043-python-skills-opt-in-per-repo.md): Python-only skills
+> live in `python-skills/`, linked per repo by `scripts/enable-python.sh`.
+> Skills that apply in every repo still follow the path above.

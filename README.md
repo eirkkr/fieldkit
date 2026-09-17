@@ -14,8 +14,9 @@ one-line `@`-import; a rule edited here reaches all of them the next session.
   a PR, record a decision, write a spec, work in Python. Split into a small
   always-on core and a larger set loaded only when the matching action comes
   up, so a session pays for what it uses.
-- **Claude Code assets** - skills (`push`, `pr`, `merge`, `kit-reconcile`),
-  subagents, a git `pre-commit` hook that blocks commits to the default branch,
+- **Claude Code assets** - skills (`push`, `pr`, `merge`, `kit-reconcile`,
+  and `update-deps` for Python repos), subagents, a git `pre-commit` hook that
+  blocks commits to the default branch,
   a `Stop` hook that catches formatter drift, a status line.
 - **The reasoning** - [`docs/decisions/`](docs/decisions/) holds an ADR per
   non-obvious choice. If you only read one thing, read those: they are the part
@@ -56,6 +57,10 @@ the `eirkkr/fieldkit` remote is mine and you will not be able to push to it.
   an overlay without regenerating leaves the vendored skill serving the old
   text - which still loads and still reads plausibly. `just check` fails on
   that drift.
+- `python-skills/` - skills that only apply in a Python repo (`update-deps`),
+  symlinked into an *opt-in* consumer repo's `.claude/skills` by
+  `.fieldkit/scripts/enable-python.sh` (not by `just install` - see "Enabling
+  the Python skills in a consumer repo").
 - `schemas/` - kit-owned OpenSpec workflow schemas, linked file-by-file into
   an opt-in consumer repo's `openspec/schemas/`.
 - `agents/` - shared Claude Code subagents, symlinked into `~/.claude/agents`
@@ -118,7 +123,8 @@ version - upgrade yourself first, e.g. `sudo n lts`).
 
    For a Python repo, also add `@.fieldkit/conventions/python/README.md`; it
    stays slim and indexes `code`, `setup`, and `testing`, which Claude reads on
-   demand. `.fieldkit` is gitignored - every collaborator or CI checkout runs
+   demand; see also "Enabling the Python skills in a consumer repo".
+   `.fieldkit` is gitignored - every collaborator or CI checkout runs
    this step once to recreate the symlink.
 
 3. **Grant Claude access to the kit.** `just install` patches
@@ -213,6 +219,25 @@ re-applies `repo-skills-overlay/*.md` on top - the rsync is `--delete`, so
 kit additions to a vendored skill live in the overlay or they don't survive.
 Adopting repos pick up the change through their symlinks next session; no
 per-repo `openspec update` needed.
+
+## Enabling the Python skills in a consumer repo
+
+Python-only skills live in `python-skills/` and are opt-in per repo
+([ADR 043](docs/decisions/043-python-skills-opt-in-per-repo.md)), keeping
+them out of other sessions. From the consumer repo root:
+
+```bash
+.fieldkit/scripts/enable-python.sh
+```
+
+This symlinks each skill into `.claude/skills/` and prunes links to removed
+ones, but won't replace a real directory - delete a local copy first. Rerun
+it when the kit adds a skill, and commit the links.
+
+`update-deps` reviews changelogs and bumps dependencies with uv. It needs a
+`just check` recipe (the script warns if missing), and reads an optional
+`docs/version-pins.md` listing pins `uv tree --outdated` can't see and which
+must agree ([ADR 044](docs/decisions/044-repo-pins-in-a-consumer-file.md)).
 
 ## Blocking commits to the default branch
 
