@@ -55,6 +55,17 @@
   no conflicts; a red check or unresolved conflicts block it outright, a
   still-running check is waited out instead.
 
+## Rewriting history
+
+- Rebasing or amending a pushed branch rewrites its commits, so the push
+  after it is a force-push:
+  `--force-with-lease=<branch>:<sha last seen>`, which refuses if anything
+  landed since. Plain `--force`, and a bare `--force-with-lease` (which
+  trusts whatever was last fetched), can overwrite someone else's push.
+- The default branch is never rewritten.
+- A rewrite re-SHAs every commit, so anything citing the old SHAs goes
+  stale - a stage's review note especially (see [specs.md](specs.md)).
+
 ## Hooks
 
 - The kit ships a `pre-commit` hook refusing commits on the default branch,
