@@ -342,7 +342,8 @@ apply:
            Change based at `1f4b02e7`.
 
        That is `git merge-base <default-branch> HEAD` at the start of the
-       change. Carry the same line forward, unchanged, in every later note.
+       change. Carry the same line forward, unchanged, in every later note -
+       unless a rebase of the first stage moves it (see below).
     2. **What changed** - per file or behaviour, since the previous gate.
        Enough that they know where to look without reading the diff first.
     3. **Departures from the plan** - anything built differently than
@@ -369,6 +370,12 @@ apply:
     Then stop and wait. If the reviewer sends the stage back, fix it in this
     stage's own branch and PR and rewrite the note; do not open a new stage,
     and do not merge, to carry the fix.
+
+    If the stage is rebased while it waits, force-push with
+    `--force-with-lease=<branch>:<head last seen>`, then fix the note in one
+    commit: remap each commit link by subject, record the checks on the
+    rebased head once they have run, and at a first gate move
+    `Change based at` to the new merge-base.
 
     When the reviewer approves, and only then, close the gate: replace
     `_Awaiting approval._` under **Reviewed at** with

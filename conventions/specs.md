@@ -177,6 +177,11 @@ second and third scopes involve a human.
   by the first stage and carried forward unchanged: the default branch's tip
   when the change began, which only the final review needs and nothing else
   remembers once the stages have merged separately.
+- **A rebase rewrites the note too.** Rebasing a stage re-SHAs every commit,
+  so the note's commit links and recorded checks go stale. One commit after
+  the force-push remaps the links by subject and records the checks on the
+  rebased head. On a first stage it also moves `Change based at` to the new
+  base - the one exception to carrying it forward unchanged.
 - **Per change.** The last stage of every change is the final review: the
   built code against the change's own proposal, design and delta specs, in
   three directions - unmet requirements, things built that nothing asked
