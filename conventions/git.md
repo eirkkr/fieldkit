@@ -80,22 +80,13 @@
   override the guess, or in a repo whose `origin/HEAD` isn't set.
 - Don't reach for `--no-verify` to get past it - the refusal means the commit
   belongs on a branch. Create one and commit there.
-- The kit also ships a Claude Code `PreToolUse` hook refusing a Bash command
-  that creates or renames a branch to a name without an allowed prefix, or
-  longer than the limit -
-  `git checkout -b`, `git switch -c`, `git branch` (create, rename or copy)
-  and `git worktree add -b`, anywhere in a compound command. It catches the
-  name before anything is committed to the branch, but only for Claude; a
-  branch made any other way is not checked. `just install` registers it
-  machine-wide, and it acts only in a repo with a `.fieldkit` entry at its
-  root, or in the kit itself.
-- That hook reads the prefixes and the length limit from the two bullets
-  above, which stay their one copy. The kit's `just check` fails if a
-  rewording of either leaves the hook unable to read it.
-- A PR's branch name is checked in CI as well, by the kit's reusable
-  `branch-name` workflow, which catches branches however they were made.
-  Enable it from the repo root with `.fieldkit/scripts/enable-branch-check.sh`
-  and commit the workflow file it writes. It reads the rules from the kit's
-  own `git.md`, so a change to them reaches the check with no edit in the
-  repo. PRs opened by a bot, such as Dependabot, are exempt: a bot's branch
-  names come from its own config, which these rules can't instruct.
+- The kit also ships a Claude Code `PreToolUse` hook that refuses creating or
+  renaming a branch to a name breaking the Branches rules, before anything is
+  committed to it. It only sees Claude's Bash commands. `just install`
+  registers it, and it acts only in a repo with `.fieldkit` or in the kit.
+- CI checks each PR's branch name too, however the branch was made. Enable it
+  from the repo root with `.fieldkit/scripts/enable-branch-check.sh`, and
+  commit the workflow it writes. PRs opened by bots are exempt, since bots
+  name branches from their own config.
+- Both read the prefixes and the limit from the Branches bullets above, their
+  only copy. The kit's `just check` fails if those stop parsing.

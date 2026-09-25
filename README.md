@@ -342,62 +342,45 @@ until it's committed.
 
 ## Refusing non-conforming branch names
 
-`conventions/git.md` requires Conventional Branch names with a prefix from a
-closed set and at most 50 characters long, but an agent only follows that if
-it reads `git.md` before
-branching - and making a branch is too small an action to prompt the read. The
-kit ships a Claude Code `PreToolUse` hook
-([ADR 046](docs/decisions/046-enforce-branch-names-in-a-hook-and-ci.md))
-that refuses a Bash command creating or renaming a branch to a name that
-breaks either rule: `git checkout -b|-B`, `git switch -c|-C`, `git branch` (create,
-`-m`/`-M` rename, `-c`/`-C` copy) and `git worktree add -b|-B`, including
-inside a compound command like `cd x && git checkout -b y`. The refusal says
-which rule the name breaks and points at `git.md`, so Claude picks a conforming
-name
-and retries - before anything has been committed to the branch.
+`conventions/git.md` limits branch names to a closed set of prefixes and 50
+characters, but an agent only follows that if it reads `git.md` first. The kit
+ships a Claude Code `PreToolUse` hook
+([ADR 046](docs/decisions/046-enforce-branch-names-in-a-hook-and-ci.md)) that
+refuses a Bash command creating or renaming a branch to a name breaking either
+rule - `git checkout -b`, `git switch -c`, `git branch` (create, rename, copy)
+or `git worktree add -b`, even inside a compound command. The refusal names
+the rule, so Claude retries with a conforming name before anything is
+committed.
 
-It checks only what Claude runs through Bash. A branch you make yourself, or
-one Claude Code's `EnterWorktree` tool makes, is not checked.
-
-`just install` registers it in `~/.claude/settings.json` next to the `Stop`
-hook, but it acts only in a repo that reaches the kit - one with a `.fieldkit`
-entry at its root (checked in the main worktree too, so a linked worktree
-counts), or the kit itself. Elsewhere it lets everything through.
-
-When it can't read a command with confidence - unbalanced quotes, a name built
-from `$VAR`, a flag combination it doesn't model - it lets the command through
-rather than guess, and a crash does the same. The prefixes and the limit
-come from `git.md`'s Branches bullets, so the doc stays their one copy;
-`just check` fails if a rewording leaves the hook unable to read either.
+- It only sees Claude's Bash commands, not branches you make yourself or ones
+  `EnterWorktree` makes.
+- `just install` registers it machine-wide, but it acts only in a repo with a
+  `.fieldkit` entry (a linked worktree's main worktree counts) or in the kit.
+- It lets through anything it can't parse with confidence, and a crash does
+  the same.
+- It reads the rules from `git.md`'s Branches bullets; `just check` fails if
+  they stop parsing.
 
 ### Checking branch names in CI
 
-The hook only sees Claude. To catch every branch - yours included - a repo can
-also check each PR's branch name in CI, with the kit's reusable
-`branch-name` workflow. From the consumer repo root:
+To catch every branch, yours included, check each PR's branch name in CI. From
+a consumer repo's root:
 
 ```bash
 .fieldkit/scripts/enable-branch-check.sh
 ```
 
-This writes `.github/workflows/branch-name.yml`, a four-line caller of the
-kit's workflow; commit it to finish. The caller names the repo the kit's
-`origin` points at, so a fork's consumers call the fork. It's idempotent, and
-refuses rather than clobbers if a different file is already there.
+This writes `.github/workflows/branch-name.yml`, a short caller of the kit's
+reusable workflow; commit it. The workflow checks out the kit's `main` and runs
+`just check-branch-name`, so rule changes reach every repo with no edit there.
+The caller points at the repo the kit's `origin` names, so a fork's consumers
+call the fork, and the kit must stay public to be callable.
 
-The workflow checks out the kit's `main` and runs `just check-branch-name`
-there, reading the rules from its `git.md`, so a rule change reaches every
-repo with no edit there - and so the
-kit must stay public for a consumer to call it. A PR opened by a bot, such as
-Dependabot, is skipped: a bot's branch names come from its own config, which
-the rules can't instruct. For the check to block merging on its own rather than
-just show red, make it a required status check in the repo's branch
-protection; the kit's `merge` skill already refuses on a failed check.
-
-The kit checks its own PRs with the same workflow, which also triggers on the
-kit's PRs and then reads the PR's copy of the kit, so the path consumers use
-is tested before it reaches them. Locally,
-`just check-branch-name` checks the branch you have checked out.
+- PRs opened by bots such as Dependabot are skipped.
+- To block merging on it, make it a required status check. The kit's `merge`
+  skill already refuses on a red check.
+- The same workflow runs on the kit's own PRs, against the PR's commit.
+  Locally, `just check-branch-name` checks the branch you're on.
 
 ## Updating a shared rule
 

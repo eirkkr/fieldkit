@@ -1,23 +1,13 @@
-# Fail a PR whose branch name breaks conventions/git.md's branch rules.
+# Fail a PR whose branch name breaks conventions/git.md's branch rules, by
+# running `just check-branch-name` in a checkout of the kit.
 #
-# Two triggers, one check:
+# - pull_request: the kit's own PRs, against the PR's commit.
+# - workflow_call: consumer repos, against the kit's main (see
+#   scripts/enable-branch-check.sh). A called workflow answers only the
+#   call, so pull_request never fires there.
 #
-# - pull_request - the kit's own PRs, checked against the PR's copy of the
-#   kit, so the path consumers call is exercised before it reaches them.
-# - workflow_call - consumer repos, each calling it from its own pull_request
-#   workflow, which .fieldkit/scripts/enable-branch-check.sh writes. They get
-#   the kit at kit-ref (its main), so a rule change reaches every caller
-#   unedited. A called workflow answers only the call, so the pull_request
-#   trigger never fires in a consumer.
-#
-# Either way it checks out the kit and runs `just check-branch-name` there,
-# which reads the rules from the kit's git.md.
-#
-# A PR showing a failure naming some other branch is not a bug here: GitHub
-# attaches check results to a commit, not a PR, so two PRs whose branches
-# point at the same commit show each other's latest run. Each run checks only
-# the branch of the PR that triggered it - give the other branch its own
-# commit, or re-run the check on this PR.
+# A failure naming another branch means two PRs share a head commit: GitHub
+# attaches checks to commits, so each shows the other's latest run.
 name: Branch name
 
 on:
@@ -35,20 +25,19 @@ on:
 
 jobs:
   branch-name:
-    # A bot's branch names come from its own config, which the naming rule
-    # can't instruct - so its PRs aren't held to it.
+    # Bots name branches from their own config, which the rules can't reach.
     if: github.event_name == 'pull_request' && github.event.pull_request.user.type != 'Bot'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          # No inputs on the kit's own PRs: fall back to the PR's commit.
+          # No inputs on the kit's own PRs, so use the PR's commit.
           repository: ${{ inputs.kit-repository || github.repository }}
           ref: ${{ inputs.kit-ref || github.event.pull_request.head.sha }}
 
       - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
 
-      # A pinned tool through uv, like rumdl in the kit's justfile (ADR 004).
+      # Pinned, through uv (ADR 004).
       - name: Install just
         run: uv tool install rust-just@1.58.0
 
