@@ -69,3 +69,8 @@ Alternatives rejected:
 > now matches by name. The claim they were cited for - that nothing
 > *requires* the names to match - is unaffected; it simply has no live
 > example left.
+
+## Superseded
+
+Superseded by [ADR 045](045-inline-git-skills.md): `push`, `pr` and `merge`
+run their commands inline, and their worker agents are removed.

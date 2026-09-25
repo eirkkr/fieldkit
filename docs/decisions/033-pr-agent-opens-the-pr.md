@@ -82,3 +82,8 @@ Alternatives rejected:
 - The trio now reads uniformly - skill decides, agent acts - which is worth
   more than any one of the three splits individually, because it removes the
   question of which half acts each time one of them is invoked.
+
+## Superseded
+
+Superseded by [ADR 045](045-inline-git-skills.md): `push`, `pr` and `merge`
+run their commands inline, and their worker agents are removed.

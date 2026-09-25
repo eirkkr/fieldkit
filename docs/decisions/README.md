@@ -20,7 +20,7 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 013 | [Style rules in tooling, not LLM context](013-style-rules-in-tooling-not-context.md)                      | Accepted   |
 | 014 | [Skills, not slash commands](014-skills-not-commands.md)                                                  | Accepted   |
 | 015 | [Delegate mechanical, ungated git steps only](015-mechanical-subagent-boundary.md)                        | Superseded |
-| 016 | [Pair a thin skill with a worker agent](016-skill-agent-pair.md)                                          | Accepted   |
+| 016 | [Pair a thin skill with a worker agent](016-skill-agent-pair.md)                                          | Superseded |
 | 017 | [Disable AI attribution via settings, not instructions](017-attribution-via-settings-not-instructions.md) | Accepted   |
 | 018 | [Rely on venv activation, not an inline uv run rule](018-venv-activation-not-uv-run.md)                   | Accepted   |
 | 019 | [Route git actions through skills; git.md on demand](019-git-on-demand-via-skills.md)                     | Accepted   |
@@ -37,7 +37,7 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 030 | [Ungate merging; caller drafts the squash message](030-ungate-merge.md)                                   | Accepted   |
 | 031 | [Re-gate PR/merge invocation, unless directly invoked](031-regate-pr-and-merge-invocation.md)             | Accepted   |
 | 032 | [Merge waits out pending CI instead of stopping](032-merge-waits-out-pending-ci.md)                       | Accepted   |
-| 033 | [Let the pr agent open the PR itself](033-pr-agent-opens-the-pr.md)                                       | Accepted   |
+| 033 | [Let the pr agent open the PR itself](033-pr-agent-opens-the-pr.md)                                       | Superseded |
 | 034 | [Gate OpenSpec stages on human review](034-review-gated-openspec-schema.md)                               | Accepted   |
 | 035 | [Attribute formatter drift by measuring the fixer](035-measure-the-fixer-not-the-transcript.md)           | Accepted   |
 | 036 | [Publish publicly under MIT](036-public-mit-with-upstream-notice.md)                                      | Accepted   |
@@ -49,3 +49,4 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 042 | [Re-gate filing an issue, unless the user asked for one](042-regate-issue-filing.md)                      | Accepted   |
 | 043 | [Ship Python-only skills per-repo, from python-skills/](043-python-skills-opt-in-per-repo.md)             | Accepted   |
 | 044 | [Find repo-specific pins by sweep and by file](044-repo-pins-in-a-consumer-file.md)                       | Accepted   |
+| 045 | [Run push, pr and merge inline; retire their agents](045-inline-git-skills.md)                            | Accepted   |

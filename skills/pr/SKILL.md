@@ -4,12 +4,12 @@ description: Draft and open a pull request for the current branch
 argument-hint: "[short summary of the change, optional]"
 ---
 
-# Open a pull request via a delegated agent
+# Open a pull request
 
 If there's uncommitted work, or the branch isn't pushed yet - including
 still being on the default branch, with no branch to open a PR from at all -
 follow `skills/push/SKILL.md` first: decide the branch, commit message, and
-file list, and dispatch its `push` subagent. Pushing is already
+file list, and commit and push. Pushing is already
 ungated/act-then-show regardless of how this skill was reached, so there's
 nothing to ask separately before doing it.
 
@@ -38,16 +38,24 @@ change set to pin them down:
   writing nothing - not a sentence reporting that there was no issue to
   close. A body says what the change is, never what it left out.
 
-Launch the `pr` subagent (`subagent_type: pr`) in the foreground with the
-title and body stated explicitly, plus `$ARGUMENTS` for whatever extra
-context was given. The agent takes them as given, and assumes the branch is
-already pushed - it doesn't rediscover, diff, push, or second-guess any of
-it. It runs `gh pr create` itself - don't run it here, and don't read its
-report as a draft awaiting a second dispatch. Relay that report (the PR
-link, title, and body - or an existing PR's URL if one was already open on
-this branch, in which case there was nothing to create).
+`$ARGUMENTS`, if given, is extra context for the draft. Then open it, in
+this turn:
 
-Everything handed to the agent as title or body is published verbatim, so
+1. Check for an existing PR on this branch: `gh pr list --head <branch>`.
+   If one is already open, report its URL instead of opening a second one -
+   there is nothing to create.
+2. Confirm the branch is pushed and up to date with the remote. If it isn't,
+   push it first as `skills/push/SKILL.md` describes.
+3. Run `gh pr create` against the default branch (`gh repo view --json
+   defaultBranchRef -q .defaultBranchRef.name`), passing the title and body
+   verbatim - the body through `--body-file` or a heredoc, so it keeps its
+   formatting.
+4. Report the PR number and URL, and the title and body as opened.
+
+These steps run here rather than in a subagent
+([ADR 045](../../docs/decisions/045-inline-git-skills.md)).
+
+Everything written as the title or body is published verbatim, so
 keep out of it anything addressed to yourself rather than to a reader. That
 covers directives - "don't add X", "use the wording below", notes about what
 not to do - and equally the quieter kind: narration accounting for a section
@@ -62,7 +70,7 @@ anything that only makes sense as an answer to your own reasoning is the
 failure this catches.
 
 Reaching this skill already means opening the PR is approved - either the
-user typed `/pr` directly, or the caller asked and got a yes first. So the
-agent opens it straight away, with no review of the draft in between;
+user typed `/pr` directly, or the caller asked and got a yes first. So it
+opens straight away, with no review of the draft in between;
 surfacing the link, title, and body afterward is what lets it be corrected
 if it's off.

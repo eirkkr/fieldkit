@@ -4,7 +4,7 @@ One place to keep the dev conventions and Claude Code tooling that every repo I
 work in would otherwise re-state for itself.
 
 Like a survival field kit: the **manual** (conventions) and the **instruments**
-(skills, subagents, hooks, a status line) live together, and every repo reaches
+(skills, hooks, a status line) live together, and every repo reaches
 into the same kit instead of carrying its own copy. A repo opts in with a
 one-line `@`-import; a rule edited here reaches all of them the next session.
 
@@ -15,7 +15,7 @@ one-line `@`-import; a rule edited here reaches all of them the next session.
   always-on core and a larger set loaded only when the matching action comes
   up, so a session pays for what it uses.
 - **Claude Code assets** - skills (`push`, `pr`, `merge`, `kit-reconcile`,
-  and `update-deps` for Python repos), subagents, a git `pre-commit` hook that
+  and `update-deps` for Python repos), a git `pre-commit` hook that
   blocks commits to the default branch,
   a `Stop` hook that catches formatter drift, a status line.
 - **The reasoning** - [`docs/decisions/`](docs/decisions/) holds an ADR per
@@ -64,7 +64,9 @@ the `eirkkr/fieldkit` remote is mine and you will not be able to push to it.
 - `schemas/` - kit-owned OpenSpec workflow schemas, linked file-by-file into
   an opt-in consumer repo's `openspec/schemas/`.
 - `agents/` - shared Claude Code subagents, symlinked into `~/.claude/agents`
-  by `just install` (see Setup).
+  by `just install` (see Setup). None ship today: `push`, `pr` and `merge`
+  run inline ([ADR 045](docs/decisions/045-inline-git-skills.md)), and
+  `just install` prunes the links it made for them.
 - `statusline/` - the shared Claude Code status line script, symlinked to
   `~/.claude/statusline-command.sh` and wired up via `settings.json`'s
   `statusLine` key by `just install` (see Setup).
