@@ -89,7 +89,7 @@ Alternatives rejected:
 > `gh pr create` directly. `pr` has since moved to the same shape decided
 > here, so the contrast no longer holds - the reasoning for keeping merge
 > whole does, and 033 adopts it rather than reversing it.
-
+>
 > Amended by [045](045-inline-git-skills.md): the decisions here still sit with
 > the skill, but the agent they were handed to is gone - the skill now runs
 > the commands itself, in the same turn.
