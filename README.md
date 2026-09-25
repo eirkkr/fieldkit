@@ -340,15 +340,15 @@ until it's committed.
 ## Refusing non-conforming branch names
 
 `conventions/git.md` requires Conventional Branch names with a prefix from a
-closed set, but an agent only follows that if it reads `git.md` before
+closed set and at most 50 characters long, but an agent only follows that if it reads `git.md` before
 branching - and making a branch is too small an action to prompt the read. The
 kit ships a Claude Code `PreToolUse` hook
 ([ADR 046](docs/decisions/046-refuse-branch-names-in-a-pretooluse-hook.md))
-that refuses a Bash command creating or renaming a branch to a name outside
-those prefixes: `git checkout -b|-B`, `git switch -c|-C`, `git branch` (create,
+that refuses a Bash command creating or renaming a branch to a name that
+breaks either rule: `git checkout -b|-B`, `git switch -c|-C`, `git branch` (create,
 `-m`/`-M` rename, `-c`/`-C` copy) and `git worktree add -b|-B`, including
-inside a compound command like `cd x && git checkout -b y`. The refusal names
-the allowed prefixes and points at `git.md`, so Claude picks a conforming name
+inside a compound command like `cd x && git checkout -b y`. The refusal says
+which rule the name breaks and points at `git.md`, so Claude picks a conforming name
 and retries - before anything has been committed to the branch.
 
 It checks only what Claude runs through Bash. A branch you make yourself, or
@@ -361,9 +361,9 @@ counts), or the kit itself. Elsewhere it lets everything through.
 
 When it can't read a command with confidence - unbalanced quotes, a name built
 from `$VAR`, a flag combination it doesn't model - it lets the command through
-rather than guess, and a crash does the same. The prefixes come from
-`git.md`'s "Allowed prefixes" bullet, so the doc stays their one copy;
-`just check` fails if a rewording leaves the hook reading none.
+rather than guess, and a crash does the same. The prefixes and the limit
+come from `git.md`'s Branches bullets, so the doc stays their one copy;
+`just check` fails if a rewording leaves the hook unable to read either.
 
 ## Updating a shared rule
 

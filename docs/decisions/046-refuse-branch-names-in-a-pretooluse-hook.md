@@ -2,11 +2,14 @@
 
 ## Decision
 
+`conventions/git.md` gains a hard limit on branch names: at most 50
+characters, prefix included.
+
 The kit ships `hooks/pretooluse-branch-name.py`, a Claude Code `PreToolUse`
 hook on `Bash`. It refuses a command that creates or renames a branch to a
-name outside the prefixes `conventions/git.md` allows, through the documented
-JSON `deny` decision, with a reason naming the allowed prefixes and pointing
-at `git.md`.
+name without one of the prefixes `git.md` allows, or over that limit, through
+the documented JSON `deny` decision, with a reason saying which rule the name
+breaks and pointing at `git.md`.
 
 - **Commands caught:** `git checkout -b|-B`, `git switch -c|-C|--create|
   --force-create`, `git branch <name>` (creation), `git branch -m|-M|-c|-C
@@ -21,9 +24,10 @@ at `git.md`.
 - **Where it applies.** Only in a repo that reaches the kit: one with a
   `.fieldkit` entry at the root of its working tree or of its main worktree,
   or the kit itself. Everywhere else it lets everything through.
-- **One copy of the prefixes.** The hook reads them from `git.md`'s "Allowed
-  prefixes:" bullet at run time. `--prefixes` prints what it reads, and
-  `just check` fails when that is empty.
+- **One copy of the rules.** The hook reads the prefixes and the limit from
+  `git.md`'s "Allowed prefixes:" and "At most N characters" bullets at run
+  time. `--rules` prints what it reads, and `just check` fails when either
+  is missing.
 - **`EnterWorktree` is left out.** Its input carries a worktree `name`, not a
   branch name; the branch Claude Code derives from it is not in the tool's
   schema.
@@ -64,12 +68,24 @@ Why the choices above:
   one because `.fieldkit` is gitignored, so a linked worktree never has it.
 - **Parsing `git.md`** over a separate data file: the doc is where a human
   reads the rule, and a second copy anywhere drifts from it. The cost is that
-  rewording the bullet could silently disable the hook, which is what the
+  rewording a bullet could silently disable its check, which is what the
   `just check` guard exists to catch. A data file the doc points at was
-  rejected because it takes the list out of the doc people actually read.
-- **Checking prefixes only**, not lowercase or hyphenation: the prefix set is
-  closed and mechanical, the style rules are looser and more likely to
-  refuse a name a human would accept.
+  rejected because it takes the rules out of the doc people actually read.
+- **A hard length limit** over guidance to keep names short: a number in
+  the doc can be checked, where "a few words" can't, and the likeliest
+  source of a long name is an agent turning an issue title into one. No
+  standard sets one - the Conventional Branch spec asks only for a concise
+  description, and GitHub's UI truncates by available width, not at a fixed
+  count - so the number is a house rule, like the commit subject's limit
+  in `git.md`. 50 matches that limit's target, and fits practice: none of
+  this repo's 78 branch names so far exceeds it (longest 41), nor any of one
+  consumer repo's 208 (longest 48), so it refuses the outlier without
+  renaming anything that exists.
+- **Characters, not words:** characters are what truncation depends on, and a
+  word cap still admits five long words.
+- **Prefix and length only**, not lowercase or hyphenation: both are closed
+  and mechanical, the style rules are looser and more likely to refuse a name
+  a human would accept.
 - **One registration script** over a second copy of the Stop one: the two
   would differ only in event, matcher and file name, and the legacy-rename
   handling from ADR 035 would otherwise be duplicated.
@@ -89,14 +105,15 @@ Alternatives rejected:
 
 - Claude's branch creation through Bash in a kit repo is checked; a human's,
   and anything made by `EnterWorktree` or a tool other than Bash, is not.
-- The "Allowed prefixes:" bullet in `git.md` is now load-bearing: it must
-  stay one bullet listing the prefixes in backticks before its first period.
-  `just check` enforces that it still parses.
+- The "Allowed prefixes:" and "At most N characters" bullets in `git.md` are
+  now load-bearing: the first must list the prefixes in backticks before its
+  first period, the second must open with that phrase. `just check`
+  enforces that both still parse.
 - The hook costs one `shlex` pass per Bash call, and two `git rev-parse` calls
   only when a non-conforming branch name is found.
 - `just install` now registers two hooks through one prompt. An existing
   registration of the Stop hook is kept or rewritten in place as before.
 - Anyone who has not re-run `just install` simply lacks the hook; nothing
   else depends on it.
-- The `pre-commit` check can read the same bullet, keeping the one copy, when
-  it is built.
+- The `pre-commit` check can read the same bullets, keeping the one copy,
+  when it is built.

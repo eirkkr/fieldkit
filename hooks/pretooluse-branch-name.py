@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""PreToolUse hook: refuse a Bash command naming a branch outside the kit's prefixes.
+"""PreToolUse hook: refuse a Bash command naming a branch against the kit's rules.
 
 `conventions/git.md` requires Conventional Branch names with a prefix from a
-closed set. Read as prose, that holds only if the branching agent read `git.md`
+closed set, and caps their length. Read as prose, that holds only if the branching agent read `git.md`
 first, and branching is too small an action to prompt the read. This hook
 checks the name at the moment the branch is made, before anything is on it.
 
@@ -19,9 +19,10 @@ covers unparseable shell, names built from `$VAR` or command substitution, flag
 combinations it doesn't model, and `git worktree add <path>` without `-b`,
 whose branch name git derives from the path only when no such branch exists.
 
-The allowed prefixes are read from `git.md`'s "Allowed prefixes:" bullet, so
-the doc stays their one copy; `--prefixes` prints what the hook reads, and
-`just check` fails when that comes back empty. It applies only in a repo that
+The allowed prefixes and the length cap are read from `git.md`'s "Allowed
+prefixes:" and "At most N characters" bullets, so the doc stays their one
+copy; `--rules` prints what the hook reads, and `just check` fails when either
+is missing. It applies only in a repo that
 reaches the kit - one with a `.fieldkit` entry at its root, or the kit itself.
 See ADR 046 under docs/decisions/.
 
@@ -42,6 +43,7 @@ import sys
 KIT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 GIT_MD = os.path.join(KIT, "conventions", "git.md")
 PREFIXES_BULLET = re.compile(r"^-\s+Allowed prefixes:(.*?)(?:\.|$)")
+LENGTH_BULLET = re.compile(r"^-\s+At most (\d+) characters")
 
 SEPARATORS = {"&&", "||", ";", "|", "&", "\n", "(", ")", "|&", ";;"}
 # Global git options that take their value as the next word.
@@ -55,10 +57,10 @@ BRANCH_RENAME_FLAGS = {"-m", "-M", "--move", "-c", "-C", "--copy"}
 
 
 def main():
-    if sys.argv[1:] == ["--prefixes"]:
-        prefixes = allowed_prefixes()
-        print("\n".join(prefixes))
-        sys.exit(0 if prefixes else 1)
+    if sys.argv[1:] == ["--rules"]:
+        prefixes, limit = rules()
+        print(f"prefixes: {' '.join(prefixes)}\nmax length: {limit}")
+        sys.exit(0 if prefixes and limit else 1)
 
     try:
         payload = json.load(sys.stdin)
@@ -70,33 +72,49 @@ def main():
     if not isinstance(command, str) or "git" not in command:
         return
 
-    prefixes = allowed_prefixes()
+    prefixes, limit = rules()
     if not prefixes:
         return
     cwd = payload.get("cwd") or os.getcwd()
     for directory, name in branch_names(command, cwd):
-        if name.startswith(prefixes) and name not in prefixes:
+        problem = violation(name, prefixes, limit)
+        if not problem:
             continue
         doc = reaches_kit(directory)
         if doc:
-            deny(name, prefixes, doc)
+            deny(name, problem, prefixes, limit, doc)
             return
 
 
-def allowed_prefixes():
-    """The prefixes git.md allows, in order, or an empty tuple if unreadable."""
+def rules():
+    """git.md's allowed prefixes and length cap.
+
+    Either comes back empty - `()` or None - when git.md can't be read or its
+    bullet no longer parses, and the hook then skips that check.
+    """
     try:
         with open(GIT_MD, encoding="utf-8") as handle:
             text = handle.read()
     except OSError:
-        return ()
-    # The bullet is hard-wrapped prose; join each bullet onto one line first.
-    bullets = re.split(r"\n(?=\s*-\s)", text)
-    for bullet in bullets:
-        match = PREFIXES_BULLET.match(" ".join(bullet.split()))
-        if match:
-            return tuple(re.findall(r"`([a-z]+/)`", match.group(1)))
-    return ()
+        return (), None
+    prefixes, limit = (), None
+    # The bullets are hard-wrapped prose; join each onto one line first.
+    for bullet in re.split(r"\n(?=\s*-\s)", text):
+        line = " ".join(bullet.split())
+        if match := PREFIXES_BULLET.match(line):
+            prefixes = tuple(re.findall(r"`([a-z]+/)`", match.group(1)))
+        elif match := LENGTH_BULLET.match(line):
+            limit = int(match.group(1))
+    return prefixes, limit
+
+
+def violation(name, prefixes, limit):
+    """Why `name` breaks the rules, or None when it doesn't."""
+    if not name.startswith(prefixes) or name in prefixes:
+        return "has no allowed prefix"
+    if limit and len(name) > limit:
+        return f"is {len(name)} characters, over the {limit}-character limit"
+    return None
 
 
 def branch_names(command, cwd):
@@ -226,13 +244,15 @@ def reaches_kit(directory):
     return None
 
 
-def deny(name, prefixes, doc):
+def deny(name, problem, prefixes, limit, doc):
     """Refuse the tool call through PreToolUse's documented JSON decision."""
     allowed = ", ".join(f"`{prefix}`" for prefix in prefixes)
+    cap = f", at most {limit} characters in all" if limit else ""
     reason = (
-        f"Branch name `{name}` doesn't follow the naming convention: "
+        f"Branch name `{name}` {problem}. The convention is "
         f"`type/short-description`, lowercase and hyphen-separated, with the "
-        f"prefix one of {allowed}. Pick a conforming name and retry - see {doc}."
+        f"prefix one of {allowed}{cap}. Pick a conforming name and retry - "
+        f"see {doc}."
     )
     print(
         json.dumps(

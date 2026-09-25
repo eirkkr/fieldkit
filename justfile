@@ -22,17 +22,17 @@ setup:
 openspec-refresh:
     @"{{ justfile_directory() }}/scripts/openspec-refresh.sh" "{{ justfile_directory() }}"
 
-# Lint all markdown, check vendored skills' overlays and the branch-name hook's prefixes.
-check: check-overlays check-branch-prefixes
+# Lint all markdown, check vendored skills' overlays and the branch-name hook's rules.
+check: check-overlays check-branch-rules
     uvx rumdl@0.2.26 check .
 
 # Check each vendored skill still ends with its overlay.
 check-overlays:
     @"{{ justfile_directory() }}/scripts/check-skill-overlays.sh" "{{ justfile_directory() }}"
 
-# Check the branch-name hook still reads the allowed prefixes out of git.md.
-check-branch-prefixes:
-    @python3 "{{ justfile_directory() }}/hooks/pretooluse-branch-name.py" --prefixes > /dev/null || (echo "hooks/pretooluse-branch-name.py read no prefixes from conventions/git.md's 'Allowed prefixes:' bullet" >&2; exit 1)
+# Check the branch-name hook still reads its prefixes and length cap out of git.md.
+check-branch-rules:
+    @python3 "{{ justfile_directory() }}/hooks/pretooluse-branch-name.py" --rules > /dev/null || (echo "hooks/pretooluse-branch-name.py couldn't read the prefixes or length cap from conventions/git.md's Branches bullets" >&2; exit 1)
 
 # Auto-fix markdown issues.
 fix:
