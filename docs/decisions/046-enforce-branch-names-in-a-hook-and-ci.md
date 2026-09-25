@@ -37,7 +37,10 @@ breaks and pointing at `git.md`.
   `lint.yml` like every other lint. Consumers get the same recipe through
   `.github/workflows/branch-name.yml`, a reusable workflow that checks out
   the kit's `main` and runs it there; `scripts/enable-branch-check.sh`
-  writes the caller workflow. PRs opened by a bot are skipped.
+  writes the caller workflow. `branch-name-self.yml` runs that workflow on
+  the kit's own PRs against the PR's copy of the kit, so the consumer path is
+  tested before it reaches consumers, at the cost of checking the name twice.
+  PRs opened by a bot are skipped.
 - **Registration.** `scripts/register_stop_hook.py` becomes
   `scripts/register_hooks.py` (and its shell wrapper `register-hooks.sh`),
   registering both kit hooks from one table, with the in-place rewrite of a

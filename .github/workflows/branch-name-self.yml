@@ -1,0 +1,13 @@
+# Run the reusable branch-name workflow on the kit's own PRs, against the PR's
+# copy of the kit, so the path consumers call is exercised before it reaches
+# them. The name itself is also checked by `just check` in lint.yml.
+name: Branch name (self-test)
+
+on: pull_request
+
+jobs:
+  branch-name:
+    uses: ./.github/workflows/branch-name.yml
+    with:
+      kit-repository: ${{ github.repository }}
+      kit-ref: ${{ github.event.pull_request.head.sha }}
