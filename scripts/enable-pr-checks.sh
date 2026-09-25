@@ -2,8 +2,8 @@
 set -euo pipefail
 
 # Write a workflow that fails any PR whose title, or whose branch's name,
-# breaks the kit's rules, by calling the kit's reusable pr-conventions workflow. Run from
-# a consumer repo's root.
+# breaks the kit's rules, by calling the kit's reusable pr-conventions
+# workflow. Run from a consumer repo's root.
 
 if [ ! -e ./.fieldkit ]; then
     echo "./.fieldkit not found - see the kit README's consumer-repo setup" >&2
