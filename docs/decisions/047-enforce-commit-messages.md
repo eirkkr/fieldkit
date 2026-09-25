@@ -39,9 +39,9 @@ both `PreToolUse` hooks rely on.
 
 The rules were instruction-only, and slipped the way the branch names did.
 Across all 85 commits on this repo's default branch, 139 body lines run past
-72 without being a URL or path; across the last 300 of one consumer repo's,
-236. Several of this repo's came from
-squash bodies an agent drafted.
+72 without being a URL or path, and so do 236 across the last 300 of one
+consumer repo's. Several of this repo's came from squash bodies an agent
+drafted.
 
 **Strict limits, and why 72 for both.** Looked at as sources rather than
 folklore:
