@@ -3,7 +3,7 @@ name: merge
 description: Merge the current branch's pull request via squash merge
 ---
 
-# Merge a pull request via a delegated agent
+# Merge a pull request
 
 If there's no open PR for this branch yet - including uncommitted or
 unpushed work - follow `skills/pr/SKILL.md` first (which itself follows
@@ -18,7 +18,7 @@ Check the PR is actually mergeable before drafting anything: `gh pr view
 number,title,state,mergeable,statusCheckRollup,baseRefName,headRefName,url`.
 If it's not open or has conflicts, stop and report what's blocking it -
 waiting doesn't fix either. Checks still running is not a stop condition
-here: draft as normal and let the `merge` subagent wait for them. Reaching
+here: draft as normal, and wait for them below. Reaching
 this skill is approval to merge once CI is green - not approval to merge
 regardless of what CI says, and not approval to skip waiting for it.
 
@@ -35,10 +35,22 @@ actually closes: `gh pr view --json closingIssuesReferences -q
 returns nothing, omit the line entirely rather than substituting the PR's
 own number.
 
-Launch the `merge` subagent (`subagent_type: merge`) in the foreground with
-the drafted subject and body. The agent takes them as given, re-verifies
-mergeability defensively, waits out any still-running checks, merges once
-they're green, and cleans up the branch locally - it doesn't rediscover,
-diff, or draft any of it itself. This can take a few minutes if CI is still
-running; relay its report once it lands (merged, or blocked - a failing
-check, or checks still running past the wait window).
+Then merge, in this turn:
+
+1. If any checks are still running, wait for them: `gh pr checks --watch
+   --fail-fast --interval 15`, with a Bash timeout up to the 600000ms
+   maximum. If every check passes, continue. If one fails, stop and report
+   which - never merge on anything less than every check finished and
+   passed. If the wait times out first, stop and report that CI is still
+   running; `/merge` can be run again later.
+2. Push the branch if local commits aren't on the remote yet.
+3. Run `gh pr merge --squash` with the drafted subject and body.
+4. Clean up locally: switch to the default branch (`gh repo view --json
+   defaultBranchRef -q .defaultBranchRef.name`), force-delete the merged
+   branch (`git branch -D <branch>` - a squash merge isn't recognised as
+   merged by plain `-d`), and `git pull --prune`.
+5. Report the PR number and URL, and that it merged and was cleaned up - or
+   what is still blocking it.
+
+These steps run here rather than in a subagent
+([ADR 045](../../docs/decisions/045-inline-git-skills.md)).

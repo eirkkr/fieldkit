@@ -2,6 +2,9 @@
 set -euo pipefail
 kit="$1"
 mkdir -p ~/.claude/agents
+# The kit ships no agents today (ADR 045); without nullglob an empty
+# agents/ would leave the pattern itself to be linked as an agent named "*".
+shopt -s nullglob
 for agent_dir in "$kit"/agents/*/; do
     name="$(basename "$agent_dir")"
     dest=~/.claude/agents/"$name"

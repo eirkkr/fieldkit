@@ -82,3 +82,7 @@ Alternatives rejected:
   detector - the caller has to remember to run the check itself. Nothing
   structural catches a caller that skips it, the same trust `git.md` and
   `github.md` already place in the orchestrator elsewhere.
+
+> Amended by [045](045-inline-git-skills.md): the decisions here still sit with
+> the skill, but the agent they were handed to is gone - the skill now runs
+> the commands itself, in the same turn.
