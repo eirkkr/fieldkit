@@ -51,3 +51,4 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 044 | [Find repo-specific pins by sweep and by file](044-repo-pins-in-a-consumer-file.md)                       | Accepted   |
 | 045 | [Run push, pr and merge inline; retire their agents](045-inline-git-skills.md)                            | Accepted   |
 | 046 | [Enforce branch names in a PreToolUse hook and CI](046-enforce-branch-names-in-a-hook-and-ci.md)          | Accepted   |
+| 047 | [Enforce commit messages at commit, merge and PR](047-enforce-commit-messages.md) | Accepted |

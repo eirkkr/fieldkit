@@ -26,7 +26,9 @@ Then decide the title and body yourself, from context already in hand plus
 `git log <base>..HEAD` alongside that diff if you need the branch's full
 change set to pin them down:
 
-- Title: Conventional Commits format, under 70 characters.
+- Title: `conventions/git.md`'s commit subject rules, and at most 72
+  characters once `(#<PR>)` is appended - it becomes the squash subject.
+  CI checks it.
 - Body: 1-3 bullet summary points plus a test plan checklist.
 - Add `Closes #X` only when the brief or the branch's work names a tracked
   issue, and only after confirming `X` is an issue, not a PR - issues and

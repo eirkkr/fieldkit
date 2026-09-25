@@ -26,7 +26,7 @@ if [ "$branch" = "$default" ]; then
     exit 0
 fi
 
-if ! reason="$(python3 "$kit/hooks/pretooluse-branch-name.py" --name "$branch" 2>&1)"; then
+if ! reason="$(python3 "$kit/hooks/conventions.py" branch "$branch" 2>&1)"; then
     echo "check-branch-name: $reason" >&2
     exit 1
 fi

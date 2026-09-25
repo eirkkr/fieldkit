@@ -1,0 +1,20 @@
+#!/usr/bin/env python3
+"""Refuse a commit whose message breaks conventions/git.md's commit rules.
+
+Installed per clone by scripts/enable-hooks.sh, next to pre-commit. The rules
+live in conventions.py, next to this file's target - the symlink is resolved
+to find it. Messages git writes itself (merges, reverts, fixup!/squash!) are
+let through: they come from git, not the committer. See ADR 047.
+"""
+
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
+
+from conventions import message_problems, message_reason
+
+with open(sys.argv[1], encoding="utf-8") as handle:
+    problems = message_problems(handle.read())
+if problems:
+    sys.exit(message_reason(problems, "conventions/git.md"))

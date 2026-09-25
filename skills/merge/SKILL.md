@@ -35,6 +35,11 @@ actually closes: `gh pr view --json closingIssuesReferences -q
 returns nothing, omit the line entirely rather than substituting the PR's
 own number.
 
+The message follows `conventions/git.md`'s commit rules: the subject ends
+`(#<PR>)` and is at most 72 characters with it, and every body line is at
+most 72 characters. The kit's merge-message hook refuses the merge otherwise,
+saying what to fix.
+
 Then merge, in this turn:
 
 1. If any checks are still running, wait for them: `gh pr checks --watch
@@ -44,7 +49,8 @@ Then merge, in this turn:
    passed. If the wait times out first, stop and report that CI is still
    running; `/merge` can be run again later.
 2. Push the branch if local commits aren't on the remote yet.
-3. Run `gh pr merge --squash` with the drafted subject and body.
+3. Run `gh pr merge <PR> --squash` with the drafted subject and body - the
+   body through `--body-file -` and a heredoc, so it keeps its line breaks.
 4. Clean up locally: switch to the default branch (`gh repo view --json
    defaultBranchRef -q .defaultBranchRef.name`), force-delete the merged
    branch (`git branch -D <branch>` - a squash merge isn't recognised as
