@@ -1,7 +1,8 @@
 # Git conventions
 
 - Never commit directly to the default branch. Branch, commit there, open a
-  PR. The kit's `pre-commit` hook enforces this once installed (see Hooks and CI checks).
+  PR. The kit's `pre-commit` hook enforces this once installed (see Hooks
+  and CI checks).
 
 ## Branches
 

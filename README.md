@@ -343,7 +343,8 @@ until it's committed.
 ## Refusing non-conforming branch names
 
 `conventions/git.md` requires Conventional Branch names with a prefix from a
-closed set and at most 50 characters long, but an agent only follows that if it reads `git.md` before
+closed set and at most 50 characters long, but an agent only follows that if
+it reads `git.md` before
 branching - and making a branch is too small an action to prompt the read. The
 kit ships a Claude Code `PreToolUse` hook
 ([ADR 046](docs/decisions/046-enforce-branch-names-in-a-hook-and-ci.md))
@@ -351,7 +352,8 @@ that refuses a Bash command creating or renaming a branch to a name that
 breaks either rule: `git checkout -b|-B`, `git switch -c|-C`, `git branch` (create,
 `-m`/`-M` rename, `-c`/`-C` copy) and `git worktree add -b|-B`, including
 inside a compound command like `cd x && git checkout -b y`. The refusal says
-which rule the name breaks and points at `git.md`, so Claude picks a conforming name
+which rule the name breaks and points at `git.md`, so Claude picks a conforming
+name
 and retries - before anything has been committed to the branch.
 
 It checks only what Claude runs through Bash. A branch you make yourself, or
