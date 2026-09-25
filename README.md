@@ -222,6 +222,13 @@ kit additions to a vendored skill live in the overlay or they don't survive.
 Adopting repos pick up the change through their symlinks next session; no
 per-repo `openspec update` needed.
 
+`package.json` also approves OpenSpec's install script, which only prints a
+completions tip, so npm does not warn that it was blocked. The approval is
+pinned to the version (`"@fission-ai/openspec@1.6.0": true`), so after a
+refresh bumps it, `npm ci` warns again. Read the new version's install
+script, then run `npm install-scripts approve @fission-ai/openspec` to pin
+the approval to it, or `deny` if it now does more than you want run.
+
 ## Enabling the Python skills in a consumer repo
 
 Python-only skills live in `python-skills/` and are opt-in per repo
