@@ -38,7 +38,9 @@ later note because the final review needs it; **what changed**
 since the previous gate, per file or behaviour; **departures from the plan**
 and why ("none" if none); **how to verify**, as exact commands plus any
 manual step; **look closely at**, naming the judgement calls and what you are
-least sure of; **not done yet**, the known gaps later stages cover; and
+least sure of; **not done yet**, the known gaps later stages cover;
+**plan impact**, what this stage found that changes later stages, with
+tasks.md and design.md corrected to match ("none" if none); and
 **reviewed at**, left marked awaiting approval. Complete, not long.
 
 If the reviewer sends the stage back, fix it within that stage and rewrite

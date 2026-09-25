@@ -355,7 +355,17 @@ apply:
        the note; never leave it out to look confident.
     6. **Not done yet** - known gaps that later stages cover, so the
        reviewer does not report them as defects.
-    7. **Reviewed at** - the heading, with `_Awaiting approval._` under it and
+    7. **Plan impact** - whether anything this stage found changes the
+       stages after it: an assumption the stage disproved, a departure
+       from the plan a later task relies on, an interface a later stage
+       builds on that came out different. Name each later task affected,
+       and correct tasks.md and design.md in this stage's branch so the
+       plan the reviewer approves is the one the next stage follows. If
+       nothing changes, say "none" in one line. When something does and
+       the change has a design.md, re-read the remaining stages end to end
+       before writing this item, as a reader who has only the artifacts
+       would.
+    8. **Reviewed at** - the heading, with `_Awaiting approval._` under it and
        what ticking it will record. Visible text, not an HTML comment: it
        stands for the length of the review, and a comment renders as dead
        space that reads as something having failed.

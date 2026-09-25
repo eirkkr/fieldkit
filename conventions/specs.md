@@ -141,7 +141,9 @@ second and third scopes involve a human.
   `tasks.md` under the gate, so it outlives the session and archives with
   the change. It covers what changed since the previous gate, any departure
   from the plan, how to verify (exact commands, plus manual steps), what to
-  look at closely, and what is deliberately not done yet.
+  look at closely, what is deliberately not done yet, and the plan's impact:
+  whatever the stage found that changes the stages after it, with the
+  artifacts corrected to match before the reviewer approves them.
 - **One stage, one branch, one PR.** Each stage branches off the default
   branch, and the PR opens when the stage reaches its gate - the PR is the
   surface the note points at, so opening it is part of reaching the gate.
