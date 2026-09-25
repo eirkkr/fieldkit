@@ -38,7 +38,7 @@ jobs:
           repository: ${{ inputs.kit-repository || github.repository }}
           ref: ${{ inputs.kit-ref || github.event.pull_request.head.sha }}
 
-      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
 
       # Pinned, through uv (ADR 004).
       - name: Install just
@@ -55,7 +55,7 @@ jobs:
           repository: ${{ inputs.kit-repository || github.repository }}
           ref: ${{ inputs.kit-ref || github.event.pull_request.head.sha }}
 
-      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
 
       - name: Install just
         run: uv tool install rust-just@1.58.0
