@@ -22,8 +22,8 @@ setup:
 openspec-refresh:
     @"{{ justfile_directory() }}/scripts/openspec-refresh.sh" "{{ justfile_directory() }}"
 
-# Lint all markdown, check vendored skills' overlays, the branch-name hook's rules and this branch's name.
-check: check-overlays check-branch-rules check-branch-name
+# Lint all markdown, and check vendored skills' overlays and the branch-name hook's rules.
+check: check-overlays check-branch-rules
     uvx rumdl@0.2.26 check .
 
 # Check each vendored skill still ends with its overlay.
@@ -34,7 +34,7 @@ check-overlays:
 check-branch-rules:
     @python3 "{{ justfile_directory() }}/hooks/pretooluse-branch-name.py" --rules > /dev/null || (echo "hooks/pretooluse-branch-name.py couldn't read the prefixes or length cap from conventions/git.md's Branches bullets" >&2; exit 1)
 
-# Check this branch's name against git.md - the PR's branch in CI, else the checked-out one.
+# Check this branch's name against git.md - the PR's branch in CI (branch-name.yml), else the checked-out one.
 check-branch-name:
     #!/usr/bin/env bash
     set -euo pipefail

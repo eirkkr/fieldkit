@@ -2,9 +2,9 @@
 #
 # Reusable, for consumer repos: each calls it from its own pull_request
 # workflow, which .fieldkit/scripts/enable-branch-check.sh writes. It checks
-# out the kit and runs `just check-branch-name` there, the same recipe the
-# kit's own `just check` runs, so the rules come from the kit's git.md at
-# kit-ref and a rule change reaches every caller unedited.
+# out the kit and runs `just check-branch-name` there, so the rules come from
+# the kit's git.md at kit-ref and a rule change reaches every caller unedited.
+# The kit checks its own PRs through the same workflow (branch-name-self.yml).
 name: Branch name
 
 on:

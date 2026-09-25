@@ -1,6 +1,6 @@
-# Run the reusable branch-name workflow on the kit's own PRs, against the PR's
-# copy of the kit, so the path consumers call is exercised before it reaches
-# them. The name itself is also checked by `just check` in lint.yml.
+# Check the kit's own PR branch names through the reusable branch-name
+# workflow, against the PR's copy of the kit - the one place the kit checks
+# them, so the path consumers call is exercised before it reaches them.
 name: Branch name (self-test)
 
 on: pull_request

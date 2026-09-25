@@ -395,11 +395,10 @@ the rules can't instruct. For the check to block merging on its own rather than
 just show red, make it a required status check in the repo's branch
 protection; the kit's `merge` skill already refuses on a failed check.
 
-The kit checks its own PRs the way it runs its other lints: `just check`
-includes `check-branch-name`, which checks the PR's branch in CI and the branch
-you have checked out locally. `branch-name-self.yml` also calls the reusable
-workflow on each kit PR, against the PR's copy of the kit, so the path
-consumers use is tested before it reaches them.
+The kit checks its own PRs through the same workflow: `branch-name-self.yml`
+calls it on each kit PR, against the PR's copy of the kit, so the path
+consumers use is tested before it reaches them. Locally,
+`just check-branch-name` checks the branch you have checked out.
 
 ## Updating a shared rule
 
