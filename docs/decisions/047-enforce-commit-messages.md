@@ -119,7 +119,12 @@ Alternatives rejected:
 - Renaming the workflow breaks a consumer's old caller until
   `enable-pr-checks.sh` is re-run there: GitHub can't find
   `branch-name.yml@main` any more. Callers can't pin a version to ride this
-  out (see the kit's issue on release tags).
+  out (see the kit's issue on release tags). `kit-reconcile` now checks each
+  CI caller's `uses:` resolves, alongside the other references into the kit
+  (ADR 040), and re-runs every `enable-*.sh` a repo has already run - so a
+  reconcile swaps the caller and picks up the new `commit-msg` hook. The
+  caller and hooks those scripts write count as kit wiring, the one
+  exception to reconcile leaving CI alone.
 - `git commit --no-verify` bypasses the `commit-msg` hook, as it does
   `pre-commit`, and is left out of its output for the same reason.
 - The branch hook no longer has a `--name` mode; `conventions.py branch

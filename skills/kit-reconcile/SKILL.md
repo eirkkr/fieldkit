@@ -31,15 +31,26 @@ From this repo's root, check:
 3. **The mentions.** Every other `.fieldkit/...` path in a tracked file -
    READMEs, scripts, `.claude/` config. One `grep -rn '\.fieldkit/'` covers it.
 4. **The wiring.** Links into the kit that now dangle (`find . -xtype l`, plus
-   `.git/hooks/pre-commit`, which `find` won't reach). `.claude/skills/` and
+   `.git/hooks/`, which `find` won't reach). `.claude/skills/` and
    `openspec/schemas/` are linked file by file, so a kit-side rename breaks
    them.
+5. **The CI callers.** Every `uses: <kit-repo>/.github/workflows/<file>@...`
+   in `.github/workflows/` names a file that exists at
+   `.fieldkit/.github/workflows/<file>`. A missing one fails every PR.
 
 Fix each unresolved reference here rather than reporting it onward - usually a
 one-line path change. `git -C .fieldkit log --diff-filter=DR --name-status --
 <old-path>` finds where the target moved; if it was removed rather than moved,
-drop the reference and say so. For a dangling link, re-run the matching
-`.fieldkit/scripts/enable-*.sh` rather than re-pointing it by hand.
+drop the reference and say so. For a dangling link or a CI caller naming a
+missing workflow, re-run the matching `.fieldkit/scripts/enable-*.sh` rather
+than editing it by hand - `enable-pr-checks.sh` replaces a caller an earlier
+version wrote.
+
+Then re-run every `enable-*.sh` this repo has already run - the ones whose
+links or files are present - even where nothing dangles. Each is idempotent,
+and a kit change can add to what one installs: `enable-hooks.sh` gaining
+`commit-msg` beside `pre-commit` reaches no clone until it's re-run. Only the
+ones the repo opted into; enabling a new one is the human's call.
 
 ## Resolve the range
 
@@ -63,7 +74,10 @@ Read the kit history for that range with `git -C .fieldkit log main` and
    the kit, and bring them into line.
 2. Make any repo-side change the new rules imply - commands, recipes, config.
 3. Leave human-facing tooling alone: don't touch CI, pre-commit, or the linters
-   themselves. This reconciles agent instructions, not the human's tools.
+   themselves. This reconciles agent instructions, not the human's tools. The
+   exception is what the kit's own `enable-*.sh` scripts wrote - its links,
+   hooks and CI caller workflows are kit wiring, kept current in the
+   references step above.
 
 ## Surface codebase follow-ups
 
