@@ -31,7 +31,10 @@ jobs:
           repository: ${{ inputs.kit-repository }}
           ref: ${{ inputs.kit-ref }}
 
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
+
+      # A pinned tool through uv, like rumdl in the kit's justfile (ADR 004).
       - name: Install just
-        run: curl -sSfL https://just.systems/install.sh | bash -s -- --to /usr/local/bin
+        run: uv tool install rust-just@1.58.0
 
       - run: just check-branch-name
