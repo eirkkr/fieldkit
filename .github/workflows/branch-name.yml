@@ -5,6 +5,12 @@
 # out the kit and runs `just check-branch-name` there, so the rules come from
 # the kit's git.md at kit-ref and a rule change reaches every caller unedited.
 # The kit checks its own PRs through the same workflow (branch-name-self.yml).
+#
+# A PR showing a failure naming some other branch is not a bug here: GitHub
+# attaches check results to a commit, not a PR, so two PRs whose branches
+# point at the same commit show each other's latest run. Each run checks only
+# the branch of the PR that triggered it - give the other branch its own
+# commit, or re-run the check on this PR.
 name: Branch name
 
 on:
