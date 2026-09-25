@@ -30,9 +30,9 @@ jobs:
   branch-name:
     # Bots name branches and PRs from their own config, which the rules can't reach.
     if: github.event_name == 'pull_request' && github.event.pull_request.user.type != 'Bot'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           # No inputs on the kit's own PRs, so use the PR's commit.
           repository: ${{ inputs.kit-repository || github.repository }}
@@ -48,9 +48,9 @@ jobs:
 
   pr-title:
     if: github.event_name == 'pull_request' && github.event.pull_request.user.type != 'Bot'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           repository: ${{ inputs.kit-repository || github.repository }}
           ref: ${{ inputs.kit-ref || github.event.pull_request.head.sha }}
