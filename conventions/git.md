@@ -41,11 +41,10 @@
 
 ## Pull requests and merging
 
-- PR title follows the same Conventional Commits format, and becomes the squash
-  subject once GitHub appends `(#N)` - so the title plus that suffix is at
-  most 72 characters. No issue numbers in the title. When the work resolves
-  a tracked issue, reference it with `Closes #X` in the body - and when it
-  doesn't, there's simply no such line.
+- PR title follows the Commits rules above. It becomes the squash subject once
+  GitHub appends `(#N)`, so the 72 includes that suffix. No issue numbers in
+  the title. When the work resolves a tracked issue, reference it with
+  `Closes #X` in the body - and when it doesn't, there's simply no such line.
 - Always `git push` before `gh pr merge` (squash merge uses remote state).
 - Work in progress stays on the branch - push freely, but don't open a PR
   until the work is ready for review. Draft the title and body yourself when
@@ -93,10 +92,9 @@
   renaming a branch to a name breaking the Branches rules, before anything is
   committed to it. It only sees Claude's Bash commands. `just install`
   registers it, and it acts only in a repo with `.fieldkit` or in the kit.
-- A `commit-msg` hook refuses a commit whose message breaks the Commits
-  rules, for anyone committing. `enable-hooks.sh` installs it with
-  `pre-commit`. Messages git writes itself - merges, reverts, `fixup!` and
-  `squash!` - are let through.
+- A `commit-msg` hook, installed with `pre-commit` by `enable-hooks.sh`,
+  refuses a commit breaking the Commits rules. Messages git writes itself -
+  merges, reverts, `fixup!`, `squash!` - pass.
 - A second `PreToolUse` hook checks the squash message Claude passes to
   `gh pr merge`: the Commits rules, plus the `(#N)` suffix matching the PR.
 - CI checks each PR's branch name and title, however they were made - the

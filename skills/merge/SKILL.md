@@ -35,10 +35,9 @@ actually closes: `gh pr view --json closingIssuesReferences -q
 returns nothing, omit the line entirely rather than substituting the PR's
 own number.
 
-The message follows `conventions/git.md`'s commit rules: the subject ends
-`(#<PR>)` and is at most 72 characters with it, and every body line is at
-most 72 characters. The kit's merge-message hook refuses the merge otherwise,
-saying what to fix.
+The message follows `conventions/git.md`'s Commits rules, with `(#<PR>)`
+ending the subject and counting toward its 72. The kit's merge-message hook
+refuses a merge that doesn't, saying what to fix.
 
 Then merge, in this turn:
 

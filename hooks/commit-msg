@@ -2,9 +2,10 @@
 """Refuse a commit whose message breaks conventions/git.md's commit rules.
 
 Installed per clone by scripts/enable-hooks.sh, next to pre-commit. The rules
-live in conventions.py, next to this file's target - the symlink is resolved
-to find it. Messages git writes itself (merges, reverts, fixup!/squash!) are
-let through: they come from git, not the committer. See ADR 047.
+live in conventions.py beside the real file, so the .git/hooks symlink is
+resolved to find it. Messages git writes itself (merges, reverts,
+fixup!/squash!) are let through: they come from git, not the committer. See
+ADR 047.
 """
 
 import os

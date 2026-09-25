@@ -83,14 +83,15 @@ def subject_problems(subject, pr=None):
 
 def title_problems(title):
     """What's wrong with a subject's `type: description`, length aside."""
+    problems = []
     match = SUBJECT.fullmatch(title)
     if not match:
-        return ["isn't `type: description`"]
-    problems = []
-    if match["type"] not in COMMIT_TYPES:
-        problems.append(f"has type `{match['type']}`, not one of {', '.join(COMMIT_TYPES)}")
-    if match["description"][:1].isupper():
-        problems.append("starts its description with a capital")
+        problems.append("isn't `type: description`")
+    else:
+        if match["type"] not in COMMIT_TYPES:
+            problems.append(f"has type `{match['type']}`, not one of {', '.join(COMMIT_TYPES)}")
+        if match["description"][:1].isupper():
+            problems.append("starts its description with a capital")
     if title.endswith("."):
         problems.append("ends with a period")
     return problems

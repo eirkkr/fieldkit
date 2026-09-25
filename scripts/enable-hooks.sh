@@ -36,5 +36,7 @@ for hook in pre-commit commit-msg; do
     fi
 done
 
-echo "Commits to the default branch, and commit messages breaking the rules, are now refused. Rerun after a fresh clone - .git/hooks isn't version controlled."
+if [ "$status" -eq 0 ]; then
+    echo "Commits to the default branch, and commit messages breaking the rules, are now refused. Rerun after a fresh clone - .git/hooks isn't version controlled."
+fi
 exit "$status"

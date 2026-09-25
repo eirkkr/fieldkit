@@ -278,15 +278,15 @@ This symlinks `.git/hooks/pre-commit` and `.git/hooks/commit-msg` to the kit's
 copies, so kit updates land without reinstalling (see "Enforcing commit
 messages" for the second). It's idempotent, leaves any other hooks in
 `.git/hooks` alone, and refuses rather than clobbers if a real file of either
-name is already there. The kit repo installs the hook on itself the same way, running
-`./scripts/enable-hooks.sh` from its own root.
+name is already there. The kit repo installs the hooks on itself the same
+way, running `./scripts/enable-hooks.sh` from its own root.
 
-The hook takes the default branch from the `fieldkit.defaultBranch` git config
-when set, otherwise `origin/HEAD`, otherwise `main` - so an explicit override
-always wins. `git commit --no-verify`
-bypasses it - deliberately left as your escape hatch, and deliberately absent
-from the hook's own output so an agent that hits the block branches instead of
-routing around it.
+The `pre-commit` hook takes the default branch from the
+`fieldkit.defaultBranch` git config when set, otherwise `origin/HEAD`,
+otherwise `main` - so an explicit override always wins. `git commit
+--no-verify` bypasses it - deliberately left as your escape hatch, and
+deliberately absent from the hook's own output so an agent that hits the block
+branches instead of routing around it.
 
 ## Auto-fixing and catching formatter drift
 
@@ -366,11 +366,10 @@ committed.
 
 ## Enforcing commit messages
 
-`conventions/git.md` holds commit messages to strict rules: a `type:
-description` subject using one of six types, lowercase, no trailing period, at
-most 72 characters, and a body wrapped at 72
-([ADR 047](docs/decisions/047-enforce-commit-messages.md)). The kit squash-merges,
-so the message that lasts is the squash commit's. Three checks cover it:
+`conventions/git.md`'s Commits section sets strict rules for messages
+([ADR 047](docs/decisions/047-enforce-commit-messages.md)). The kit
+squash-merges, so the message that lasts is the squash commit's. Three checks
+cover it:
 
 - **The `commit-msg` git hook**, installed with `pre-commit` by
   `enable-hooks.sh`, refuses any commit breaking the rules - yours or
@@ -381,9 +380,6 @@ so the message that lasts is the squash commit's. Three checks cover it:
   and it acts in the same repos.
 - **CI** checks the PR title, as the subject it becomes once GitHub appends
   `(#N)` - see below.
-
-A body line may run past 72 only when it's one unbreakable word, such as a URL
-or path, optionally after a list marker or a `[1]:` label.
 
 ## Checking PRs in CI
 
@@ -399,14 +395,14 @@ reusable workflow; commit it. The workflow checks out the kit's `main` and runs
 `just check-branch-name` and `just check-pr-title` as two jobs, so rule changes
 reach every repo with no edit there. It re-runs when a PR is retitled. The
 caller points at the repo the kit's `origin` names, so a fork's consumers call
-the fork, and the kit must stay public to be callable. An older caller for the
-branch check alone, `branch-name.yml`, is replaced.
+the fork, and the kit must stay public to be callable.
 
 - PRs opened by bots such as Dependabot are skipped.
 - To block merging on them, make both jobs required status checks. The kit's
   `merge` skill already refuses on a red check.
-- For merges through GitHub's UI, set the repo's squash default to the PR
-  title, so GitHub appends `(#N)` to the title CI checked.
+- For merges through GitHub's UI, set the repo's squash defaults to the PR
+  title and a blank body: the subject is then the checked title plus `(#N)`,
+  and no unwrapped text lands in the body.
 - The same workflow runs on the kit's own PRs, against the PR's commit.
   Locally, `just check` includes both checks for the branch you're on.
 

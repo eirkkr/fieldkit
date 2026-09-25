@@ -49,8 +49,8 @@ version wrote.
 Then re-run every `enable-*.sh` this repo has already run - the ones whose
 links or files are present - even where nothing dangles. Each is idempotent,
 and a kit change can add to what one installs: `enable-hooks.sh` gaining
-`commit-msg` beside `pre-commit` reaches no clone until it's re-run. Only the
-ones the repo opted into; enabling a new one is the human's call.
+`commit-msg` reaches no clone until it's re-run. Enabling one the repo never
+ran is the human's call.
 
 ## Resolve the range
 

@@ -43,8 +43,7 @@ Across all 85 commits on this repo's default branch, 139 body lines run past
 consumer repo's. Several of this repo's came from squash bodies an agent
 drafted.
 
-**Strict limits, and why 72 for both.** Looked at as sources rather than
-folklore:
+**Strict limits, and why 72 for both.** What the sources say:
 
 - Git's own `git commit` documentation suggests "no more than 50 characters"
   for the first line, "though not required".
@@ -126,6 +125,8 @@ Alternatives rejected:
   caller and hooks those scripts write count as kit wiring, the one
   exception to reconcile leaving CI alone.
 - `git commit --no-verify` bypasses the `commit-msg` hook, as it does
-  `pre-commit`, and is left out of its output for the same reason.
+  `pre-commit`, and is left out of its output for the same reason (ADR 023):
+  an agent that hits the refusal should fix the message, not route around
+  it.
 - The branch hook no longer has a `--name` mode; `conventions.py branch
   <name>` replaces it, and `check-branch-name.sh` calls that.
