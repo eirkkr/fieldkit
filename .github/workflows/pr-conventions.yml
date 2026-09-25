@@ -1,0 +1,68 @@
+# Fail a PR whose title, or whose branch's name, breaks conventions/git.md's
+# rules, by running the matching just recipe in a checkout of the kit.
+#
+# - pull_request: the kit's own PRs, against the PR's commit.
+# - workflow_call: consumer repos, against the kit's main (see
+#   scripts/enable-pr-checks.sh). A called workflow answers only the
+#   call, so pull_request never fires there.
+#
+# `edited` is listed so a retitled PR is checked again.
+#
+# A failure naming another branch means two PRs share a head commit: GitHub
+# attaches checks to commits, so each shows the other's latest run.
+name: PR conventions
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+  workflow_call:
+    inputs:
+      kit-repository:
+        description: The kit repo whose rules to apply
+        type: string
+        default: eirkkr/fieldkit
+      kit-ref:
+        description: The kit ref whose rules to apply
+        type: string
+        default: main
+
+jobs:
+  branch-name:
+    # Bots name branches and PRs from their own config, which the rules can't reach.
+    if: github.event_name == 'pull_request' && github.event.pull_request.user.type != 'Bot'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          # No inputs on the kit's own PRs, so use the PR's commit.
+          repository: ${{ inputs.kit-repository || github.repository }}
+          ref: ${{ inputs.kit-ref || github.event.pull_request.head.sha }}
+
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+
+      # Pinned, through uv (ADR 004).
+      - name: Install just
+        run: uv tool install rust-just@1.58.0
+
+      - run: just check-branch-name
+
+  pr-title:
+    if: github.event_name == 'pull_request' && github.event.pull_request.user.type != 'Bot'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: ${{ inputs.kit-repository || github.repository }}
+          ref: ${{ inputs.kit-ref || github.event.pull_request.head.sha }}
+
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+
+      - name: Install just
+        run: uv tool install rust-just@1.58.0
+
+      # Through env, never interpolated into the script: PR text is user input.
+      - run: just check-pr-title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_BODY: ${{ github.event.pull_request.body }}

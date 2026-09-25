@@ -154,3 +154,7 @@ Alternatives rejected:
   check's only remaining value would be an earlier warning for humans. If
   that is ever wanted, it can call the hook's `--name` mode rather than
   copying the rules.
+
+Later changes: ADR 047 moves the rules and the `--name` mode into
+`hooks/conventions.py`, and renames the workflow `pr-conventions.yml`, with
+`scripts/enable-pr-checks.sh` replacing `enable-branch-check.sh`.

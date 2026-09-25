@@ -2,9 +2,9 @@
 set -euo pipefail
 
 if [ -e ./.fieldkit/hooks/pre-commit ]; then
-    target="../../.fieldkit/hooks/pre-commit"
+    hooks="../../.fieldkit/hooks"
 elif [ -e ./hooks/pre-commit ]; then
-    target="../../hooks/pre-commit"
+    hooks="../../hooks"
 else
     echo "./.fieldkit not found - see the kit README's consumer-repo setup" >&2
     exit 1
@@ -16,20 +16,27 @@ if [ ! -d .git ]; then
 fi
 
 if [ -n "$(git config core.hooksPath || true)" ]; then
-    echo "core.hooksPath is set - unset it, or install the hook there yourself" >&2
+    echo "core.hooksPath is set - unset it, or install the hooks there yourself" >&2
     exit 1
 fi
 
-dest=".git/hooks/pre-commit"
-if [ -L "$dest" ] && [ "$(readlink "$dest")" = "$target" ]; then
-    echo "Already linked .git/hooks/pre-commit, no change"
-elif [ -f "$dest" ] && [ ! -L "$dest" ]; then
-    echo "$dest already exists and isn't a symlink - move it aside first" >&2
-    exit 1
-else
-    mkdir -p .git/hooks
-    ln -sfn "$target" "$dest"
-    echo "Linked .git/hooks/pre-commit"
-fi
+mkdir -p .git/hooks
+status=0
+for hook in pre-commit commit-msg; do
+    target="$hooks/$hook"
+    dest=".git/hooks/$hook"
+    if [ -L "$dest" ] && [ "$(readlink "$dest")" = "$target" ]; then
+        echo "Already linked .git/hooks/$hook, no change"
+    elif [ -f "$dest" ] && [ ! -L "$dest" ]; then
+        echo "$dest already exists and isn't a symlink - move it aside first" >&2
+        status=1
+    else
+        ln -sfn "$target" "$dest"
+        echo "Linked .git/hooks/$hook"
+    fi
+done
 
-echo "Commits to the default branch are now refused. Rerun after a fresh clone - .git/hooks isn't version controlled."
+if [ "$status" -eq 0 ]; then
+    echo "Commits to the default branch, and commit messages breaking the rules, are now refused. Rerun after a fresh clone - .git/hooks isn't version controlled."
+fi
+exit "$status"

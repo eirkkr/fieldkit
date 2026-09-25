@@ -15,10 +15,10 @@ one-line `@`-import; a rule edited here reaches all of them the next session.
   always-on core and a larger set loaded only when the matching action comes
   up, so a session pays for what it uses.
 - **Claude Code assets** - skills (`push`, `pr`, `merge`, `kit-reconcile`,
-  and `update-deps` for Python repos), a git `pre-commit` hook that
-  blocks commits to the default branch,
-  a `Stop` hook that catches formatter drift, a `PreToolUse` hook that
-  refuses non-conforming branch names, a status line.
+  and `update-deps` for Python repos), git hooks that block commits to the
+  default branch and commit messages breaking the rules, a `Stop` hook that
+  catches formatter drift, `PreToolUse` hooks that refuse non-conforming
+  branch names and squash messages, CI checks for PRs, a status line.
 - **The reasoning** - [`docs/decisions/`](docs/decisions/) holds an ADR per
   non-obvious choice. If you only read one thing, read those: they are the part
   that transfers, whatever your own setup looks like.
@@ -40,7 +40,7 @@ the `eirkkr/fieldkit` remote is mine and you will not be able to push to it.
 - `CLAUDE.md` - the kit's *own* repo-specific rules, not imported by consumers.
   It imports `KIT.md`, so a session in this repo gets both.
 - `conventions/` - the load-on-demand docs: `git`, `github`, `decisions`,
-  `specs`, `ai`, and `python/` for Python repos - a slim `README.md` hub
+  `specs`, `ai`, `ci`, and `python/` for Python repos - a slim `README.md` hub
   indexing `code`, `setup`, and `testing`, each read on demand.
 - `docs/decisions/` - ADRs recording this repo's own non-obvious design
   choices; the one `docs/` subtree.
@@ -72,15 +72,17 @@ the `eirkkr/fieldkit` remote is mine and you will not be able to push to it.
   `~/.claude/statusline-command.sh` and wired up via `settings.json`'s
   `statusLine` key by `just install` (see Setup).
 - `hooks/` - shared hooks of both kinds, told apart by filename: the git
-  `pre-commit` hook, symlinked into an *opt-in* consumer repo's `.git/hooks` by
-  `.fieldkit/scripts/enable-hooks.sh` (not by `just install` - `.git/hooks` is
-  per-clone; see "Blocking commits to the default branch"), and the Claude Code
-  session hooks `stop-autofix.py` and `pretooluse-branch-name.py`, registered
-  machine-wide by `just install` (see "Auto-fixing and catching formatter
-  drift" and "Refusing non-conforming branch names").
+  `pre-commit` and `commit-msg` hooks, symlinked into an *opt-in* consumer
+  repo's `.git/hooks` by `.fieldkit/scripts/enable-hooks.sh` (not by
+  `just install` - `.git/hooks` is per-clone; see "Blocking commits to the
+  default branch"), and the Claude Code session hooks `stop-autofix.py`,
+  `pretooluse-branch-name.py` and `pretooluse-merge-message.py`, registered
+  machine-wide by `just install`. `conventions.py` holds the branch and
+  commit rules they all check against.
 - `.github/workflows/` - the kit's own CI (`lint.yml`, running `just lint`),
-  and `branch-name.yml`, which checks PR branch names on the kit's own PRs
-  and is also called by consumer repos (see "Checking branch names in CI").
+  and `pr-conventions.yml`, which checks each PR's title and branch name on
+  the kit's own PRs and is also called by consumer repos (see "Checking PRs in
+  CI").
 - further areas as needs emerge - e.g. more Claude Code assets, shared scripts,
   editor/CI config.
 
@@ -142,10 +144,10 @@ version - upgrade yourself first, e.g. `sudo n lts`).
    `attribution: {commit: "", pr: "", sessionUrl: false}` so commits and PRs
    carry no AI attribution, `statusLine` to run the kit's linked
    `statusline-command.sh`, a `hooks.Stop` entry for the autofix hook
-   (see "Auto-fixing and catching formatter drift"), and a `hooks.PreToolUse`
-   entry for the branch-name hook (see "Refusing non-conforming branch
-   names") - if the existing file
-   already differs from any of those, it shows the diff and asks before
+   (see "Auto-fixing and catching formatter drift"), and `hooks.PreToolUse`
+   entries for the branch-name and merge-message hooks (see "Refusing
+   non-conforming branch names" and "Enforcing commit messages") - if the
+   existing file already differs from any of those, it shows the diff and asks before
    changing it. Each of these only touches its own key, leaving the rest of the
    file alone.
 
@@ -272,18 +274,19 @@ so a fresh checkout needs it again. From the repo root:
 .fieldkit/scripts/enable-hooks.sh
 ```
 
-This symlinks `.git/hooks/pre-commit` to the kit's copy, so kit updates land
-without reinstalling. It's idempotent, leaves any other hooks in `.git/hooks`
-alone, and refuses rather than clobbers if a real `pre-commit` file is already
-there. The kit repo installs the hook on itself the same way, running
-`./scripts/enable-hooks.sh` from its own root.
+This symlinks `.git/hooks/pre-commit` and `.git/hooks/commit-msg` to the kit's
+copies, so kit updates land without reinstalling (see "Enforcing commit
+messages" for the second). It's idempotent, leaves any other hooks in
+`.git/hooks` alone, and refuses rather than clobbers if a real file of either
+name is already there. The kit repo installs the hooks on itself the same
+way, running `./scripts/enable-hooks.sh` from its own root.
 
-The hook takes the default branch from the `fieldkit.defaultBranch` git config
-when set, otherwise `origin/HEAD`, otherwise `main` - so an explicit override
-always wins. `git commit --no-verify`
-bypasses it - deliberately left as your escape hatch, and deliberately absent
-from the hook's own output so an agent that hits the block branches instead of
-routing around it.
+The `pre-commit` hook takes the default branch from the
+`fieldkit.defaultBranch` git config when set, otherwise `origin/HEAD`,
+otherwise `main` - so an explicit override always wins. `git commit
+--no-verify` bypasses it - deliberately left as your escape hatch, and
+deliberately absent from the hook's own output so an agent that hits the block
+branches instead of routing around it.
 
 ## Auto-fixing and catching formatter drift
 
@@ -358,30 +361,51 @@ committed.
   `.fieldkit` entry (a linked worktree's main worktree counts) or in the kit.
 - It lets through anything it can't parse with confidence, and a crash does
   the same.
-- The rules are constants at the top of the hook, mirroring `git.md`'s
+- The rules are constants in `hooks/conventions.py`, mirroring `git.md`'s
   Branches bullets - change both together.
 
-### Checking branch names in CI
+## Enforcing commit messages
 
-To catch every branch, yours included, check each PR's branch name in CI. From
-a consumer repo's root:
+`conventions/git.md`'s Commits section sets strict rules for messages
+([ADR 047](docs/decisions/047-enforce-commit-messages.md)). The kit
+squash-merges, so the message that lasts is the squash commit's. Three checks
+cover it:
+
+- **The `commit-msg` git hook**, installed with `pre-commit` by
+  `enable-hooks.sh`, refuses any commit breaking the rules - yours or
+  Claude's. Messages git writes itself (merges, reverts, `fixup!`) pass.
+- **A `PreToolUse` hook** checks the squash message Claude passes to
+  `gh pr merge --subject ... --body-file -`, including that the subject ends
+  with the PR's `(#N)`. `just install` registers it next to the branch hook,
+  and like that one it acts only in repos that reach the kit.
+- **CI** checks the PR title, as the subject it becomes once GitHub appends
+  `(#N)`, and that a `!` title and a `BREAKING CHANGE:` line in the PR body
+  come together - see below.
+
+## Checking PRs in CI
+
+To catch every branch name and PR title, yours included, check each PR in CI.
+From a consumer repo's root:
 
 ```bash
-.fieldkit/scripts/enable-branch-check.sh
+.fieldkit/scripts/enable-pr-checks.sh
 ```
 
-This writes `.github/workflows/branch-name.yml`, a short caller of the kit's
+This writes `.github/workflows/pr-conventions.yml`, a short caller of the kit's
 reusable workflow; commit it. The workflow checks out the kit's `main` and runs
-`just check-branch-name`, so rule changes reach every repo with no edit there.
-The caller points at the repo the kit's `origin` names, so a fork's consumers
-call the fork, and the kit must stay public to be callable.
+`just check-branch-name` and `just check-pr-title` as two jobs, so rule changes
+reach every repo with no edit there. It re-runs when a PR is retitled. The
+caller points at the repo the kit's `origin` names, so a fork's consumers call
+the fork, and the kit must stay public to be callable.
 
 - PRs opened by bots such as Dependabot are skipped.
-- To block merging on it, make it a required status check. The kit's `merge`
-  skill already refuses on a red check.
+- To block merging on them, make both jobs required status checks. The kit's
+  `merge` skill already refuses on a red check.
+- For merges through GitHub's UI, set the repo's squash defaults to the PR
+  title and a blank body: the subject is then the checked title plus `(#N)`,
+  and no unwrapped text lands in the body.
 - The same workflow runs on the kit's own PRs, against the PR's commit.
-  Locally, `just check-branch-name` (part of `just check`) checks the branch
-  you're on.
+  Locally, `just check` includes both checks for the branch you're on.
 
 ## Updating a shared rule
 
@@ -477,5 +501,5 @@ per machine, so run them again after a fresh checkout:
 
 ```bash
 just setup                 # fix command for the format-drift Stop hook
-./scripts/enable-hooks.sh  # pre-commit hook blocking default-branch commits
+./scripts/enable-hooks.sh  # pre-commit and commit-msg hooks
 ```

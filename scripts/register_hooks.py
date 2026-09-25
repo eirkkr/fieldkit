@@ -26,6 +26,7 @@ class Hook(NamedTuple):
 HOOKS = (
     Hook("Stop", None, "stop-autofix.py", ("stop-format-drift.py",)),
     Hook("PreToolUse", "Bash", "pretooluse-branch-name.py"),
+    Hook("PreToolUse", "Bash", "pretooluse-merge-message.py"),
 )
 
 
