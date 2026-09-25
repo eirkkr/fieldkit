@@ -1,14 +1,13 @@
 # Fail a PR whose branch name breaks conventions/git.md's branch rules.
 #
-# Reusable: a consumer repo calls it from its own pull_request workflow, which
-# .fieldkit/scripts/enable-branch-check.sh writes. The rules are read from the
-# kit's git.md at kit-ref, so a rule change reaches every caller unedited. It
-# also runs on the kit's own PRs, against the PR's copy of the rules, so the
-# path consumers use is exercised here first.
+# Reusable, for consumer repos: each calls it from its own pull_request
+# workflow, which .fieldkit/scripts/enable-branch-check.sh writes. It checks
+# out the kit and runs `just check-branch-name` there, the same recipe the
+# kit's own `just check` runs, so the rules come from the kit's git.md at
+# kit-ref and a rule change reaches every caller unedited.
 name: Branch name
 
 on:
-  pull_request:
   workflow_call:
     inputs:
       kit-repository:
@@ -29,9 +28,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: ${{ inputs.kit-repository || github.repository }}
-          ref: ${{ inputs.kit-ref || github.event.pull_request.head.sha }}
+          repository: ${{ inputs.kit-repository }}
+          ref: ${{ inputs.kit-ref }}
 
-      - run: python3 hooks/pretooluse-branch-name.py --name "$BRANCH"
-        env:
-          BRANCH: ${{ github.head_ref }}
+      - name: Install just
+        run: curl -sSfL https://just.systems/install.sh | bash -s -- --to /usr/local/bin
+
+      - run: just check-branch-name

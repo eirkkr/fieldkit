@@ -31,13 +31,13 @@ breaks and pointing at `git.md`.
 - **`EnterWorktree` is left out.** Its input carries a worktree `name`, not a
   branch name; the branch Claude Code derives from it is not in the tool's
   schema.
-- **CI backs it for everyone.** `.github/workflows/branch-name.yml` fails a
-  PR whose branch name breaks either rule, running the hook's `--name` mode.
-  It is reusable: a consumer calls it from a caller workflow that
-  `scripts/enable-branch-check.sh` writes, and it reads the rules from the
-  kit's `main`. It also runs on the kit's own PRs against the PR's copy.
-  PRs opened by a bot are skipped. `just check-branch-name`, part of
-  `just check`, runs the same check on the checked-out branch.
+- **CI backs it for everyone.** `just check-branch-name`, part of
+  `just check`, runs the hook's `--name` mode on the PR's branch in CI and
+  on the checked-out branch locally, so the kit's own PRs are checked by
+  `lint.yml` like every other lint. Consumers get the same recipe through
+  `.github/workflows/branch-name.yml`, a reusable workflow that checks out
+  the kit's `main` and runs it there; `scripts/enable-branch-check.sh`
+  writes the caller workflow. PRs opened by a bot are skipped.
 - **Registration.** `scripts/register_stop_hook.py` becomes
   `scripts/register_hooks.py` (and its shell wrapper `register-hooks.sh`),
   registering both kit hooks from one table, with the in-place rewrite of a

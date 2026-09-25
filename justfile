@@ -34,12 +34,12 @@ check-overlays:
 check-branch-rules:
     @python3 "{{ justfile_directory() }}/hooks/pretooluse-branch-name.py" --rules > /dev/null || (echo "hooks/pretooluse-branch-name.py couldn't read the prefixes or length cap from conventions/git.md's Branches bullets" >&2; exit 1)
 
-# Check the checked-out branch's name against git.md (CI checks PRs' in the branch-name workflow).
+# Check this branch's name against git.md - the PR's branch in CI, else the checked-out one.
 check-branch-name:
     #!/usr/bin/env bash
     set -euo pipefail
-    branch="$(git branch --show-current)"
-    # Detached HEAD - as in CI - or the default branch, which the rules don't name.
+    branch="${GITHUB_HEAD_REF:-$(git branch --show-current)}"
+    # Detached HEAD, or the default branch, which the rules don't name.
     if [ -z "$branch" ] || [ "$branch" = main ]; then exit 0; fi
     python3 "{{ justfile_directory() }}/hooks/pretooluse-branch-name.py" --name "$branch"
 

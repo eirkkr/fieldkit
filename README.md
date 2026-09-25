@@ -78,9 +78,9 @@ the `eirkkr/fieldkit` remote is mine and you will not be able to push to it.
   session hooks `stop-autofix.py` and `pretooluse-branch-name.py`, registered
   machine-wide by `just install` (see "Auto-fixing and catching formatter
   drift" and "Refusing non-conforming branch names").
-- `.github/workflows/` - the kit's own CI: `lint.yml`, and `branch-name.yml`,
-  which consumer repos also call to check PR branch names (see "Checking
-  branch names in CI").
+- `.github/workflows/` - the kit's own CI (`lint.yml`, running `just check`),
+  and `branch-name.yml`, a reusable workflow consumer repos call to check PR
+  branch names (see "Checking branch names in CI").
 - further areas as needs emerge - e.g. more Claude Code assets, shared scripts,
   editor/CI config.
 
@@ -383,16 +383,18 @@ kit's workflow; commit it to finish. The caller names the repo the kit's
 `origin` points at, so a fork's consumers call the fork. It's idempotent, and
 refuses rather than clobbers if a different file is already there.
 
-The workflow checks out the kit's `main` and reads the rules from its
-`git.md`, so a rule change reaches every repo with no edit there - and so the
+The workflow checks out the kit's `main` and runs `just check-branch-name`
+there, reading the rules from its `git.md`, so a rule change reaches every
+repo with no edit there - and so the
 kit must stay public for a consumer to call it. A PR opened by a bot, such as
 Dependabot, is skipped: a bot's branch names come from its own config, which
 the rules can't instruct. For the check to block merging on its own rather than
 just show red, make it a required status check in the repo's branch
 protection; the kit's `merge` skill already refuses on a failed check.
 
-The kit runs the same workflow on its own PRs, against the PR's copy of the
-rules, and `just check` checks the branch you have checked out.
+The kit checks its own PRs the way it runs its other lints: `just check`
+includes `check-branch-name`, which checks the PR's branch in CI and the branch
+you have checked out locally.
 
 ## Updating a shared rule
 
