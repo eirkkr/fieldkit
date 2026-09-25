@@ -153,3 +153,4 @@ repo root - the directory the session is started from. Read
 | Recording a design decision (ADR)                                               | .fieldkit/conventions/decisions.md |
 | Working an OpenSpec change (repo has `openspec/`) or writing a spec by hand     | .fieldkit/conventions/specs.md     |
 | Building a feature that calls an LLM                                            | .fieldkit/conventions/ai.md        |
+| Writing or editing a CI workflow                                                | .fieldkit/conventions/ci.md        |

@@ -40,7 +40,7 @@ the `eirkkr/fieldkit` remote is mine and you will not be able to push to it.
 - `CLAUDE.md` - the kit's *own* repo-specific rules, not imported by consumers.
   It imports `KIT.md`, so a session in this repo gets both.
 - `conventions/` - the load-on-demand docs: `git`, `github`, `decisions`,
-  `specs`, `ai`, and `python/` for Python repos - a slim `README.md` hub
+  `specs`, `ai`, `ci`, and `python/` for Python repos - a slim `README.md` hub
   indexing `code`, `setup`, and `testing`, each read on demand.
 - `docs/decisions/` - ADRs recording this repo's own non-obvious design
   choices; the one `docs/` subtree.
