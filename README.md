@@ -78,6 +78,9 @@ the `eirkkr/fieldkit` remote is mine and you will not be able to push to it.
   session hooks `stop-autofix.py` and `pretooluse-branch-name.py`, registered
   machine-wide by `just install` (see "Auto-fixing and catching formatter
   drift" and "Refusing non-conforming branch names").
+- `.github/workflows/` - the kit's own CI: `lint.yml`, and `branch-name.yml`,
+  which consumer repos also call to check PR branch names (see "Checking
+  branch names in CI").
 - further areas as needs emerge - e.g. more Claude Code assets, shared scripts,
   editor/CI config.
 
@@ -343,7 +346,7 @@ until it's committed.
 closed set and at most 50 characters long, but an agent only follows that if it reads `git.md` before
 branching - and making a branch is too small an action to prompt the read. The
 kit ships a Claude Code `PreToolUse` hook
-([ADR 046](docs/decisions/046-refuse-branch-names-in-a-pretooluse-hook.md))
+([ADR 046](docs/decisions/046-enforce-branch-names-in-a-hook-and-ci.md))
 that refuses a Bash command creating or renaming a branch to a name that
 breaks either rule: `git checkout -b|-B`, `git switch -c|-C`, `git branch` (create,
 `-m`/`-M` rename, `-c`/`-C` copy) and `git worktree add -b|-B`, including
@@ -364,6 +367,32 @@ from `$VAR`, a flag combination it doesn't model - it lets the command through
 rather than guess, and a crash does the same. The prefixes and the limit
 come from `git.md`'s Branches bullets, so the doc stays their one copy;
 `just check` fails if a rewording leaves the hook unable to read either.
+
+### Checking branch names in CI
+
+The hook only sees Claude. To catch every branch - yours included - a repo can
+also check each PR's branch name in CI, with the kit's reusable
+`branch-name` workflow. From the consumer repo root:
+
+```bash
+.fieldkit/scripts/enable-branch-check.sh
+```
+
+This writes `.github/workflows/branch-name.yml`, a four-line caller of the
+kit's workflow; commit it to finish. The caller names the repo the kit's
+`origin` points at, so a fork's consumers call the fork. It's idempotent, and
+refuses rather than clobbers if a different file is already there.
+
+The workflow checks out the kit's `main` and reads the rules from its
+`git.md`, so a rule change reaches every repo with no edit there - and so the
+kit must stay public for a consumer to call it. A PR opened by a bot, such as
+Dependabot, is skipped: a bot's branch names come from its own config, which
+the rules can't instruct. For the check to block merging on its own rather than
+just show red, make it a required status check in the repo's branch
+protection; the kit's `merge` skill already refuses on a failed check.
+
+The kit runs the same workflow on its own PRs, against the PR's copy of the
+rules, and `just check` checks the branch you have checked out.
 
 ## Updating a shared rule
 

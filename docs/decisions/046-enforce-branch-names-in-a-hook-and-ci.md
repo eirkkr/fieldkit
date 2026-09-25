@@ -1,4 +1,4 @@
-# 046 - Refuse non-conforming branch names in a PreToolUse hook
+# 046 - Enforce branch names in a PreToolUse hook and CI
 
 ## Decision
 
@@ -31,6 +31,13 @@ breaks and pointing at `git.md`.
 - **`EnterWorktree` is left out.** Its input carries a worktree `name`, not a
   branch name; the branch Claude Code derives from it is not in the tool's
   schema.
+- **CI backs it for everyone.** `.github/workflows/branch-name.yml` fails a
+  PR whose branch name breaks either rule, running the hook's `--name` mode.
+  It is reusable: a consumer calls it from a caller workflow that
+  `scripts/enable-branch-check.sh` writes, and it reads the rules from the
+  kit's `main`. It also runs on the kit's own PRs against the PR's copy.
+  PRs opened by a bot are skipped. `just check-branch-name`, part of
+  `just check`, runs the same check on the checked-out branch.
 - **Registration.** `scripts/register_stop_hook.py` becomes
   `scripts/register_hooks.py` (and its shell wrapper `register-hooks.sh`),
   registering both kit hooks from one table, with the in-place rewrite of a
@@ -86,6 +93,17 @@ Why the choices above:
 - **Prefix and length only**, not lowercase or hyphenation: both are closed
   and mechanical, the style rules are looser and more likely to refuse a name
   a human would accept.
+- **CI as well as the hook:** the hook sees only Claude, and only through
+  Bash; CI sees every PR's branch, however it was made. It also answers the
+  objection that made the `pre-commit` check's refuse-or-warn question hard:
+  refusing gets in the way of scratch branches, spikes and bisect runs - none
+  of which become PRs, so CI never sees them.
+- **A reusable workflow reading the kit's `main`** over a script copied into
+  each consumer: the rules stay in one place and a change reaches every
+  consumer at once. A consumer can't pin the rules this way - the same trade
+  the `.fieldkit` symlink already makes for the conventions themselves.
+- **Bots exempt:** a bot's branch names come from its own config, which the
+  rules can't instruct. Failing its PRs would only be noise.
 - **One registration script** over a second copy of the Stop one: the two
   would differ only in event, matcher and file name, and the legacy-rename
   handling from ADR 035 would otherwise be duplicated.
@@ -103,8 +121,16 @@ Alternatives rejected:
 
 ## Consequences
 
-- Claude's branch creation through Bash in a kit repo is checked; a human's,
-  and anything made by `EnterWorktree` or a tool other than Bash, is not.
+- Claude's branch creation through Bash in a kit repo is refused on the spot;
+  every other branch - a human's, or one `EnterWorktree` made - is caught only
+  at its PR, and only in a repo that has enabled the CI check. By then the
+  branch is pushed, so the fix is a rename rather than a retry.
+- The CI check blocks a merge by itself only where it is a required status
+  check; otherwise it shows red, which the kit's `merge` skill already
+  refuses.
+- Consumers call the workflow from the kit's public repo. Were the kit made
+  private, it would stay callable only by repos GitHub's access settings let
+  in.
 - The "Allowed prefixes:" and "At most N characters" bullets in `git.md` are
   now load-bearing: the first must list the prefixes in backticks before its
   first period, the second must open with that phrase. `just check`
@@ -115,5 +141,6 @@ Alternatives rejected:
   registration of the Stop hook is kept or rewritten in place as before.
 - Anyone who has not re-run `just install` simply lacks the hook; nothing
   else depends on it.
-- The `pre-commit` check can read the same bullets, keeping the one copy,
-  when it is built.
+- With agents refused here and everyone checked at the PR, the `pre-commit`
+  check's remaining value is an earlier warning for humans. If it is built,
+  it can read the same bullets, keeping the one copy.

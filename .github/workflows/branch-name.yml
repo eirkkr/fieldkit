@@ -1,0 +1,37 @@
+# Fail a PR whose branch name breaks conventions/git.md's branch rules.
+#
+# Reusable: a consumer repo calls it from its own pull_request workflow, which
+# .fieldkit/scripts/enable-branch-check.sh writes. The rules are read from the
+# kit's git.md at kit-ref, so a rule change reaches every caller unedited. It
+# also runs on the kit's own PRs, against the PR's copy of the rules, so the
+# path consumers use is exercised here first.
+name: Branch name
+
+on:
+  pull_request:
+  workflow_call:
+    inputs:
+      kit-repository:
+        description: The kit repo to read the rules from
+        type: string
+        default: eirkkr/fieldkit
+      kit-ref:
+        description: The kit ref to read the rules from
+        type: string
+        default: main
+
+jobs:
+  branch-name:
+    # A bot's branch names come from its own config, which the naming rule
+    # can't instruct - so its PRs aren't held to it.
+    if: github.event_name == 'pull_request' && github.event.pull_request.user.type != 'Bot'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.kit-repository || github.repository }}
+          ref: ${{ inputs.kit-ref || github.event.pull_request.head.sha }}
+
+      - run: python3 hooks/pretooluse-branch-name.py --name "$BRANCH"
+        env:
+          BRANCH: ${{ github.head_ref }}

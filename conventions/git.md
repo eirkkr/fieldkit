@@ -1,7 +1,7 @@
 # Git conventions
 
 - Never commit directly to the default branch. Branch, commit there, open a
-  PR. The kit's `pre-commit` hook enforces this once installed (see Hooks).
+  PR. The kit's `pre-commit` hook enforces this once installed (see Hooks and CI checks).
 
 ## Branches
 
@@ -68,7 +68,7 @@
 - A rewrite re-SHAs every commit, so anything citing the old SHAs goes
   stale - a stage's review note especially (see [specs.md](specs.md)).
 
-## Hooks
+## Hooks and CI checks
 
 - The kit ships a `pre-commit` hook refusing commits on the default branch,
   backing the rule above structurally. Install it from the repo root with
@@ -91,3 +91,10 @@
 - That hook reads the prefixes and the length limit from the two bullets
   above, which stay their one copy. The kit's `just check` fails if a
   rewording of either leaves the hook unable to read it.
+- A PR's branch name is checked in CI as well, by the kit's reusable
+  `branch-name` workflow, which catches branches however they were made.
+  Enable it from the repo root with `.fieldkit/scripts/enable-branch-check.sh`
+  and commit the workflow file it writes. It reads the rules from the kit's
+  own `git.md`, so a change to them reaches the check with no edit in the
+  repo. PRs opened by a bot, such as Dependabot, are exempt: a bot's branch
+  names come from its own config, which these rules can't instruct.

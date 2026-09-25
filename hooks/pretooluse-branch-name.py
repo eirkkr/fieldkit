@@ -22,7 +22,9 @@ whose branch name git derives from the path only when no such branch exists.
 The allowed prefixes and the length cap are read from `git.md`'s "Allowed
 prefixes:" and "At most N characters" bullets, so the doc stays their one
 copy; `--rules` prints what the hook reads, and `just check` fails when either
-is missing. It applies only in a repo that
+is missing. `--name <branch>` checks one name outside Claude Code, exiting 1
+with the reason when it breaks a rule - `just check-branch-name` and the
+reusable `branch-name` workflow consumers' CI calls both run it. It applies only in a repo that
 reaches the kit - one with a `.fieldkit` entry at its root, or the kit itself.
 See ADR 046 under docs/decisions/.
 
@@ -61,6 +63,14 @@ def main():
         prefixes, limit = rules()
         print(f"prefixes: {' '.join(prefixes)}\nmax length: {limit}")
         sys.exit(0 if prefixes and limit else 1)
+    if len(sys.argv) == 3 and sys.argv[1] == "--name":
+        prefixes, limit = rules()
+        if not prefixes:
+            sys.exit("couldn't read the branch rules from " + GIT_MD)
+        problem = violation(sys.argv[2], prefixes, limit)
+        if problem:
+            sys.exit(reason(sys.argv[2], problem, prefixes, limit, "conventions/git.md"))
+        return
 
     try:
         payload = json.load(sys.stdin)
@@ -246,24 +256,28 @@ def reaches_kit(directory):
 
 def deny(name, problem, prefixes, limit, doc):
     """Refuse the tool call through PreToolUse's documented JSON decision."""
-    allowed = ", ".join(f"`{prefix}`" for prefix in prefixes)
-    cap = f", at most {limit} characters in all" if limit else ""
-    reason = (
-        f"Branch name `{name}` {problem}. The convention is "
-        f"`type/short-description`, lowercase and hyphen-separated, with the "
-        f"prefix one of {allowed}{cap}. Pick a conforming name and retry - "
-        f"see {doc}."
-    )
     print(
         json.dumps(
             {
                 "hookSpecificOutput": {
                     "hookEventName": "PreToolUse",
                     "permissionDecision": "deny",
-                    "permissionDecisionReason": reason,
+                    "permissionDecisionReason": reason(name, problem, prefixes, limit, doc),
                 }
             }
         )
+    )
+
+
+def reason(name, problem, prefixes, limit, doc):
+    """Which rule `name` breaks, the rules in full, and where they're written."""
+    allowed = ", ".join(f"`{prefix}`" for prefix in prefixes)
+    cap = f", at most {limit} characters in all" if limit else ""
+    return (
+        f"Branch name `{name}` {problem}. The convention is "
+        f"`type/short-description`, lowercase and hyphen-separated, with the "
+        f"prefix one of {allowed}{cap}. Pick a conforming name and retry - "
+        f"see {doc}."
     )
 
 

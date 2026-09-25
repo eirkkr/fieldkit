@@ -50,4 +50,4 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 043 | [Ship Python-only skills per-repo, from python-skills/](043-python-skills-opt-in-per-repo.md)              | Accepted   |
 | 044 | [Find repo-specific pins by sweep and by file](044-repo-pins-in-a-consumer-file.md)                        | Accepted   |
 | 045 | [Run push, pr and merge inline; retire their agents](045-inline-git-skills.md)                             | Accepted   |
-| 046 | [Refuse non-conforming branch names in a PreToolUse hook](046-refuse-branch-names-in-a-pretooluse-hook.md) | Accepted   |
+| 046 | [Enforce branch names in a PreToolUse hook and CI](046-enforce-branch-names-in-a-hook-and-ci.md) | Accepted   |
