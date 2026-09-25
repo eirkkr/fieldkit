@@ -15,11 +15,11 @@ on:
   workflow_call:
     inputs:
       kit-repository:
-        description: The kit repo to read the rules from
+        description: The kit repo whose rules to apply
         type: string
         default: eirkkr/fieldkit
       kit-ref:
-        description: The kit ref to read the rules from
+        description: The kit ref whose rules to apply
         type: string
         default: main
 

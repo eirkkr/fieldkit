@@ -358,8 +358,8 @@ committed.
   `.fieldkit` entry (a linked worktree's main worktree counts) or in the kit.
 - It lets through anything it can't parse with confidence, and a crash does
   the same.
-- It reads the rules from `git.md`'s Branches bullets; `just lint` fails if
-  they stop parsing.
+- The rules are constants at the top of the hook, mirroring `git.md`'s
+  Branches bullets - change both together.
 
 ### Checking branch names in CI
 

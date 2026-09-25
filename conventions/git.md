@@ -88,5 +88,5 @@
   from the repo root with `.fieldkit/scripts/enable-branch-check.sh`, and
   commit the workflow it writes. PRs opened by bots are exempt, since bots
   name branches from their own config.
-- Both read the prefixes and the limit from the Branches bullets above, their
-  only copy. The kit's `just lint` fails if those stop parsing.
+- Both enforce the rules from constants in the kit's hook script, which
+  mirror the Branches bullets above. A change to the rules changes both.

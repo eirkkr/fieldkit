@@ -24,10 +24,9 @@ breaks and pointing at `git.md`.
 - **Where it applies.** Only in a repo that reaches the kit: one with a
   `.fieldkit` entry at the root of its working tree or of its main worktree,
   or the kit itself. Everywhere else it lets everything through.
-- **One copy of the rules.** The hook reads the prefixes and the limit from
-  `git.md`'s "Allowed prefixes:" and "At most N characters" bullets at run
-  time. `--rules` prints what it reads, and `just lint` fails when either
-  is missing.
+- **The rules live in the hook.** `PREFIXES` and `MAX_LENGTH` are constants
+  at the top of `pretooluse-branch-name.py`, with a comment marking them as a
+  mirror of `git.md`'s Branches bullets. Nothing checks the two agree.
 - **`EnterWorktree` is left out.** Its input carries a worktree `name`, not a
   branch name; the branch Claude Code derives from it is not in the tool's
   schema.
@@ -59,12 +58,12 @@ A `PreToolUse` hook fires at the moment of branching, before anything is on
 the branch, and its refusal reaches Claude as a reason it can act on in the
 same turn - a rename costs one retry, not a rewrite of pushed history.
 
-It complements the `pre-commit` check proposed for branch names rather than
-replacing it: that one fires at the first commit and catches everyone, this
-one fires earlier and catches only Claude. That split is also what makes the
-`pre-commit` check's "refuse for agents, warn for humans" option reachable -
-there was no signal for "an agent is committing", and a `PreToolUse` hook is
-one. With agents refused here, the `pre-commit` check is free to warn.
+A `pre-commit` check was proposed for the same rule first. It fires at the
+first commit and catches everyone, but it was stuck on refuse-or-warn: it
+cannot tell an agent from a human, and refusing gets in the way of a human's
+scratch branch. Splitting enforcement removes the dilemma - this hook refuses
+Claude at branching, and CI checks everyone at the PR, which scratch branches
+never reach - so the `pre-commit` check is not built.
 
 Why the choices above:
 
@@ -76,11 +75,19 @@ Why the choices above:
   third-party checkout, a repo with its own naming scheme - would be a false
   refusal by definition. The main worktree is checked as well as the current
   one because `.fieldkit` is gitignored, so a linked worktree never has it.
-- **Parsing `git.md`** over a separate data file: the doc is where a human
-  reads the rule, and a second copy anywhere drifts from it. The cost is that
-  rewording a bullet could silently disable its check, which is what the
-  `just lint` guard exists to catch. A data file the doc points at was
-  rejected because it takes the rules out of the doc people actually read.
+- **Constants in the hook** over the alternatives. The hook is the only
+  reader of the rules - CI, and any later `pre-commit` check, call its
+  `--name` mode rather than reading them themselves - so a shared data file
+  (JSON, TOML) would be a second file with one reader. Parsing them out of
+  `git.md`'s prose, tried first, kept one copy but made the bullets' exact
+  wording load-bearing: a rewording that stopped a bullet
+  parsing silently switched that check off, and a lint check existed only to
+  catch it.
+- **No check that `git.md` and the constants agree.** A mismatch surfaces by
+  itself: every refusal states the rules from the code and points at
+  `git.md`, so the first person to hit one sees both. The two change in one
+  PR, and doc accuracy is audited in review. A drift check would buy early
+  warning on a list that rarely changes, at the cost of matching prose.
 - **A hard length limit** over guidance to keep names short: a number in
   the doc can be checked, where "a few words" can't, and the likeliest
   source of a long name is an agent turning an issue title into one. No
@@ -113,9 +120,10 @@ Why the choices above:
 
 Alternatives rejected:
 
-- **Only the `pre-commit` check.** Fires after work has piled up on the
-  wrongly named branch, and cannot tell an agent from a human, forcing one
-  refuse-or-warn answer on both.
+- **The `pre-commit` check, alone or alongside.** Fires after work has piled
+  up on the wrongly named branch, cannot tell an agent from a human, and
+  needs installing per clone; the hook and CI between them cover what it
+  would.
 - **A non-zero exit to refuse.** Indistinguishable from a crash, which must
   fail open; the JSON decision is the documented block.
 - **Guessing `EnterWorktree`'s branch name.** It would hard-code an
@@ -134,10 +142,8 @@ Alternatives rejected:
 - Consumers call the workflow from the kit's public repo. Were the kit made
   private, it would stay callable only by repos GitHub's access settings let
   in.
-- The "Allowed prefixes:" and "At most N characters" bullets in `git.md` are
-  now load-bearing: the first must list the prefixes in backticks before its
-  first period, the second must open with that phrase. `just lint`
-  enforces that both still parse.
+- Changing a rule means editing the constants and `git.md` together; nothing
+  enforces it, so a PR changing one and not the other relies on review.
 - The hook costs one `shlex` pass per Bash call, and two `git rev-parse` calls
   only when a non-conforming branch name is found.
 - `just install` now registers two hooks through one prompt. An existing
@@ -145,5 +151,6 @@ Alternatives rejected:
 - Anyone who has not re-run `just install` simply lacks the hook; nothing
   else depends on it.
 - With agents refused here and everyone checked at the PR, the `pre-commit`
-  check's remaining value is an earlier warning for humans. If it is built,
-  it can read the same bullets, keeping the one copy.
+  check's only remaining value would be an earlier warning for humans. If
+  that is ever wanted, it can call the hook's `--name` mode rather than
+  copying the rules.

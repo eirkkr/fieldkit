@@ -2,9 +2,10 @@
 """PreToolUse hook: refuse a Bash command naming a branch against the kit's rules.
 
 `conventions/git.md` requires Conventional Branch names with a prefix from a
-closed set, and caps their length. Read as prose, that holds only if the branching agent read `git.md`
-first, and branching is too small an action to prompt the read. This hook
-checks the name at the moment the branch is made, before anything is on it.
+closed set, and caps their length. As prose, that holds only if the branching
+agent read `git.md` first, and branching is too small an action to prompt the
+read. This hook checks the name when the branch is made, before anything is on
+it.
 
 It catches, anywhere in a compound command:
 
@@ -19,14 +20,10 @@ covers unparseable shell, names built from `$VAR` or command substitution, flag
 combinations it doesn't model, and `git worktree add <path>` without `-b`,
 whose branch name git derives from the path only when no such branch exists.
 
-The allowed prefixes and the length cap are read from `git.md`'s "Allowed
-prefixes:" and "At most N characters" bullets, so the doc stays their one
-copy; `--rules` prints what the hook reads, and `just lint` fails when either
-is missing. `--name <branch>` checks one name outside Claude Code, exiting 1
-with the reason when it breaks a rule - `just check-branch-name` and the
-reusable `branch-name` workflow consumers' CI calls both run it. It applies only in a repo that
-reaches the kit - one with a `.fieldkit` entry at its root, or the kit itself.
-See ADR 046 under docs/decisions/.
+It applies only in a repo that reaches the kit - one with a `.fieldkit` entry
+at its root, or the kit itself. `--name <branch>` checks one name outside
+Claude Code, exiting 1 with the reason when it breaks a rule; CI runs it
+through scripts/check-branch-name.sh. See ADR 046 under docs/decisions/.
 
 Registered in ~/.claude/settings.json by `just install`
 (scripts/register-hooks.sh); not meant to be invoked directly. Refuses through
@@ -42,10 +39,11 @@ import shlex
 import subprocess
 import sys
 
+# Mirror of conventions/git.md's Branches rules - change both together.
+PREFIXES = ("feature/", "bugfix/", "hotfix/", "release/", "chore/")
+MAX_LENGTH = 50
+
 KIT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-GIT_MD = os.path.join(KIT, "conventions", "git.md")
-PREFIXES_BULLET = re.compile(r"^-\s+Allowed prefixes:(.*?)(?:\.|$)")
-LENGTH_BULLET = re.compile(r"^-\s+At most (\d+) characters")
 
 SEPARATORS = {"&&", "||", ";", "|", "&", "\n", "(", ")", "|&", ";;"}
 # Global git options that take their value as the next word.
@@ -59,17 +57,10 @@ BRANCH_RENAME_FLAGS = {"-m", "-M", "--move", "-c", "-C", "--copy"}
 
 
 def main():
-    if sys.argv[1:] == ["--rules"]:
-        prefixes, limit = rules()
-        print(f"prefixes: {' '.join(prefixes)}\nmax length: {limit}")
-        sys.exit(0 if prefixes and limit else 1)
     if len(sys.argv) == 3 and sys.argv[1] == "--name":
-        prefixes, limit = rules()
-        if not prefixes:
-            sys.exit("couldn't read the branch rules from " + GIT_MD)
-        problem = violation(sys.argv[2], prefixes, limit)
+        problem = violation(sys.argv[2])
         if problem:
-            sys.exit(reason(sys.argv[2], problem, prefixes, limit, "conventions/git.md"))
+            sys.exit(reason(sys.argv[2], problem, "conventions/git.md"))
         return
 
     try:
@@ -82,48 +73,23 @@ def main():
     if not isinstance(command, str) or "git" not in command:
         return
 
-    prefixes, limit = rules()
-    if not prefixes:
-        return
     cwd = payload.get("cwd") or os.getcwd()
     for directory, name in branch_names(command, cwd):
-        problem = violation(name, prefixes, limit)
+        problem = violation(name)
         if not problem:
             continue
         doc = reaches_kit(directory)
         if doc:
-            deny(name, problem, prefixes, limit, doc)
+            deny(name, problem, doc)
             return
 
 
-def rules():
-    """git.md's allowed prefixes and length cap.
-
-    Either comes back empty - `()` or None - when git.md can't be read or its
-    bullet no longer parses, and the hook then skips that check.
-    """
-    try:
-        with open(GIT_MD, encoding="utf-8") as handle:
-            text = handle.read()
-    except OSError:
-        return (), None
-    prefixes, limit = (), None
-    # The bullets are hard-wrapped prose; join each onto one line first.
-    for bullet in re.split(r"\n(?=\s*-\s)", text):
-        line = " ".join(bullet.split())
-        if match := PREFIXES_BULLET.match(line):
-            prefixes = tuple(re.findall(r"`([a-z]+/)`", match.group(1)))
-        elif match := LENGTH_BULLET.match(line):
-            limit = int(match.group(1))
-    return prefixes, limit
-
-
-def violation(name, prefixes, limit):
+def violation(name):
     """Why `name` breaks the rules, or None when it doesn't."""
-    if not name.startswith(prefixes) or name in prefixes:
+    if not name.startswith(PREFIXES) or name in PREFIXES:
         return "has no allowed prefix"
-    if limit and len(name) > limit:
-        return f"is {len(name)} characters, over the {limit}-character limit"
+    if len(name) > MAX_LENGTH:
+        return f"is {len(name)} characters, over the {MAX_LENGTH}-character limit"
     return None
 
 
@@ -254,7 +220,7 @@ def reaches_kit(directory):
     return None
 
 
-def deny(name, problem, prefixes, limit, doc):
+def deny(name, problem, doc):
     """Refuse the tool call through PreToolUse's documented JSON decision."""
     print(
         json.dumps(
@@ -262,22 +228,21 @@ def deny(name, problem, prefixes, limit, doc):
                 "hookSpecificOutput": {
                     "hookEventName": "PreToolUse",
                     "permissionDecision": "deny",
-                    "permissionDecisionReason": reason(name, problem, prefixes, limit, doc),
+                    "permissionDecisionReason": reason(name, problem, doc),
                 }
             }
         )
     )
 
 
-def reason(name, problem, prefixes, limit, doc):
+def reason(name, problem, doc):
     """Which rule `name` breaks, the rules in full, and where they're written."""
-    allowed = ", ".join(f"`{prefix}`" for prefix in prefixes)
-    cap = f", at most {limit} characters in all" if limit else ""
+    allowed = ", ".join(f"`{prefix}`" for prefix in PREFIXES)
     return (
         f"Branch name `{name}` {problem}. The convention is "
         f"`type/short-description`, lowercase and hyphen-separated, with the "
-        f"prefix one of {allowed}{cap}. Pick a conforming name and retry - "
-        f"see {doc}."
+        f"prefix one of {allowed}, at most {MAX_LENGTH} characters in all. "
+        f"Pick a conforming name and retry - see {doc}."
     )
 
 

@@ -25,8 +25,8 @@ openspec-refresh:
 # Run all checks: the linters, plus this branch's name.
 check: lint check-branch-name
 
-# Lint markdown and check the kit's generated and parsed files still line up.
-lint: rumdl check-overlays check-branch-rules
+# Lint markdown and check the vendored skills still carry their overlays.
+lint: rumdl check-overlays
 
 # Lint all markdown.
 rumdl:
@@ -37,10 +37,6 @@ rumdl:
 # Check each vendored skill still ends with its overlay.
 check-overlays:
     @"{{ justfile_directory() }}/scripts/check-skill-overlays.sh" "{{ justfile_directory() }}"
-
-# Check the branch-name hook still reads its prefixes and length cap out of git.md.
-check-branch-rules:
-    @"{{ justfile_directory() }}/scripts/check-branch-rules.sh" "{{ justfile_directory() }}"
 
 # Check this branch's name against git.md - the PR's branch in CI, else the checked-out one.
 check-branch-name:
