@@ -30,7 +30,9 @@ lint: rumdl check-overlays check-branch-rules
 
 # Lint all markdown.
 rumdl:
-    uvx rumdl@0.2.26 check .
+    #!/usr/bin/env bash
+    set -euo pipefail
+    uvx rumdl@0.2.26 check . 2>&1 | sed '/^$/d; s/^/rumdl: /'
 
 # Check each vendored skill still ends with its overlay.
 check-overlays:
@@ -38,7 +40,7 @@ check-overlays:
 
 # Check the branch-name hook still reads its prefixes and length cap out of git.md.
 check-branch-rules:
-    @python3 "{{ justfile_directory() }}/hooks/pretooluse-branch-name.py" --rules > /dev/null || (echo "hooks/pretooluse-branch-name.py couldn't read the prefixes or length cap from conventions/git.md's Branches bullets" >&2; exit 1)
+    @"{{ justfile_directory() }}/scripts/check-branch-rules.sh" "{{ justfile_directory() }}"
 
 # Check this branch's name against git.md - the PR's branch in CI, else the checked-out one.
 check-branch-name:

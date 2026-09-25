@@ -19,26 +19,25 @@ for overlay in "$kit"/repo-skills-overlay/*.md; do
     target="$kit/repo-skills/$name/SKILL.md"
 
     if [ ! -f "$target" ]; then
-        echo "$name: repo-skills/$name/SKILL.md is missing" >&2
+        echo "check-overlays: repo-skills/$name/SKILL.md is missing" >&2
         status=1
         continue
     fi
 
     bytes="$(wc -c <"$overlay" | tr -d '[:space:]')"
     if tail -c "$bytes" "$target" | diff -q - "$overlay" >/dev/null; then
-        echo "$name: overlay is current"
+        echo "check-overlays: $name overlay is current"
     else
-        echo "$name: repo-skills/$name/SKILL.md does not end with repo-skills-overlay/$name.md" >&2
+        echo "check-overlays: repo-skills/$name/SKILL.md does not end with repo-skills-overlay/$name.md" >&2
         status=1
     fi
 done
 
 if [ "$status" -ne 0 ]; then
     cat >&2 <<'MSG'
-
-The vendored skill and its overlay have drifted. Re-apply the overlays with
-`just openspec-refresh`, or append the overlay by hand if the pinned openspec
-version should not move.
+check-overlays: the vendored skill and its overlay have drifted. Re-apply the
+overlays with `just openspec-refresh`, or append the overlay by hand if the
+pinned openspec version should not move.
 MSG
 fi
 

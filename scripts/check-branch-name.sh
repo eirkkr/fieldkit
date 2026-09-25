@@ -18,13 +18,16 @@ if [ -z "$default" ]; then
 fi
 default="${default:-main}"
 if [ -z "$branch" ]; then
-    echo "Detached HEAD - no branch name to check"
+    echo "check-branch-name: detached HEAD, no branch name to check"
     exit 0
 fi
 if [ "$branch" = "$default" ]; then
-    echo "On the default branch '$default' - its name isn't checked"
+    echo "check-branch-name: on the default branch '$default', whose name isn't checked"
     exit 0
 fi
 
-python3 "$kit/hooks/pretooluse-branch-name.py" --name "$branch"
-echo "Branch name '$branch' follows the rules"
+if ! reason="$(python3 "$kit/hooks/pretooluse-branch-name.py" --name "$branch" 2>&1)"; then
+    echo "check-branch-name: $reason" >&2
+    exit 1
+fi
+echo "check-branch-name: '$branch' follows the rules"
