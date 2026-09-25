@@ -31,7 +31,8 @@ BODY_MAX = 72
 
 KIT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
-SUBJECT = re.compile(r"(?P<type>[a-z]+): (?P<description>.+)")
+# `!` after the type marks a breaking change.
+SUBJECT = re.compile(r"(?P<type>[a-z]+)!?: (?P<description>.+)")
 # A body line allowed past BODY_MAX: one unbreakable word - a URL or a path -
 # optionally after a list marker or a `[1]: ` link label, since wrapping it is
 # impossible.
@@ -114,7 +115,8 @@ def title_reason(title, problems, doc):
     listed = "\n".join(f"- {problem}" for problem in problems)
     return (
         f"PR title `{title}` breaks the convention:\n{listed}\n"
-        f"A PR title becomes the squash commit's subject, so it is `type: description` - "
+        f"A PR title becomes the squash commit's subject, so it is `type: description` "
+        f"(`type!:` for a breaking change) - "
         f"type one of {', '.join(COMMIT_TYPES)}, description lowercase, no trailing "
         f"period - within {SUBJECT_MAX} characters once ` (#N)` is appended. See {doc}."
     )
@@ -156,7 +158,8 @@ def message_reason(problems, doc):
     listed = "\n".join(f"- {problem}" for problem in problems)
     return (
         f"Commit message breaks the convention:\n{listed}\n"
-        f"The subject is `type: description` - type one of {', '.join(COMMIT_TYPES)}, "
+        f"The subject is `type: description` (`type!:` for a breaking change) - "
+        f"type one of {', '.join(COMMIT_TYPES)}, "
         f"description lowercase, no trailing period - at most {SUBJECT_MAX} characters, "
         f"then a blank line and a body wrapped at {BODY_MAX}. See {doc}."
     )

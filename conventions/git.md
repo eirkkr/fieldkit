@@ -25,7 +25,10 @@
 ## Commits
 
 - [Conventional Commits](https://www.conventionalcommits.org/): `type: short
-  description`, imperative mood. No scope, no `!`.
+  description`, imperative mood. No scope.
+- A breaking change - one a consumer has to act on - is marked with `!`
+  after the type (`feat!: drop the old flag`), and may explain what to do in
+  a `BREAKING CHANGE:` footer at the end of the body.
 - Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`. No others
   (`ci`, `style`, `perf`, `build`, etc.).
 - The description starts lowercase and has no trailing period.

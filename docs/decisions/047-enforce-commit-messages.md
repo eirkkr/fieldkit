@@ -5,8 +5,9 @@
 `conventions/git.md`'s commit rules become strict, with no targets:
 
 - Subject: `type: description`, type one of `feat`, `fix`, `docs`, `refactor`,
-  `test`, `chore` - no scope, no `!`, no other types - description starting
-  lowercase, no trailing period, at most 72 characters.
+  `test`, `chore` - no scope, no other types - description starting
+  lowercase, no trailing period, at most 72 characters. `type!:` marks a
+  breaking change, optionally explained in a `BREAKING CHANGE:` footer.
 - Body: after a blank line, every line at most 72 characters, except a line
   that is one unbreakable word (a URL or a path), optionally after a list
   marker or a `[1]:` label.
@@ -87,6 +88,12 @@ message is set at merge time. Each check covers a different writer of it:
 common in that layer, and an agent reached for both on this repo's own
 history - which is the drift a closed list exists to stop, not a reason to
 widen it.
+
+**`!` allowed, scopes not.** Neither appeared in either repo's history. `!`
+is part of the Conventional Commits spec proper and carries what a type
+can't - whether a consumer has to act - which is also what release tooling
+reads to bump a major version, should the kit adopt release tags. A scope is
+free-form, and adds little in repos this size.
 
 **One module for every rule.** Four checks now read naming rules. Keeping
 them in one imported module keeps ADR 046's one-copy property as the
