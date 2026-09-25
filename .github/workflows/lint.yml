@@ -14,4 +14,4 @@ jobs:
       - name: Install just
         run: uv tool install rust-just@1.58.0
 
-      - run: just check
+      - run: just lint

@@ -89,4 +89,4 @@
   commit the workflow it writes. PRs opened by bots are exempt, since bots
   name branches from their own config.
 - Both read the prefixes and the limit from the Branches bullets above, their
-  only copy. The kit's `just check` fails if those stop parsing.
+  only copy. The kit's `just lint` fails if those stop parsing.

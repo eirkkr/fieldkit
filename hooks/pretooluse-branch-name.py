@@ -21,7 +21,7 @@ whose branch name git derives from the path only when no such branch exists.
 
 The allowed prefixes and the length cap are read from `git.md`'s "Allowed
 prefixes:" and "At most N characters" bullets, so the doc stays their one
-copy; `--rules` prints what the hook reads, and `just check` fails when either
+copy; `--rules` prints what the hook reads, and `just lint` fails when either
 is missing. `--name <branch>` checks one name outside Claude Code, exiting 1
 with the reason when it breaks a rule - `just check-branch-name` and the
 reusable `branch-name` workflow consumers' CI calls both run it. It applies only in a repo that

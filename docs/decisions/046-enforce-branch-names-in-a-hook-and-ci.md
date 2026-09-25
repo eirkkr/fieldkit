@@ -26,7 +26,7 @@ breaks and pointing at `git.md`.
   or the kit itself. Everywhere else it lets everything through.
 - **One copy of the rules.** The hook reads the prefixes and the limit from
   `git.md`'s "Allowed prefixes:" and "At most N characters" bullets at run
-  time. `--rules` prints what it reads, and `just check` fails when either
+  time. `--rules` prints what it reads, and `just lint` fails when either
   is missing.
 - **`EnterWorktree` is left out.** Its input carries a worktree `name`, not a
   branch name; the branch Claude Code derives from it is not in the tool's
@@ -39,8 +39,8 @@ breaks and pointing at `git.md`.
   `scripts/enable-branch-check.sh` writes; it also triggers on the kit's own
   PRs, at the PR's commit, so the consumer path is tested before it reaches
   consumers. That is the kit's only CI check of the
-  name - it stays out of `just check`, which `lint.yml` also runs, so a bad
-  name fails once. PRs opened by a bot are skipped.
+  name - it stays out of `just lint`, which `lint.yml` runs, so a bad name
+  fails once. `just check` runs both locally. PRs opened by a bot are skipped.
 - **Registration.** `scripts/register_stop_hook.py` becomes
   `scripts/register_hooks.py` (and its shell wrapper `register-hooks.sh`),
   registering both kit hooks from one table, with the in-place rewrite of a
@@ -79,7 +79,7 @@ Why the choices above:
 - **Parsing `git.md`** over a separate data file: the doc is where a human
   reads the rule, and a second copy anywhere drifts from it. The cost is that
   rewording a bullet could silently disable its check, which is what the
-  `just check` guard exists to catch. A data file the doc points at was
+  `just lint` guard exists to catch. A data file the doc points at was
   rejected because it takes the rules out of the doc people actually read.
 - **A hard length limit** over guidance to keep names short: a number in
   the doc can be checked, where "a few words" can't, and the likeliest
@@ -136,7 +136,7 @@ Alternatives rejected:
   in.
 - The "Allowed prefixes:" and "At most N characters" bullets in `git.md` are
   now load-bearing: the first must list the prefixes in backticks before its
-  first period, the second must open with that phrase. `just check`
+  first period, the second must open with that phrase. `just lint`
   enforces that both still parse.
 - The hook costs one `shlex` pass per Bash call, and two `git rev-parse` calls
   only when a non-conforming branch name is found.

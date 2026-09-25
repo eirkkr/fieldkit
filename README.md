@@ -56,7 +56,7 @@ the `eirkkr/fieldkit` remote is mine and you will not be able to push to it.
   appended by `just openspec-refresh` after it regenerates them; one
   `<skill-name>.md` per skill patched. Both halves are checked in, so editing
   an overlay without regenerating leaves the vendored skill serving the old
-  text - which still loads and still reads plausibly. `just check` fails on
+  text - which still loads and still reads plausibly. `just lint` fails on
   that drift.
 - `python-skills/` - skills that only apply in a Python repo (`update-deps`),
   symlinked into an *opt-in* consumer repo's `.claude/skills` by
@@ -78,7 +78,7 @@ the `eirkkr/fieldkit` remote is mine and you will not be able to push to it.
   session hooks `stop-autofix.py` and `pretooluse-branch-name.py`, registered
   machine-wide by `just install` (see "Auto-fixing and catching formatter
   drift" and "Refusing non-conforming branch names").
-- `.github/workflows/` - the kit's own CI (`lint.yml`, running `just check`),
+- `.github/workflows/` - the kit's own CI (`lint.yml`, running `just lint`),
   and `branch-name.yml`, which checks PR branch names on the kit's own PRs
   and is also called by consumer repos (see "Checking branch names in CI").
 - further areas as needs emerge - e.g. more Claude Code assets, shared scripts,
@@ -358,7 +358,7 @@ committed.
   `.fieldkit` entry (a linked worktree's main worktree counts) or in the kit.
 - It lets through anything it can't parse with confidence, and a crash does
   the same.
-- It reads the rules from `git.md`'s Branches bullets; `just check` fails if
+- It reads the rules from `git.md`'s Branches bullets; `just lint` fails if
   they stop parsing.
 
 ### Checking branch names in CI
@@ -380,7 +380,8 @@ call the fork, and the kit must stay public to be callable.
 - To block merging on it, make it a required status check. The kit's `merge`
   skill already refuses on a red check.
 - The same workflow runs on the kit's own PRs, against the PR's commit.
-  Locally, `just check-branch-name` checks the branch you're on.
+  Locally, `just check-branch-name` (part of `just check`) checks the branch
+  you're on.
 
 ## Updating a shared rule
 
