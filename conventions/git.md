@@ -1,7 +1,8 @@
 # Git conventions
 
 - Never commit directly to the default branch. Branch, commit there, open a
-  PR. The kit's `pre-commit` hook enforces this once installed (see Hooks).
+  PR. The kit's `pre-commit` hook enforces this once installed (see Hooks
+  and CI checks).
 
 ## Branches
 
@@ -9,6 +10,8 @@
   `type/short-description`, lowercase, hyphen-separated.
 - Allowed prefixes: `feature/`, `bugfix/`, `hotfix/`, `release/`, `chore/`. No
   others (`refactor/`, `fix/`, `test/`, etc.).
+- At most 50 characters, prefix included - a few words of description. The
+  issue or PR carries the detail.
 - Branch off the default branch. Branching off another branch is an
   anti-pattern - it stacks work on something that can still change or get
   discarded.
@@ -66,7 +69,7 @@
 - A rewrite re-SHAs every commit, so anything citing the old SHAs goes
   stale - a stage's review note especially (see [specs.md](specs.md)).
 
-## Hooks
+## Hooks and CI checks
 
 - The kit ships a `pre-commit` hook refusing commits on the default branch,
   backing the rule above structurally. Install it from the repo root with
@@ -77,3 +80,13 @@
   override the guess, or in a repo whose `origin/HEAD` isn't set.
 - Don't reach for `--no-verify` to get past it - the refusal means the commit
   belongs on a branch. Create one and commit there.
+- The kit also ships a Claude Code `PreToolUse` hook that refuses creating or
+  renaming a branch to a name breaking the Branches rules, before anything is
+  committed to it. It only sees Claude's Bash commands. `just install`
+  registers it, and it acts only in a repo with `.fieldkit` or in the kit.
+- CI checks each PR's branch name too, however the branch was made. Enable it
+  from the repo root with `.fieldkit/scripts/enable-branch-check.sh`, and
+  commit the workflow it writes. PRs opened by bots are exempt, since bots
+  name branches from their own config.
+- Both enforce the rules from constants in the kit's hook script, which
+  mirror the Branches bullets above. A change to the rules changes both.

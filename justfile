@@ -11,7 +11,7 @@ install:
     @"{{ justfile_directory() }}/scripts/register-dir.sh" "{{ justfile_directory() }}"
     @"{{ justfile_directory() }}/scripts/disable-attribution.sh" "{{ justfile_directory() }}"
     @"{{ justfile_directory() }}/scripts/register-statusline.sh" "{{ justfile_directory() }}"
-    @"{{ justfile_directory() }}/scripts/register-stop-hook.sh" "{{ justfile_directory() }}"
+    @"{{ justfile_directory() }}/scripts/register-hooks.sh" "{{ justfile_directory() }}"
 
 # Set this clone's fix command for the format-drift Stop hook (per clone).
 setup:
@@ -22,13 +22,25 @@ setup:
 openspec-refresh:
     @"{{ justfile_directory() }}/scripts/openspec-refresh.sh" "{{ justfile_directory() }}"
 
-# Lint all markdown and check the vendored skills carry current overlays.
-check: check-overlays
-    uvx rumdl@0.2.26 check .
+# Run all checks: the linters, plus this branch's name.
+check: lint check-branch-name
+
+# Lint markdown and check the vendored skills still carry their overlays.
+lint: rumdl check-overlays
+
+# Lint all markdown.
+rumdl:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    uvx rumdl@0.2.26 check . 2>&1 | sed '/^$/d; s/^/rumdl: /'
 
 # Check each vendored skill still ends with its overlay.
 check-overlays:
     @"{{ justfile_directory() }}/scripts/check-skill-overlays.sh" "{{ justfile_directory() }}"
+
+# Check this branch's name against git.md - the PR's branch in CI, else the checked-out one.
+check-branch-name:
+    @"{{ justfile_directory() }}/scripts/check-branch-name.sh" "{{ justfile_directory() }}"
 
 # Auto-fix markdown issues.
 fix:

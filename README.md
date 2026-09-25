@@ -17,7 +17,8 @@ one-line `@`-import; a rule edited here reaches all of them the next session.
 - **Claude Code assets** - skills (`push`, `pr`, `merge`, `kit-reconcile`,
   and `update-deps` for Python repos), a git `pre-commit` hook that
   blocks commits to the default branch,
-  a `Stop` hook that catches formatter drift, a status line.
+  a `Stop` hook that catches formatter drift, a `PreToolUse` hook that
+  refuses non-conforming branch names, a status line.
 - **The reasoning** - [`docs/decisions/`](docs/decisions/) holds an ADR per
   non-obvious choice. If you only read one thing, read those: they are the part
   that transfers, whatever your own setup looks like.
@@ -55,7 +56,7 @@ the `eirkkr/fieldkit` remote is mine and you will not be able to push to it.
   appended by `just openspec-refresh` after it regenerates them; one
   `<skill-name>.md` per skill patched. Both halves are checked in, so editing
   an overlay without regenerating leaves the vendored skill serving the old
-  text - which still loads and still reads plausibly. `just check` fails on
+  text - which still loads and still reads plausibly. `just lint` fails on
   that drift.
 - `python-skills/` - skills that only apply in a Python repo (`update-deps`),
   symlinked into an *opt-in* consumer repo's `.claude/skills` by
@@ -74,8 +75,12 @@ the `eirkkr/fieldkit` remote is mine and you will not be able to push to it.
   `pre-commit` hook, symlinked into an *opt-in* consumer repo's `.git/hooks` by
   `.fieldkit/scripts/enable-hooks.sh` (not by `just install` - `.git/hooks` is
   per-clone; see "Blocking commits to the default branch"), and the Claude Code
-  `stop-autofix.py` session hook, registered machine-wide by `just install`
-  (see "Auto-fixing and catching formatter drift").
+  session hooks `stop-autofix.py` and `pretooluse-branch-name.py`, registered
+  machine-wide by `just install` (see "Auto-fixing and catching formatter
+  drift" and "Refusing non-conforming branch names").
+- `.github/workflows/` - the kit's own CI (`lint.yml`, running `just lint`),
+  and `branch-name.yml`, which checks PR branch names on the kit's own PRs
+  and is also called by consumer repos (see "Checking branch names in CI").
 - further areas as needs emerge - e.g. more Claude Code assets, shared scripts,
   editor/CI config.
 
@@ -136,8 +141,10 @@ version - upgrade yourself first, e.g. `sudo n lts`).
    docs or CLAUDE.md rather than machine-local memory files. It also sets
    `attribution: {commit: "", pr: "", sessionUrl: false}` so commits and PRs
    carry no AI attribution, `statusLine` to run the kit's linked
-   `statusline-command.sh`, and a `hooks.Stop` entry for the autofix hook
-   (see "Auto-fixing and catching formatter drift") - if the existing file
+   `statusline-command.sh`, a `hooks.Stop` entry for the autofix hook
+   (see "Auto-fixing and catching formatter drift"), and a `hooks.PreToolUse`
+   entry for the branch-name hook (see "Refusing non-conforming branch
+   names") - if the existing file
    already differs from any of those, it shows the diff and asks before
    changing it. Each of these only touches its own key, leaving the rest of the
    file alone.
@@ -332,6 +339,49 @@ that being the case where a reformat would otherwise be stranded behind a commit
 with nothing left dirty to reveal it. The flip side is that a repo carrying old
 formatting debt will have it listed on the first turn, and every turn after,
 until it's committed.
+
+## Refusing non-conforming branch names
+
+`conventions/git.md` limits branch names to a closed set of prefixes and 50
+characters, but an agent only follows that if it reads `git.md` first. The kit
+ships a Claude Code `PreToolUse` hook
+([ADR 046](docs/decisions/046-enforce-branch-names-in-a-hook-and-ci.md)) that
+refuses a Bash command creating or renaming a branch to a name breaking either
+rule - `git checkout -b`, `git switch -c`, `git branch` (create, rename, copy)
+or `git worktree add -b`, even inside a compound command. The refusal names
+the rule, so Claude retries with a conforming name before anything is
+committed.
+
+- It only sees Claude's Bash commands, not branches you make yourself or ones
+  `EnterWorktree` makes.
+- `just install` registers it machine-wide, but it acts only in a repo with a
+  `.fieldkit` entry (a linked worktree's main worktree counts) or in the kit.
+- It lets through anything it can't parse with confidence, and a crash does
+  the same.
+- The rules are constants at the top of the hook, mirroring `git.md`'s
+  Branches bullets - change both together.
+
+### Checking branch names in CI
+
+To catch every branch, yours included, check each PR's branch name in CI. From
+a consumer repo's root:
+
+```bash
+.fieldkit/scripts/enable-branch-check.sh
+```
+
+This writes `.github/workflows/branch-name.yml`, a short caller of the kit's
+reusable workflow; commit it. The workflow checks out the kit's `main` and runs
+`just check-branch-name`, so rule changes reach every repo with no edit there.
+The caller points at the repo the kit's `origin` names, so a fork's consumers
+call the fork, and the kit must stay public to be callable.
+
+- PRs opened by bots such as Dependabot are skipped.
+- To block merging on it, make it a required status check. The kit's `merge`
+  skill already refuses on a red check.
+- The same workflow runs on the kit's own PRs, against the PR's commit.
+  Locally, `just check-branch-name` (part of `just check`) checks the branch
+  you're on.
 
 ## Updating a shared rule
 

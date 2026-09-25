@@ -20,7 +20,7 @@ do about what it found - that is Claude's call. See ADR 035, which supersedes
 ADR 024, and ADR 007 under docs/decisions/.
 
 Registered in ~/.claude/settings.json by `just install`
-(scripts/register-stop-hook.sh); not meant to be invoked directly. Standard
+(scripts/register-hooks.sh); not meant to be invoked directly. Standard
 library only - it runs in whatever repo the session is in, so it must not
 depend on that repo's toolchain.
 """

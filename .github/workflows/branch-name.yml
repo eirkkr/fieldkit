@@ -1,0 +1,44 @@
+# Fail a PR whose branch name breaks conventions/git.md's branch rules, by
+# running `just check-branch-name` in a checkout of the kit.
+#
+# - pull_request: the kit's own PRs, against the PR's commit.
+# - workflow_call: consumer repos, against the kit's main (see
+#   scripts/enable-branch-check.sh). A called workflow answers only the
+#   call, so pull_request never fires there.
+#
+# A failure naming another branch means two PRs share a head commit: GitHub
+# attaches checks to commits, so each shows the other's latest run.
+name: Branch name
+
+on:
+  pull_request:
+  workflow_call:
+    inputs:
+      kit-repository:
+        description: The kit repo whose rules to apply
+        type: string
+        default: eirkkr/fieldkit
+      kit-ref:
+        description: The kit ref whose rules to apply
+        type: string
+        default: main
+
+jobs:
+  branch-name:
+    # Bots name branches from their own config, which the rules can't reach.
+    if: github.event_name == 'pull_request' && github.event.pull_request.user.type != 'Bot'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # No inputs on the kit's own PRs, so use the PR's commit.
+          repository: ${{ inputs.kit-repository || github.repository }}
+          ref: ${{ inputs.kit-ref || github.event.pull_request.head.sha }}
+
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
+
+      # Pinned, through uv (ADR 004).
+      - name: Install just
+        run: uv tool install rust-just@1.58.0
+
+      - run: just check-branch-name
