@@ -84,9 +84,13 @@ rules live in its root `CLAUDE.md`, which is not imported by consumers.
 - An issue, ADR or spec is read by someone who has none of the conversation
   that produced it. Everything needed to act on it belongs in the body: the
   decisions still open, the docs that must change alongside the code, the
-  reasoning behind a choice that looks arbitrary without it. Catching
-  yourself planning to brief the next session is the signal that something
-  is missing from the artifact.
+  reasoning behind a choice that looks arbitrary without it, and anything
+  the conversation built that the reader would otherwise rebuild - a prompt
+  or script that worked, where each change has to go, what it cost.
+  Catching yourself planning to brief the next session is the signal that
+  something is missing from the artifact. Before filing, read the body as
+  the person who will act on it: if they could not start the first step
+  without asking, it is not finished.
 - A later finding that changes what the body says is edited into the body,
   not left in a comment beneath it. Someone acting on the body alone must
   not be acting on a version already known to be superseded.
