@@ -48,8 +48,10 @@ Upgrading means editing the pin: change the SHA and its comment together.
 ## Triggers and input
 
 - Workflows run on `on: pull_request` with no draft filter: every PR runs
-  every check. Add `types: [..., edited]` only for a check that reads the PR's
-  title or body, so a retitled PR is checked again.
+  every check ([ADR 011](../docs/decisions/011-wip-on-branches.md) keeps
+  unfinished work on branches, not in draft PRs). Add
+  `types: [..., edited]` only for a check that reads the PR's title or body,
+  so a retitled PR is checked again.
 - PR text - the title, body or branch name - reaches a script through `env:`,
   never interpolated as `${{ }}` into `run:`. It is user input, and
   interpolated it runs as shell.

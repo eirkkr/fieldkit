@@ -121,13 +121,20 @@ def title_reason(title, problems, doc):
 
 
 def message_problems(message, pr=None):
-    """What's wrong with a whole commit message; see subject_problems for `pr`."""
-    lines = strip_comments(message).splitlines()
+    """What's wrong with a whole commit message; see subject_problems for `pr`.
+
+    Without `pr` the message is one git is committing, so its `#` lines are
+    dropped as git drops them, and a message git wrote itself passes. A squash
+    message is passed to gh verbatim, and neither applies.
+    """
+    if pr is None:
+        message = strip_comments(message)
+    lines = message.splitlines()
     while lines and not lines[-1].strip():
         lines.pop()
     if not lines:
         return ["is empty"]
-    if lines[0].startswith(GENERATED):
+    if pr is None and lines[0].startswith(GENERATED):
         return []
     problems = [f"subject {problem}" for problem in subject_problems(lines[0], pr)]
     if len(lines) > 1 and lines[1].strip():

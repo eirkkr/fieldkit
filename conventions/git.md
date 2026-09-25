@@ -56,8 +56,7 @@
   a revision right away if it's gone stale (see [github.md](github.md)).
 - Squash-merge: synthesise a subject + body summarising the whole change; don't
   concatenate commit messages. Append `(#PR)` to a custom `--subject` manually
-  (GitHub omits it when you provide a custom subject); the commit rules apply
-  to the result, suffix included. Take `Closes #X` from
+  (GitHub omits it when you provide a custom subject). Take `Closes #X` from
   `gh pr view --json closingIssuesReferences` - GitHub's own answer to what
   the PR closes - rather than reading a number off the body or inferring one.
   Nothing back means no linked issue: omit the line entirely. Never fall back
@@ -79,24 +78,24 @@
 
 ## Hooks and CI checks
 
-- The kit ships a `pre-commit` hook refusing commits on the default branch,
-  backing the rule above structurally. Install it from the repo root with
+- The kit ships two git hooks, installed from the repo root with
   `.fieldkit/scripts/enable-hooks.sh` - once per clone, since `.git/hooks`
-  isn't version controlled.
-- It takes the default branch from the `fieldkit.defaultBranch` git config
-  when set, otherwise `origin/HEAD`, otherwise `main`. Set that config to
-  override the guess, or in a repo whose `origin/HEAD` isn't set.
-- Don't reach for `--no-verify` to get past it - the refusal means the commit
-  belongs on a branch. Create one and commit there.
-- The kit also ships a Claude Code `PreToolUse` hook that refuses creating or
-  renaming a branch to a name breaking the Branches rules, before anything is
-  committed to it. It only sees Claude's Bash commands. `just install`
-  registers it, and it acts only in a repo with `.fieldkit` or in the kit.
-- A `commit-msg` hook, installed with `pre-commit` by `enable-hooks.sh`,
-  refuses a commit breaking the Commits rules. Messages git writes itself -
-  merges, reverts, `fixup!`, `squash!` - pass.
-- A second `PreToolUse` hook checks the squash message Claude passes to
-  `gh pr merge`: the Commits rules, plus the `(#N)` suffix matching the PR.
+  isn't version controlled:
+  - `pre-commit` refuses commits on the default branch. It takes the default
+    branch from the `fieldkit.defaultBranch` git config when set, otherwise
+    `origin/HEAD`, otherwise `main`; set that config to override the guess,
+    or in a repo whose `origin/HEAD` isn't set.
+  - `commit-msg` refuses a commit breaking the Commits rules. Messages git
+    writes itself - merges, reverts, `fixup!`, `squash!` - pass.
+- Don't reach for `--no-verify` to get past either - a refusal means the
+  commit belongs on a branch, or its message needs fixing.
+- Two Claude Code `PreToolUse` hooks, registered by `just install`, act only
+  in a repo with `.fieldkit` or in the kit, and only see Claude's Bash
+  commands:
+  - one refuses creating or renaming a branch to a name breaking the
+    Branches rules, before anything is committed to it;
+  - one checks the squash message Claude passes to `gh pr merge`: the
+    Commits rules, plus the `(#N)` suffix matching the PR.
 - CI checks each PR's title and its branch's name, however they were made -
   the title as the squash subject it becomes. Enable it from the repo root with
   `.fieldkit/scripts/enable-pr-checks.sh`, and commit the workflow it writes.

@@ -25,6 +25,12 @@ For actions there are three ways to reference a version:
 
 The SHA is the only one of the three that is actually a pin.
 
+Tools come through uv at an exact version, from the lockfile where there is
+one, because a vendor's install script is two problems at once: it puts a
+third-party host on every run - one consumer's builds failed on a 403 from
+`just`'s install host with no code changed - and it installs whatever
+release is current, so two runs of one commit can differ.
+
 Runners have no finer pin than the OS version: `ubuntu-24.04` stops the move
 to the next release, while GitHub still refreshes the image's packages
 roughly weekly.

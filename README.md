@@ -377,7 +377,7 @@ cover it:
 - **A `PreToolUse` hook** checks the squash message Claude passes to
   `gh pr merge --subject ... --body-file -`, including that the subject ends
   with the PR's `(#N)`. `just install` registers it next to the branch hook,
-  and it acts in the same repos.
+  and like that one it acts only in repos that reach the kit.
 - **CI** checks the PR title, as the subject it becomes once GitHub appends
   `(#N)` - see below.
 
