@@ -36,8 +36,10 @@ returns nothing, omit the line entirely rather than substituting the PR's
 own number.
 
 The message follows `conventions/git.md`'s Commits rules, with `(#<PR>)`
-ending the subject and counting toward its 72. The kit's merge-message hook
-refuses a merge that doesn't, saying what to fix.
+ending the subject and counting toward its 72. A `!` title's
+`BREAKING CHANGE:` line comes over from the PR body into the squash body.
+The kit's merge-message hook refuses a merge that doesn't, saying what to
+fix.
 
 Then merge, in this turn:
 

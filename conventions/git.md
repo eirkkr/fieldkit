@@ -27,8 +27,8 @@
 - [Conventional Commits](https://www.conventionalcommits.org/): `type: short
   description`, imperative mood. No scope.
 - A breaking change - one a consumer has to act on - is marked with `!`
-  after the type (`feat!: drop the old flag`), and may explain what to do in
-  a `BREAKING CHANGE:` footer at the end of the body.
+  after the type (`feat!: drop the old flag`) and a `BREAKING CHANGE:` line
+  in the body saying what to do. Each requires the other.
 - Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`. No others
   (`ci`, `style`, `perf`, `build`, etc.).
 - The description starts lowercase and has no trailing period.
@@ -45,9 +45,11 @@
 ## Pull requests and merging
 
 - PR title follows the Commits rules above. It becomes the squash subject once
-  GitHub appends `(#N)`, so the 72 includes that suffix. No issue numbers in
-  the title. When the work resolves a tracked issue, reference it with
-  `Closes #X` in the body - and when it doesn't, there's simply no such line.
+  GitHub appends `(#N)`, so the 72 includes that suffix. A `!` title needs a
+  `BREAKING CHANGE:` line in the PR body, which the squash body carries on.
+  No issue numbers in the title. When the work resolves a tracked issue,
+  reference it with `Closes #X` in the body - and when it doesn't, there's
+  simply no such line.
 - Always `git push` before `gh pr merge` (squash merge uses remote state).
 - Work in progress stays on the branch - push freely, but don't open a PR
   until the work is ready for review. Draft the title and body yourself when

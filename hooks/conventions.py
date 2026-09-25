@@ -10,7 +10,7 @@ to it in hooks/. Run directly, it checks one thing and exits 1 with the
 reasons when it breaks a rule:
 
     conventions.py branch <name>
-    conventions.py pr-title <title> <pr-number>
+    conventions.py pr-title <title> <pr-number> [<body-file> | -]
     conventions.py message <file>
 
 Standard library only - the hooks run in whatever repo the session or commit
@@ -31,8 +31,10 @@ BODY_MAX = 72
 
 KIT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
-# `!` after the type marks a breaking change.
-SUBJECT = re.compile(r"(?P<type>[a-z]+)!?: (?P<description>.+)")
+# `!` after the type marks a breaking change, and always comes with a footer
+# saying what to do; the spec allows either spelling of it.
+SUBJECT = re.compile(r"(?P<type>[a-z]+)(?P<bang>!)?: (?P<description>.+)")
+BREAKING_FOOTER = re.compile(r"^BREAKING[ -]CHANGE: \S", re.MULTILINE)
 # A body line allowed past BODY_MAX: one unbreakable word - a URL or a path -
 # optionally after a list marker or a `[1]: ` link label, since wrapping it is
 # impossible.
@@ -98,8 +100,24 @@ def title_problems(title):
     return problems
 
 
-def pr_title_problems(title, pr):
-    """What's wrong with a PR title, which becomes the squash subject plus ` (#pr)`."""
+def breaking_problems(subject, body, where="the body"):
+    """What's wrong with how a breaking change is marked: `!` and footer go together."""
+    match = SUBJECT.fullmatch(re.sub(r" \(#\d+\)$", "", subject))
+    bang = bool(match and match["bang"])
+    footer = bool(BREAKING_FOOTER.search(body))
+    if bang and not footer:
+        return [f"marks a breaking change with `!`, but {where} has no `BREAKING CHANGE:` line saying what to do"]
+    if footer and not bang:
+        return [f"has a `BREAKING CHANGE:` line in {where}, but no `!` after the type"]
+    return []
+
+
+def pr_title_problems(title, pr, body=None):
+    """What's wrong with a PR title, which becomes the squash subject plus ` (#pr)`.
+
+    With `body`, the PR's description is checked for the breaking-change
+    footer a `!` title needs, and the reverse.
+    """
     limit = SUBJECT_MAX - len(f" (#{pr})")
     problems = []
     if len(title) > limit:
@@ -107,7 +125,10 @@ def pr_title_problems(title, pr):
             f"is {len(title)} characters, over {limit} - the subject limit of "
             f"{SUBJECT_MAX} once GitHub appends ` (#{pr})`"
         )
-    return problems + title_problems(title)
+    problems += title_problems(title)
+    if body is not None:
+        problems += breaking_problems(title, body, "the PR body")
+    return problems
 
 
 def title_reason(title, problems, doc):
@@ -118,7 +139,8 @@ def title_reason(title, problems, doc):
         f"A PR title becomes the squash commit's subject, so it is `type: description` "
         f"(`type!:` for a breaking change) - "
         f"type one of {', '.join(COMMIT_TYPES)}, description lowercase, no trailing "
-        f"period - within {SUBJECT_MAX} characters once ` (#N)` is appended. See {doc}."
+        f"period - within {SUBJECT_MAX} characters once ` (#N)` is appended. A `!` title "
+        f"needs a `BREAKING CHANGE:` line in the PR body, and that line needs `!`. See {doc}."
     )
 
 
@@ -139,6 +161,7 @@ def message_problems(message, pr=None):
     if pr is None and lines[0].startswith(GENERATED):
         return []
     problems = [f"subject {problem}" for problem in subject_problems(lines[0], pr)]
+    problems += breaking_problems(lines[0], "\n".join(lines[1:]))
     if len(lines) > 1 and lines[1].strip():
         problems.append("has no blank line after the subject")
     for number, line in enumerate(lines[1:], start=2):
@@ -161,7 +184,8 @@ def message_reason(problems, doc):
         f"The subject is `type: description` (`type!:` for a breaking change) - "
         f"type one of {', '.join(COMMIT_TYPES)}, "
         f"description lowercase, no trailing period - at most {SUBJECT_MAX} characters, "
-        f"then a blank line and a body wrapped at {BODY_MAX}. See {doc}."
+        f"then a blank line and a body wrapped at {BODY_MAX}, with a `BREAKING CHANGE:` "
+        f"line whenever the subject has `!`. See {doc}."
     )
 
 
@@ -258,8 +282,12 @@ def main():
         problem = branch_problem(args[1])
         if problem:
             sys.exit(branch_reason(args[1], problem, doc))
-    elif len(args) == 3 and args[0] == "pr-title":
-        problems = pr_title_problems(args[1], args[2])
+    elif len(args) in (3, 4) and args[0] == "pr-title":
+        body = None
+        if len(args) == 4:
+            with open(0 if args[3] == "-" else args[3], encoding="utf-8") as handle:
+                body = handle.read()
+        problems = pr_title_problems(args[1], args[2], body)
         if problems:
             sys.exit(title_reason(args[1], problems, doc))
     elif len(args) == 2 and args[0] == "message":

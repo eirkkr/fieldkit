@@ -7,7 +7,9 @@
 - Subject: `type: description`, type one of `feat`, `fix`, `docs`, `refactor`,
   `test`, `chore` - no scope, no other types - description starting
   lowercase, no trailing period, at most 72 characters. `type!:` marks a
-  breaking change, optionally explained in a `BREAKING CHANGE:` footer.
+  breaking change, and a `BREAKING CHANGE:` line in the body says what to
+  do; each requires the other. CI checks the pair on the PR - a `!` title
+  against a line in the PR body.
 - Body: after a blank line, every line at most 72 characters, except a line
   that is one unbreakable word (a URL or a path), optionally after a list
   marker or a `[1]:` label.
@@ -95,6 +97,12 @@ can't - whether a consumer has to act - which is also what release tooling
 reads to bump a major version, should the kit adopt release tags. A scope is
 free-form, and adds little in repos this size.
 
+`!` and the footer are required together, though the spec accepts either
+alone. `!` is what shows in `git log --oneline` and GitHub's lists, so a
+breaking change marked only in the body is missed there; the footer is the
+only room to say what a consumer must do, which a 72-character subject has
+none of.
+
 **One module for every rule.** Four checks now read naming rules. Keeping
 them in one imported module keeps ADR 046's one-copy property as the
 readers multiply; the hooks already sit next to it, and git resolves the
@@ -120,6 +128,8 @@ Alternatives rejected:
 - A UI merge's body comes from the repo's squash-message setting and is not
   checked by anything: GitHub's PR-body default is Markdown, not wrapped at
   72. Claude's merges are checked; a human's UI merge relies on the setting.
+  With the setting blank, a UI merge of a `!` PR lands without its
+  `BREAKING CHANGE:` line - the PR keeps it, the default branch doesn't.
 - The `commit-msg` hook is opt-in per clone, like `pre-commit`. A clone
   without it only meets the rules at the PR.
 - Renaming the workflow breaks a consumer's old caller until

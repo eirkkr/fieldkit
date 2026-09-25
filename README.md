@@ -379,7 +379,8 @@ cover it:
   with the PR's `(#N)`. `just install` registers it next to the branch hook,
   and like that one it acts only in repos that reach the kit.
 - **CI** checks the PR title, as the subject it becomes once GitHub appends
-  `(#N)` - see below.
+  `(#N)`, and that a `!` title and a `BREAKING CHANGE:` line in the PR body
+  come together - see below.
 
 ## Checking PRs in CI
 
