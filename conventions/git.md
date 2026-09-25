@@ -77,3 +77,14 @@
   override the guess, or in a repo whose `origin/HEAD` isn't set.
 - Don't reach for `--no-verify` to get past it - the refusal means the commit
   belongs on a branch. Create one and commit there.
+- The kit also ships a Claude Code `PreToolUse` hook refusing a Bash command
+  that creates or renames a branch to a name outside the allowed prefixes -
+  `git checkout -b`, `git switch -c`, `git branch` (create, rename or copy)
+  and `git worktree add -b`, anywhere in a compound command. It catches the
+  name before anything is committed to the branch, but only for Claude; a
+  branch made any other way is not checked. `just install` registers it
+  machine-wide, and it acts only in a repo with a `.fieldkit` entry at its
+  root, or in the kit itself.
+- That hook reads the prefix list from the "Allowed prefixes" bullet above,
+  which stays the list's one copy. The kit's `just check` fails if a
+  rewording of that bullet leaves the hook reading no prefixes.

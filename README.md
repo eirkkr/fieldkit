@@ -17,7 +17,8 @@ one-line `@`-import; a rule edited here reaches all of them the next session.
 - **Claude Code assets** - skills (`push`, `pr`, `merge`, `kit-reconcile`,
   and `update-deps` for Python repos), a git `pre-commit` hook that
   blocks commits to the default branch,
-  a `Stop` hook that catches formatter drift, a status line.
+  a `Stop` hook that catches formatter drift, a `PreToolUse` hook that
+  refuses non-conforming branch names, a status line.
 - **The reasoning** - [`docs/decisions/`](docs/decisions/) holds an ADR per
   non-obvious choice. If you only read one thing, read those: they are the part
   that transfers, whatever your own setup looks like.
@@ -74,8 +75,9 @@ the `eirkkr/fieldkit` remote is mine and you will not be able to push to it.
   `pre-commit` hook, symlinked into an *opt-in* consumer repo's `.git/hooks` by
   `.fieldkit/scripts/enable-hooks.sh` (not by `just install` - `.git/hooks` is
   per-clone; see "Blocking commits to the default branch"), and the Claude Code
-  `stop-autofix.py` session hook, registered machine-wide by `just install`
-  (see "Auto-fixing and catching formatter drift").
+  session hooks `stop-autofix.py` and `pretooluse-branch-name.py`, registered
+  machine-wide by `just install` (see "Auto-fixing and catching formatter
+  drift" and "Refusing non-conforming branch names").
 - further areas as needs emerge - e.g. more Claude Code assets, shared scripts,
   editor/CI config.
 
@@ -136,8 +138,10 @@ version - upgrade yourself first, e.g. `sudo n lts`).
    docs or CLAUDE.md rather than machine-local memory files. It also sets
    `attribution: {commit: "", pr: "", sessionUrl: false}` so commits and PRs
    carry no AI attribution, `statusLine` to run the kit's linked
-   `statusline-command.sh`, and a `hooks.Stop` entry for the autofix hook
-   (see "Auto-fixing and catching formatter drift") - if the existing file
+   `statusline-command.sh`, a `hooks.Stop` entry for the autofix hook
+   (see "Auto-fixing and catching formatter drift"), and a `hooks.PreToolUse`
+   entry for the branch-name hook (see "Refusing non-conforming branch
+   names") - if the existing file
    already differs from any of those, it shows the diff and asks before
    changing it. Each of these only touches its own key, leaving the rest of the
    file alone.
@@ -332,6 +336,34 @@ that being the case where a reformat would otherwise be stranded behind a commit
 with nothing left dirty to reveal it. The flip side is that a repo carrying old
 formatting debt will have it listed on the first turn, and every turn after,
 until it's committed.
+
+## Refusing non-conforming branch names
+
+`conventions/git.md` requires Conventional Branch names with a prefix from a
+closed set, but an agent only follows that if it reads `git.md` before
+branching - and making a branch is too small an action to prompt the read. The
+kit ships a Claude Code `PreToolUse` hook
+([ADR 046](docs/decisions/046-refuse-branch-names-in-a-pretooluse-hook.md))
+that refuses a Bash command creating or renaming a branch to a name outside
+those prefixes: `git checkout -b|-B`, `git switch -c|-C`, `git branch` (create,
+`-m`/`-M` rename, `-c`/`-C` copy) and `git worktree add -b|-B`, including
+inside a compound command like `cd x && git checkout -b y`. The refusal names
+the allowed prefixes and points at `git.md`, so Claude picks a conforming name
+and retries - before anything has been committed to the branch.
+
+It checks only what Claude runs through Bash. A branch you make yourself, or
+one Claude Code's `EnterWorktree` tool makes, is not checked.
+
+`just install` registers it in `~/.claude/settings.json` next to the `Stop`
+hook, but it acts only in a repo that reaches the kit - one with a `.fieldkit`
+entry at its root (checked in the main worktree too, so a linked worktree
+counts), or the kit itself. Elsewhere it lets everything through.
+
+When it can't read a command with confidence - unbalanced quotes, a name built
+from `$VAR`, a flag combination it doesn't model - it lets the command through
+rather than guess, and a crash does the same. The prefixes come from
+`git.md`'s "Allowed prefixes" bullet, so the doc stays their one copy;
+`just check` fails if a rewording leaves the hook reading none.
 
 ## Updating a shared rule
 
