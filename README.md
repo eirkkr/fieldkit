@@ -80,8 +80,8 @@ the `eirkkr/fieldkit` remote is mine and you will not be able to push to it.
   machine-wide by `just install`. `conventions.py` holds the branch and
   commit rules they all check against.
 - `.github/workflows/` - the kit's own CI (`lint.yml`, running `just lint`),
-  and `pr-conventions.yml`, which checks PR branch names and titles on the
-  kit's own PRs and is also called by consumer repos (see "Checking PRs in
+  and `pr-conventions.yml`, which checks each PR's title and branch name on
+  the kit's own PRs and is also called by consumer repos (see "Checking PRs in
   CI").
 - further areas as needs emerge - e.g. more Claude Code assets, shared scripts,
   editor/CI config.

@@ -1,5 +1,5 @@
-# Fail a PR whose branch name or title breaks conventions/git.md's rules, by
-# running the matching just recipe in a checkout of the kit.
+# Fail a PR whose title, or whose branch's name, breaks conventions/git.md's
+# rules, by running the matching just recipe in a checkout of the kit.
 #
 # - pull_request: the kit's own PRs, against the PR's commit.
 # - workflow_call: consumer repos, against the kit's main (see

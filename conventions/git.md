@@ -97,8 +97,8 @@
   merges, reverts, `fixup!`, `squash!` - pass.
 - A second `PreToolUse` hook checks the squash message Claude passes to
   `gh pr merge`: the Commits rules, plus the `(#N)` suffix matching the PR.
-- CI checks each PR's branch name and title, however they were made - the
-  title as the squash subject it becomes. Enable it from the repo root with
+- CI checks each PR's title and its branch's name, however they were made -
+  the title as the squash subject it becomes. Enable it from the repo root with
   `.fieldkit/scripts/enable-pr-checks.sh`, and commit the workflow it writes.
   PRs opened by bots are exempt, since bots name branches and PRs from their
   own config.

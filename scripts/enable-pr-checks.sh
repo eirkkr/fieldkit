@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Write a workflow that fails any PR whose branch name or title breaks the
-# kit's rules, by calling the kit's reusable pr-conventions workflow. Run from
+# Write a workflow that fails any PR whose title, or whose branch's name,
+# breaks the kit's rules, by calling the kit's reusable pr-conventions workflow. Run from
 # a consumer repo's root.
 
 if [ ! -e ./.fieldkit ]; then
