@@ -79,9 +79,8 @@ the `eirkkr/fieldkit` remote is mine and you will not be able to push to it.
   machine-wide by `just install` (see "Auto-fixing and catching formatter
   drift" and "Refusing non-conforming branch names").
 - `.github/workflows/` - the kit's own CI (`lint.yml`, running `just check`),
-  `branch-name.yml`, a reusable workflow consumer repos call to check PR
-  branch names (see "Checking branch names in CI"), and
-  `branch-name-self.yml`, which runs that workflow on the kit's own PRs.
+  and `branch-name.yml`, which checks PR branch names on the kit's own PRs
+  and is also called by consumer repos (see "Checking branch names in CI").
 - further areas as needs emerge - e.g. more Claude Code assets, shared scripts,
   editor/CI config.
 
@@ -395,9 +394,9 @@ the rules can't instruct. For the check to block merging on its own rather than
 just show red, make it a required status check in the repo's branch
 protection; the kit's `merge` skill already refuses on a failed check.
 
-The kit checks its own PRs through the same workflow: `branch-name-self.yml`
-calls it on each kit PR, against the PR's copy of the kit, so the path
-consumers use is tested before it reaches them. Locally,
+The kit checks its own PRs with the same workflow, which also triggers on the
+kit's PRs and then reads the PR's copy of the kit, so the path consumers use
+is tested before it reaches them. Locally,
 `just check-branch-name` checks the branch you have checked out.
 
 ## Updating a shared rule

@@ -36,9 +36,9 @@ breaks and pointing at `git.md`.
   CI reaches it through `.github/workflows/branch-name.yml`, a reusable
   workflow that checks out the kit and runs the recipe there. Consumers call
   it at the kit's `main`, from a caller workflow that
-  `scripts/enable-branch-check.sh` writes; the kit calls it on its own PRs
-  from `branch-name-self.yml`, at the PR's commit, so the consumer path is
-  tested before it reaches consumers. That is the kit's only CI check of the
+  `scripts/enable-branch-check.sh` writes; it also triggers on the kit's own
+  PRs, at the PR's commit, so the consumer path is tested before it reaches
+  consumers. That is the kit's only CI check of the
   name - it stays out of `just check`, which `lint.yml` also runs, so a bad
   name fails once. PRs opened by a bot are skipped.
 - **Registration.** `scripts/register_stop_hook.py` becomes

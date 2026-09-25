@@ -1,10 +1,17 @@
 # Fail a PR whose branch name breaks conventions/git.md's branch rules.
 #
-# Reusable, for consumer repos: each calls it from its own pull_request
-# workflow, which .fieldkit/scripts/enable-branch-check.sh writes. It checks
-# out the kit and runs `just check-branch-name` there, so the rules come from
-# the kit's git.md at kit-ref and a rule change reaches every caller unedited.
-# The kit checks its own PRs through the same workflow (branch-name-self.yml).
+# Two triggers, one check:
+#
+# - pull_request - the kit's own PRs, checked against the PR's copy of the
+#   kit, so the path consumers call is exercised before it reaches them.
+# - workflow_call - consumer repos, each calling it from its own pull_request
+#   workflow, which .fieldkit/scripts/enable-branch-check.sh writes. They get
+#   the kit at kit-ref (its main), so a rule change reaches every caller
+#   unedited. A called workflow answers only the call, so the pull_request
+#   trigger never fires in a consumer.
+#
+# Either way it checks out the kit and runs `just check-branch-name` there,
+# which reads the rules from the kit's git.md.
 #
 # A PR showing a failure naming some other branch is not a bug here: GitHub
 # attaches check results to a commit, not a PR, so two PRs whose branches
@@ -14,6 +21,7 @@
 name: Branch name
 
 on:
+  pull_request:
   workflow_call:
     inputs:
       kit-repository:
@@ -34,8 +42,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: ${{ inputs.kit-repository }}
-          ref: ${{ inputs.kit-ref }}
+          # No inputs on the kit's own PRs: fall back to the PR's commit.
+          repository: ${{ inputs.kit-repository || github.repository }}
+          ref: ${{ inputs.kit-ref || github.event.pull_request.head.sha }}
 
       - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
 
