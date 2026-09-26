@@ -68,7 +68,7 @@ def _records() -> list[dict]:
     return json.loads(Path("tests/data/records.json").read_text("utf-8"))
 
 
-@pytest.fixture(params=_records(), ids=lambda record: record["code"])
+@pytest.fixture(params=_records(), ids=operator.itemgetter("code"))
 def record(request: pytest.FixtureRequest) -> dict:
     """One record from the data file."""
     return request.param
