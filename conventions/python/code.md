@@ -1,7 +1,7 @@
 # Python code conventions
 
 Conventions for authoring Python source: docstrings, imports, member
-ordering, constants, enum values, and exception handling. Several rules
+ordering, constants, enum values, caching, and exception handling. Several rules
 below have no automated enforcement and rely on review.
 
 ## Docstrings
@@ -105,6 +105,26 @@ and rendering `name="{{ SAVE }}"` instead of typing the string again.
   serialised, one a library matches on, or one that *is* the payload (an enum
   whose values are the classes it dispatches to). That value is part of a
   contract, not an implementation detail.
+
+## Caching
+
+`functools.cache` fits a function only when all three hold:
+
+1. **The result depends only on the arguments**, and nothing it reads
+   changes while the process runs - a class's schema, a checked-in file.
+   Config, the environment and the database fail this; read them per call.
+2. **No caller modifies the result.** Every caller gets the same object, so
+   a cached list or dict is a shared global. Return an immutable value
+   (`NamedTuple`, `tuple`, `frozenset`) to enforce it.
+3. **It is called repeatedly with the same arguments**, and recomputing
+   costs something or sharing one object is the point.
+
+Never cache an instance method: the cache keeps every instance alive (ruff's
+`B019`). `@classmethod` over `@cache` is fine. Arguments must be hashable,
+since they are the key.
+
+[testing.md](testing.md#loading-test-data) applies this to test data
+loaders.
 
 ## Exception handling
 

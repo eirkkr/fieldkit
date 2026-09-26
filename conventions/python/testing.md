@@ -53,3 +53,31 @@ def test_export_matches_fixture(result: dict) -> None:
 
 Document which fields are volatile near the test or extract them into a shared
 helper if the same set recurs across tests.
+
+## Loading test data
+
+Cache a module-level loader whose data feeds collection - fixture `params`
+or `ids`, or a `parametrize` list. Collection calls it, and the fixture or
+test usually calls it again:
+
+```python
+@cache
+def _records() -> list[dict]:
+    return json.loads(Path("tests/data/records.json").read_text("utf-8"))
+
+
+@pytest.fixture(params=_records(), ids=operator.itemgetter("code"))
+def record(request: pytest.FixtureRequest) -> dict:
+    """One record from the data file."""
+    return request.param
+```
+
+This meets [code.md's caching rules](code.md#caching): nothing modifies the
+records, so they can stay plain dicts rather than immutable values. Pytest
+hands every test the same parameter objects whether or not the loader is
+cached, so the cache shares nothing new.
+
+Don't cache data read at run time, in a fixture body or a helper a test
+calls. Each test should own its copy: a shared record one test changes leaks
+into later tests, intermittently under parallel or random order. Parsing a
+test data file takes well under a millisecond.
