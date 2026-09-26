@@ -53,3 +53,31 @@ def test_export_matches_fixture(result: dict) -> None:
 
 Document which fields are volatile near the test or extract them into a shared
 helper if the same set recurs across tests.
+
+## Loading test data
+
+A module-level loader whose data feeds collection - a fixture's `params` or
+`ids`, or a `parametrize` list - is wrapped in `functools.cache`. Collection
+calls it at least once, and the fixture or test body usually calls it again
+for the same file, so without the cache the file is read and parsed on every
+call:
+
+```python
+@cache
+def _records() -> list[dict]:
+    return json.loads(Path("tests/data/records.json").read_text("utf-8"))
+
+
+@pytest.fixture(params=_records(), ids=lambda record: record["code"])
+def record(request: pytest.FixtureRequest) -> dict:
+    """One record from the data file."""
+    return request.param
+```
+
+Data read at run time - in a fixture body, or a helper called from inside a
+test - is not cached. A cached loader hands every caller the same object, so
+a test that changed a record would change it for every test after it, and
+only in the orders that happen to run them that way; parallel and randomised
+runs make that intermittent. Re-reading the file gives each test its own copy,
+and parsing a test data file costs a fraction of a millisecond. Cache for the
+collection case, where the same object is shared anyway, not for speed.
