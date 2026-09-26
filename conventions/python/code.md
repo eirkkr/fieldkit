@@ -108,30 +108,23 @@ and rendering `name="{{ SAVE }}"` instead of typing the string again.
 
 ## Caching
 
-`functools.cache` on a function is right only when all three hold:
+`functools.cache` fits a function only when all three hold:
 
-1. **The arguments decide the result, and nothing it reads changes while
-   the process runs.** A class's schema, fixed when the class is defined,
-   qualifies; so does a checked-in data file. Config, the environment, the
-   database and the current request do not - a value that can differ
-   between app instances, or between tests, is read per call.
-2. **No caller modifies the result.** A cached function hands every caller
-   the same object, so a cached list or dict is a shared global in
-   disguise: one caller's change is every caller's. Return something
-   immutable - a `NamedTuple`, `tuple` or `frozenset` - so the rule is
-   enforced rather than trusted.
-3. **It is called repeatedly with the same arguments**, and either
-   recomputing costs something real or sharing one object is the point.
-   Looking cacheable is not a reason.
+1. **The result depends only on the arguments**, and nothing it reads
+   changes while the process runs - a class's schema, a checked-in file.
+   Config, the environment and the database fail this; read them per call.
+2. **No caller modifies the result.** Every caller gets the same object, so
+   a cached list or dict is a shared global. Return an immutable value
+   (`NamedTuple`, `tuple`, `frozenset`) to enforce it.
+3. **It is called repeatedly with the same arguments**, and recomputing
+   costs something or sharing one object is the point.
 
-Two mechanics go with it. Never cache an instance method: the cache keeps
-a reference to every instance it has seen, so none is ever freed (ruff's
-`B019`). Caching per class - `@classmethod` over `@cache`, keyed on `cls` -
-does not have that problem. And every argument must be hashable, since the
-arguments are the cache key.
+Never cache an instance method: the cache keeps every instance alive (ruff's
+`B019`). `@classmethod` over `@cache` is fine. Arguments must be hashable,
+since they are the key.
 
-Test data has a case of its own, where a mutable result is cached on
-purpose - see [testing.md](testing.md#loading-test-data).
+Test data has one deliberate exception - see
+[testing.md](testing.md#loading-test-data).
 
 ## Exception handling
 

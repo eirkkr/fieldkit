@@ -56,10 +56,9 @@ helper if the same set recurs across tests.
 
 ## Loading test data
 
-A module-level loader whose data feeds collection - a fixture's `params` or
-`ids`, or a `parametrize` list - is wrapped in `functools.cache`. Collection
-calls it at least once, and the fixture or test body usually calls it again
-for the same file:
+Cache a module-level loader whose data feeds collection - fixture `params`
+or `ids`, or a `parametrize` list. Collection calls it, and the fixture or
+test usually calls it again:
 
 ```python
 @cache
@@ -73,14 +72,11 @@ def record(request: pytest.FixtureRequest) -> dict:
     return request.param
 ```
 
-This is the one place a mutable result is cached, against
-[code.md's caching rule](code.md#caching): pytest already hands every test
-the same parameter objects, so the cache shares nothing that was not shared
-anyway.
+The result is mutable, which [code.md](code.md#caching) otherwise rules out,
+but pytest already shares parameter objects between tests, so the cache
+shares nothing new.
 
-Data read at run time - in a fixture body, or a helper called from inside a
-test - is not cached. There the result is mutable and each test should own
-its copy: a test that changed a shared record would change it for every test
-after it, and only in the orders that happen to run them that way, which
-parallel and randomised runs make intermittent. Parsing a test data file
-costs a fraction of a millisecond.
+Don't cache data read at run time, in a fixture body or a helper a test
+calls. Each test should own its copy: a shared record one test changes leaks
+into later tests, intermittently under parallel or random order. Parsing a
+test data file takes well under a millisecond.
