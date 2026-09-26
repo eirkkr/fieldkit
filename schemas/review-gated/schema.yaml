@@ -317,11 +317,13 @@ apply:
        task, on top of the last one".
 
        Link them **through the PR** - `/pull/<n>/commits/<sha>`, not
-       `/commit/<sha>`. Both render the same diff, but only the PR form
-       carries the PR's state with it, so a file ticked off while walking
-       is ticked off in the file view too. A bare commit URL is a second,
-       stateless surface, which is what the file view leading was meant to
-       avoid. The PR is open before the note is written - opening it is
+       `/commit/<sha>`. Both render the same diff, but the PR form keeps
+       the walk inside the PR: it steps to the previous and next commit,
+       and a line comment left there joins the PR's review, where one on a
+       bare commit URL sits outside it. Neither form offers the Viewed
+       checkbox - GitHub puts that only in the file view, against each
+       file as it stands at the PR's head - so files are ticked off there,
+       not while walking. The PR is open before the note is written - opening it is
        part of reaching the gate - so its number is always in hand.
 
        The walk covers every commit on the branch, not only the tasks. A

@@ -155,3 +155,11 @@ Alternatives rejected:
 > surface. The rules live in [specs.md](../../conventions/specs.md) and the
 > review-gated schema. One commit per task, and the stage as the unit of
 > merge, are unchanged.
+>
+> The claim above that walking through the PR ticks off files was wrong. A
+> commit viewed inside the PR has no Viewed checkbox: GitHub offers it only
+> in the file view, against each file as it stands at the PR's head. So for
+> Viewed state the Reason's "state would be meaningless" holds after all.
+> The links still go through the PR for what does carry over: the walk stays
+> in the PR, stepping commit to commit, and a line comment left on a commit
+> joins the PR's review rather than sitting on a bare commit outside it.
