@@ -123,8 +123,8 @@ Never cache an instance method: the cache keeps every instance alive (ruff's
 `B019`). `@classmethod` over `@cache` is fine. Arguments must be hashable,
 since they are the key.
 
-Test data has one deliberate exception - see
-[testing.md](testing.md#loading-test-data).
+[testing.md](testing.md#loading-test-data) applies this to test data
+loaders.
 
 ## Exception handling
 

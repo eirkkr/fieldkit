@@ -72,9 +72,10 @@ def record(request: pytest.FixtureRequest) -> dict:
     return request.param
 ```
 
-The result is mutable, which [code.md](code.md#caching) otherwise rules out,
-but pytest already shares parameter objects between tests, so the cache
-shares nothing new.
+This meets [code.md's caching rules](code.md#caching): nothing modifies the
+records, so they can stay plain dicts rather than immutable values. Pytest
+hands every test the same parameter objects whether or not the loader is
+cached, so the cache shares nothing new.
 
 Don't cache data read at run time, in a fixture body or a helper a test
 calls. Each test should own its copy: a shared record one test changes leaks
