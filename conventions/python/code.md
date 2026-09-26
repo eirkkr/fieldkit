@@ -1,7 +1,7 @@
 # Python code conventions
 
 Conventions for authoring Python source: docstrings, imports, member
-ordering, constants, enum values, and exception handling. Several rules
+ordering, constants, enum values, caching, and exception handling. Several rules
 below have no automated enforcement and rely on review.
 
 ## Docstrings
@@ -105,6 +105,33 @@ and rendering `name="{{ SAVE }}"` instead of typing the string again.
   serialised, one a library matches on, or one that *is* the payload (an enum
   whose values are the classes it dispatches to). That value is part of a
   contract, not an implementation detail.
+
+## Caching
+
+`functools.cache` on a function is right only when all three hold:
+
+1. **The arguments decide the result, and nothing it reads changes while
+   the process runs.** A class's schema, fixed when the class is defined,
+   qualifies; so does a checked-in data file. Config, the environment, the
+   database and the current request do not - a value that can differ
+   between app instances, or between tests, is read per call.
+2. **No caller modifies the result.** A cached function hands every caller
+   the same object, so a cached list or dict is a shared global in
+   disguise: one caller's change is every caller's. Return something
+   immutable - a `NamedTuple`, `tuple` or `frozenset` - so the rule is
+   enforced rather than trusted.
+3. **It is called repeatedly with the same arguments**, and either
+   recomputing costs something real or sharing one object is the point.
+   Looking cacheable is not a reason.
+
+Two mechanics go with it. Never cache an instance method: the cache keeps
+a reference to every instance it has seen, so none is ever freed (ruff's
+`B019`). Caching per class - `@classmethod` over `@cache`, keyed on `cls` -
+does not have that problem. And every argument must be hashable, since the
+arguments are the cache key.
+
+Test data has a case of its own, where a mutable result is cached on
+purpose - see [testing.md](testing.md#loading-test-data).
 
 ## Exception handling
 
