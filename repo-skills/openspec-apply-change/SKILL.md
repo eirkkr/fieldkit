@@ -190,8 +190,9 @@ followed by one line per commit: its number, subject and commit link for a
 task, and an unnumbered line saying what it is for anything else - a lint fix,
 a prose pass, a fix made after the stage was sent back - so the walk opens
 everything on the branch. Link a commit through the PR
-(`/pull/<n>/commits/<sha>`, never `/commit/<sha>`), so that a file ticked off
-while walking is ticked off in the file view too. The PR holds exactly this
+(`/pull/<n>/commits/<sha>`, never `/commit/<sha>`), so the walk stays inside
+the PR and a comment left on a commit joins its review. Only the file view
+offers the Viewed checkbox, so a walk ticks nothing off. The PR holds exactly this
 stage, so there is no range to assemble and no base commit to carry; at a
 first gate also `Change based at <commit>`, from
 `git merge-base <default-branch> HEAD`, carried forward unchanged in every

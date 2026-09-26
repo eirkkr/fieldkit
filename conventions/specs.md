@@ -166,8 +166,10 @@ second and third scopes involve a human.
   parent; for anything else, the same without a number and a clause saying
   what it is. Every commit, so that nothing on the branch goes unopened and
   nobody has to judge which ones earn a line. Those links go through the PR,
-  `/pull/<n>/commits/<sha>` rather than `/commit/<sha>`, so that the state
-  the file view holds is the same state a walk ticks off. They are a walking
+  `/pull/<n>/commits/<sha>` rather than `/commit/<sha>`, so a walk stays
+  inside the PR - stepping commit to commit, with any line comment joining
+  its review. A commit view has no Viewed checkbox, so files are ticked off
+  in the file view, not during a walk. They are a walking
   aid, not a second review surface, so the reviewer takes the stage whole or
   commit by commit as it deserves.
 - **Two bookmarks, both in the note.** `Reviewed at` ends every note, marked
