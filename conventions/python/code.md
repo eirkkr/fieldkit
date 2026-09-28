@@ -18,13 +18,20 @@ below have no automated enforcement and rely on review.
 - A package's `__all__` is its public surface. Import a public symbol from the
   package that owns it - not from the module that defines it (even a private
   `_`-module), and not from a parent package.
-- Re-export only what something imports through the package. That rules out a
-  symbol used only inside its own package (in-package callers import it from
-  its defining module), and one whose outside callers reach its defining
-  module directly.
+- Re-export what something imports through the package, and every type named
+  in the signature of something re-exported - its parameter and return types.
+  A caller receives those values whether or not it names them, so they are
+  part of the surface. Leaving one out means the first caller that needs its
+  name has to edit `__all__` or reach into the defining module, and the second
+  is easier and silently breaks the rule above. A type's visibility should not
+  depend on which half of a union a caller happened to test with
+  `isinstance`.
+- That still rules out a symbol used only inside its own package (in-package
+  callers import it from its defining module), and one whose outside callers
+  reach its defining module directly.
 - An annotation-only import under `TYPE_CHECKING` counts as public usage - it
   is a real cross-package contract. A test import doesn't: a symbol used only
-  by tests stays private.
+  by tests stays private, unless a public signature names it.
 - On Python 3.14+ an annotation-only import can sit under `if TYPE_CHECKING:`
   without `from __future__ import annotations`, since PEP 649 defers annotation
   evaluation. Below 3.14 a runtime-evaluated annotation - notably a module- or
