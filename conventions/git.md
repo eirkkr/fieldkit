@@ -63,10 +63,13 @@
   concatenate commit messages. Append `(#PR)` to a custom `--subject` manually
   (GitHub omits it when you provide a custom subject). Take `Closes #X` from
   `gh pr view --json closingIssuesReferences` - GitHub's own answer to what
-  the PR closes - rather than reading a number off the body or inferring one.
-  Nothing back means no linked issue: omit the line entirely. Never fall back
-  to the PR's own number; issues and PRs share one number space, so a wrong
-  guess still resolves to something. Merge once CI is green and the PR has
+  the PR closes - rather than inferring one. GitHub does not always link a
+  `Closes #X` written in the PR body, and an unlinked PR closes nothing on
+  merge, so the squash footer is then the only thing that will: when that
+  answer is empty, carry over the body's `Closes #X` lines whose number is
+  confirmed an issue, not a PR. With neither, omit the line entirely. Never
+  fall back to the PR's own number; issues and PRs share one number space,
+  so a wrong guess still resolves to something. Merge once CI is green and the PR has
   no conflicts; a red check or unresolved conflicts block it outright, a
   still-running check is waited out instead.
 
