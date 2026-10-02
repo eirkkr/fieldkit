@@ -62,15 +62,14 @@
 - Squash-merge: synthesise a subject + body summarising the whole change; don't
   concatenate commit messages. Append `(#PR)` to a custom `--subject` manually
   (GitHub omits it when you provide a custom subject). Take `Closes #X` from
-  both `gh pr view --json closingIssuesReferences` - GitHub's own answer to
-  what the PR closes - and the PR body's closing-keyword lines whose number
-  is confirmed an issue, not a PR. GitHub's answer can be empty at merge time
-  though the body names an issue, and an issue it has not linked stays open,
-  so the footer is what closes it. With neither, omit the line. Never infer a
-  number or fall back to the PR's own; issues and PRs share one number space,
-  so a wrong guess still resolves to something. Merge once CI is green and
-  the PR has no conflicts; a red check or unresolved conflicts block it
-  outright, a still-running check is waited out instead.
+  both `gh pr view --json closingIssuesReferences` and the PR body's
+  closing-keyword lines whose number is confirmed an issue, not a PR.
+  GitHub's list can be empty at merge time, and an issue it has not linked
+  stays open, so the footer is what closes it. With neither, omit the line.
+  Never infer a number or fall back to the PR's own; issues and PRs share one
+  number space, so a wrong guess still resolves to something. Merge once CI
+  is green and the PR has no conflicts; a red check or unresolved conflicts
+  block it outright, a still-running check is waited out instead.
 
 ## Rewriting history
 
