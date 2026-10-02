@@ -98,9 +98,10 @@
     `git merge-base` with the default branch. Every change in the first
     is one the second made when the divergence is only the rebase;
     anything left over exists only on the remote.
-- Passing those checks shows a force-push is safe, not that it is wanted:
-  overwriting a branch with an open PR is confirmed with the person first.
-  The lease then names the remote SHA that was checked. If it refuses, the
+- Passing those checks shows a force-push loses nothing, not that it is
+  harmless. On a branch with an open PR it still replaces commits a
+  reviewer has read or pulled, so they hear about it before it happens.
+  The lease names the remote SHA that was checked. If it refuses, the
   remote moved after the check, and the answer is to check again - not
   plain `--force`.
 - The default branch is never rewritten.
