@@ -80,6 +80,29 @@
   `--force-with-lease=<branch>:<sha last seen>`, which refuses if anything
   landed since. Plain `--force`, and a bare `--force-with-lease` (which
   trusts whatever was last fetched), can overwrite someone else's push.
+- A branch rebased locally and never pushed has diverged from its remote:
+  `git rev-list --left-right --count origin/<branch>...<branch>` counts
+  commits on both sides. The count says neither that there is a conflict
+  nor that forcing is safe - the remote's commits may be the local ones
+  under their old SHAs, or work the local branch never had. Two checks
+  tell them apart:
+  - `git cherry -v <branch> origin/<branch>` lists the remote's commits,
+    `-` where the local branch holds one with the same patch and `+` where
+    it holds none. All `-` means nothing on the remote would be lost.
+  - A `+` is not yet lost work. A rebase changes a commit's patch when the
+    base branch changed lines beside the commit's own, or a conflict was
+    resolved, and the two stop matching. Attribute the difference instead:
+    `git diff origin/<branch> <twin>`, where `<twin>` is the local commit
+    the remote tip was rebased into, below anything added since, against
+    `git diff <old base> <new base>`, each base being that side's
+    `git merge-base` with the default branch. Every change in the first
+    is one the second made when the divergence is only the rebase;
+    anything left over exists only on the remote.
+- Passing those checks shows a force-push is safe, not that it is wanted:
+  overwriting a branch with an open PR is confirmed with the person first.
+  The lease then names the remote SHA that was checked. If it refuses, the
+  remote moved after the check, and the answer is to check again - not
+  plain `--force`.
 - The default branch is never rewritten.
 - A rewrite re-SHAs every commit, so anything citing the old SHAs goes
   stale - a stage's review note especially (see [specs.md](specs.md)).
