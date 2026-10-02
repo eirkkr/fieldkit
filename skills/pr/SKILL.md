@@ -21,6 +21,13 @@ either way - it never reads prose. This is the moment for that audit,
 because a PR is where the branch stops being yours to quietly amend, and
 doc drift merges as easily as code.
 
+One kind of drift is not in the diff at all: a sentence elsewhere in the
+tree about this branch itself, true until the merge and false from then on -
+the work "sits unmerged on" it, "is in review", "has not landed". Search
+for the branch's name, and for the PR's number where one already exists
+(`git grep -n -e '<branch>' -e '#<N>' -e 'pull/<N>'`), and rewrite each
+such sentence on the branch so it is true of the tree after the merge.
+
 Then decide the title and body yourself, from context already in hand plus
 `conventions/git.md`/`conventions/github.md`'s conventions - read
 `git log <base>..HEAD` alongside that diff if you need the branch's full

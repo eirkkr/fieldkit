@@ -51,6 +51,10 @@
   reference it with `Closes #X` in the body - and when it doesn't, there's
   simply no such line. Naming the issue in prose is not a reference: an
   issue the work finished but only mentioned stays open after the merge.
+- A branch describes the tree as it will be once merged. A sentence about
+  the PR's own state - "unmerged", "in review", "on branch X" - becomes
+  false at the merge and stays in the tree, so it is rewritten before then.
+  Searching for the PR's number and the branch's name finds them.
 - Always `git push` before `gh pr merge` (squash merge uses remote state).
 - Work in progress stays on the branch - push freely, but don't open a PR
   until the work is ready for review. Draft the title and body yourself when
