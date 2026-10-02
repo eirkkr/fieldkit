@@ -13,7 +13,10 @@ request for it.
 
 The rule is stated in the `review-gated` schema's `apply` instruction, in
 the kit's overlay on the `openspec-apply-change` skill, and in
-`conventions/specs.md`.
+`conventions/specs.md`. The gate task itself says it too: the schema's
+`tasks` instruction and template write each gate as "Do not tick this box
+until the reviewer approves, and do not begin stage 3 until they ask for
+it".
 
 ## Reason
 
@@ -22,7 +25,9 @@ the kit's overlay on the `openspec-apply-change` skill, and in
 Neither said what happens next, and the instructions written from them did:
 the schema's `apply` instruction ended its approval paragraph with "Then
 start the next stage on a fresh branch cut from the default branch", and the
-skill overlay with "The next stage then starts on a fresh branch".
+skill overlay with "The next stage then starts on a fresh branch". Every
+gate task said the same thing in its own text: "Do not tick this box, and
+do not begin stage 3, until the reviewer approves".
 
 Those sentences were written to say *where* the next stage branches from. An
 agent reads them as *when*. In a consumer repo, a reviewer wrote "review
@@ -63,10 +68,14 @@ does not hold across sessions.
   words in the approval. That is the point of it.
 - A session that ends on an approval ends with the stage merged and the
   default branch checked out. Nothing is left half-begun.
-- The same rule now stands in four files: the schema, the overlay, the
-  vendored skill that ends with the overlay, and `conventions/specs.md`.
-  `just check-overlays` keeps the middle two together; nothing checks the
-  schema against them, as before.
+- The same rule now stands in five files: the schema, its tasks template,
+  the overlay, the vendored skill that ends with the overlay, and
+  `conventions/specs.md`. `just check-overlays` keeps the overlay and the
+  skill together; nothing checks the others against them, as before.
+- A `tasks.md` written before this change keeps the old sentence in each of
+  its gates. The `apply` instruction and the skill are read on every run and
+  say otherwise, so such a change follows the new rule without being
+  rewritten.
 - A consumer reaches the schema and the skill through symlinks into the
   kit, so it follows the rule as soon as its kit checkout has this change.
   Nothing has to be re-run.

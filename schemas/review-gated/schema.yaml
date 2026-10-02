@@ -199,9 +199,9 @@ artifacts:
       as an ordinary numbered checkbox so progress tracking counts it:
 
       ```
-      - [ ] 2.6 REVIEW GATE - stage 2. Stop here. Do not tick this box, and
-            do not begin stage 3, until the reviewer approves. Write the
-            review note below first.
+      - [ ] 2.6 REVIEW GATE - stage 2. Stop here. Do not tick this box until
+            the reviewer approves, and do not begin stage 3 until they ask
+            for it. Write the review note below first.
       ```
 
       Leave the note itself blank when authoring tasks.md - it is written
