@@ -22,13 +22,9 @@ here: draft as normal, and wait for them below. Reaching
 this skill is approval to merge once CI is green - not approval to merge
 regardless of what CI says, and not approval to skip waiting for it.
 
-Then search the tree for what this merge would make false, now that the
-PR's number is known: `git grep -n -e '#<N>' -e 'pull/<N>' -e '<branch>'`.
-A sentence calling the PR or its branch open, unmerged, a draft or in
-review is true only until it merges, and the merged tree keeps it. Rewrite
-it on the branch so it is true afterwards, push, and say so in the report.
-A hit that only cites the PR - a link, a review note's commit list - is
-left alone.
+Run `git grep -n -e '#<N>' -e 'pull/<N>' -e '<branch>'`. A sentence calling
+the PR or branch open, unmerged or in review turns false at the merge:
+rewrite it on the branch, push, and report it.
 
 Once it's clean, decide the squash subject and body yourself. Start from
 context already in hand plus `git log <base>..<branch>` for the branch's

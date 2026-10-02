@@ -19,14 +19,9 @@ enforced by review rather than by a linter, a doc page the repo's own
 guidance ties to a file the branch touched. A green pipeline is not evidence
 either way - it never reads prose. This is the moment for that audit,
 because a PR is where the branch stops being yours to quietly amend, and
-doc drift merges as easily as code.
-
-One kind of drift is not in the diff at all: a sentence elsewhere in the
-tree about this branch itself, true until the merge and false from then on -
-the work "sits unmerged on" it, "is in review", "has not landed". Search
-for the branch's name, and for the PR's number where one already exists
-(`git grep -n -e '<branch>' -e '#<N>' -e 'pull/<N>'`), and rewrite each
-such sentence on the branch so it is true of the tree after the merge.
+doc drift merges as easily as code. Search the tree too, for the branch's
+name and the PR's number if it has one: a sentence calling the work
+unmerged or in review turns false at the merge, so rewrite it now.
 
 Then decide the title and body yourself, from context already in hand plus
 `conventions/git.md`/`conventions/github.md`'s conventions - read
@@ -38,13 +33,8 @@ change set to pin them down:
   A breaking change takes `!` and a `BREAKING CHANGE:` line in the body
   saying what consumers must do. CI checks both.
 - Body: 1-3 bullet summary points plus a test plan checklist.
-- For every issue the brief, the branch's commits or the draft body
-  mentions, decide whether merging finishes it: would anything it asks for
-  still be left once this lands? If nothing would, it takes `Closes #X` on
-  a line of its own. A mention in prose closes nothing, so an issue the
-  branch finished but only mentioned stays open until someone notices. If
-  something would be left, the mention stays prose.
-- Write `Closes #X` only for an issue that test picked out, and only after
+- Add `Closes #X` for each issue the brief, commits or body mentions that
+  merging finishes - a mention in prose closes nothing - and only after
   confirming `X` is an issue, not a PR - issues and
   PRs share one number space, and `gh issue view <N>` returns a *PR* just as
   happily, so it proves nothing. Use `gh api repos/{owner}/{repo}/issues/<N>
