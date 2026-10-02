@@ -129,17 +129,17 @@ principle.
 Review runs at three scopes ([ADR 034](../docs/decisions/034-review-gated-openspec-schema.md)),
 and the stage is the unit of merge as well as of review
 ([ADR 041](../docs/decisions/041-stage-is-the-merge-unit.md)). Only the
-second and third scopes involve a human.
+second and third scopes involve a reviewer.
 
 - **Per task.** The implementer checks the work against that task's own
   `Done when ...` condition before ticking the box, and commits it. A box
   whose condition could not be verified stays unticked.
 - **Per stage.** Every stage's last task is a `REVIEW GATE`, and it is a
-  full stop: the gate is not ticked until a human approves, and the next
+  full stop: the gate is not ticked until the reviewer approves, and the next
   stage waits to be asked for. The stage is green before the gate is reached -
   nobody is asked to sign off on a broken tree. The review note is written into
-  `tasks.md` under the gate, so it outlives the session and archives with
-  the change. It covers what changed since the previous gate, any departure
+  `tasks.md` under the gate, so it is committed and archives with the
+  change. It covers what changed since the previous gate, any departure
   from the plan, how to verify (exact commands, plus manual steps), what to
   look at closely, what is deliberately not done yet, and the plan's impact:
   whatever the stage found that changes the stages after it, with the
@@ -153,7 +153,7 @@ second and third scopes involve a human.
   There is no draft state to set: a stage PR exists only once it is ready to
   be read.
 - **Green means the PR's checks, not the tests alone.** Linting is CI's
-  pass rather than the agent's, so work deferred to it is work nobody
+  pass rather than the implementer's, so work deferred to it is work nobody
   looked at. Reaching a gate includes reading the PR's checks and
   recording their state in the note, and a stage's last verification task
   runs the repo's full check rather than its test command. A red check
@@ -162,8 +162,8 @@ second and third scopes involve a human.
   the note links `/pull/<n>/files` - no range to assemble, no base commit to
   carry - with `git diff <default-branch>...HEAD` beside it for the terminal.
   The PR view leads because it alone holds state: files tick off as they are
-  read, a file a later fix touches again un-ticks itself, comments outlive
-  the session. Under it, one line per commit on the branch - for a task, its
+  read, a file a later fix touches again un-ticks itself, comments stay
+  with the PR. Under it, one line per commit on the branch - for a task, its
   number, subject and commit link, which renders that commit against its
   parent; for anything else, the same without a number and a clause saying
   what it is. Every commit, so that nothing on the branch goes unopened and
@@ -199,7 +199,7 @@ second and third scopes involve a human.
   artifact-shaped findings, so correcting first means correcting twice. Then
   every issue the change references, in artifacts, docstrings and the docs it
   touches, is re-read: still open, and still about the thing cited. Then the
-  gate iterates with the human until they are satisfied. A change is not
+  gate iterates with the reviewer until they are satisfied. A change is not
   complete, and is not archived, before that.
 - **The final note's two diffs.** The last stage's own diff leads, as any
   stage's does - its PR, its per-task links. The whole change follows, based

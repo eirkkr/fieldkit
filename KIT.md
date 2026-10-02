@@ -26,6 +26,7 @@ rules live in its root `CLAUDE.md`, which is not imported by consumers.
 | Action                                     | Approval      | Notes                                                          |
 | ------------------------------------------ | ------------- | -------------------------------------------------------------- |
 | Committing and pushing                     | act-then-show | each coherent piece as it lands, not one batch per session     |
+| Force-pushing a branch with an open PR     | ask first     | even when git.md's checks show nothing would be lost           |
 | Revising an open PR's title/body           | act-then-show | keep it true as the branch grows                               |
 | Filing an issue                            | ask first     | unless the user asked for one                                  |
 | Commenting on an issue, editing either     | act-then-show | surface what was filed so it can be corrected                  |

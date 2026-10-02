@@ -54,3 +54,4 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 047 | [Enforce commit messages at commit, merge and PR](047-enforce-commit-messages.md)                         | Accepted   |
 | 048 | [Pin CI actions by commit, runners and tools by version](048-pin-ci-by-commit.md)                         | Accepted   |
 | 049 | [Approving a gate does not start the next stage](049-approval-does-not-start-the-next-stage.md)           | Accepted   |
+| 050 | [Approval rules live in KIT.md, not in the conventions docs](050-approval-rules-live-in-kit-md.md)        | Accepted   |

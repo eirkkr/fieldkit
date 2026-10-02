@@ -39,8 +39,7 @@
   that is one unbreakable word - a URL or a path, optionally after a list
   marker or a `[1]:` label - may run longer, since it can't be wrapped.
 - Commit often - each coherent piece of work as it lands, not one batch at the
-  end of a session. Small commits are easier to review, revert, and reword,
-  and no approval is needed for any of them.
+  end of the work. Small commits are easier to review, revert, and reword.
 
 ## Pull requests and merging
 
@@ -54,9 +53,8 @@
   false at the merge, so it is rewritten on the branch first.
 - Always `git push` before `gh pr merge` (squash merge uses remote state).
 - Work in progress stays on the branch - push freely, but don't open a PR
-  until the work is ready for review. Draft the title and body yourself when
-  opening it. Merge once CI is green and the PR has no conflicts - see
-  Squash-merge below.
+  until the work is ready for review. Merge once CI is green and the PR has
+  no conflicts - see Squash-merge below.
 - Once a PR is open, every later push to that branch has to leave the
   description still true. Checking is part of the push, not a separate
   step: push first, check the body against the branch as pushed, and apply
@@ -80,6 +78,21 @@
   `--force-with-lease=<branch>:<sha last seen>`, which refuses if anything
   landed since. Plain `--force`, and a bare `--force-with-lease` (which
   trusts whatever was last fetched), can overwrite someone else's push.
+- A branch rebased locally and never pushed has commits on both sides of
+  its remote, which means neither a conflict nor a safe force-push:
+  - `git cherry -v <branch> origin/<branch>` marks each remote commit `-`
+    if the local branch has the same patch, `+` if not. All `-` means
+    nothing would be lost.
+  - A `+` can still be a rebased copy: the patch changes when the base
+    changed neighbouring lines or a conflict was resolved. Then
+    `git diff origin/<branch> <copy of the remote tip>` should show only
+    what `git diff <old base> <new base>` does, each base being that
+    side's merge-base with the default branch. Anything more exists only
+    on the remote.
+- A force-push that loses nothing still replaces commits the reviewer of
+  an open PR has read or pulled, so they are told first. The lease names
+  the SHA that was checked; if it refuses, check again rather than
+  reaching for `--force`.
 - The default branch is never rewritten.
 - A rewrite re-SHAs every commit, so anything citing the old SHAs goes
   stale - a stage's review note especially (see [specs.md](specs.md)).
