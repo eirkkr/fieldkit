@@ -184,6 +184,8 @@ At a review gate:
   before reporting. Then show the same note in your reply.
 - Stop and wait.
 
+Approval, when it comes, closes that stage and starts nothing. See below.
+
 The note covers, in order: **review this stage**, the PR's file view
 (`/pull/<n>/files`) and `git diff <default-branch>...HEAD`, both written out,
 followed by one line per commit: its number, subject and commit link for a
@@ -212,9 +214,18 @@ rewriting - both ends stay valid as fixes land.
 When the reviewer approves, record `git rev-parse --short HEAD` under
 **Reviewed at**, tick the box, and merge the PR. That commit is the record of
 the tree they signed off, kept because the squash-merge discards the branch
-holding it. The next stage then starts on a fresh branch cut from the default
-branch - never continued on the merged one, and never stacked on a branch
-still under review.
+holding it.
+
+Then stop again, and report that the stage has merged. Approving a gate is
+not a request for the next stage. Do NOT start it - not its branch, not its
+first task - until the human asks: by invoking this skill again, or by
+saying so, which they may do in the same message as the approval ("approved,
+carry on with stage 3"). An approval that does not mention the next stage
+starts nothing.
+
+When the next stage is asked for, it starts on a fresh branch cut from the
+default branch - never continued on the merged one, and never stacked on a
+branch still under review.
 
 The final stage is the whole-change review. Its closing task stops the same
 way, except that it iterates: present the change, take feedback, revise,

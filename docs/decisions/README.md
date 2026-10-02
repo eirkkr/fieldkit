@@ -53,3 +53,4 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 046 | [Enforce branch names in a PreToolUse hook and CI](046-enforce-branch-names-in-a-hook-and-ci.md)          | Accepted   |
 | 047 | [Enforce commit messages at commit, merge and PR](047-enforce-commit-messages.md)                         | Accepted   |
 | 048 | [Pin CI actions by commit, runners and tools by version](048-pin-ci-by-commit.md)                         | Accepted   |
+| 049 | [Approving a gate does not start the next stage](049-approval-does-not-start-the-next-stage.md)           | Accepted   |

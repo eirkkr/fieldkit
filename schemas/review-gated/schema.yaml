@@ -278,6 +278,8 @@ apply:
 
     - NEVER tick a review gate yourself. Only the human closes it.
     - NEVER start the next stage's tasks. Ending the stage IS the deliverable.
+      That holds after the gate is approved too: approval closes this stage
+      and starts nothing (see "When the reviewer approves" below).
     - Before stopping, confirm the stage really is green - run the repo's
       test command. A gate reached on a red tree is not reached; fix or
       report it first.
@@ -398,9 +400,19 @@ apply:
     write a SHA into a gate the reviewer has not approved: a bookmark that is
     not where they stopped reading is worse than none.
 
-    Then start the next stage on a fresh branch cut from the default branch,
-    which now has this stage in it. Never continue on the merged branch, and
-    never branch the next stage off this one before it merges.
+    Then stop, and report that the stage has merged. Approval covers the
+    stage that was reviewed and nothing after it. Do not start the next
+    stage - not its branch, not its first task, not the reading for it -
+    until the human asks for it: by running the apply skill again, or by
+    saying so. They may say so in the same message as the approval
+    ("approved, carry on with stage 3"), and that is a request. An approval
+    that does not mention the next stage is not one, however obvious the
+    next step looks.
+
+    When the next stage is asked for, it goes on a fresh branch cut from the
+    default branch, which now has this stage in it. Never continue on the
+    merged branch, and never branch the next stage off this one before it
+    merges.
 
     ## L3 - the final stage
 
