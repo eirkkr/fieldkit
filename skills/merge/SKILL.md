@@ -31,14 +31,12 @@ when the commit messages and your own context don't add up to a clear
 picture of the whole change. For `Closes #X`, don't
 infer a number - ask GitHub what this PR actually closes: `gh pr view
 --json closingIssuesReferences -q '.closingIssuesReferences[].number'`.
-GitHub does not always link a closing keyword in the PR body, so an empty
-answer is not proof there is none: when it returns nothing, carry over the
-PR body's own `Closes #X` lines, keeping only those that pass `gh api
-repos/{owner}/{repo}/issues/<N> -q '.pull_request.url // "issue"'`
-(any output but `issue` means `N` is a PR). The squash footer is what
-closes the issue once the PR is unlinked, so dropping the line leaves it
-open. With neither source giving a number, omit the line entirely rather
-than substituting the PR's own number.
+GitHub does not always link a closing keyword in the PR body, and an
+unlinked PR closes nothing on merge. So when it returns nothing, carry over
+the PR body's own `Closes #X` lines, keeping only those that pass
+`gh api repos/{owner}/{repo}/issues/<N> -q '.pull_request.url // "issue"'`
+(any output but `issue` means `N` is a PR). With no number from either,
+omit the line rather than substituting the PR's own number.
 
 The message follows `conventions/git.md`'s Commits rules, with `(#<PR>)`
 ending the subject and counting toward its 72. A `!` title's
