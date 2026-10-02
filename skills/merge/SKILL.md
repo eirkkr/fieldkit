@@ -29,11 +29,15 @@ enough to synthesize a subject + body summarizing the whole change, not a
 concatenation of the commits. Only fall back to `git diff <base>...<branch>`
 when the commit messages and your own context don't add up to a clear
 picture of the whole change. For `Closes #X`, don't
-read a number off the PR body or infer one - ask GitHub what this PR
-actually closes: `gh pr view --json closingIssuesReferences -q
-'.closingIssuesReferences[].number'`. Use only a number it returns; if it
-returns nothing, omit the line entirely rather than substituting the PR's
-own number.
+infer a number. Take every number from two sources: `gh pr view --json
+closingIssuesReferences -q '.closingIssuesReferences[].number'`, and the PR
+body's closing-keyword lines (`Closes`, `Fixes`, `Resolves`) whose number
+passes
+`gh api repos/{owner}/{repo}/issues/<N> -q '.pull_request.url // "issue"'`
+(any output but `issue` means `N` is a PR). GitHub's list can be empty at
+merge time, and an issue it has not linked stays open, so the footer is
+what closes it. Write each as `Closes #X`; with no number, omit the line -
+never substitute the PR's own.
 
 The message follows `conventions/git.md`'s Commits rules, with `(#<PR>)`
 ending the subject and counting toward its 72. A `!` title's
