@@ -17,7 +17,8 @@ pin this down:
 
 If the branch already has an open PR (`gh pr view --json
 number,url,title,body`), check whether its description still describes what
-you're about to push - you already have the diff for this. If it's gone
+you're about to push, `Closes #X` for an issue since finished included -
+you already have the diff for this. If it's gone
 stale, draft a revised title/body (keeping the human's own wording where it
 still holds) - no approval needed, this is act-then-show like the rest.
 `$ARGUMENTS`, if given, is extra context for these decisions.

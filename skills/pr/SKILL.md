@@ -19,7 +19,9 @@ enforced by review rather than by a linter, a doc page the repo's own
 guidance ties to a file the branch touched. A green pipeline is not evidence
 either way - it never reads prose. This is the moment for that audit,
 because a PR is where the branch stops being yours to quietly amend, and
-doc drift merges as easily as code.
+doc drift merges as easily as code. Search the tree too, for the branch's
+name and the PR's number if it has one: a sentence calling the work
+unmerged or in review turns false at the merge, so rewrite it now.
 
 Then decide the title and body yourself, from context already in hand plus
 `conventions/git.md`/`conventions/github.md`'s conventions - read
@@ -31,8 +33,9 @@ change set to pin them down:
   A breaking change takes `!` and a `BREAKING CHANGE:` line in the body
   saying what consumers must do. CI checks both.
 - Body: 1-3 bullet summary points plus a test plan checklist.
-- Add `Closes #X` only when the brief or the branch's work names a tracked
-  issue, and only after confirming `X` is an issue, not a PR - issues and
+- Add `Closes #X` for each issue the brief, commits or body mentions that
+  merging finishes - a mention in prose closes nothing - and only after
+  confirming `X` is an issue, not a PR - issues and
   PRs share one number space, and `gh issue view <N>` returns a *PR* just as
   happily, so it proves nothing. Use `gh api repos/{owner}/{repo}/issues/<N>
   -q '.pull_request.url // "issue"'` - any output but `issue` means `N` is a

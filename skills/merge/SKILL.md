@@ -22,6 +22,10 @@ here: draft as normal, and wait for them below. Reaching
 this skill is approval to merge once CI is green - not approval to merge
 regardless of what CI says, and not approval to skip waiting for it.
 
+Run `git grep -n -e '#<N>' -e 'pull/<N>' -e '<branch>'`. A sentence calling
+the PR or branch open, unmerged or in review turns false at the merge:
+rewrite it on the branch, push, and report it.
+
 Once it's clean, decide the squash subject and body yourself. Start from
 context already in hand plus `git log <base>..<branch>` for the branch's
 full run of commit messages, not just the latest one - that's usually

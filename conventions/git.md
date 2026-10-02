@@ -49,7 +49,9 @@
   `BREAKING CHANGE:` line in the PR body, which the squash body carries on.
   No issue numbers in the title. When the work resolves a tracked issue,
   reference it with `Closes #X` in the body - and when it doesn't, there's
-  simply no such line.
+  simply no such line. A mention in prose closes nothing.
+- A sentence about the PR's own state - "unmerged", "in review" - turns
+  false at the merge, so it is rewritten on the branch first.
 - Always `git push` before `gh pr merge` (squash merge uses remote state).
 - Work in progress stays on the branch - push freely, but don't open a PR
   until the work is ready for review. Draft the title and body yourself when
