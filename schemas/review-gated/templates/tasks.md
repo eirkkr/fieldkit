@@ -7,8 +7,8 @@
       condition>. -->
 - [ ] 1.2 <!-- ... -->
 - [ ] 1.3 REVIEW GATE - stage 1. Stop here. Do not tick this box until
-      the reviewer approves, and do not begin stage 2 until they ask for it.
-      Write the review note below first.
+      the reviewer approves, or begin stage 2 until they ask. Write the
+      review note below first.
 
 ## 2. Stage 2 - <!-- one idea, named -->
 
@@ -17,8 +17,8 @@
 - [ ] 2.1 <!-- ... -->
 - [ ] 2.2 <!-- ... -->
 - [ ] 2.3 REVIEW GATE - stage 2. Stop here. Do not tick this box until
-      the reviewer approves, and do not begin stage 3 until they ask for it.
-      Write the review note below first.
+      the reviewer approves, or begin stage 3 until they ask. Write the
+      review note below first.
 
 <!-- ... more stages. Aim for 3-6 tasks each, 8 at the most. Prefer more,
      smaller stages: a smaller stage is a cheaper review. -->

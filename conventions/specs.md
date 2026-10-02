@@ -136,10 +136,8 @@ second and third scopes involve a human.
   whose condition could not be verified stays unticked.
 - **Per stage.** Every stage's last task is a `REVIEW GATE`, and it is a
   full stop: the gate is not ticked until a human approves, and the next
-  stage does not start until one asks for it
-  ([ADR 049](../docs/decisions/049-approval-does-not-start-the-next-stage.md)).
-  The stage is green before the gate is reached - nobody
-  is asked to sign off on a broken tree. The review note is written into
+  stage waits to be asked for. The stage is green before the gate is reached -
+  nobody is asked to sign off on a broken tree. The review note is written into
   `tasks.md` under the gate, so it outlives the session and archives with
   the change. It covers what changed since the previous gate, any departure
   from the plan, how to verify (exact commands, plus manual steps), what to
@@ -149,9 +147,9 @@ second and third scopes involve a human.
 - **One stage, one branch, one PR.** Each stage branches off the default
   branch, and the PR opens when the stage reaches its gate - the PR is the
   surface the note points at, so opening it is part of reaching the gate.
-  Approving the gate merges it and starts nothing: the next stage begins
-  when it is asked for - in the approval itself or later - and branches off
-  the result.
+  Approving the gate merges it and starts nothing: the next stage begins when
+  asked for, and branches off the result
+  ([ADR 049](../docs/decisions/049-approval-does-not-start-the-next-stage.md)).
   There is no draft state to set: a stage PR exists only once it is ready to
   be read.
 - **Green means the PR's checks, not the tests alone.** Linting is CI's
