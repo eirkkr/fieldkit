@@ -31,8 +31,14 @@ change set to pin them down:
   A breaking change takes `!` and a `BREAKING CHANGE:` line in the body
   saying what consumers must do. CI checks both.
 - Body: 1-3 bullet summary points plus a test plan checklist.
-- Add `Closes #X` only when the brief or the branch's work names a tracked
-  issue, and only after confirming `X` is an issue, not a PR - issues and
+- For every issue the brief, the branch's commits or the draft body
+  mentions, decide whether merging finishes it: would anything it asks for
+  still be left once this lands? If nothing would, it takes `Closes #X` on
+  a line of its own. A mention in prose closes nothing, so an issue the
+  branch finished but only mentioned stays open until someone notices. If
+  something would be left, the mention stays prose.
+- Write `Closes #X` only for an issue that test picked out, and only after
+  confirming `X` is an issue, not a PR - issues and
   PRs share one number space, and `gh issue view <N>` returns a *PR* just as
   happily, so it proves nothing. Use `gh api repos/{owner}/{repo}/issues/<N>
   -q '.pull_request.url // "issue"'` - any output but `issue` means `N` is a
