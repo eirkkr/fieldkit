@@ -69,3 +69,8 @@ Alternatives rejected:
   from "I decided to file one", with no stored state behind it - the same
   limitation 031 recorded, and the same signal that it is worth revisiting if
   it proves unreliable.
+
+> **Amended by [050](050-approval-rules-live-in-kit-md.md):** the gate
+> stands. `conventions/github.md` no longer restates it, and its
+> out-of-scope line no longer puts the choice to the human - approval rules
+> are stated in `KIT.md` only.
