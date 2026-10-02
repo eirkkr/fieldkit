@@ -212,9 +212,16 @@ rewriting - both ends stay valid as fixes land.
 When the reviewer approves, record `git rev-parse --short HEAD` under
 **Reviewed at**, tick the box, and merge the PR. That commit is the record of
 the tree they signed off, kept because the squash-merge discards the branch
-holding it. The next stage then starts on a fresh branch cut from the default
-branch - never continued on the merged one, and never stacked on a branch
-still under review.
+holding it.
+
+Then stop and report that the stage has merged. Approval is not a request
+for the next stage: start it only when the human asks, by invoking this
+skill again or by saying so - in the approval itself ("approved, carry on
+with stage 3") or later.
+
+The next stage, once asked for, starts on a fresh branch cut from the
+default branch - never continued on the merged one, and never stacked on a
+branch still under review.
 
 The final stage is the whole-change review. Its closing task stops the same
 way, except that it iterates: present the change, take feedback, revise,
