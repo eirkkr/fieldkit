@@ -56,13 +56,6 @@ conflict, flag it briefly before proceeding.
 - Fix the underlying issue before reaching for a suppression
   (`# type: ignore`, `# noqa`, tool exclusion). Suppress only when the tool
   is wrong about the file's context (e.g. a generated or vendored file).
-- An exemption list records why each entry is exempt, in terms of the rule
-  it escapes, so the reason could be used to refuse an entry. One describing
-  what the code does instead ("uses the raw driver", "runs at startup")
-  cannot be audited, and the list grows by precedent.
-- Known violations of a convention live in the issue tracker, not in the
-  convention document - the document outlives them, and a stale list of
-  files reads as permission.
 - Delegate to a subagent for context isolation - keeping large, throwaway
   exploration out of the main window - not for a cheaper model on a small
   task. A fresh subagent re-pays context from scratch, which dominates a
@@ -71,18 +64,6 @@ conflict, flag it briefly before proceeding.
   tree as it is written into an ADR, spec, issue or commit message -
   never recalled, never carried over from an older document. Stale
   figures get repeated precisely because they are already written down.
-- An issue, ADR or spec is read without the conversation that produced it,
-  so everything needed to act on it belongs in the body: the decisions still
-  open, the docs that must change alongside the code, the reasoning behind a
-  choice that looks arbitrary, and anything the conversation built that the
-  reader would otherwise rebuild - a prompt or script that worked, where
-  each change has to go, what it cost. Planning to brief the next session
-  signals something is missing. Before filing, read the body as the person
-  who will act on it: if they could not start the first step without
-  asking, it is not finished.
-- A later finding that changes what the body says is edited into the body,
-  not left in a comment beneath it, where someone acting on the body alone
-  would miss it.
 - Reading part of a file is not reading it. "This document never
   addresses X", drawn from a head-and-tail skim, is a claim about the
   part that was not read.
@@ -132,6 +113,7 @@ repo root - the directory the session is started from. Read
 | ------------------------------------------------------------------------------- | ---------------------------------- |
 | A git action `push`/`pr`/`merge` don't cover (rebase, tag, amend)               | .fieldkit/conventions/git.md       |
 | A GitHub action `pr`/`merge` don't cover (issues, comments, PR edits)           | .fieldkit/conventions/github.md    |
+| Writing an issue, ADR, spec or convention doc, or an exemption list             | .fieldkit/conventions/records.md   |
 | Recording a design decision (ADR)                                               | .fieldkit/conventions/decisions.md |
 | Working an OpenSpec change (repo has `openspec/`) or writing a spec by hand     | .fieldkit/conventions/specs.md     |
 | Building a feature that calls an LLM                                            | .fieldkit/conventions/ai.md        |
