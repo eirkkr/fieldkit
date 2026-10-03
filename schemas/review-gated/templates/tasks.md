@@ -1,3 +1,27 @@
+## Brief
+
+<!-- What the reviewer reads to approve the plan. Written last, from the
+     finished artifacts, for a reader who opens nothing else. One screen,
+     no checkboxes. -->
+
+**Why:** <!-- two sentences at most -->
+
+**What you get:** <!-- what is different once the change has landed -->
+
+**Decisions:**
+
+- <!-- what was chosen, and over what - one line each -->
+
+**Open questions:** <!-- what the build cannot start without, or "none" -->
+
+**Least sure of:** <!-- where the plan is most likely wrong, and which
+artifact and section to read to judge it -->
+
+**Stages:**
+
+1. <!-- name - what it delivers -->
+2. <!-- ... -->
+
 ## 1. Stage 1 - <!-- one idea, named -->
 
 <!-- 1-3 sentences: what this stage delivers, and what must be true before
@@ -33,8 +57,8 @@ Iterate until they are satisfied.
       findings.
 - [ ] 3.2 Re-read proposal.md, design.md and every delta spec against what
       was actually built. List each requirement and where it is satisfied in
-      the code. Flag any that is unmet, partly met, or met differently than
-      specified.
+      the code, in the note's record. Flag any that is unmet, partly met, or
+      met differently than specified.
 - [ ] 3.3 List everything built that no requirement asked for, and everything
       the artifacts still describe that was not built. Either the code or the
       artifacts is wrong - say which.
@@ -48,9 +72,10 @@ Iterate until they are satisfied.
       found. Record anything durable as an ADR rather than leaving it in
       design.md.
 - [ ] 3.7 FINAL REVIEW - present the change as a whole and iterate with the
-      reviewer until they are satisfied. The note opens with two diffs: this
-      stage's own PR, then the whole change from the `Change based at`
-      commit. Stop here. Only the reviewer closes this box.
+      reviewer until they are satisfied. The note's brief carries two diffs -
+      this stage's own PR, then the whole change from the `Change based at`
+      commit - and the findings of 3.1-3.5. Stop here. Only the reviewer
+      closes this box.
 - [ ] 3.8 Archive the change once this stage has merged. Done when the
       change folder is under `archive/` and its delta is synced into the
       living specs, in a PR of its own.

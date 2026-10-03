@@ -18,6 +18,14 @@ described here; this file is the content guidance for what goes in them.
 - A change's artifacts are `proposal.md` (what & why), `design.md` (how),
   and `tasks.md` (implementation steps); the sections below say what belongs
   in each.
+- What a change writes is divided by its reader
+  ([ADR 052](../docs/decisions/052-divide-a-change-by-reader.md)). The
+  reviewer reads two short things: the plan brief that opens `tasks.md`, to
+  approve the plan, and the brief of each stage's review note, to approve
+  the stage. Everything else - the proposal, the specs, the design, the
+  tasks, each note's record - is written for the agent that builds the next
+  part, complete and never required reading. A brief points at the detail
+  worth opening rather than repeating it.
 
 ## Specifying to decide, not only to build
 
@@ -85,6 +93,12 @@ principle.
 
 ## Build plan (tasks.md)
 
+- `tasks.md` opens with the **plan brief**, above the first stage and
+  written last: why, what the change delivers, the decisions the reviewer
+  could have made differently, the open questions, where the plan is most
+  likely wrong, and a line per stage. One screen. Every line is drawn from
+  an artifact, so one that is not marks a gap in the artifact, and a gate
+  that changes the plan changes the brief with it.
 - Break work into ordered tasks, each with an explicit **definition-of-done**
   and, where one exists, a "copy/adapt this existing file" reference. Size the
   detail for the least-skilled likely implementer.
@@ -139,11 +153,18 @@ second and third scopes involve a reviewer.
   stage waits to be asked for. The stage is green before the gate is reached -
   nobody is asked to sign off on a broken tree. The review note is written into
   `tasks.md` under the gate, so it is committed and archives with the
-  change. It covers what changed since the previous gate, any departure
-  from the plan, how to verify (exact commands, plus manual steps), what to
-  look at closely, what is deliberately not done yet, and the plan's impact:
-  whatever the stage found that changes the stages after it, with the
-  artifacts corrected to match before the reviewer approves them.
+  change.
+- **The note is a brief and a record.** The brief is the reviewer's, about
+  ten lines: the stage in a sentence, the PR's file view and its checks,
+  what to look at closely, whether the plan held, and one thing to try by
+  hand. The plan line names any departure from the plan and anything the
+  stage found that changes the stages after it, with the artifacts corrected
+  to match before the reviewer approves them - or says in one line that
+  there were none, since a brief silent on it reads the same as one that
+  did not look. The record sits under it for the next stage's implementer:
+  the commits, what changed, the commands that verify it, what is
+  deliberately not done yet, and the two bookmarks. Each item is in one part
+  only.
 - **One stage, one branch, one PR.** Each stage branches off the default
   branch, and the PR opens when the stage reaches its gate - the PR is the
   surface the note points at, so opening it is part of reaching the gate.
@@ -159,11 +180,12 @@ second and third scopes involve a reviewer.
   runs the repo's full check rather than its test command. A red check
   means the stage is not ready, and is fixed before a reviewer sees it.
 - **The stage's diff is the PR.** Because the PR holds exactly one stage,
-  the note links `/pull/<n>/files` - no range to assemble, no base commit to
-  carry - with `git diff <default-branch>...HEAD` beside it for the terminal.
+  the brief links `/pull/<n>/files` - no range to assemble, no base commit to
+  carry - and the record gives `git diff <default-branch>...HEAD` for the
+  terminal.
   The PR view leads because it alone holds state: files tick off as they are
   read, a file a later fix touches again un-ticks itself, comments stay
-  with the PR. Under it, one line per commit on the branch - for a task, its
+  with the PR. In the record, one line per commit on the branch - for a task, its
   number, subject and commit link, which renders that commit against its
   parent; for anything else, the same without a number and a clause saying
   what it is. Every commit, so that nothing on the branch goes unopened and
@@ -174,7 +196,7 @@ second and third scopes involve a reviewer.
   in the file view, not during a walk. They are a walking
   aid, not a second review surface, so the reviewer takes the stage whole or
   commit by commit as it deserves.
-- **Two bookmarks, both in the note.** `Reviewed at` ends every note, marked
+- **Two bookmarks, both in the record.** `Reviewed at` ends every note, marked
   awaiting approval until the gate closes, then filled with the commit
   approved before the box is ticked - so a stage sent back and fixed records
   the tree after the fixes. It is the record of what was signed off, since
@@ -201,8 +223,14 @@ second and third scopes involve a reviewer.
   touches, is re-read: still open, and still about the thing cited. Then the
   gate iterates with the reviewer until they are satisfied. A change is not
   complete, and is not archived, before that.
-- **The final note's two diffs.** The last stage's own diff leads, as any
-  stage's does - its PR, its per-task links. The whole change follows, based
+- **The final note reports findings, not lists.** The list of every
+  requirement and where the code meets it goes in the record. The brief
+  gains a line for each
+  thing found wrong or corrected - a requirement unmet, something built
+  unasked, a requirement with no test, a stale reference - or one line
+  saying there were none.
+- **The final brief's two diffs.** The last stage's own diff leads, as any
+  stage's does - its PR. The whole change follows, based
   at the `Change based at` commit recorded by the first stage: mostly already
   merged, so it is a `git diff <base>...<default-branch>` and a
   `git log --oneline <base>..<default-branch>` over the stages that landed,

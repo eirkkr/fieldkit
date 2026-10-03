@@ -184,3 +184,10 @@ Alternatives rejected:
 > longer holds. The three review levels, the gate mechanics, and the
 > `Reviewed at` bookmark are unchanged; 041 adds one commit per task and
 > per-task links in the note.
+>
+> Amended by [052](052-divide-a-change-by-reader.md): the review note is now
+> two parts, a brief for the reviewer and a record for the next stage's
+> implementer, and `tasks.md` opens with a plan brief. The note's items are
+> the ones described above, divided between the two parts, with plan impact
+> (added after this ADR) joined to departures; "not done yet" moved to the
+> record.

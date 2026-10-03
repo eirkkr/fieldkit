@@ -14,19 +14,18 @@ At a review gate:
 - Confirm the stage is green first (run the repo's test command). A gate
   reached on a red tree is not reached.
 - Commit each task on its own as you go, with the task number in the
-  subject. The gate's note links every commit on the branch so the stage can
-  be walked commit by commit.
+  subject. The note's record links every commit on the branch so the stage
+  can be walked commit by commit.
 - Open a PR for the stage's branch - every gate, not just the first, and not
   a draft. The stage is one branch and one PR, so opening it is part of
   reaching the gate and needs no approval.
 - Write the review note into `tasks.md`, indented under the gate's checkbox,
-  before reporting. Then show the same note in your reply.
+  before reporting. Then show its brief - the brief only - in your reply.
 - Stop and wait.
 
-The note's items and their order are the schema's: step 3's
-`openspec instructions apply --change "<name>" --json` returns them in its
-instruction field. Write every item it lists, in that order. Complete, not
-long.
+The note's two parts, the brief and the record, are the schema's: step 3's
+`openspec instructions apply --change "<name>" --json` returns their shape
+in its instruction field. Write every item of both.
 
 If the reviewer sends the stage back, fix it within that stage and rewrite
 the note. Do not open the next stage to carry the fix. The links do not need
