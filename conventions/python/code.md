@@ -1,8 +1,9 @@
 # Python code conventions
 
 Conventions for authoring Python source: docstrings, imports, member
-ordering, constants, enum values, caching, and exception handling. Several rules
-below have no automated enforcement and rely on review.
+ordering, constants, enum values, record types, caching, and exception
+handling. Several rules below have no automated enforcement and rely on
+review.
 
 ## Docstrings
 
@@ -112,6 +113,19 @@ and rendering `name="{{ SAVE }}"` instead of typing the string again.
   serialised, one a library matches on, or one that *is* the payload (an enum
   whose values are the classes it dispatches to). That value is part of a
   contract, not an implementation detail.
+
+## Record types
+
+Choose by what the object is for:
+
+- **A value**, never changed once built: `NamedTuple`. The default, as a
+  house choice - Python's own docs do not name one.
+- **A record changed after it is made** - a collector, a builder:
+  `@dataclass`. A `NamedTuple` holding lists reads as a value and isn't one.
+- **A value a tuple cannot express** - it needs `__post_init__`, or must
+  not unpack or equal a bare tuple: `@dataclass(frozen=True)`.
+- **The shape of a dict something else owns** - a JSON payload, a stored
+  document: `TypedDict`, at that boundary only.
 
 ## Caching
 
