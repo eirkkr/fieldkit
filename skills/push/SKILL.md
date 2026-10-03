@@ -15,12 +15,10 @@ pin this down:
 - the commit message
 - the exact list of files to stage
 
-If the branch already has an open PR (`gh pr view --json
-number,url,title,body`), check whether its description still describes what
-you're about to push, `Closes #X` for an issue since finished included -
-you already have the diff for this. If it's gone
-stale, draft a revised title/body (keeping the human's own wording where it
-still holds) - no approval needed, this is act-then-show like the rest.
+If the branch has an open PR (`gh pr view --json number,url,title,body`),
+check its description against what you're about to push, including a
+`Closes #X` for an issue the push finishes. If it's gone stale, draft a
+revised title/body, keeping the human's own wording where it still holds.
 `$ARGUMENTS`, if given, is extra context for these decisions.
 
 Then run it, in this turn:
@@ -35,11 +33,7 @@ Then run it, in this turn:
    breaks.
 5. Push, with `-u origin <branch>` on the branch's first push.
 6. If the PR description needed revising, apply it with `gh pr edit`.
-7. Don't open a PR or merge - stop after pushing.
+7. Stop there - opening a PR and merging are their own skills.
 
 Report the commit (short hash and subject), the branch, whether the push
-succeeded, and any PR edit made. The commit lands before the turn ends, so
-the `Stop` hook measures formatter drift against it
-([ADR 035](../../docs/decisions/035-measure-the-fixer-not-the-transcript.md)).
-These steps run here rather than in a subagent
-([ADR 045](../../docs/decisions/045-inline-git-skills.md)).
+succeeded, and any PR edit made.
