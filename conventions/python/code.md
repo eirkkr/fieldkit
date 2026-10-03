@@ -118,7 +118,8 @@ and rendering `name="{{ SAVE }}"` instead of typing the string again.
 
 Choose by what the object is for:
 
-- **A value**, never changed once built: `NamedTuple`. The default.
+- **A value**, never changed once built: `NamedTuple`. The default, as a
+  house choice - Python's own docs do not name one.
 - **A record changed after it is made** - a collector, a builder:
   `@dataclass`. A `NamedTuple` holding lists reads as a value and isn't one.
 - **A value a tuple cannot express** - it needs `__post_init__`, or must
