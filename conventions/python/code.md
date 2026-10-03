@@ -1,8 +1,9 @@
 # Python code conventions
 
 Conventions for authoring Python source: docstrings, imports, member
-ordering, constants, enum values, caching, and exception handling. Several rules
-below have no automated enforcement and rely on review.
+ordering, constants, enum values, record types, caching, and exception
+handling. Several rules below have no automated enforcement and rely on
+review.
 
 ## Docstrings
 
@@ -112,6 +113,35 @@ and rendering `name="{{ SAVE }}"` instead of typing the string again.
   serialised, one a library matches on, or one that *is* the payload (an enum
   whose values are the classes it dispatches to). That value is part of a
   contract, not an implementation detail.
+
+## Record types
+
+Pick the type for a group of named fields by what the object is for, not by
+which is shortest to write.
+
+- **A value** - built once, compared, passed around, never changed - is a
+  `NamedTuple`. It is immutable and hashable with nothing extra written, so
+  it can be a dict key, sit in a `frozenset`, or be a cached result
+  ([Caching](#caching)). This is the default: most records are values.
+- **A record filled in or changed after it is made** - a collector a
+  recursive walk appends to, a builder, running state - is a `@dataclass`.
+  A `NamedTuple` holding lists is the wrong answer even though it works: it
+  reads as a value, and its contents change under whoever holds it. Give a
+  mutable field its default through `field(default_factory=...)`, never a
+  bare `[]` or `{}`, which every instance would share.
+- **A value a tuple cannot express** is a `@dataclass(frozen=True)`: one
+  that checks itself in `__post_init__`, or that must not unpack, index or
+  compare equal to a bare tuple of the same fields. This is the exception,
+  and the reason is the one of those it needs - not a preference for the
+  decorator.
+- **The shape of a dict something else owns** - a JSON payload, a stored
+  document - is a `TypedDict`, used at that boundary and no further in.
+  Code past the boundary converts it to one of the types above and stops
+  reading fields by string key.
+
+A plain class with a hand-written `__init__` that only stores its arguments
+is a `@dataclass` with more lines. Write the class when it has behaviour to
+carry - methods that own an invariant - not just fields.
 
 ## Caching
 
