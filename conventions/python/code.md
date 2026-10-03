@@ -116,32 +116,15 @@ and rendering `name="{{ SAVE }}"` instead of typing the string again.
 
 ## Record types
 
-Pick the type for a group of named fields by what the object is for, not by
-which is shortest to write.
+Choose by what the object is for:
 
-- **A value** - built once, compared, passed around, never changed - is a
-  `NamedTuple`. It is immutable and hashable with nothing extra written, so
-  it can be a dict key, sit in a `frozenset`, or be a cached result
-  ([Caching](#caching)). This is the default: most records are values.
-- **A record filled in or changed after it is made** - a collector a
-  recursive walk appends to, a builder, running state - is a `@dataclass`.
-  A `NamedTuple` holding lists is the wrong answer even though it works: it
-  reads as a value, and its contents change under whoever holds it. Give a
-  mutable field its default through `field(default_factory=...)`, never a
-  bare `[]` or `{}`, which every instance would share.
-- **A value a tuple cannot express** is a `@dataclass(frozen=True)`: one
-  that checks itself in `__post_init__`, or that must not unpack, index or
-  compare equal to a bare tuple of the same fields. This is the exception,
-  and the reason is the one of those it needs - not a preference for the
-  decorator.
+- **A value**, never changed once built: `NamedTuple`. The default.
+- **A record changed after it is made** - a collector, a builder:
+  `@dataclass`. A `NamedTuple` holding lists reads as a value and isn't one.
+- **A value a tuple cannot express** - it needs `__post_init__`, or must
+  not unpack or equal a bare tuple: `@dataclass(frozen=True)`.
 - **The shape of a dict something else owns** - a JSON payload, a stored
-  document - is a `TypedDict`, used at that boundary and no further in.
-  Code past the boundary converts it to one of the types above and stops
-  reading fields by string key.
-
-A plain class with a hand-written `__init__` that only stores its arguments
-is a `@dataclass` with more lines. Write the class when it has behaviour to
-carry - methods that own an invariant - not just fields.
+  document: `TypedDict`, at that boundary only.
 
 ## Caching
 
