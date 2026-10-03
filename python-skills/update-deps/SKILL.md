@@ -44,8 +44,8 @@ For each direct dependency, apply this procedure:
   is now generic" -> grep for ParamType subclasses). Do not run open-ended
   "is this used" searches - if the changelog item is a passive bug fix,
   no search is needed.
-- Report findings clearly, organised by the four categories above.
-- Include a direct link to the changelog so the user can verify independently.
+- Report findings under those four categories, with a direct link to the
+  changelog so the user can verify independently.
 - Prefer `gh release view <tag> -R owner/repo` for tagged GitHub releases -
   it works on private repos and avoids guessing between CHANGELOG.md /
   CHANGES.rst / HISTORY.rst paths. Fall back to WebFetch on the project's
@@ -144,8 +144,6 @@ When bumping a linter (ruff, mypy, djlint, rumdl, etc):
 
 ## Notes
 
-- Missing new features or config options is a common failure mode - do not
-  shortcut the changelog review.
 - Flag major version bumps explicitly before proceeding.
 - When a library adds inline types (look for "inline types", "py.typed", or
   "replaces typeshed" in the changelog), check whether the project has a

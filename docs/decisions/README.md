@@ -55,3 +55,4 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 048 | [Pin CI actions by commit, runners and tools by version](048-pin-ci-by-commit.md)                         | Accepted   |
 | 049 | [Approving a gate does not start the next stage](049-approval-does-not-start-the-next-stage.md)           | Accepted   |
 | 050 | [Approval rules live in KIT.md, not in the conventions docs](050-approval-rules-live-in-kit-md.md)        | Accepted   |
+| 051 | [Move the record-writing rules on demand](051-record-writing-rules-on-demand.md)                          | Accepted   |

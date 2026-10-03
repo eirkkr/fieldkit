@@ -46,30 +46,34 @@
 - PR title follows the Commits rules above. It becomes the squash subject once
   GitHub appends `(#N)`, so the 72 includes that suffix. A `!` title needs a
   `BREAKING CHANGE:` line in the PR body, which the squash body carries on.
-  No issue numbers in the title. When the work resolves a tracked issue,
-  reference it with `Closes #X` in the body - and when it doesn't, there's
-  simply no such line. A mention in prose closes nothing.
+  No issue numbers in the title.
+- `Closes #X` in the PR body references a tracked issue the work resolves -
+  and when there is none, there's simply no such line. A mention in prose
+  closes nothing. A number is never inferred, and never the PR's own: issues
+  and PRs share one number space, so a wrong guess still resolves to
+  something, and `gh issue view <N>` returns a PR just as happily. The check
+  is `gh api repos/{owner}/{repo}/issues/<N> -q '.pull_request.url //
+  "issue"'`, where any output but `issue` means `N` is a PR.
 - A sentence about the PR's own state - "unmerged", "in review" - turns
   false at the merge, so it is rewritten on the branch first.
 - Always `git push` before `gh pr merge` (squash merge uses remote state).
 - Work in progress stays on the branch - push freely, but don't open a PR
-  until the work is ready for review. Merge once CI is green and the PR has
-  no conflicts - see Squash-merge below.
+  until the work is ready for review.
 - Once a PR is open, every later push to that branch has to leave the
   description still true. Checking is part of the push, not a separate
   step: push first, check the body against the branch as pushed, and apply
   a revision right away if it's gone stale (see [github.md](github.md)).
 - Squash-merge: synthesise a subject + body summarising the whole change; don't
   concatenate commit messages. Append `(#PR)` to a custom `--subject` manually
-  (GitHub omits it when you provide a custom subject). Take `Closes #X` from
-  both `gh pr view --json closingIssuesReferences` and the PR body's
-  closing-keyword lines whose number is confirmed an issue, not a PR.
+  (GitHub omits it when you provide a custom subject). The footer takes its
+  `Closes #X` lines from both `gh pr view --json closingIssuesReferences -q
+  '.closingIssuesReferences[].number'` and the PR body's closing-keyword
+  lines (`Closes`, `Fixes`, `Resolves`), each number checked as above.
   GitHub's list can be empty at merge time, and an issue it has not linked
   stays open, so the footer is what closes it. With neither, omit the line.
-  Never infer a number or fall back to the PR's own; issues and PRs share one
-  number space, so a wrong guess still resolves to something. Merge once CI
-  is green and the PR has no conflicts; a red check or unresolved conflicts
-  block it outright, a still-running check is waited out instead.
+- Merge once CI is green and the PR has no conflicts; a red check or
+  unresolved conflicts block it outright, a still-running check is waited
+  out instead.
 
 ## Rewriting history
 

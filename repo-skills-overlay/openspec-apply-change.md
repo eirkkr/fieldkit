@@ -23,26 +23,10 @@ At a review gate:
   before reporting. Then show the same note in your reply.
 - Stop and wait.
 
-The note covers, in order: **review this stage**, the PR's file view
-(`/pull/<n>/files`) and `git diff <default-branch>...HEAD`, both written out,
-followed by one line per commit: its number, subject and commit link for a
-task, and an unnumbered line saying what it is for anything else - a lint fix,
-a prose pass, a fix made after the stage was sent back - so the walk opens
-everything on the branch. Link a commit through the PR
-(`/pull/<n>/commits/<sha>`, never `/commit/<sha>`), so the walk stays inside
-the PR and a comment left on a commit joins its review. Only the file view
-offers the Viewed checkbox, so a walk ticks nothing off. The PR holds exactly this
-stage, so there is no range to assemble and no base commit to carry; at a
-first gate also `Change based at <commit>`, from
-`git merge-base <default-branch> HEAD`, carried forward unchanged in every
-later note because the final review needs it; **what changed**
-since the previous gate, per file or behaviour; **departures from the plan**
-and why ("none" if none); **how to verify**, as exact commands plus any
-manual step; **look closely at**, naming the judgement calls and what you are
-least sure of; **not done yet**, the known gaps later stages cover;
-**plan impact**, what this stage found that changes later stages, with
-tasks.md and design.md corrected to match ("none" if none); and
-**reviewed at**, left marked awaiting approval. Complete, not long.
+The note's items and their order are the schema's: step 3's
+`openspec instructions apply --change "<name>" --json` returns them in its
+instruction field. Write every item it lists, in that order. Complete, not
+long.
 
 If the reviewer sends the stage back, fix it within that stage and rewrite
 the note. Do not open the next stage to carry the fix. The links do not need
@@ -68,18 +52,9 @@ present again, until the reviewer says they are satisfied. Only then is the
 change complete. Its gate then closes and merges like any other stage's;
 archiving follows in a PR of its own, cut from the default branch.
 
-Its note opens with two diffs: this stage's own PR, exactly as any stage's
-note gives it, then the whole change from the `Change based at` commit -
-mostly already merged, so `git log --oneline <base>..<default-branch>` and
-`git diff <base>...<default-branch>` rather than a PR view, naming the base
-commit and the merged stages' PR numbers. The
-stage walks the diff *before* correcting the artifacts, since the walk turns
-up artifact-shaped findings; reconciles code against the artifacts in three
-directions - unmet, unasked-for, and met only by construction; and re-reads
-every issue the change references for still open, still about the thing
-cited.
+How its note and its tasks differ from an ordinary gate's is in that same
+instruction, under L3.
 
-`openspec instructions apply --change "<name>" --json` returns the schema's
-own statement of these rules in its instruction field. Follow it; this
-section exists because the generated steps above were written for a schema
-without gates.
+That instruction is the schema's own statement of every rule here, and the
+one place the note is specified. This section repeats only the stops,
+because the generated steps above were written for a schema without gates.

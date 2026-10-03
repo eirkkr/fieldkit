@@ -6,8 +6,7 @@
 - PRs: mechanics live in [git.md](git.md). Once open, keep the title
   and body in sync as the branch grows - revise it directly when it drifts,
   keeping the author's wording where it still holds. The description is
-  what reviewers read and what the squash message is built from, so it's
-  worth getting right.
+  what reviewers read and what the squash message is built from.
 - Before filing an issue, check for duplicates/broader scope:
   `gh issue list --search "<2-3 keywords>"`.
 - Out-of-scope work doesn't get bundled in. It becomes an issue or its own

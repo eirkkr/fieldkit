@@ -7,21 +7,16 @@ disable-model-invocation: true
 
 # Reconcile this repo to the latest kit changes
 
-The shared conventions kit (imported here via `@.fieldkit`) has changed. This
-command catches this repo up: it checks this repo's references into the kit
-still resolve, works out which kit commits are new, reconciles this repo's
-agent-facing docs and tooling to them, and advances a stored marker so the next
-run knows where it left off.
+The shared conventions kit (imported here via `@.fieldkit`) has changed, and
+this command catches this repo up, in the order of the sections below.
 
 ## Verify the references into the kit resolve
 
-Do this first, whatever the range below resolves to. A stale instruction still
-loads and quietly says the wrong thing; a reference that no longer resolves
-doesn't load at all, so the session runs with rules missing rather than wrong -
-and this session is the least likely to notice, since the failed import is what
-would have told it how to behave. References also break from a kit commit the
-marker has already passed, or from a local edit, and neither shows up in the
-range.
+Do this first, whatever the range below resolves to. A reference that no
+longer resolves loads nothing, so the session runs with rules missing rather
+than wrong, and nothing tells it so. References also break from a kit commit
+the marker has already passed, or from a local edit, and neither shows up in
+the range.
 
 From this repo's root, check:
 
