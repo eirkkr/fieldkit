@@ -23,12 +23,9 @@ At a review gate:
   before reporting. Then show its brief - the brief only - in your reply.
 - Stop and wait.
 
-The note has two parts: a brief for the reviewer, about ten lines, and a
-record under it for the agent that builds the next stage. Their items and
-order are the schema's: step 3's
-`openspec instructions apply --change "<name>" --json` returns them in its
-instruction field. Write every item of both parts, in that order, each item
-in one part only.
+The note's two parts, the brief and the record, are the schema's: step 3's
+`openspec instructions apply --change "<name>" --json` returns their shape
+in its instruction field. Write every item of both.
 
 If the reviewer sends the stage back, fix it within that stage and rewrite
 the note. Do not open the next stage to carry the fix. The links do not need

@@ -140,12 +140,11 @@ artifacts:
 
       ## Plan brief
 
-      tasks.md opens with a brief, above stage 1. It is what the reviewer
-      reads to approve the plan. proposal.md, the specs, design.md and the
-      tasks under the brief are written for the agent that builds the
-      change: complete, and never required reading. Write the brief last,
-      from the finished artifacts, for a reviewer who reads nothing else.
-      One screen - about twenty-five lines - and no checkboxes:
+      tasks.md opens with a brief, above stage 1. It is all the reviewer
+      is asked to read to approve the plan; proposal.md, the specs,
+      design.md and the tasks are for the agent that builds the change.
+      Write the brief last, from the finished artifacts. At most 25 lines;
+      checkboxes are for tasks alone:
 
       - **Why** - two sentences at most.
       - **What you get** - what is different once the change has landed,
@@ -155,16 +154,12 @@ artifacts:
         over what. The reasoning stays in design.md.
       - **Open questions** - anything the build, or a named stage, cannot
         start without an answer from them. Say "none" in a line if none.
-      - **Least sure of** - where the plan is most likely wrong, and which
-        artifact and section to read to judge it. This is the line that
-        tells the reviewer which detail is worth their time; never leave
-        it out to look confident.
+      - **Least sure of** - always present: where the plan is most likely
+        wrong, and which artifact and section to read to judge it.
       - **Stages** - one line each: number, name, what it delivers.
 
-      The brief adds nothing of its own: every line is drawn from an
-      artifact, and one that is not is a gap in the artifact. It is kept
-      true as the change is built - a gate that changes the plan changes
-      the brief in the same branch.
+      Every line of the brief is drawn from an artifact. A line with no
+      source means the artifact has a gap: fill it there first.
 
       ## Bite-sized tasks
 
@@ -320,64 +315,30 @@ apply:
     - NEVER tick a review gate yourself. Only the human closes it.
     - NEVER start the next stage's tasks. Ending the stage IS the deliverable.
       Approval does not change that: it closes this stage and starts nothing.
-    - Before stopping, confirm the stage really is green - run the repo's
-      test command. A gate reached on a red tree is not reached; fix or
-      report it first.
-    - Write the review note into tasks.md, indented under the gate's
-      checkbox, then show its brief - the brief only - in your reply.
-      Written first, so it survives the session.
 
-    The note has two parts, divided by who reads them. The **brief** is the
-    reviewer's: what they have to decide, and where to look. The **record**
-    is for the agent that builds the next stage and for the archive. It is
-    there for a reviewer who wants to go deeper, and it is never required
-    reading. Each item lives in exactly one part: the brief is not a
-    summary of the record, and the record repeats nothing from the brief.
+    Reaching a gate is four steps, in this order:
 
-    ### The brief
+    1. **Green.** Run the repo's test command. Done when it passes. A red
+       tree is fixed or reported, and the gate is not reached.
+    2. **PR.** Open a PR for the stage's branch: at every gate, ready for
+       review rather than draft, with no approval of its own. Opening it
+       starts CI. Done when its checks have run green; a red check is fixed
+       before the note is written.
+    3. **Note.** Write the review note, specified below, into tasks.md,
+       indented under the gate's checkbox, and commit it. Done when every
+       item of both its parts is written.
+    4. **Stop.** Show the note's brief in your reply - the brief alone -
+       and wait.
 
-    Write it for a reviewer who reads nothing else. About ten lines when
-    the plan held, and every line is something they must decide or check.
-    In this order:
+    ### The review note
 
-    1. **The stage in a sentence** - its number and name, and what it did.
-    2. **Review** - the PR's file view, and the state of its checks:
+    Two parts, divided by reader. The **brief** is the reviewer's, and it
+    is all they are asked to read. The **record** is for the agent that
+    builds the next stage, which starts with no context. Each item is
+    written once, in its own part.
 
-           Review: https://github.com/<owner>/<repo>/pull/<n>/files (checks green)
-
-       The file view is the review surface: the PR holds state - files
-       tick off as they are read, a file a later fix touches again un-ticks
-       itself, comments outlive the session. The PR holds exactly this
-       stage, so it needs no range and no base commit - `/pull/<n>/files`
-       IS the stage. The PR is open before the note is written - opening
-       it is part of reaching the gate - so its number is always in hand.
-    3. **Look closely at** - one to three bullets, each naming the file:
-       the judgement calls and the risky part. Point them at what you are
-       least sure of. This is the most valuable part of the note; never
-       leave it out to look confident.
-    4. **Plan** - whether the stage kept to the plan, and whether the plan
-       still stands. A departure is anything built differently than
-       design.md or tasks.md said, and why. An impact is anything the stage
-       found that changes the stages after it: an assumption it disproved,
-       a departure a later task relies on, an interface a later stage
-       builds on that came out different. Give each a line, naming the
-       later task an impact affects, and correct tasks.md - its plan brief
-       included - and design.md in this stage's branch, so the plan the
-       reviewer approves is the one the next stage follows. When something
-       does change and the change has a design.md, re-read the remaining
-       stages end to end first, as a reader who has only the artifacts
-       would. With neither a departure nor an impact, one line says so:
-
-           Plan held: no departures, and nothing changes for later stages.
-
-       Never drop the line: a brief that says nothing reads the same as
-       one that did not look. This is the one item the ten lines give way
-       to.
-    5. **Try it** - one thing to do by hand that shows the stage working,
-       and what to expect: what to run or click, what a good result looks
-       like. Leave the line out when the stage has nothing to try by hand.
-
-    For example:
+    **The brief** is at most ten lines, plus one line for each departure
+    or impact. This shape, in this order:
 
         **Stage 2 - header parsing.** The parser reads the new header format.
 
@@ -392,78 +353,59 @@ apply:
 
         Try it: `just run sample.hdr` prints three fields.
 
-    ### The record
+    - **Look closely at** is always present: one to three bullets, each
+      naming a file, on the judgement calls you are least sure of.
+    - **Plan** is always present. A departure is anything built differently
+      than design.md or tasks.md said. An impact is anything the stage
+      found that changes a later stage: an assumption it disproved, a
+      departure a later task relies on, an interface that came out
+      different. Each takes a line in place of "Plan held" - a departure
+      with its reason, an impact naming the later task. Correct tasks.md,
+      its plan brief included, and design.md in this stage's branch, so
+      the plan the reviewer approves is the one the next stage follows.
+      When the change has a design.md, write an impact only after
+      re-reading the remaining stages end to end, as a reader who has only
+      the artifacts.
+    - **Try it** is one thing to do by hand, and what a good result looks
+      like. Omit it when the stage has nothing to try by hand.
 
-    Under the brief, headed **Record**. Complete rather than short: its
-    reader is an agent starting with no context. In this order:
+    **The record** goes under the brief. This shape, in this order:
 
-    1. **Diff and commits** - the stage's diff for the terminal, then the
-       stage's commits so it can be walked commit by commit, tasks numbered
-       and everything else not:
+        **Record**
 
-           git diff <default-branch>...HEAD
+            git diff <default-branch>...HEAD
 
-           - 1.1 add is_dev_db
-             https://github.com/<owner>/<repo>/pull/<n>/commits/9c1d0a4e
-           - 1.2 cover is_dev_db
-             https://github.com/<owner>/<repo>/pull/<n>/commits/3b77e215
+        - 1.1 add is_dev_db
+          https://github.com/<owner>/<repo>/pull/<n>/commits/9c1d0a4e
+        - 1.2 cover is_dev_db
+          https://github.com/<owner>/<repo>/pull/<n>/commits/3b77e215
+        - fix a lint error in db.py
+          https://github.com/<owner>/<repo>/pull/<n>/commits/77c0de1a
 
-       Do not reconstruct the old `<base>..HEAD` form; there is nothing
-       before this stage on this branch.
+        Change based at `1f4b02e7`.
 
-       The per-commit lines are a walking aid, not a second review surface.
-       Each renders its commit against its parent, which is exactly "this
-       task, on top of the last one".
+        **What changed** - per file or behaviour, since the previous gate.
 
-       Link them **through the PR** - `/pull/<n>/commits/<sha>`, not
-       `/commit/<sha>`. Both render the same diff, but the PR form keeps
-       the walk inside the PR: it steps to the previous and next commit,
-       and a line comment left there joins the PR's review, where one on a
-       bare commit URL sits outside it. Neither form offers the Viewed
-       checkbox - GitHub puts that only in the file view, against each
-       file as it stands at the PR's head - so files are ticked off there,
-       not while walking.
+        **How to verify** - the exact commands, and what a good result
+        looks like.
 
-       The walk covers every commit on the branch, not only the tasks. A
-       commit that is no task - a lint or format fix, a pass over the
-       stage's prose, a fix made after the stage was sent back, an earlier
-       write of this note - takes a line of its own with no number, saying
-       in a clause what it is. Leaving one out puts a change in the diff
-       that the walk never opens, which is the one thing the walk exists
-       to prevent, and deciding which commits deserve a line is how that
-       happens. "Every commit" means every commit on the branch as the
-       note is written: the commit that writes the note cannot name
-       itself.
+        **Not done yet** - the gaps that later stages cover.
 
-       At a FIRST gate, add one more line, because nothing else will remember
-       it once the stages have merged separately and the final review needs
-       it:
+        **Reviewed at**
 
-           Change based at `1f4b02e7`.
+        _Awaiting approval._ Approval records the commit approved here.
 
-       That is `git merge-base <default-branch> HEAD` at the start of the
-       change. Carry the same line forward, unchanged, in every later note -
-       unless a rebase of the first stage moves it (see below).
-    2. **What changed** - per file or behaviour, since the previous gate.
-    3. **How to verify** - the exact commands to run and what a good result
-       looks like.
-    4. **Not done yet** - known gaps that later stages cover. If the
-       reviewer reports one as a defect, this is where the answer is.
-    5. **Reviewed at** - the heading, with `_Awaiting approval._` under it and
-       what ticking it will record. Visible text, not an HTML comment: it
-       stands for the length of the review, and a comment renders as dead
-       space that reads as something having failed.
+    - **Commits**: one line for every commit on the branch as the note is
+      written. A task takes its number. Any other commit - a lint fix, a
+      fix made after the stage was sent back, an earlier write of this
+      note - takes a clause saying what it is. Link each through the PR,
+      as `/pull/<n>/commits/<sha>`.
+    - **Change based at** is `git merge-base <default-branch> HEAD` at the
+      change's first gate. Every later note copies that line unchanged.
 
-    EVERY gate opens a PR for the stage's branch. It is the surface the note
-    points at, so opening it is part of reaching the gate, and it needs no
-    approval of its own. Not a draft: the stage is done and is being asked
-    for, which is what a non-draft PR means. Opening it here is also what
-    starts CI, so the first run lands on a tree already green rather than on
-    half-finished work.
-
-    Then stop and wait. If the reviewer sends the stage back, fix it in this
-    stage's own branch and PR and rewrite the note; do not open a new stage,
-    and do not merge, to carry the fix.
+    If the reviewer sends the stage back, fix it in this stage's own branch
+    and PR and rewrite the note; do not open a new stage, and do not merge,
+    to carry the fix.
 
     If the stage is rebased while it waits, force-push with
     `--force-with-lease=<branch>:<head last seen>`, then fix the note in one
@@ -500,11 +442,11 @@ apply:
 
     It differs from an L2 gate in five ways:
 
-    1. **Its brief's Review item carries two diffs, not one.** This stage's
-       own PR leads, exactly as any stage's does. The whole change follows,
-       based at the `Change based at` commit the first gate recorded. Most
-       of the change has already merged, so that half is git against the
-       default branch rather than a PR view:
+    1. **Its brief's Review item carries two diffs.** This stage's own PR
+       leads. The whole change follows, based at the `Change based at`
+       commit and listing the merged stages by PR number. Most of the
+       change has already merged, so that half is git against the default
+       branch:
 
            Review: https://github.com/<owner>/<repo>/pull/<n>/files (checks green)
 
@@ -514,9 +456,6 @@ apply:
 
                git diff 1f4b02e7...<default-branch>
 
-       Name the base commit, and list the merged stages by their PR numbers.
-       The reviewer has seen each stage already; what they have not seen is
-       the shape of all of them together, which is what this gate is for.
     2. **The diff walk comes before the artifacts are corrected.** Walking
        the diff for the conventions CI cannot check turns up
        artifact-shaped findings, so correcting first means correcting
@@ -530,13 +469,12 @@ apply:
        about the thing cited. Nothing else re-reads those references after
        they are written.
     5. **The brief carries the findings; the record carries the lists.**
-       The requirement-by-requirement list - each one and where the code
-       satisfies it - goes in the record, with the issues re-read. The
-       brief gains a **Findings** item after Review, a line for each thing
-       that is wrong or was corrected: a requirement unmet or partly met,
-       something built that nothing asked for, a requirement with no test
-       behind it, a reference gone stale, an artifact changed to match the
-       build. When there are none, one line says so, and is never dropped:
+       The record lists each requirement with where the code satisfies it,
+       and each issue re-read. The brief has a **Findings** item after
+       Review, always present: a line for each requirement unmet or partly
+       met, thing built unasked, requirement with no test behind it,
+       reference gone stale, and artifact changed to match the build. With
+       none:
 
            Findings: none. Every requirement is met and tested, nothing was
            built unasked, and every reference is current.
