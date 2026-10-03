@@ -21,14 +21,12 @@ reproducible where it can be, bounded, auditable, and cheap.
 - Keep its knowledge self-contained (in-repo references) rather than dependent
   on external lookups or the model's own training-data recall where
   correctness matters.
-- Pursue stable, bounded output by whatever means the backend actually
-  exposes. Where sampling controls are available, use a low temperature -
-  but do not assume they are: some current models reject `temperature`/
-  `top_p`/`top_k` outright. On those, effort/reasoning-level settings (where
-  offered) are the tuning knob, and the mandatory gate below (not the
-  sampling parameters) is what actually makes the output trustworthy. Don't
-  claim a stability guarantee from temperature alone; verify what your
-  chosen model accepts before relying on it.
+- Pursue stable, bounded output by whatever means the backend exposes. Use a
+  low temperature where sampling controls exist, but verify what the chosen
+  model accepts first: some current models reject `temperature`/`top_p`/
+  `top_k` outright, leaving effort/reasoning-level settings (where offered)
+  as the tuning knob. Either way the deterministic checker below, not a
+  sampling parameter, is what makes the output trustworthy.
 
 ## Untrusted input
 
