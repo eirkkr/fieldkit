@@ -1,14 +1,9 @@
 # Claude Guidance (Generic)
 
-Shared dev conventions for use across repos. A consumer repo pulls these in by
-`@`-importing this file (or individual `conventions/*` files) from its own
-CLAUDE.md via a `.fieldkit` symlink to this repo - e.g. `@.fieldkit/KIT.md`.
-See the README for the one-time symlink setup. The kit's own repo-specific
-rules live in its root `CLAUDE.md`, which is not imported by consumers.
-
-- These are the generic, cross-repo rules - repo-specific conventions, setup,
-  and architecture live in the consumer repo's own docs. Flag conflicts with
-  them briefly before proceeding, rather than silently complying.
+Generic rules shared across repos, imported from a consumer's CLAUDE.md as
+`@.fieldkit/KIT.md` (the README covers setup). Repo-specific conventions,
+setup, and architecture live in the consumer repo's own docs - where the two
+conflict, flag it briefly before proceeding.
 
 ## Always-on
 
@@ -35,42 +30,36 @@ rules live in its root `CLAUDE.md`, which is not imported by consumers.
 | Opening a PR                               | ask first     | unless the user typed `/pr`                                    |
 | Merging                                    | ask first     | unless the user typed `/merge`; also conditioned on CI         |
 
-- Typing `/pr` or `/merge` is itself the approval, and covers the push it may
-  need first; asking for an issue is the same. Approval is for whether to
-  act, not a preview of the draft: draft it and go straight to it.
+- Approval settles whether to act, not what the draft says: once given -
+  a yes, or the `/pr`, `/merge` or issue request itself - draft it and go
+  straight to it.
 - An issue settles that a finding is handled later and separately, which
   forecloses doing it now on the branch in hand. Say what the issue would
   say, and file it on a yes.
-- Merging is conditioned on CI on top of approval - a failed check or a
-  conflict stops it (report that, don't merge around it), a still-running
-  check is waited out, a green one merges with no further sign-off.
+- Merging also needs CI: a failed check or a conflict stops it (report
+  that, don't merge around it), a running check is waited out, a green one
+  merges with no further sign-off.
 - The PR a review-gated change opens at each stage's gate (see
   `conventions/specs.md`) needs no approval - one per stage, and opening it
   is part of reaching the gate. Each one's merge is gated like any other.
-- Default to committing onto whatever branch you're already on, even if its
-  existing work looks unrelated. New branches come off the default branch
-  (see git.md); stacking one on another is an anti-pattern, and where that
-  seems genuinely warranted it's the same gate.
-- A gate on a *follow-up* never gates the action that precedes it - don't
-  hold a push on an unrelated open question; land it, then ask.
+- Commit onto the branch you're already on, even if its existing work looks
+  unrelated.
+- A gate on a *follow-up* never holds the action before it: land the push,
+  then ask.
 - Route anything learned that's worth keeping by scope: generic cross-repo
   lessons into the shared conventions kit, repo-specific ones into that
   repo's own docs.
-- `conventions/*.md` are read by humans and agents alike - state git/GitHub
-  mechanics as plain facts, not instructions to an agent. This file's own
-  process vocabulary (act-then-show, gate, dispatching a subagent) belongs
-  here or in the skill/agent files that execute it, never in a `conventions`
-  doc - a human reading one shouldn't need `KIT.md` open to parse a term
-  in it.
-- Before any suppression (`# type: ignore`, `# noqa`, tool exclusion), try
-  fixing the underlying issue first. Suppress only when the tool is
-  genuinely wrong about the file's context (e.g. a generated or vendored
-  file).
+- `conventions/*.md` are read by humans too: state git/GitHub mechanics as
+  plain facts, and keep this file's process vocabulary (act-then-show, gate,
+  dispatching a subagent) here or in the skill/agent files that execute it,
+  so a convention reads without `KIT.md` open.
+- Fix the underlying issue before reaching for a suppression
+  (`# type: ignore`, `# noqa`, tool exclusion). Suppress only when the tool
+  is wrong about the file's context (e.g. a generated or vendored file).
 - An exemption list records why each entry is exempt, in terms of the rule
-  it escapes. An entry describing what the code does instead ("uses the
-  raw driver", "runs at startup") cannot be audited: nothing in it says
-  whether a new case belongs, so the list grows by precedent. Write each
-  reason so it could be used to refuse an entry.
+  it escapes, so the reason could be used to refuse an entry. One describing
+  what the code does instead ("uses the raw driver", "runs at startup")
+  cannot be audited, and the list grows by precedent.
 - Known violations of a convention live in the issue tracker, not in the
   convention document - the document outlives them, and a stale list of
   files reads as permission.
@@ -82,19 +71,18 @@ rules live in its root `CLAUDE.md`, which is not imported by consumers.
   tree as it is written into an ADR, spec, issue or commit message -
   never recalled, never carried over from an older document. Stale
   figures get repeated precisely because they are already written down.
-- An issue, ADR or spec is read by someone who has none of the conversation
-  that produced it. Everything needed to act on it belongs in the body: the
-  decisions still open, the docs that must change alongside the code, the
-  reasoning behind a choice that looks arbitrary without it, and anything
-  the conversation built that the reader would otherwise rebuild - a prompt
-  or script that worked, where each change has to go, what it cost.
-  Catching yourself planning to brief the next session is the signal that
-  something is missing from the artifact. Before filing, read the body as
-  the person who will act on it: if they could not start the first step
-  without asking, it is not finished.
+- An issue, ADR or spec is read without the conversation that produced it,
+  so everything needed to act on it belongs in the body: the decisions still
+  open, the docs that must change alongside the code, the reasoning behind a
+  choice that looks arbitrary, and anything the conversation built that the
+  reader would otherwise rebuild - a prompt or script that worked, where
+  each change has to go, what it cost. Planning to brief the next session
+  signals something is missing. Before filing, read the body as the person
+  who will act on it: if they could not start the first step without
+  asking, it is not finished.
 - A later finding that changes what the body says is edited into the body,
-  not left in a comment beneath it. Someone acting on the body alone must
-  not be acting on a version already known to be superseded.
+  not left in a comment beneath it, where someone acting on the body alone
+  would miss it.
 - Reading part of a file is not reading it. "This document never
   addresses X", drawn from a head-and-tail skim, is a claim about the
   part that was not read.
@@ -102,16 +90,12 @@ rules live in its root `CLAUDE.md`, which is not imported by consumers.
 ### Linting and formatting
 
 - Don't run formatters or linters unless asked, for code or docs alike - the
-  human runs these and CI enforces them. Match the surrounding style: don't
-  count line lengths or reflow prose to hit a column, and leave any
-  off-by-one wrapping to CI.
-- This division is deliberate: a style slip reaching CI is the accepted cost
-  of not burning tokens on lint/format churn.
-- Tests are different: run them for correctness feedback, not churn. Use the
-  repo's canonical command with quiet, short-traceback flags, and fail fast
-  while iterating.
-- Run the narrowest relevant selection while iterating; widen to the full
-  suite before declaring work done.
+  human runs these and CI enforces them, and a style slip reaching CI is the
+  accepted cost of not burning tokens on lint churn. Match the surrounding
+  style by eye, leaving line lengths and wrapping to CI.
+- Do run tests, for correctness feedback: the repo's canonical command with
+  quiet, short-traceback flags, failing fast on the narrowest relevant
+  selection while iterating, then the full suite before declaring work done.
 
 ### Reviewing and auditing
 
@@ -136,12 +120,9 @@ rules live in its root `CLAUDE.md`, which is not imported by consumers.
 
 ## Load on Demand
 
-Situational conventions, not carried in context. Read the matching file before
-the action; don't load it otherwise.
-
-The `push`, `pr`, and `merge` skills each read `git.md`/`github.md`
-themselves, so routing through them (see Always-on) needs no lookup here. The
-rows below are for the actions those skills don't cover.
+Read the matching file before the action, and only then. The `push`, `pr`,
+and `merge` skills read `git.md`/`github.md` themselves, so the actions they
+cover need no row here.
 
 <!-- Read-tool targets (not @-imports). Paths are relative to the consumer
 repo root - the directory the session is started from. Read
