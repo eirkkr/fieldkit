@@ -47,7 +47,7 @@ Document which fields are volatile near the test or extract them into a shared h
 
 ## Expected multi-line text
 
-Expected text of three or more lines follows [code.md's multi-line text rule](code.md#multi-line-text): one dedented block, so the expectation looks like the output it checks. Bind it to a name before the assertion, and strip the expected side only, never the result:
+Expected text of three or more lines follows [code.md's multi-line text rule](code.md#multi-line-text): one dedented block, so the expectation looks like the output it checks.
 
 ```python
 def test_summary_lists_requisite_types() -> None:
@@ -69,10 +69,12 @@ def test_summary_lists_requisite_types() -> None:
     assert result == expected
 ```
 
-`expected` is the same text as the `_SUMMARY` literals in code.md's section.
+`expected` is the seven lines between the quotes with the eight-space indent they share removed, so the two rows under `Requisite types` keep their two spaces.
 
-- **Bind first.** `ruff format` rewraps an inline `assert result == textwrap.dedent(...).strip()` into a parenthesised comparison, pushing the call and the quotes a level deeper than the text between them. Bound to a name, the block is left as written.
-- **Strip the expected side only.** A stray leading or trailing newline in `result` then still fails the comparison. Output that ends in a newline is matched by ending the block in `.lstrip()`.
+A comparison adds two rules:
+
+- **Assign first.** Give the block a name before the assertion. `ruff format` rewraps an inline `assert result == textwrap.dedent(...).strip()` into a parenthesised comparison, pushing the call and the quotes a level deeper than the text between them. Assigned to a name, the block is left as written.
+- **Strip the expected side only, never the result.** A stray leading or trailing newline in `result` then still fails the comparison. Output that ends in a newline is matched by ending the block in `.lstrip()`.
 
 A substring check of fewer than three lines stays one literal: `assert "Heading\n  (none)\n" in result`.
 
