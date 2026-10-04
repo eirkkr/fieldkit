@@ -57,7 +57,7 @@ Pick the side that owns the value and pass it to the other, so it is written onc
 
 ## Multi-line text
 
-Relies on review (no linter). Write text of three or more lines as it will appear: one triple-quoted string passed through `textwrap.dedent` and ended in `.strip()`, with the opening and closing quotes on lines of their own. Blank lines count as lines; shorter text stays one literal.
+Relies on review (no linter). Write text of three or more lines as it will appear: one triple-quoted block passed through `textwrap.dedent`, the call ending in `.strip()`, with the opening and closing quotes on lines of their own. Blank lines count as lines; shorter text stays one literal.
 
 ```python
 _BODY = textwrap.dedent(
@@ -85,14 +85,14 @@ _USAGE = textwrap.dedent(
 
 `_USAGE` is `"usage: prog [-h] FILE\n  FILE  the file to read\n  -h    show this help\n"`.
 
-Don't write the text as adjacent string literals each ending in `\n`, or as a list of literals passed to `"\n".join`: both make the reader look past quotes to see it. `inspect.cleandoc` gives `_BODY` in one call, but it also expands tabs, and `textwrap` is where a reader looks for text handling.
+Don't write the text as adjacent string literals each ending in `\n`, or as a list of literals passed to `"\n".join`: both make the reader look past quotes to see it. Don't use `inspect.cleandoc` either: it gives the same value as `_BODY` in one call, but it also expands tabs, and `textwrap` is where a reader looks for text handling.
 
 Four cases stay as adjacent literals:
 
 - **A line that ends in spaces** - inside the block, editors and pre-commit hooks strip them.
 - **A first line that is indented or blank** - `.strip()` and `.lstrip()` both remove that indent or blank line.
 - **One long line wrapped across literals** - with no `\n` between them it is one line of output, not multi-line text.
-- **An f-string that inserts a value which can span lines** - the value goes in before `dedent` runs, and its second line starts at column 0, so the lines share no indent to remove.
+- **An f-string that inserts a value which can span lines** - the value goes in before `dedent` runs, and the value's second line starts at column 0, so the string's lines share no indent to remove.
 
 [testing.md](testing.md#expected-multi-line-text) applies this to the text a test expects.
 
