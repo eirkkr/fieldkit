@@ -98,6 +98,13 @@ _USAGE = textwrap.dedent(
 
 `_USAGE` is `"usage: prog [-h] FILE\n  -h  show this help\n"`.
 
+Four cases stay as one literal per line:
+
+- **A line that ends in spaces.** Editors and hooks strip trailing whitespace from source, which would change the text without anyone seeing it.
+- **A first line that is indented or blank.** `.strip()` and `.lstrip()` both remove that indent or blank line.
+- **One long line wrapped across adjacent literals.** With no `\n` between them the literals make a single line of output, which is not multi-line text.
+- **An f-string that inserts a value which can itself hold a newline.** The value goes in before `dedent` runs and its second line has no indent, so the lines no longer share one and nothing is removed.
+
 ## Enum values
 
 - `enum.auto()` when nothing outside the enum reads the value - the members are only ever compared to each other. A hand-written number there is bookkeeping: it has to track whatever ordering the enum declares, and inserting a member renumbers the rest.
