@@ -6,7 +6,9 @@ Markdown in this repo is not hard-wrapped. Each paragraph and list item is a sin
 
 ## Reason
 
-A hard wrap puts a line break wherever the column limit fell, so editing a sentence re-breaks its neighbours and the diff shows the reflow rather than the change. It also splits phrases across lines, which is why KIT.md has to warn that a line-based `grep` over wrapped prose proves nothing. Editors soft-wrap for the human reader, so the break buys nothing.
+A hard wrap puts a line break wherever the column limit fell, so editing a sentence re-breaks its neighbours and the diff shows the reflow rather than the change. Editors soft-wrap for the human reader, so the break buys nothing.
+
+It also splits phrases across lines. A multi-word `grep` for "line-based search" misses it whenever the wrap fell between the words, and reports the file clean - which is why KIT.md has to warn that a no-hit over wrapped prose proves nothing. With one line per paragraph, a phrase sits on one line wherever it appears, so the search finds it, for an agent auditing prose as much as for a person.
 
 Rejected:
 
