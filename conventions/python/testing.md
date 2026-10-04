@@ -45,6 +45,15 @@ def test_export_matches_fixture(result: dict) -> None:
 
 Document which fields are volatile near the test or extract them into a shared helper if the same set recurs across tests.
 
+## Expected multi-line text
+
+Expected text of three or more lines follows [code.md's multi-line text rule](code.md#multi-line-text). A comparison adds two rules:
+
+- **Assign the block to `expected` before the assertion.** `ruff format` rewraps an inline `assert result == textwrap.dedent(...).strip()` into a parenthesised comparison, pushing the opening quotes a level deeper than the text and the closing quotes.
+- **Strip the expected side only, never the result.** A stray leading or trailing newline in `result` then still fails the comparison.
+
+A substring check of fewer than three lines stays one literal.
+
 ## Loading test data
 
 Cache a module-level loader whose data feeds collection - fixture `params` or `ids`, or a `parametrize` list. Collection calls it, and the fixture or test usually calls it again:
