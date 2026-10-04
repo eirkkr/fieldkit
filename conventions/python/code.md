@@ -105,6 +105,8 @@ Four cases stay as one literal per line:
 - **One long line wrapped across adjacent literals.** With no `\n` between them the literals make a single line of output, which is not multi-line text.
 - **An f-string that inserts a value which can itself hold a newline.** The value goes in before `dedent` runs and its second line has no indent, so the lines no longer share one and nothing is removed.
 
+[testing.md](testing.md#expected-multi-line-text) applies this to the text a test expects.
+
 ## Enum values
 
 - `enum.auto()` when nothing outside the enum reads the value - the members are only ever compared to each other. A hand-written number there is bookkeeping: it has to track whatever ordering the enum declares, and inserting a member renumbers the rest.

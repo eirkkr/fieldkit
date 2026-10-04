@@ -45,6 +45,37 @@ def test_export_matches_fixture(result: dict) -> None:
 
 Document which fields are volatile near the test or extract them into a shared helper if the same set recurs across tests.
 
+## Expected multi-line text
+
+Expected text of three or more lines follows [code.md's multi-line text rule](code.md#multi-line-text): one dedented block, so the expectation looks like the output it checks. Bind it to a name before the assertion, and strip the expected side only, never the result:
+
+```python
+def test_summary_lists_requisite_types() -> None:
+    """The summary lists each requisite type under its heading."""
+    result = summarise(RECORDS)
+
+    expected = textwrap.dedent(
+        """
+        Records                        3
+
+        Requisite types
+          PREREQUISITE                 4
+          PRE-REQ                      1
+
+        Maximum component depth        1
+        """
+    ).strip()
+
+    assert result == expected
+```
+
+`expected` is the same text as the `_SUMMARY` literals in code.md's section.
+
+- **Bind first.** `ruff format` rewraps an inline `assert result == textwrap.dedent(...).strip()` into a parenthesised comparison, pushing the call and the quotes a level deeper than the text between them. Bound to a name, the block is left as written.
+- **Strip the expected side only.** A stray leading or trailing newline in `result` then still fails the comparison. Output that ends in a newline is matched by ending the block in `.lstrip()`.
+
+A substring check of fewer than three lines stays one literal: `assert "Heading\n  (none)\n" in result`.
+
 ## Loading test data
 
 Cache a module-level loader whose data feeds collection - fixture `params` or `ids`, or a `parametrize` list. Collection calls it, and the fixture or test usually calls it again:
