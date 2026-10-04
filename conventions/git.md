@@ -8,7 +8,7 @@
 - Allowed prefixes: `feature/`, `bugfix/`, `hotfix/`, `release/`, `chore/`. No others (`refactor/`, `fix/`, `test/`, etc.).
 - At most 50 characters, prefix included - a few words of description. The issue or PR carries the detail.
 - Branch off the default branch. Branching off another branch is an anti-pattern - it stacks work on something that can still change or get discarded.
-- One branch is one unit of work, and for a review-gated OpenSpec change that unit is the *stage*, not the whole change: each stage gets its own branch off the default branch and merges when its review gate closes ([specs.md](specs.md)). A change spanning five stages is five branches in sequence, each cut from the previous one's merge - never stacked on a branch still under review.
+- One branch is one unit of work, and for a change planned in stages that unit is the *stage*, not the whole change: each stage gets its own branch off the default branch and merges when its review gate closes ([specs.md](specs.md)). A change spanning five stages is five branches in sequence, each cut from the previous one's merge - never stacked on a branch still under review.
 
 ## Commits
 
@@ -39,7 +39,7 @@
   - A `+` can still be a rebased copy: the patch changes when the base changed neighbouring lines or a conflict was resolved. Then `git diff origin/<branch> <copy of the remote tip>` should show only what `git diff <old base> <new base>` does, each base being that side's merge-base with the default branch. Anything more exists only on the remote.
 - A force-push that loses nothing still replaces commits the reviewer of an open PR has read or pulled, so they are told first. The lease names the SHA that was checked; if it refuses, check again rather than reaching for `--force`.
 - The default branch is never rewritten.
-- A rewrite re-SHAs every commit, so anything citing the old SHAs goes stale - a stage's review note especially (see [specs.md](specs.md)).
+- A rewrite re-SHAs every commit, so anything citing the old SHAs goes stale: a comment that links a commit, and under the `review-gated` OpenSpec schema a stage's review note.
 
 ## Hooks and CI checks
 
