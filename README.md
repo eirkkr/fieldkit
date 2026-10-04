@@ -75,7 +75,7 @@ Requires [just](https://just.systems), [uv](https://docs.astral.sh/uv/), and Nod
 
 ## Planning a change
 
-Work too big for one pull request is planned and built as a *change* ([ADR 054](docs/decisions/054-a-change-is-an-issue.md)): an issue holding the plan, a sub-issue and a pull request per stage, and nothing about it in the repo's files. `/change-plan` asks its questions, writes the issue and has the plan reviewed; `/change-stage` builds one stage, has it reviewed, opens its PR and stops for approval. Both are linked by `just install` and need no per-repo setup beyond `gh`. `conventions/specs.md` says what each issue must contain, and a repo can name the skills that do the reviewing under a `## Change skills` heading in its own `CLAUDE.md`.
+Work too big for one pull request is planned and built as a *change* ([ADR 054](docs/decisions/054-a-change-is-an-issue.md)): an issue holding the plan, a sub-issue and a pull request per stage where it needs more than one, and nothing about it in the repo's files. `/change-plan` asks its questions and writes the issue; `/change-stage` builds one stage, opens its PR and stops for approval. Each offers a review by fresh agents where it stops, and runs one when asked. Both are linked by `just install` and need no per-repo setup beyond `gh`. `conventions/specs.md` says what each issue must contain, and a repo can name the review skills to offer under a `## Change skills` heading in its own `CLAUDE.md`.
 
 ## Adopting OpenSpec in a consumer repo
 

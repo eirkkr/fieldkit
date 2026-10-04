@@ -4,23 +4,33 @@ Reached from [SKILL.md](SKILL.md) once a plan is published and the reviewer has 
 
 Find the plan first: the issue named, else the open `change` issue with no approval comment (`gh issue list --label change --state open`). With several, ask.
 
-## Changes asked for
+## A review asked for
 
-Any answer short of approval with no conditions is this one.
+A *fresh* agent is a subagent given only what is listed here, and nothing from this conversation.
+
+1. Dispatch a fresh agent with the brief, the notes and `conventions/specs.md`, or run the skill the reviewer named. Ask it:
+   - Can a test hold each requirement as written?
+   - Does each stage meet the stage rules, and deliver what its line says?
+   - What would an agent building from these alone have to guess?
+   - What does the brief contradict - in itself, in the notes, or in the repo's ADRs?
+2. Triage each finding against the repo: fix the brief or the notes, or record why the finding is wrong.
+3. Show the reviewer each finding with its outcome, and stop.
+
+## Changes asked for
 
 1. Edit the brief, and comment on the issue what changed and why.
 2. If the contracts or assumptions moved, post the notes again, whole, and hide the one before.
-3. If a requirement or a stage changed, run the fresh review again (SKILL.md, step 4).
-4. Show the reviewer the brief again, and stop.
+3. Show the reviewer the brief again, offer a review if a requirement or a stage changed, and stop.
 
 ## Approved
 
-1. Comment the approval line ("Asking first, and approval"), the login being the reviewer's: `gh api user -q .login`.
-2. Create each stage the brief lists, in order, as a sub-issue (`gh issue create --parent <n>`), titled and filled as "A stage's issue" gives it. A change of one stage gets its one.
-3. Mark a stage blocked (`gh issue edit <stage> --add-blocked-by <other>`) where it cannot be built without the other.
-4. Report the stages created.
+Any clear yes is approval.
 
-Then stop, unless the approval also asked for the first stage: then start the `change-stage` skill.
+1. Comment the approval line ("Asking first, and approval"), the login being the reviewer's: `gh api user -q .login`.
+2. Where the brief lists stages, create each in order as a sub-issue (`gh issue create --parent <n>`), titled and filled as "A stage's issue" gives it, and mark one blocked (`gh issue edit <stage> --add-blocked-by <other>`) where it cannot be built without the other. A change of one pull request gets none.
+3. Report what was created.
+
+Then stop, unless the approval also asked for the build: then start the `change-stage` skill.
 
 ## Turned down
 

@@ -23,7 +23,7 @@ The change's issue is labelled `change`, and its body is the brief: all the revi
 - **Yours to decide** - what could not be settled by asking before the brief was written.
 - **Least sure of** - where the plan is most likely wrong.
 - **Out of scope** - what someone might expect this change to do that it will not.
-- **Stages** - one numbered line each, in the order they are built: what the stage delivers and which requirements. Every requirement is delivered by a stage, or named under the next heading. The final review is not listed; every change ends with one.
+- **Stages** - `One pull request.` for a change that fits one. Otherwise one numbered line each, in the order they are built: what the stage delivers and which requirements. Every requirement is delivered by a stage, or named under the next heading.
 - **Not yet specified** - work that can be seen coming but not yet said in a line. As stages land and it can be, a new stage is proposed to the reviewer at that stage's gate, and added on their yes.
 
 Everything but the requirements fits one screen.
@@ -35,9 +35,8 @@ Everything but the requirements fits one screen.
 ### Asking first, and approval
 
 - Before the brief is written, the reviewer is asked what only they can decide, one question at a time.
-- A fresh agent reads the brief and the first build notes before the reviewer does (see Review).
 - Approval is the reviewer saying so with no conditions attached; anything less is a request for changes. It is recorded as a comment on the issue whose first line is `Plan approved by @<login>.`, and a change is built once it has that comment.
-- The stage sub-issues are created on approval.
+- The stage sub-issues, where the brief lists stages, are created on approval.
 - A plan turned down is closed as not planned. Its brief and notes stay, as the record of what was priced and why it was not done.
 
 ### Planning to decide, not only to build
@@ -60,14 +59,16 @@ Planning a change is also a way to find out whether to do it. A proposal argues 
 The build notes are a comment on the change's issue whose first line is `## Build notes` and whose second says how far they run: `Through the plan.`, then `Through stage <k>.` They are written for the next agent, in whatever form serves it; no person is asked to read them.
 
 - The first is posted with the plan. It holds what only the build needs: the contracts between the change's parts - fields, types, what may be absent, with file-in, file-out boundaries preferred so each part is tested alone - and the assumptions the plan rests on but has not proved, each with the stage that will test it.
-- Each later one is posted when a stage has been approved and merged, and adds the state: the interfaces as built, which test holds each requirement, stopgaps still to remove.
+- Each later one is posted when a stage has been approved and merged, and adds the state: the interfaces as built, which test holds each requirement, stopgaps still to remove. A change of one pull request has only the first.
 - The notes name a requirement by its number. The brief holds the only copy of its words.
 - Each is posted whole. The agent posting reads the newest, carries it forward, then hides the one before it as outdated. The newest comment that opens with the marker is the only one read; the earlier ones are the history.
 - About 150 lines is the cap. Notes that outgrow it mean the change should have been two.
 
 ## Stages
 
-A stage is the smallest part of a change that leaves the default branch green and says one thing. It is also what gets merged: one stage is one branch, cut from the default branch, and one pull request ([ADR 041](../docs/decisions/041-stage-is-the-merge-unit.md)).
+A change that fits one pull request has no stages: it is claimed, built and closed on its own issue, and what follows about a stage's issue, its steps and its gate applies to the change itself.
+
+A stage is the smallest part of a larger change that leaves the default branch green and says one thing. It is also what gets merged: one stage is one branch, cut from the default branch, and one pull request ([ADR 041](../docs/decisions/041-stage-is-the-merge-unit.md)).
 
 - **One idea.** The reviewer can say what the stage did in a sentence.
 - **Three to six steps, eight at the most.** When the choice is open, split: a smaller stage is a cheaper review.
@@ -81,31 +82,31 @@ A stage is the smallest part of a change that leaves the default branch green an
 
 ### A stage's issue
 
-- It is a sub-issue of the change, titled `Stage <k> - <name>` and created with the stage's one line and the numbers of the requirements it delivers. A change of one stage has one.
+- It is a sub-issue of the change, titled `Stage <k> - <name>` and created with the stage's one line and the numbers of the requirements it delivers.
 - Stages run in the order the brief lists them. A stage is marked blocked by another only where it cannot be built without it - in its own change or in another - so the unmarked ones are those free to be reordered or dropped. A change that waits on another change is marked the same way.
 - Whoever starts a stage claims it first, by assigning its issue to themselves. A claimed stage is left to its owner.
-- Its steps are written into it when it starts, under `## Steps`, after the brief and the notes have been re-read against the repository as it then is. Where the notes are out of date the steps follow the repository, and the next notes say so; where the brief is wrong, the reviewer is told before anything is built. Each step is numbered and is one action with a `Done when ...` that running or looking at something can check. The stage's branch is named there too, under `## Branch`.
+- Its steps are written when it starts, after the brief and the notes have been re-read against the repository as it then is. Where the notes are out of date the steps follow the repository, and the next notes say so; where the brief is wrong, the reviewer is told before anything is built. Each step is numbered and is one action with a `Done when ...` that running or looking at something can check.
+- The steps go in the stage's issue under `## Steps`, with its branch under `## Branch`. A change of one pull request has them in a comment on its own issue, under the same two headings.
 - Something an earlier stage finds that changes a later one is edited into the later stage's issue, with a comment saying so.
 
 ## Building a stage
 
-- **One step, one commit.** Its subject ends with the stage and step it is, as `(2.3)`, so a stage picked up again can be matched against its steps. Its body says why, and anything the step needed that the stage's steps did not foresee.
-- **Green before review.** The repo's full check passes, not its tests alone.
-- **Reviewed before the PR opens** (see Review).
-- **The PR opens ready to be read**, with a comment headed `## Review findings` giving each finding and its outcome.
-- **Then a full stop: the stage's gate.** The stage waits for the reviewer to approve it or send it back. Approval merges it; the next stage begins when it is asked for, on a branch cut from the default branch ([ADR 049](../docs/decisions/049-approval-does-not-start-the-next-stage.md)).
-- **A stage sent back is fixed in its own branch and PR**, and reviewed again before the reviewer is asked a second time.
+- **One step, one commit.** Its subject ends with the stage and step it is, as `(2.3)`, so a stage picked up again can be matched against its steps. Its body says why, and anything the step needed that the steps did not foresee.
+- **Green before the PR opens.** The repo's full check passes, not its tests alone.
+- **Then a full stop: the gate.** The PR waits for the reviewer to approve it or send it back. Any clear yes is approval, and approval is the word to merge. The next stage begins when it is asked for, on a branch cut from the default branch ([ADR 049](../docs/decisions/049-approval-does-not-start-the-next-stage.md)).
+- **What is sent back is fixed on the same branch and PR**, as plain commits. The steps stay as they were written.
 
 ### The PR body
 
 The PR body is the reviewer's page, and holds only what needs them:
 
 - The stage in a few sentences: what now works, and what does not yet.
-- **Changed from the plan** - anything built differently from the brief or from the stage's own steps, with the reason, or one line saying nothing was.
+- **Changed from the plan** - anything built differently from the brief or from the steps, with the reason, or one line saying nothing was.
 - **Yours to overturn** - choices the agent made between real alternatives, or one line saying there were none.
 - **Try it** - one thing to do by hand and what a good result looks like, saying whether the agent was able to do it itself.
+- **Review** - which reviews have run on the PR as it now stands, or `Not run.`
 
-Every other command in the body was run as written. The body closes the stage's issue.
+Every other command in the body was run as written. The body closes the stage's issue, or for a change of one pull request, the change's.
 
 ### What is said at a gate
 
@@ -113,30 +114,31 @@ A decision made while a stage is reviewed is written down where it will be found
 
 ## Review
 
-A *fresh* agent is one given the work and the rules it checks against, and nothing from the planning or the build. A plan and a stage are each reviewed by fresh agents. The questions before a plan are asked by the planning agent.
+Review is offered, and runs when the reviewer asks for it. A *fresh* agent is one given the work and the rules it checks against, and nothing from the planning or the build.
 
-- A stage is read by fresh agents on two axes, kept apart: the repo's conventions, including whether everything a person will read is in plain words; and the requirements the stage's issue says it delivers.
-- The building agent reproduces each finding, then triages it: fixed in this stage, edited into the later stage that will handle it, or listed as an issue to file. Listed issues are filed when the reviewer says so.
-- A repo names the skills that do any of those three under a `## Change skills` heading in its own `CLAUDE.md`, and the reviewer names one for a single run. The conversation wins over the repo, and the repo over the default.
+- **When it is offered.** Each time the agent stops for the reviewer - a plan published, a PR at its gate, a fix made after either - it says what has not been reviewed and names the reviews worth running, with a reason for each drawn from what changed. Where none looks worth its cost, it says that.
+- **A plan** is read by a fresh agent for requirements no test could hold, stages that break the stage rules, and what an agent building from it would have to guess.
+- **A PR** is read by fresh agents on two axes, kept apart: the repo's conventions, including whether everything a person will read is in plain words; and the requirements it says it delivers.
+- **Findings.** The building agent reproduces each one, then triages it: fixed here, edited into the later stage that will handle it, or listed as an issue to file. They go on the PR as a comment headed `## Review findings`, each with its outcome. Listed issues are filed when the reviewer says so.
+- **Which skills.** A repo names the skills to offer under a `## Change skills` heading in its own `CLAUDE.md`, and the reviewer names one for a single run. The conversation wins over the repo, and the repo over the two axes above.
 
   ```markdown
   ## Change skills
 
   - Questions before a plan: `grilling`
   - Plan review: default
-  - Stage review: `code-review`, `security-review`
+  - PR review: `code-review`, `security-review`
   ```
-
-- A named skill fills the role as defined here. Whatever it leaves out - an axis, the plain-words check - is still done.
 
 ## The final review
 
-The last stage of every change reads the change as a whole.
+A change built in stages can be read once more as a whole when its last stage has merged, for what no single stage shows. It is offered then, with the question of whether to close the change. A change of one pull request has none: its one PR is the whole change, and closes it.
 
 - Fresh agents read the diffs of the change's stages together, against the repo's conventions and in three directions: requirements unmet, things built that no requirement asked for, and requirements no test holds.
 - Every issue the change cites - in code, comments and docs - is re-read: still open, and still about the thing cited.
 - The findings are a comment on the change's issue whose first line is `## Final review`. So is anything the change showed the process got wrong, and where a mechanical check could have caught the mistake, the check is proposed in place of another written rule.
-- A finding that needs fixing is proposed to the reviewer as one more stage, and built like any other when they ask for it. The change is closed by the reviewer, who is asked once a final review has nothing left to fix.
+- A finding that needs fixing is proposed to the reviewer as one more stage, and built like any other when they ask for it.
+- A change built in stages is closed by the reviewer, on their word.
 
 ## Who an agent listens to
 
