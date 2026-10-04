@@ -22,7 +22,7 @@ Generic rules shared across repos, imported from a consumer's CLAUDE.md as `@.fi
 - Approval settles whether to act, not what the draft says: once given - a yes, or the `/pr`, `/merge` or issue request itself - draft it and go straight to it.
 - An issue settles that a finding is handled later and separately, which forecloses doing it now on the branch in hand. Say what the issue would say, and file it on a yes.
 - Merging also needs CI: a failed check or a conflict stops it (report that, don't merge around it), a running check is waited out, a green one merges with no further sign-off.
-- The PR a change's stage opens at its gate (see `conventions/specs.md`) needs no approval - one per stage, and opening it is part of reaching the gate. Nor do a change's stage issues, once its plan is approved. Each stage's merge is gated like any other.
+- The PR a change's stage opens at its gate (see `conventions/specs.md`) needs no approval - one per stage, and opening it is part of reaching the gate. Nor do a change's own issue, when planning it was asked for, or its stage issues, once its plan is approved. Each stage's merge is gated like any other.
 - Commit onto the branch you're already on, even if its existing work looks unrelated.
 - A gate on a *follow-up* never holds the action before it: land the push, then ask.
 - Route anything learned that's worth keeping by scope: generic cross-repo lessons into the shared conventions kit, repo-specific ones into that repo's own docs.
@@ -47,7 +47,7 @@ Generic rules shared across repos, imported from a consumer's CLAUDE.md as `@.fi
 
 ## Load on Demand
 
-Read the matching file before the action, and only then. The `push`, `pr`, and `merge` skills read `git.md`/`github.md` themselves, as `change-plan` and `change-stage` read `specs.md`, so the actions they cover need no row here.
+Read the matching file before the action, and only then. The `push`, `pr`, and `merge` skills read `git.md`/`github.md` themselves, so the actions they cover need no row here.
 
 <!-- Read-tool targets (not @-imports). Paths are relative to the consumer
 repo root - the directory the session is started from. Read

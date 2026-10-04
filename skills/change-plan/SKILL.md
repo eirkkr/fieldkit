@@ -14,7 +14,9 @@ When the reviewer has answered a plan already published, go to [ANSWER.md](ANSWE
 
 ## 1. Test that it is a change
 
-Apply "When work is a change". Done when the reviewer has been told which test the work meets - or that it meets none, in which case it is a branch and a PR, and this skill ends.
+Apply "When work is a change", and ask the reviewer whether this is a plan to decide with ("Planning to decide, not only to build").
+
+Done when the reviewer has been told which test the work meets - or that it meets none, in which case it is a branch and a PR, and this skill ends.
 
 ## 2. Ask
 
@@ -24,13 +26,12 @@ Done when every question has the reviewer's answer, or their word that it stays 
 
 ## 3. Draft
 
-Write the brief ("The brief") for the reviewer, in plain words, and the first build notes ("The build notes") for the next agent.
+Write the brief ("The brief") for the reviewer, in plain words, and the first build notes ("The build notes") for the next agent. Run the plan past "What a plan tends to miss".
 
-- A decision that outlasts the change is an ADR, written now.
 - An existing issue that asks for the change stays as it is. The brief names it.
 - Both are published as written: every line reads to someone who never saw this conversation.
 
-Done when every section of the brief is filled or says it is empty, and every stage line names the requirements it delivers.
+Done when every section of the brief is filled or says it is empty, every requirement is delivered by a stage or named as not yet specified, and everything but the requirements fits one screen.
 
 ## 4. Fresh review
 

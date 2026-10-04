@@ -6,7 +6,7 @@ argument-hint: "[short summary of the change, optional]"
 
 # Open a pull request
 
-Reaching this skill means opening the PR is approved - the user typed `/pr`, or the caller asked and got a yes - so it opens with no review of the draft in between. The report at the end is what lets it be corrected.
+Reaching this skill means opening the PR is approved - the user typed `/pr`, the caller asked and got a yes, or a change's stage reached its gate - so it opens with no review of the draft in between. The report at the end is what lets it be corrected.
 
 `$ARGUMENTS`, if given, is extra context for the draft. In this turn:
 
