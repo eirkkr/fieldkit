@@ -7,7 +7,7 @@ Like a survival field kit: the **manual** (conventions) and the **instruments** 
 ## What's actually in it
 
 - **Conventions** an agent reads as instructions - how to branch, commit, open a PR, record a decision, write a spec, work in Python. Split into a small always-on core and a larger set loaded only when the matching action comes up, so a session pays for what it uses.
-- **Claude Code assets** - skills (`push`, `pr`, `merge`, `kit-reconcile`, and `update-deps` for Python repos), git hooks that block commits to the default branch and commit messages breaking the rules, a `Stop` hook that catches formatter drift, `PreToolUse` hooks that refuse non-conforming branch names and squash messages, CI checks for PRs, a status line.
+- **Claude Code assets** - skills (`push`, `pr`, `merge`, `change-plan`, `change-stage`, `kit-reconcile`, and `update-deps` for Python repos), git hooks that block commits to the default branch and commit messages breaking the rules, a `Stop` hook that catches formatter drift, `PreToolUse` hooks that refuse non-conforming branch names and squash messages, CI checks for PRs, a status line.
 - **The reasoning** - [`docs/decisions/`](docs/decisions/) holds an ADR per non-obvious choice. If you only read one thing, read those: they are the part that transfers, whatever your own setup looks like.
 
 ## Is this for you?
@@ -73,7 +73,13 @@ Requires [just](https://just.systems), [uv](https://docs.astral.sh/uv/), and Nod
 
 5. **First run.** Accept Claude Code's external-import dialog for `@.fieldkit` - declining permanently disables it. Verify with `/memory`: your own `CLAUDE.md`, the kit's `KIT.md`, and the convention files should show as loaded.
 
+## Planning a change
+
+Work too big for one pull request is planned and built as a *change* ([ADR 054](docs/decisions/054-a-change-is-an-issue.md)): an issue holding the plan, a sub-issue and a pull request per stage, and nothing about it in the repo's files. `/change-plan` asks its questions, writes the issue and has the plan reviewed; `/change-stage` builds one stage, has it reviewed, opens its PR and stops for approval. Both are linked by `just install` and need no per-repo setup beyond `gh`. `conventions/specs.md` says what each issue must contain, and a repo can name the skills that do the reviewing under a `## Change skills` heading in its own `CLAUDE.md`.
+
 ## Adopting OpenSpec in a consumer repo
+
+OpenSpec is how changes were planned before ADR 054, and is kept so that a change already in flight can finish under it. New changes use the two skills above; don't opt a repo in for them.
 
 OpenSpec ([ADR 021](docs/decisions/021-adopt-openspec-centralised-via-kit.md)) is opt-in per repo. `just install` (Setup step 1) already puts the pinned `openspec` CLI on `PATH`, but adds no OpenSpec skills anywhere - a repo that skips the steps below carries no OpenSpec context at all.
 
