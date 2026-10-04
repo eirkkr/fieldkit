@@ -17,5 +17,5 @@ Rejected:
 
 - One commit reflows every Markdown file outside the excluded vendored skills. Run `git blame --ignore-rev` on it to see through to the earlier change.
 - `repo-skills-overlay/*.md` is reflowed too, so each overlay was re-appended to its vendored `repo-skills/*/SKILL.md`; `just check-overlays` compares them byte for byte. An overlay edit still needs that re-append.
-- KIT.md's rules for consumers are unchanged: a consumer's own `rumdl` config decides whether its prose is wrapped, so the audit-by-phrase advice stays.
+- KIT.md does not state the rule, since a consumer's own `rumdl` config decides whether its prose is wrapped. It only tells an agent to read that config rather than assume a width, and its audit-by-phrase advice stays for wrapped consumers.
 - Commit messages and PR bodies keep their own wrapping rules ([047](047-enforce-commit-messages.md)); this covers Markdown files only.

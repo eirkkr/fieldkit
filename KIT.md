@@ -34,7 +34,7 @@ Generic rules shared across repos, imported from a consumer's CLAUDE.md as `@.fi
 
 ### Linting and formatting
 
-- Don't run formatters or linters unless asked, for code or docs alike - the human runs these and CI enforces them, and a style slip reaching CI is the accepted cost of not burning tokens on lint churn. Match the surrounding style by eye, leaving line lengths and wrapping to CI.
+- Don't run formatters or linters unless asked, for code or docs alike - the human runs these and CI enforces them, and a style slip reaching CI is the accepted cost of not burning tokens on lint churn. Match the surrounding style by eye, leaving line lengths and wrapping to CI. For Markdown, the repo's lint config (`.rumdl.toml`) says whether paragraphs are wrapped, so read it rather than assuming a width.
 - Do run tests, for correctness feedback: the repo's canonical command with quiet, short-traceback flags, failing fast on the narrowest relevant selection while iterating, then the full suite before declaring work done.
 
 ### Reviewing and auditing
