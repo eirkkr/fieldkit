@@ -7,89 +7,47 @@ disable-model-invocation: true
 
 # Reconcile this repo to the latest kit changes
 
-The shared conventions kit (imported here via `@.fieldkit`) has changed, and
-this command catches this repo up, in the order of the sections below.
+The shared conventions kit (imported here via `@.fieldkit`) has changed, and this command catches this repo up, in the order of the sections below.
 
 ## Verify the references into the kit resolve
 
-Do this first, whatever the range below resolves to. A reference that no
-longer resolves loads nothing, so the session runs with rules missing rather
-than wrong, and nothing tells it so. References also break from a kit commit
-the marker has already passed, or from a local edit, and neither shows up in
-the range.
+Do this first, whatever the range below resolves to. A reference that no longer resolves loads nothing, so the session runs with rules missing rather than wrong, and nothing tells it so. References also break from a kit commit the marker has already passed, or from a local edit, and neither shows up in the range.
 
 From this repo's root, check:
 
 1. **The symlink.** `test -e .fieldkit/KIT.md`.
-2. **The imports.** Every `@.fieldkit/...` line in `CLAUDE.md`, and in anything
-   it imports in turn, names a file that exists.
-3. **The mentions.** Every other `.fieldkit/...` path in a tracked file -
-   READMEs, scripts, `.claude/` config. One `grep -rn '\.fieldkit/'` covers it.
-4. **The wiring.** Links into the kit that now dangle (`find . -xtype l`, plus
-   `.git/hooks/`, which `find` won't reach). `.claude/skills/` and
-   `openspec/schemas/` are linked file by file, so a kit-side rename breaks
-   them.
-5. **The CI callers.** Every `uses: <kit-repo>/.github/workflows/<file>@...`
-   in `.github/workflows/` names a file that exists at
-   `.fieldkit/.github/workflows/<file>`. A missing one fails every PR.
+2. **The imports.** Every `@.fieldkit/...` line in `CLAUDE.md`, and in anything it imports in turn, names a file that exists.
+3. **The mentions.** Every other `.fieldkit/...` path in a tracked file - READMEs, scripts, `.claude/` config. One `grep -rn '\.fieldkit/'` covers it.
+4. **The wiring.** Links into the kit that now dangle (`find . -xtype l`, plus `.git/hooks/`, which `find` won't reach). `.claude/skills/` and `openspec/schemas/` are linked file by file, so a kit-side rename breaks them.
+5. **The CI callers.** Every `uses: <kit-repo>/.github/workflows/<file>@...` in `.github/workflows/` names a file that exists at `.fieldkit/.github/workflows/<file>`. A missing one fails every PR.
 
-Fix each unresolved reference here rather than reporting it onward - usually a
-one-line path change. `git -C .fieldkit log --diff-filter=DR --name-status --
-<old-path>` finds where the target moved; if it was removed rather than moved,
-drop the reference and say so. For a dangling link or a CI caller naming a
-missing workflow, re-run the matching `.fieldkit/scripts/enable-*.sh` rather
-than editing it by hand - `enable-pr-checks.sh` replaces a caller an earlier
-version wrote.
+Fix each unresolved reference here rather than reporting it onward - usually a one-line path change. `git -C .fieldkit log --diff-filter=DR --name-status -- <old-path>` finds where the target moved; if it was removed rather than moved, drop the reference and say so. For a dangling link or a CI caller naming a missing workflow, re-run the matching `.fieldkit/scripts/enable-*.sh` rather than editing it by hand - `enable-pr-checks.sh` replaces a caller an earlier version wrote.
 
-Then re-run every `enable-*.sh` this repo has already run - the ones whose
-links or files are present - even where nothing dangles. Each is idempotent,
-and a kit change can add to what one installs: `enable-hooks.sh` gaining
-`commit-msg` reaches no clone until it's re-run. Enabling one the repo never
-ran is the human's call.
+Then re-run every `enable-*.sh` this repo has already run - the ones whose links or files are present - even where nothing dangles. Each is idempotent, and a kit change can add to what one installs: `enable-hooks.sh` gaining `commit-msg` reaches no clone until it's re-run. Enabling one the repo never ran is the human's call.
 
 ## Resolve the range
 
-The marker file `.fieldkit-rev` at this repo's root records the kit commit this
-repo was last reconciled to as a bare SHA. The kit squash-merges, so each
-commit on its `main` is one change. Resolve the range from `$ARGUMENTS`:
+The marker file `.fieldkit-rev` at this repo's root records the kit commit this repo was last reconciled to as a bare SHA. The kit squash-merges, so each commit on its `main` is one change. Resolve the range from `$ARGUMENTS`:
 
-- **No argument, marker present:** `<marker-sha>..main` - every kit commit since
-  the last reconcile.
-- **No argument, marker absent:** the latest kit commit only. Warn that
-  `.fieldkit-rev` is missing, so older changes were not reviewed.
+- **No argument, marker present:** `<marker-sha>..main` - every kit commit since the last reconcile.
+- **No argument, marker absent:** the latest kit commit only. Warn that `.fieldkit-rev` is missing, so older changes were not reviewed.
 - **A number `N`:** `main~N..main` - the last N kit commits.
 - **`latest`:** the latest kit commit only.
 
-Read the kit history for that range with `git -C .fieldkit log main` and
-`git -C .fieldkit show <commit>`.
+Read the kit history for that range with `git -C .fieldkit log main` and `git -C .fieldkit show <commit>`.
 
 ## Reconcile this repo
 
-1. Audit agent-facing docs and instructions for anything that now contradicts
-   the kit, and bring them into line.
+1. Audit agent-facing docs and instructions for anything that now contradicts the kit, and bring them into line.
 2. Make any repo-side change the new rules imply - commands, recipes, config.
-3. Leave human-facing tooling alone: don't touch CI, pre-commit, or the linters
-   themselves. This reconciles agent instructions, not the human's tools. The
-   exception is what the kit's own `enable-*.sh` scripts wrote - its links,
-   hooks and CI caller workflows are kit wiring, kept current in the
-   references step above.
+3. Leave human-facing tooling alone: don't touch CI, pre-commit, or the linters themselves. This reconciles agent instructions, not the human's tools. The exception is what the kit's own `enable-*.sh` scripts wrote - its links, hooks and CI caller workflows are kit wiring, kept current in the references step above.
 
 ## Surface codebase follow-ups
 
-The steps above reconcile *instructions*, not the *codebase*. Some convention
-changes also imply source edits this command does not make - a style or language
-rule the existing code now violates. For each changed convention in range, judge
-whether it has codebase implications. List the ones that do, each as the issue
-it would become - title and the finding in a sentence - and file them on a yes.
-Don't sweep the code here; that's a separate job.
+The steps above reconcile *instructions*, not the *codebase*. Some convention changes also imply source edits this command does not make - a style or language rule the existing code now violates. For each changed convention in range, judge whether it has codebase implications. List the ones that do, each as the issue it would become - title and the finding in a sentence - and file them on a yes. Don't sweep the code here; that's a separate job.
 
 ## Advance the marker and open the PR
 
-Set `.fieldkit-rev` to the kit HEAD you reconciled to
-(`git -C .fieldkit rev-parse main`) and commit the bump alongside the reconcile
-edits. This also creates the file on a repo that had no marker yet. If the
-audit found nothing to change, still bump the marker and open a marker-only PR -
-that records the repo was checked up to this commit.
+Set `.fieldkit-rev` to the kit HEAD you reconciled to (`git -C .fieldkit rev-parse main`) and commit the bump alongside the reconcile edits. This also creates the file on a repo that had no marker yet. If the audit found nothing to change, still bump the marker and open a marker-only PR - that records the repo was checked up to this commit.
 
-Follow the kit's git conventions: show me the proposed changes for approval
-before editing, work on a branch, and open a PR.
+Follow the kit's git conventions: show me the proposed changes for approval before editing, work on a branch, and open a PR.

@@ -12,5 +12,4 @@ Read the matching file before the action; don't load it otherwise.
 | Setting up a project or managing deps | .fieldkit/conventions/python/setup.md         |
 | Writing or reviewing tests            | .fieldkit/conventions/python/testing.md       |
 
-Dependency bumps, and reviews of bumps in a diff, go through the `update-deps`
-skill where enabled (`.fieldkit/scripts/enable-python.sh`).
+Dependency bumps, and reviews of bumps in a diff, go through the `update-deps` skill where enabled (`.fieldkit/scripts/enable-python.sh`).

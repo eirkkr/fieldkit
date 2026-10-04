@@ -3,6 +3,12 @@
 enabled = true
 style = "aligned"
 
+# One line per paragraph (ADR 053).
+[MD013]
+line-length = 0
+reflow = true
+reflow-mode = "normalize"
+
 [global]
 # Generated: `just openspec-refresh` overwrites repo-skills/ from the openspec
 # CLI, then appends the kit's repo-skills-overlay/*.md (ADR 034). Neither half

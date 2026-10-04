@@ -1,7 +1,6 @@
 # Decisions
 
-Lightweight architecture decision records (ADRs) for non-obvious design choices.
-See [conventions/decisions.md](../../conventions/decisions.md) for the format.
+Lightweight architecture decision records (ADRs) for non-obvious design choices. See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 
 | #   | Decision                                                                                                  | Status     |
 | --- | --------------------------------------------------------------------------------------------------------- | ---------- |
@@ -57,3 +56,4 @@ See [conventions/decisions.md](../../conventions/decisions.md) for the format.
 | 050 | [Approval rules live in KIT.md, not in the conventions docs](050-approval-rules-live-in-kit-md.md)        | Accepted   |
 | 051 | [Move the record-writing rules on demand](051-record-writing-rules-on-demand.md)                          | Accepted   |
 | 052 | [Divide what a change writes by its reader](052-divide-a-change-by-reader.md)                             | Accepted   |
+| 053 | [One line per paragraph](053-one-line-per-paragraph.md)                                                   | Accepted   |

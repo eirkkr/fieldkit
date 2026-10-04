@@ -4,8 +4,7 @@ pytest conventions for Python repos.
 
 ## Structure and naming
 
-Write flat test functions - no class grouping. Each function gets a one-line
-docstring stating the behaviour under test (not how the test works):
+Write flat test functions - no class grouping. Each function gets a one-line docstring stating the behaviour under test (not how the test works):
 
 ```python
 def test_parse_empty_input_returns_none() -> None:
@@ -13,15 +12,11 @@ def test_parse_empty_input_returns_none() -> None:
     assert parse("") is None
 ```
 
-Mirror the source layout under `tests/`, one file per module:
-`tests/test_<module>.py` for top-level modules,
-`tests/<package>/test_<module>.py` for subpackages. Shared fixtures go in
-`conftest.py` at the appropriate directory level.
+Mirror the source layout under `tests/`, one file per module: `tests/test_<module>.py` for top-level modules, `tests/<package>/test_<module>.py` for subpackages. Shared fixtures go in `conftest.py` at the appropriate directory level.
 
 ## CLI testing
 
-Test entry points in-process with `monkeypatch.setattr` rather than subprocess -
-faster, and pytest can capture output:
+Test entry points in-process with `monkeypatch.setattr` rather than subprocess - faster, and pytest can capture output:
 
 ```python
 import sys
@@ -35,14 +30,11 @@ def test_run_exits_zero(monkeypatch: pytest.MonkeyPatch) -> None:
     assert exc.value.code == 0
 ```
 
-If `main()` does not call `sys.exit`, no `SystemExit` is raised - assert the
-return value or side effects directly instead.
+If `main()` does not call `sys.exit`, no `SystemExit` is raised - assert the return value or side effects directly instead.
 
 ## Golden / fixture-comparison tests
 
-When asserting against a stored fixture or expected output, strip volatile fields
-before comparing - timestamps, generated IDs, anything that changes between runs.
-Normalise on a copy so the original is not mutated:
+When asserting against a stored fixture or expected output, strip volatile fields before comparing - timestamps, generated IDs, anything that changes between runs. Normalise on a copy so the original is not mutated:
 
 ```python
 def test_export_matches_fixture(result: dict) -> None:
@@ -51,14 +43,11 @@ def test_export_matches_fixture(result: dict) -> None:
     assert stable == load_fixture("expected_export.json")
 ```
 
-Document which fields are volatile near the test or extract them into a shared
-helper if the same set recurs across tests.
+Document which fields are volatile near the test or extract them into a shared helper if the same set recurs across tests.
 
 ## Loading test data
 
-Cache a module-level loader whose data feeds collection - fixture `params`
-or `ids`, or a `parametrize` list. Collection calls it, and the fixture or
-test usually calls it again:
+Cache a module-level loader whose data feeds collection - fixture `params` or `ids`, or a `parametrize` list. Collection calls it, and the fixture or test usually calls it again:
 
 ```python
 @cache
@@ -72,12 +61,6 @@ def record(request: pytest.FixtureRequest) -> dict:
     return request.param
 ```
 
-This meets [code.md's caching rules](code.md#caching): nothing modifies the
-records, so they can stay plain dicts rather than immutable values. Pytest
-hands every test the same parameter objects whether or not the loader is
-cached, so the cache shares nothing new.
+This meets [code.md's caching rules](code.md#caching): nothing modifies the records, so they can stay plain dicts rather than immutable values. Pytest hands every test the same parameter objects whether or not the loader is cached, so the cache shares nothing new.
 
-Don't cache data read at run time, in a fixture body or a helper a test
-calls. Each test should own its copy: a shared record one test changes leaks
-into later tests, intermittently under parallel or random order. Parsing a
-test data file takes well under a millisecond.
+Don't cache data read at run time, in a fixture body or a helper a test calls. Each test should own its copy: a shared record one test changes leaks into later tests, intermittently under parallel or random order. Parsing a test data file takes well under a millisecond.
