@@ -7,7 +7,7 @@ Retire OpenSpec and the `review-gated` schema. A change keeps nothing about itse
 Each thing a change writes has one home and one reader:
 
 - **The change is an issue**, labelled `change`. Its body is the brief, and it is all the reviewer reads to approve the plan: why, what they get, the decisions made, the decisions that are theirs, and one line per stage. One screen.
-- **The build notes are one comment on that issue, edited in place.** They are the agent's, and they hold the change's current state rather than its history: the interfaces as built, each requirement with the test that holds it, stopgaps still to remove, assumptions not yet tested. They are never polished for a human, and they have a size cap - notes that outgrow it mean the change should be split.
+- **The build notes are a comment on that issue, written afresh at every gate.** They are the agent's, and they hold the change's current state: the interfaces as built, each requirement with the test that holds it, stopgaps still to remove, assumptions not yet tested. Each gate posts the notes whole as a new comment and hides the one before it as outdated, so the latest comment is the only one an agent reads and the earlier ones stay as the history. They are never polished for a human, and they have a size cap - notes that outgrow it mean the change should be split.
 - **A stage is a sub-issue of the change, and one pull request closes it.** The sub-issue is created with the plan, holding the stage's one line. Its steps are written into it when the stage starts, from the repository as it then is, not when the change is planned. Anything an earlier stage finds that changes a later one is a comment on the later stage's issue. A change small enough to be one stage has no sub-issues: it is an issue and a PR.
 - **A change that waits on another is marked blocked by it.** When the blocker closes, the waiting change's brief and notes are re-read against the repository before its first stage starts.
 - **A step is a commit.** Its body says why, and anything the step needed that the stage's plan did not anticipate.
@@ -41,6 +41,8 @@ The evidence is ten changes in one consumer repo, six of them review-gated, read
 
 **Keeping the build notes in a file deleted by the final stage was rejected.** It is easier to edit and to search, but it puts agent-only text back into every stage's diff, which is what the reviewer asked to be rid of.
 
+**Editing one build-notes comment in place was rejected.** It keeps the issue's thread shortest, but an edit replaces the whole comment, so one bad write loses the change's state with nothing beneath it, and how the notes stood at each gate survives only in GitHub's edit history, which nobody reads. **Appending only what each stage changed was rejected too:** the next agent would have to read every comment and work out which lines still hold, which is the accumulated note this ADR removes. A whole copy per gate costs a longer thread and gives both a single place to read and a history.
+
 **A checklist of stages in the issue body was rejected for sub-issues.** A sub-issue gives the stage's plan somewhere to be written when the stage starts, gives a later stage somewhere to receive what an earlier one found, and is closed by its PR without anyone ticking a box.
 
 **Keeping "look closely at" was considered.** It did once name the thing a gate was then sent back on. But it is the building agent reporting on itself to a reader who does not open it; the reviewer agents cover the same ground independently, and the choices the reviewer could overturn are asked as choices.
@@ -50,7 +52,8 @@ The evidence is ten changes in one consumer repo, six of them review-gated, read
 ## Consequences
 
 - **The history of a change is on GitHub, not in git.** A clone no longer carries it, a search of the repository no longer finds it, and edits to an issue are not reviewed diffs. Looking back over past changes - the work this ADR is itself the result of - reads issues and pull requests through `gh` rather than files: `gh issue list --label change --state all` finds them, and each one's stage PRs hold what departed, what review found and what was decided.
-- **That lookback depends on two things being written down.** The build notes are edited in place and keep no history worth reading, so the record of what happened is the stage PRs and their comments. A gate conversation held only in a terminal leaves nothing behind; recording its outcome on the PR is what replaces the note that used to capture it.
+- **That lookback depends on the gate being written down.** The build notes say how the change stood at each gate, not what happened at it; that record is the stage PRs and their comments. A gate conversation held only in a terminal leaves nothing behind, and recording its outcome on the PR is what replaces the note that used to capture it.
+- **The change's issue carries one build-notes comment per gate**, all but the last collapsed as outdated.
 - **No change is priced task by task before it starts** unless someone asks for that. The stage list is the estimate.
 - **Nothing enforces a spec format.** That behaviour is written down at all now rests on tests and docs being kept, and on the final review's check that every requirement has a test.
 - **More issues.** A five-stage change is six issues and five PRs.
