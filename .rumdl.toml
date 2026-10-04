@@ -3,8 +3,7 @@
 enabled = true
 style = "aligned"
 
-# One line per paragraph or list item: no hard wraps, so a diff shows what a
-# sentence changed rather than where the wrap fell (ADR 053).
+# One line per paragraph (ADR 053).
 [MD013]
 line-length = 0
 reflow = true
