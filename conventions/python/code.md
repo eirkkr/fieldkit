@@ -57,7 +57,7 @@ Pick the side that owns the value and pass it to the other, so it is written onc
 
 ## Multi-line text
 
-Relies on review (no linter). Write text of three or more lines as it will appear, in one triple-quoted string passed through `textwrap.dedent`. Put the opening and closing quotes on lines of their own, so every line of the text starts at the same indent, and end the block in `.strip()`. A line here is a line of the text produced, blank ones included; shorter text stays one literal.
+Relies on review (no linter). Write text of three or more lines as it will appear: one triple-quoted string passed through `textwrap.dedent`, the opening and closing quotes on lines of their own, ending in `.strip()`. Blank lines count as lines; shorter text stays one literal.
 
 ```python
 _BODY = textwrap.dedent(
@@ -69,9 +69,12 @@ _BODY = textwrap.dedent(
 ).strip()
 ```
 
-`_BODY` is `"Hello,\n\nYour report is ready."`. `dedent` removes only the indent every line shares, so a line indented further than the others keeps the difference. `.strip()` removes the whitespace at both ends, which here is the newline after the opening quotes and the one before the closing quotes. `inspect.cleandoc` would do the same for this example in one call, but `textwrap` is where a reader looks for text handling, and `cleandoc` also expands tabs.
+`_BODY` is `"Hello,\n\nYour report is ready."`: `dedent` removes only the indent the lines share, and `.strip()` the whitespace at both ends.
 
-Where the text must end in a newline or a blank line - a file's contents, a usage message written to a terminal - end the block in `.lstrip()`, which leaves the end as written:
+- Not adjacent string literals each ending in `\n`, nor a list of literals passed to `"\n".join` - both make the reader look past quotes to see the text.
+- Not `inspect.cleandoc`, which does the same here in one call - it also expands tabs, and `textwrap` is where a reader looks for text handling.
+
+End the block in `.lstrip()` where the text must end in a newline or a blank line:
 
 ```python
 _USAGE = textwrap.dedent(
@@ -85,26 +88,12 @@ _USAGE = textwrap.dedent(
 
 `_USAGE` is `"usage: prog [-h] FILE\n  FILE  the file to read\n  -h    show this help\n"`.
 
-Don't write the text as adjacent string literals each ending in `\n`, or as a list of literals passed to `"\n".join`. Both put quotes on every line, the first an escape as well, and the reader has to look past them to see the text:
-
-```python
-_SUMMARY = (
-    "Records                        3\n"
-    "\n"
-    "Requisite types\n"
-    "  PREREQUISITE                 4\n"
-    "  PRE-REQ                      1\n"
-    "\n"
-    "Maximum component depth        1"
-)
-```
-
 Four cases stay as adjacent literals:
 
-- **A line that ends in spaces.** Editors and pre-commit hooks strip trailing whitespace from source, which would change the text without anyone seeing it.
+- **A line that ends in spaces.** Editors and pre-commit hooks strip them from source.
 - **A first line that is indented or blank.** `.strip()` and `.lstrip()` both remove that indent or blank line.
-- **One long line wrapped across adjacent literals.** With no `\n` between them the literals make a single line of output, which is not multi-line text.
-- **An f-string that inserts a value which can span lines.** The value is inserted before `dedent` runs. Its second line starts at column 0, so the lines have no common indent and `dedent` removes nothing.
+- **One long line wrapped across adjacent literals.** With no `\n` between them it is a single line of output.
+- **An f-string that inserts a value which can span lines.** The value goes in before `dedent` runs, and its second line starts at column 0, so the lines share no indent to remove.
 
 [testing.md](testing.md#expected-multi-line-text) applies this to the text a test expects.
 
