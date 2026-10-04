@@ -25,7 +25,7 @@ Lightweight architecture decision records (ADRs) for non-obvious design choices.
 | 019 | [Route git actions through skills; git.md on demand](019-git-on-demand-via-skills.md)                     | Accepted   |
 | 020 | [Fold workflow.md into CLAUDE.md](020-fold-workflow-into-claude-md.md)                                    | Accepted   |
 | 021 | [Adopt OpenSpec, centralised via the kit](021-adopt-openspec-centralised-via-kit.md)                      | Superseded |
-| 022 | [Make OpenSpec skills model-discoverable](022-openspec-skills-model-discoverable.md)                      | Accepted   |
+| 022 | [Make OpenSpec skills model-discoverable](022-openspec-skills-model-discoverable.md)                      | Superseded |
 | 023 | [Block default-branch commits with a git hook](023-block-default-branch-commits-via-hook.md)              | Accepted   |
 | 024 | [Fix and catch formatter drift in one Stop hook](024-stop-hook-for-formatter-drift.md)                    | Superseded |
 | 025 | [State skill routing and push cadence always-on](025-skill-routing-stated-always-on.md)                   | Accepted   |
@@ -37,7 +37,7 @@ Lightweight architecture decision records (ADRs) for non-obvious design choices.
 | 031 | [Re-gate PR/merge invocation, unless directly invoked](031-regate-pr-and-merge-invocation.md)             | Accepted   |
 | 032 | [Merge waits out pending CI instead of stopping](032-merge-waits-out-pending-ci.md)                       | Accepted   |
 | 033 | [Let the pr agent open the PR itself](033-pr-agent-opens-the-pr.md)                                       | Superseded |
-| 034 | [Gate OpenSpec stages on human review](034-review-gated-openspec-schema.md)                               | Accepted   |
+| 034 | [Gate OpenSpec stages on human review](034-review-gated-openspec-schema.md)                               | Superseded |
 | 035 | [Attribute formatter drift by measuring the fixer](035-measure-the-fixer-not-the-transcript.md)           | Accepted   |
 | 036 | [Publish publicly under MIT](036-public-mit-with-upstream-notice.md)                                      | Accepted   |
 | 037 | [Split the kit entry from its own rules](037-split-kit-entry-from-own-rules.md)                           | Accepted   |
@@ -57,4 +57,4 @@ Lightweight architecture decision records (ADRs) for non-obvious design choices.
 | 051 | [Move the record-writing rules on demand](051-record-writing-rules-on-demand.md)                          | Accepted   |
 | 052 | [Divide what a change writes by its reader](052-divide-a-change-by-reader.md)                             | Accepted   |
 | 053 | [One line per paragraph](053-one-line-per-paragraph.md)                                                   | Accepted   |
-| 054 | [A change is an issue, and a stage is a pull request](054-a-change-is-an-issue.md)                        | Proposed   |
+| 054 | [A change is an issue, and a stage is a pull request](054-a-change-is-an-issue.md)                        | Accepted   |

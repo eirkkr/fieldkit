@@ -43,3 +43,5 @@ A review that is nominally of everything and actually of nothing is worse than o
 - The plan brief is one more thing a gate must keep true when the plan changes. The stage brief's plan item says so.
 - A `tasks.md` written before this change has no plan brief and its closed gates carry single-list notes. Neither needs a rewrite: the `apply` instruction is read on every run, so the next gate writes the new form.
 - The rule stands in the schema's `tasks` and `apply` instructions, its tasks template, the overlay on `openspec-apply-change`, the vendored skill that ends with it, and `conventions/specs.md`.
+
+> [054](054-a-change-is-an-issue.md) keeps this division and moves both halves out of `tasks.md`: the reviewer's briefs are the change's issue body and each stage's PR body, and what the implementing agent reads is the build notes, a comment on the change's issue. "Look closely at" is dropped from the stage brief; "least sure of" stays in the plan's.

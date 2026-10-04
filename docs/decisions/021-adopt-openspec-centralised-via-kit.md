@@ -40,3 +40,5 @@ Alternatives rejected:
 ## Superseded
 
 Superseded in part by [ADR 022](022-openspec-skills-model-discoverable.md): the vendored skills are no longer patched with `disable-model-invocation: true`, so Claude can invoke them without a deliberate `/` command. Everything else here - centralisation via the kit, per-repo opt-in, the vendoring mechanism - is unchanged.
+
+Superseded in full by [ADR 054](054-a-change-is-an-issue.md): new changes are planned and built on GitHub, as an issue and its pull requests, and OpenSpec is retired. The CLI, the vendored skills and the per-repo opt-in described here stay in the kit only until no consumer has an OpenSpec change in flight.

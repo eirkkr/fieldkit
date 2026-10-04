@@ -16,3 +16,5 @@ Per-repo opt-in (the rest of ADR 021) already bounds the context cost: only a re
 - `scripts/openspec-refresh.sh` is simpler: it no longer patches generated SKILL.md files before vendoring them.
 - `conventions/specs.md` updated to describe auto-discovery instead of deliberate `/` invocation.
 - This does not revisit the rest of ADR 021 (centralisation via the kit, per-repo opt-in, vendoring mechanism) - only the per-session hiding.
+
+> Superseded by [054](054-a-change-is-an-issue.md): OpenSpec is retired for new changes, which are planned and built by two kit skills linked into every repo. The vendored skills this ADR made discoverable stay only until no consumer has an OpenSpec change in flight.
