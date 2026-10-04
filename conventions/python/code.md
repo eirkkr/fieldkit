@@ -1,6 +1,6 @@
 # Python code conventions
 
-Conventions for authoring Python source: docstrings, imports, member ordering, constants, enum values, record types, caching, and exception handling. Several rules below have no automated enforcement and rely on review.
+Conventions for authoring Python source: docstrings, imports, member ordering, constants, multi-line text, enum values, record types, caching, and exception handling. Several rules below have no automated enforcement and rely on review.
 
 ## Docstrings
 
@@ -54,6 +54,49 @@ If none of them is true, an `Enum` is work for nothing. A name that is written o
 None of this helps when the same value is also written outside Python. Take a submit button: Python defines `SAVE = "save"` and checks `if SAVE in request.form`, while the template hand-writes `name="save"`. Nothing connects the two, so renaming the constant just means Python stops finding the button - no error, no failing import, the button silently does nothing.
 
 Pick the side that owns the value and pass it to the other, so it is written once. For a template, that means handing the constants to the template engine and rendering `name="{{ SAVE }}"` instead of typing the string again.
+
+## Multi-line text
+
+Relies on review (no linter). Write text of three or more lines as it will appear, in one triple-quoted string passed through `textwrap.dedent`, with the opening and closing quotes on lines of their own. A line here is a line of the text produced, blank ones included.
+
+```python
+_BODY = textwrap.dedent(
+    """
+    Hello,
+
+    Your report is ready.
+    """
+).strip()
+```
+
+`_BODY` is `"Hello,\n\nYour report is ready."`. `dedent` removes only the indent every line shares, so a line indented further than the others keeps the difference. `inspect.cleandoc` would do the work of both calls in one, but `textwrap` is where a reader looks for text handling, and `cleandoc` also expands tabs.
+
+Don't write the text as adjacent string literals each ending in `\n`, or as a list of literals passed to `"\n".join`. Both put quotes and an escape on every line, and the reader has to look past them to see the text:
+
+```python
+_SUMMARY = (
+    "Records                        3\n"
+    "\n"
+    "Requisite types\n"
+    "  PREREQUISITE                 4\n"
+    "  PRE-REQ                      1\n"
+    "\n"
+    "Maximum component depth        1"
+)
+```
+
+`.strip()` drops the newline after the opening quotes and the one before the closing quotes. Where the text must end in a newline - a file's contents, a usage message written to a terminal - end the block in `.lstrip()`, which drops only the first:
+
+```python
+_USAGE = textwrap.dedent(
+    """
+    usage: prog [-h] FILE
+      -h  show this help
+    """
+).lstrip()
+```
+
+`_USAGE` is `"usage: prog [-h] FILE\n  -h  show this help\n"`.
 
 ## Enum values
 
