@@ -1,6 +1,6 @@
 # Planning and building a change
 
-How a piece of work too big for one pull request is planned, built and reviewed. A change lives on GitHub - an issue, its sub-issues and their pull requests - and leaves nothing about itself in the repository's files ([ADR 054](../docs/decisions/054-a-change-is-an-issue.md)). This file says what each of those must contain. The `change-plan` and `change-stage` skills carry it out, and a change planned any other way is built the same once it meets what is written here.
+How a piece of work too big for one pull request is planned, built and reviewed. A change lives on GitHub - an issue, its sub-issues and their pull requests - and leaves nothing about itself in the repository's files ([ADR 054](../docs/decisions/054-a-change-is-an-issue.md)). This file says what each of those must contain. The `change-plan` and `change-stage` skills carry it out, each pointing here by heading for the form of what it writes, and a change planned any other way is built the same once it meets what is written here.
 
 ## When work is a change
 
@@ -42,25 +42,25 @@ The change's issue is labelled `change`, and its body is the brief: all the revi
 
 Everything but the requirements fits one screen.
 
-- The brief describes behaviour and interfaces, never file paths or code: both are out of date before the stage that needs them starts.
+- The brief names behaviour and interfaces - a type, a command, a rule - which survive a refactor. A file path or a snippet is out of date before the stage that needs it starts.
 - Another issue is named by its title, with the link inside the name. A row of bare numbers cannot be read.
 - The brief always says the plan as it now stands. Every edit to it comes with a comment on the issue saying what changed, why, and where that was decided - the body is the plan, and the comments under it are how the plan got there.
 
 ### Asking first, and approval
 
 - Planning starts with questions. Before the brief is written, the reviewer is asked what only they can decide, one question at a time.
-- A reviewer agent that did not write the plan reads the brief and the first build notes before the reviewer does.
+- A fresh agent reads the brief and the first build notes before the reviewer does.
 - Approval is a comment on the issue whose first line is `Plan approved by @<login>.` A change with that comment may be built; one without it may not.
 - The stage sub-issues are created on approval, not before.
 - A plan turned down is closed as not planned. Its brief and notes stay, as the record of what was priced and why it was not done.
 
 ## The build notes
 
-The build notes are a comment on the change's issue whose first line is `## Build notes`. They are written for the next agent and never polished for a person.
+The build notes are a comment on the change's issue whose first line is `## Build notes`. They are written for the next agent, in whatever form serves it; no person is asked to read them.
 
 - The first is posted with the plan. It holds what only the build needs: the contracts between the change's parts - fields, types, what may be absent - and the assumptions the plan rests on but has not proved, each with the stage that will test it.
 - Each later one is posted when a stage has been approved and merged, and adds the state: the interfaces as built, which test holds each requirement, stopgaps still to remove.
-- The notes name a requirement by its number and never restate one. The brief holds the only copy.
+- The notes name a requirement by its number. The brief holds the only copy of its words.
 - Each is posted whole. The agent posting reads the newest first and carries it forward, then hides the one before it as outdated. The newest comment that opens with the marker is the only one read; the earlier ones are the history.
 - About 150 lines is the cap. Notes that outgrow it mean the change should have been two.
 
@@ -116,8 +116,8 @@ A decision made while a stage is reviewed is written down where it will be found
 
 Three things are done by someone other than the agent planning or building: the questions before a plan, the review of a plan, and the review of a stage.
 
-- A stage is read by agents with no context from building it, on two axes kept apart: the repo's conventions, including whether everything a person will read is in plain words; and the requirements the stage's issue says it delivers.
-- The building agent reproduces each finding before acting on it, then sorts it: fixed in this stage, edited into the later stage that will handle it, or listed as an issue to file. Listed issues are filed when the reviewer says so.
+- A stage is read by *fresh* agents - each given the diff and the rules it checks against, and nothing from the build - on two axes kept apart: the repo's conventions, including whether everything a person will read is in plain words; and the requirements the stage's issue says it delivers.
+- The building agent reproduces each finding, then triages it: fixed in this stage, edited into the later stage that will handle it, or listed as an issue to file. Listed issues are filed when the reviewer says so.
 - A repo can name the skills that fill each of the three, under a `## Change skills` heading in its own `CLAUDE.md`, and the reviewer can name one for a single run. What is said in the conversation wins over the repo, and the repo over the default.
 
   ```markdown
@@ -134,7 +134,7 @@ Three things are done by someone other than the agent planning or building: the 
 
 The last stage of every change reads the change as a whole, since no stage's review saw it that way.
 
-- Reviewer agents read the whole change's diff in three directions: requirements unmet, things built that no requirement asked for, and requirements no test holds. The third is the one nothing else catches.
+- Fresh agents read the whole change's diff in three directions: requirements unmet, things built that no requirement asked for, and requirements no test holds. The third is the one nothing else catches.
 - Every issue the change cites - in code, comments and docs - is re-read: still open, and still about the thing cited.
 - The findings are the closing comment on the change's issue. So is anything the change showed the process got wrong, and where that was a mistake a mechanical check could have caught, the check is proposed rather than another written rule.
 - What the final review fixes is a stage like any other, and when it fixes nothing there is no PR. Either way the change is closed by the reviewer, who is asked once the findings are posted.

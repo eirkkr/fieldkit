@@ -1,61 +1,54 @@
 ---
 name: change-plan
-description: Plan a change as a GitHub issue - questions, brief, build notes, review, approval, stage issues
+description: Plan a change - work too big for one pull request, or that leaves the reviewer a decision - or act on the reviewer's answer to a plan.
 argument-hint: "[what the change is, or the issue that asks for it]"
 ---
 
 # Plan a change
 
-Read `conventions/specs.md` first: it says what a change is, and what its brief, build notes and stage issues must contain. This skill is how one gets written. `$ARGUMENTS`, if given, is what the change is about.
+The form of everything written here is in `conventions/specs.md`, under the heading each step names. `$ARGUMENTS`, if given, is what the change is about.
 
-Being asked to plan a change is the approval to file its issue. Nothing here builds anything.
+A *fresh* agent is a subagent given only what a step lists, and nothing from this conversation.
 
-## 1. Check it is a change
+When the reviewer has answered a plan already published, go to [ANSWER.md](ANSWER.md).
 
-Apply the three tests in `conventions/specs.md`. If a single PR could be opened for the work now without asking anything, say so and stop - it is ordinary work. Otherwise say which test it met.
+## 1. Test that it is a change
 
-## 2. Read before asking
+Apply "When work is a change". Done when the reviewer has been told which test the work meets - or that it meets none, in which case it is a branch and a PR, and this skill ends.
 
-- The code, docs and ADRs in the area, enough to ask questions the repo cannot answer.
-- `gh issue list --label change --state open --json number,title` for a change this one overlaps or must wait on.
-- The repo's `CLAUDE.md` for a `## Change skills` heading, and the conversation for a skill named for this run.
+## 2. Ask
 
-## 3. Ask
+List what only the reviewer can decide, and `gh issue list --label change --state open` for a change this one overlaps or waits on. Ask one question at a time, each with the answer you would pick. A skill named for the questions - in the conversation, else under `## Change skills` in the repo's `CLAUDE.md` - asks in your place.
 
-Ask the reviewer what only they can decide, one question at a time, each with the answer you would pick. With a skill named for the questions, invoke it instead. Stop asking when what is left can be settled by reading the code.
+Done when every question has the reviewer's answer, or their word that it stays open.
 
-## 4. Draft the brief and the first build notes
+## 3. Draft
 
-Write both to the form in `conventions/specs.md`. Keep the two readers apart: the brief is the reviewer's and is in plain words; the notes are the next agent's.
+Write the brief ("The brief") for the reviewer, in plain words, and the first build notes ("The build notes") for the next agent.
 
-- A decision that would outlast the change is an ADR, written now.
-- If the change comes from an existing issue, leave that issue as it is. The brief names it, and the reviewer is asked to close it with the change.
-- Both are published as written. Every line is for a reader who never saw this conversation.
+- A decision that outlasts the change is an ADR, written now.
+- An existing issue that asks for the change stays as it is. The brief names it.
+- Both are published as written: every line reads to someone who never saw this conversation.
 
-## 5. Have the plan reviewed
+Done when every section of the brief is filled or says it is empty, and every stage line names the requirements it delivers.
 
-Dispatch a subagent with no context from this conversation. Give it the draft brief, the draft notes and `conventions/specs.md`, and nothing else. Ask it:
+## 4. Fresh review
+
+Dispatch a fresh agent with the draft brief, the draft notes and `conventions/specs.md`. Ask it:
 
 - Can a test hold each requirement as written?
 - Does each stage meet the stage rules, and deliver what its line says?
 - What would an agent building stage 1 from these alone have to guess?
-- What does the brief contradict - in itself, the notes, or the repo's ADRs?
+- What does the brief contradict - in itself, in the notes, or in the repo's ADRs?
 
-With a skill named for plan review, invoke it as well. Check each finding against the repo before acting on it, and fix the draft.
+A skill named for plan review runs as well. Triage each finding against the repo: fix the draft, or record why the finding is wrong.
 
-## 6. Publish, and stop
+Done when every finding has one of those two outcomes.
 
-1. Create the `change` label if the repo lacks it: `gh label list --search change`, then `gh label create change --description "A change planned and built in stages"`.
-2. `gh issue create --label change --title "<title>" --body-file <brief>`, with `--blocked-by <n>` for a change it waits on.
-3. `gh issue comment <n> --body-file <notes>` - the first build notes.
-4. Show the reviewer the brief as published and the issue's URL, and what the plan review found. Then stop and wait.
+## 5. Publish, and stop
 
-## 7. On the reviewer's answer
+1. File the issue with the `change` label, creating the label if the repo lacks it, and `--blocked-by <n>` for a change it waits on.
+2. Post the notes as its first comment.
+3. Show the reviewer the brief as published, the issue's URL, and each review finding with its outcome.
 
-- **Changes asked for:** edit the brief with `gh issue edit <n> --body-file`, comment what changed and why, and stop again.
-- **Approved:**
-  1. `gh issue comment <n> --body "Plan approved by @$(gh api user -q .login)."`
-  2. Create each stage, in order: `gh issue create --parent <n> --title "Stage <k> - <name>" --body-file <stage>`, the body holding the stage's one line and the requirements it delivers.
-  3. Mark a stage blocked only where it cannot be built without another: `gh issue edit <stage> --add-blocked-by <other>`.
-  4. Report the stages created. Do not start one: approval of a plan is not a request to build it.
-- **Turned down:** `gh issue close <n> --reason "not planned" --comment "<why>"`, once the reviewer has said to close it.
+Then stop. The reviewer's answer is the next step, and [ANSWER.md](ANSWER.md) handles it.
