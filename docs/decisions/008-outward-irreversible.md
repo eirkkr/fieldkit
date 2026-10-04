@@ -2,90 +2,46 @@
 
 ## Decision
 
-Agents seek approval only before actions that are outward-facing or
-irreversible: creating or editing issues or comments, marking a PR ready for
-review, and squash-merging to main (with its message). Local, pre-merge work -
-creating branches, editing docs and code, committing, and pushing draft PRs -
-is act-then-show: do it, surface it (the diff or PR), and correct after. First
-push is a review checkpoint, not a gate. The principle is stated once in
-`CLAUDE.md` and applied in `conventions/workflow.md` and `conventions/git.md`.
+Agents seek approval only before actions that are outward-facing or irreversible: creating or editing issues or comments, marking a PR ready for review, and squash-merging to main (with its message). Local, pre-merge work - creating branches, editing docs and code, committing, and pushing draft PRs - is act-then-show: do it, surface it (the diff or PR), and correct after. First push is a review checkpoint, not a gate. The principle is stated once in `CLAUDE.md` and applied in `conventions/workflow.md` and `conventions/git.md`.
 
 ## Reason
 
-Pre-approval on every step (the branch name, each doc edit) added round-trips
-for little safety: local pre-merge work is cheap to amend or revert with git, so
-the gates mostly cost turns. Gating only the outward and irreversible points
-keeps protection where mistakes are costly - public artefacts, and the shared
-`main` branch every consumer pulls - while taking friction off reversible local
-work.
+Pre-approval on every step (the branch name, each doc edit) added round-trips for little safety: local pre-merge work is cheap to amend or revert with git, so the gates mostly cost turns. Gating only the outward and irreversible points keeps protection where mistakes are costly - public artefacts, and the shared `main` branch every consumer pulls - while taking friction off reversible local work.
 
 Alternatives rejected:
 
-- **Gate each step** (branch creation, doc text before editing). High friction,
-  and the gated steps are trivially reversible, so the gate mostly bought
-  round-trips, not safety.
-- **No gates, review only after merge.** A merge to `main` is irreversible and
-  propagates to every consumer, and outward actions (issues, review requests)
-  reach other people - those genuinely need a stop.
+- **Gate each step** (branch creation, doc text before editing). High friction, and the gated steps are trivially reversible, so the gate mostly bought round-trips, not safety.
+- **No gates, review only after merge.** A merge to `main` is irreversible and propagates to every consumer, and outward actions (issues, review requests) reach other people - those genuinely need a stop.
 
 ## Consequences
 
-- Wrong-but-local outcomes (a misnamed branch, an off doc edit) are corrected
-  after the fact rather than prevented. Accepted: cheaper than gating every step.
-- The pre-merge message is the single substantive review point; the agent drafts
-  it proactively so it is not an extra round-trip.
-- A genuinely new convention or design decision still has its direction agreed
-  first, in discussion, since redoing it is costly - the one place pre-agreement
-  is kept.
-- `conventions/github.md` already matched this model (draft PRs need no approval;
-  the gates are ready-for-review and the pre-merge message), so only `CLAUDE.md`,
-  `workflow.md`, and `git.md` changed.
+- Wrong-but-local outcomes (a misnamed branch, an off doc edit) are corrected after the fact rather than prevented. Accepted: cheaper than gating every step.
+- The pre-merge message is the single substantive review point; the agent drafts it proactively so it is not an extra round-trip.
+- A genuinely new convention or design decision still has its direction agreed first, in discussion, since redoing it is costly - the one place pre-agreement is kept.
+- `conventions/github.md` already matched this model (draft PRs need no approval; the gates are ready-for-review and the pre-merge message), so only `CLAUDE.md`, `workflow.md`, and `git.md` changed.
 
-> Amended by [011](011-wip-on-branches.md): drafts are dropped and WIP lives on
-> the branch; the ready-for-review gate is relocated onto PR creation. The
-> principle here stands - opening a PR and merging remain gated, and branch
-> pushes join act-then-show.
+> Amended by [011](011-wip-on-branches.md): drafts are dropped and WIP lives on the branch; the ready-for-review gate is relocated onto PR creation. The principle here stands - opening a PR and merging remain gated, and branch pushes join act-then-show.
 
 <!-- -->
 
-> The "stated once" restatement drifted into two overlapping copies (in
-> `CLAUDE.md` and `workflow.md`); [020](020-fold-workflow-into-claude-md.md)
-> collapses them back into one paragraph in `CLAUDE.md`. No change to the
-> principle itself.
+> The "stated once" restatement drifted into two overlapping copies (in `CLAUDE.md` and `workflow.md`); [020](020-fold-workflow-into-claude-md.md) collapses them back into one paragraph in `CLAUDE.md`. No change to the principle itself.
 
 <!-- -->
 
-> Amended by [026](026-pr-description-sync-on-push.md): the carve-out noted
-> above for `github.md`'s ungated PR title/body edits is withdrawn - those
-> edits are now drafted and approved like other outward-facing changes. The
-> principle here is unchanged; 026 argues the carve-out never fit it.
+> Amended by [026](026-pr-description-sync-on-push.md): the carve-out noted above for `github.md`'s ungated PR title/body edits is withdrawn - those edits are now drafted and approved like other outward-facing changes. The principle here is unchanged; 026 argues the carve-out never fit it.
 
 <!-- -->
 
-> Amended by [028](028-ungate-pr-creation.md): opening a PR moves back to
-> act-then-show, on the argument that it's cheap to correct after the fact
-> like the rest of the local git workflow, not that it stopped being
-> outward-facing. Merging and editing an *open* PR's title/body - the
-> genuinely irreversible or human-authored-content risks - stay gated.
+> Amended by [028](028-ungate-pr-creation.md): opening a PR moves back to act-then-show, on the argument that it's cheap to correct after the fact like the rest of the local git workflow, not that it stopped being outward-facing. Merging and editing an *open* PR's title/body - the genuinely irreversible or human-authored-content risks - stay gated.
 
 <!-- -->
 
-> Amended by [029](029-ungate-pr-body-edits.md): editing an open PR's
-> title/body joins the act-then-show side too, on the same cheap-to-correct
-> argument 028 made for creation. Merging is the only gate this ADR's model
-> still protects.
+> Amended by [029](029-ungate-pr-body-edits.md): editing an open PR's title/body joins the act-then-show side too, on the same cheap-to-correct argument 028 made for creation. Merging is the only gate this ADR's model still protects.
 
 <!-- -->
 
-> Amended by [030](030-ungate-merge.md): merging drops the approval gate
-> too, replaced by an unconditional CI/mergeability check. Nothing this ADR
-> originally gated is still gated on human approval; a genuinely new
-> convention or design decision is the only case left where direction is
-> agreed first.
+> Amended by [030](030-ungate-merge.md): merging drops the approval gate too, replaced by an unconditional CI/mergeability check. Nothing this ADR originally gated is still gated on human approval; a genuinely new convention or design decision is the only case left where direction is agreed first.
 
 <!-- -->
 
-> Amended by [038](038-ungate-issue-filing.md): filing an issue, commenting
-> on one, and editing either move to act-then-show as well, on the same
-> cheap-to-correct argument. Closing an issue is the piece of this ADR's
-> outward-facing gate that survives.
+> Amended by [038](038-ungate-issue-filing.md): filing an issue, commenting on one, and editing either move to act-then-show as well, on the same cheap-to-correct argument. Closing an issue is the piece of this ADR's outward-facing gate that survives.
