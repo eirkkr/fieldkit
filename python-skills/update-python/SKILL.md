@@ -27,10 +27,10 @@ Done when the reply's first line states the move and its kind, e.g. "3.14.7 → 
 
 ## 2. Dependencies first
 
-Bring packages and tools up to date before the interpreter. Their newer releases are where support for a new Python arrives, so a stale lock reports blockers a dependency update would clear, and with dependencies already green, any failure after the move belongs to Python.
+Packages and tools move before the interpreter ("Moved by an interpreter update" in `.fieldkit/conventions/python/setup.md` says why).
 
 - Run `uv tree --outdated --depth 1` for the direct dependencies, every group included.
-- Compare `uv --version` with the newest uv release (`gh release view -R astral-sh/uv --json tagName`). An older uv may not know the target release at all.
+- Compare `uv --version` with the newest uv release (`gh release view -R astral-sh/uv --json tagName`).
 
 On a minor move with anything outdated, recommend running `update-deps` first and wait for the user's answer. Going ahead is their call. On a patch move, mention what is outdated and carry on.
 
@@ -68,13 +68,15 @@ Done when every category has been reported, with any empty category stated as em
 
 ## 5. Raise every pin
 
-Every pin naming the full version moves on both kinds of move:
+These are the groups in "Moved by an interpreter update" (`.fieldkit/conventions/python/setup.md`), listed site by site.
+
+**Full version**, raised on both kinds of move:
 
 - `.python-version` (already raised in step 3)
 - base images: `FROM` in every Dockerfile, service `image:` tags
 - CI: `python-version:` inputs, matrix entries, cache keys that embed the version
 
-*Minor only.* Some pins name only the minor, and a minor move raises them too:
+**Minor only**, raised on a minor move:
 
 - `requires-python` (already raised in step 3)
 - `Programming Language :: Python :: X.Y` classifiers
