@@ -21,8 +21,8 @@ The repo needs a `just check` recipe running the full lint, type-check, and test
 
 - Find releases with `uv python list --all-versions`. uv only knows the releases that existed when its own version shipped, so a release newer than uv returns nothing, or only release candidates. Before you conclude a release is missing, check python.org.
 - The target is a final release. Ask before you target a pre-release.
-- Every base image the repo builds from must exist at the target patch, e.g. `docker manifest inspect python:3.15.0-slim-trixie` for each `FROM`. A missing image is a blocker (step 3).
-- A base image tag also names an OS release (`slim-trixie` is Debian 13). List the target patch's variants on the registry, and when one names a newer release of the same OS (a `slim-forky` beside `slim-trixie`), recommend moving to it as part of this move. Ask before you do: a new OS release can drop or rename system packages the image relies on.
+- A base image whose tag names the Python version must exist at the target patch, e.g. `docker manifest inspect python:3.15.0-slim-trixie`. A missing image is a blocker (step 3). An image that gets Python from `uv python install` follows `.python-version` and needs no check.
+- A base image tag also names an OS release (`slim-trixie`, `debian:trixie-slim`: Debian 13). Check the registry for a newer release of the same OS (`forky` beside `trixie`), and when one is out, recommend moving to it as part of this move. Ask before you do: a new OS release can drop or rename system packages the image relies on.
 
 Done when the reply's first line states the move and its kind, e.g. "3.14.7 → 3.15.0 (minor)".
 
@@ -43,7 +43,7 @@ Prove the dependencies work on the target before you change anything else. On th
 
 1. On a minor move, set `requires-python` to the form in `.fieldkit/conventions/python/setup.md` first, since `uv python pin` refuses a version outside it. uv has no command for `requires-python`, so it is the one hand edit to `pyproject.toml` this skill makes. Then run `uv python pin <target patch>`.
 2. Run `uv lock`. A dependency that caps `requires-python` below the target fails resolution here.
-3. Run `uv sync --all-groups --no-build`. A dependency with no wheel for the target fails here, even one that would build from source. For each failure, check whether the sdist is pure Python, which is safe to build. Compiled code with no wheel is a blocker.
+3. Run `uv sync --all-groups --no-build`. A dependency with no wheel for the target fails here, even one that would build from source. For each failure, check whether the sdist is pure Python, which is safe to build. Compiled code with no wheel is a blocker, even with a pure-Python fallback: an image with no compiler installs the fallback without a word, and the package runs without its extension.
 4. *Minor only.* Every tool `just check` runs must support the target. That includes the version name in the tool's own config, e.g. ruff `target-version = "py315"` and mypy `python_version`. A tool that rejects the target's version name, or whose newest release predates the target, is a blocker. `update-deps` may have a newer release that clears it.
 
 Done when `uv lock` and the `--no-build` sync both succeed and, on a minor move, every tool is confirmed ready. Otherwise, a blocker list names each package, tool or image, what is missing, and the upstream issue tracking it.
@@ -74,7 +74,7 @@ These are the groups in "Moved by an interpreter update" (`.fieldkit/conventions
 **Full version**, raised on both kinds of move:
 
 - `.python-version` (already raised in step 3)
-- base images: `FROM` in every Dockerfile, service `image:` tags. Where a `FROM` is pinned by digest, re-resolve it for the new tag (`docker buildx imagetools inspect python:<tag>`).
+- base images whose tag names the Python version: `FROM` in every Dockerfile, service `image:` tags. Where a `FROM` is pinned by digest, re-resolve it for the new tag (`docker buildx imagetools inspect python:<tag>`).
 - CI: `python-version:` inputs, matrix entries, cache keys that embed the version
 
 **Minor only**, raised on a minor move:

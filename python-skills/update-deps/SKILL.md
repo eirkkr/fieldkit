@@ -66,7 +66,7 @@ Include every "new feature" or "new config option" surfaced above, with an expli
      - To pick up a version that already satisfies the existing constraint (a lock-only refresh): `uv lock --upgrade-package <name>`, or `uv lock --upgrade` to refresh every dependency at once.
    - Follow the pinning convention in `.fieldkit/conventions/python/setup.md`.
    - A bump that fails because the new version's `requires-python` excludes the project's Python is waiting on `update-python`, not a dead end. Report it as such, leave it out, and carry on with the rest.
-   - For patch and minor bumps, batch them and run `just check` once at the end. For major version bumps, do one at a time so failures attribute cleanly. The user can override this default.
+   - Batch the minor bumps and run `just check` once at the end. Bump majors one at a time, each with its own `just check`, so failures attribute cleanly. The user can override this default.
 
 4. Check the pins `uv tree --outdated` can't see (see "Moved by a dependency update" in `.fieldkit/conventions/python/setup.md`). Find them two ways:
    - **Sweep the tree:** `[build-system] requires`, `.python-version`, `Dockerfile` `FROM` and `COPY --from=`, `uses:` and `version:` in `.github/`, service `image:` tags, `docker run` images, and `rev:` in `.pre-commit-config.yaml`.
@@ -78,9 +78,7 @@ Include every "new feature" or "new config option" surfaced above, with an expli
 
    Leave `.python-version` and Python base images where they are. When a newer Python is out, report it and recommend running `update-python` once this update lands.
 
-5. If new config options or rules are worth enabling, propose the change and wait for approval before editing config files. Adopting a newly-available option is part of the dependency update, not separate work: make the change
-   - and any small cleanup it surfaces, such as fixing newly-flagged lint
-   violations - on the dependency-update branch itself rather than deferring it to a follow-up issue. If the option is performance-related (e.g. a parallelism flag), benchmark it empirically across a range of values rather than assuming more is better.
+5. If new config options or rules are worth enabling, propose the change and wait for approval before editing config files. Adopting a newly-available option is part of the dependency update, not separate work: make the change - and any small cleanup it surfaces, such as fixing newly-flagged lint violations - on the dependency-update branch itself rather than deferring it to a follow-up issue. If the option is performance-related (e.g. a parallelism flag), benchmark it empirically across a range of values rather than assuming more is better.
 
 ---
 
@@ -104,7 +102,6 @@ When bumping a linter (ruff, mypy, djlint, rumdl, etc):
 
 ## Notes
 
-- Flag major version bumps explicitly before proceeding.
 - A bump can need a step outside uv before it can be verified, and a suite `just check` leaves out. A new `playwright` needs `playwright install` for its browser build, and the browser suite then has to run. When a bump touches what such a suite exercises, run it too.
 - When a library adds inline types (look for "inline types", "py.typed", or "replaces typeshed" in the changelog), check whether the project has a `types-<package>` stub in dev deps and propose removing it. The typeshed stubs PyPI page usually states the recommended action explicitly.
 - If `just check` fails after a bump, verify the failure is not pre-existing on the base branch before assuming the bump caused it (a quick `git stash && <linter> && git stash pop` confirms). If it is, say what an issue for it would contain and ask whether to file it or fix it here, then continue.
