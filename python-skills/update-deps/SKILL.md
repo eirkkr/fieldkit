@@ -74,6 +74,8 @@ Include every "new feature" or "new config option" surfaced above, with an expli
 
    If the two disagree, the file is stale - propose a fix alongside the bumps. With no file, report the sweep's pins.
 
+   An image tag can name an OS release as well as a version (`mongo:7.0-noble`, `node:24-trixie`). Check each such tag for a newer release of the same OS and report it with the bumps. Where an image is pinned by digest, raising its tag means re-resolving the digest (`docker buildx imagetools inspect <image>:<tag>`).
+
    Leave `.python-version` and Python base images where they are. When a newer Python is out, report it and recommend running `update-python` once this update lands.
 
 5. If new config options or rules are worth enabling, propose the change and wait for approval before editing config files. Adopting a newly-available option is part of the dependency update, not separate work: make the change

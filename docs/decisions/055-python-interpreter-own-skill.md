@@ -29,5 +29,6 @@ Alternatives rejected:
 
 - `enable-python.sh` links the new skill with no change. A consumer that has already opted in reruns it.
 - `conventions/python/setup.md` lists the minor-only pins next to the ones `update-deps` sweeps, so the lists change together, as ADR 044 requires for a new kind of pin site.
+- Where a repo pins its Python base image by digest ([`conventions/ci.md`](../../conventions/ci.md)), Dependabot refreshes the digest and `update-python` moves the version, so Dependabot is set to ignore that image's version updates. The image's OS release (`-slim-trixie`) is checked by `update-python` on each move: neither Dependabot nor a tag bump proposes a new one.
 - A patch move pays for a readiness gate that rarely finds anything. It takes seconds, and catches a base image not yet published at the new patch.
 - `update-python` uses `uv sync --no-build` as its wheel probe. If uv drops or renames that flag, the gate stops working silently, so a uv bump that touches it needs the skill checked too.

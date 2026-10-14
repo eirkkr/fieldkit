@@ -50,7 +50,7 @@ Common mistakes to avoid:
 
 The Python version moves in a change of its own, after the dependencies are current. Support for a new Python arrives in packages' newer releases, so with dependencies current first, the move hits fewer blockers and any failure after it belongs to Python.
 
-- **Full version** - `.python-version` and the Python base image tag. Every move raises them, patch or minor.
+- **Full version** - `.python-version` and the Python base image tag, with its digest where the image is pinned by one. Every move raises them, patch or minor. The tag also names an OS release (`-slim-trixie` is Debian 13), which can move on its own when a newer one is out.
 - **Minor only** - `requires-python`, the `Programming Language :: Python :: X.Y` classifier, and tool targets such as ruff `target-version` and mypy `python_version`. Only a move to a new minor raises them.
 
 ### Pins that must agree

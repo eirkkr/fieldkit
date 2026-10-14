@@ -22,6 +22,7 @@ The repo needs a `just check` recipe running the full lint, type-check, and test
 - Find releases with `uv python list --all-versions`. uv only knows the releases that existed when its own version shipped, so a release newer than uv returns nothing, or only release candidates. Before you conclude a release is missing, check python.org.
 - The target is a final release. Ask before you target a pre-release.
 - Every base image the repo builds from must exist at the target patch, e.g. `docker manifest inspect python:3.15.0-slim-trixie` for each `FROM`. A missing image is a blocker (step 3).
+- A base image tag also names an OS release (`slim-trixie` is Debian 13). List the target patch's variants on the registry, and when one names a newer release of the same OS (a `slim-forky` beside `slim-trixie`), recommend moving to it as part of this move. Ask before you do: a new OS release can drop or rename system packages the image relies on.
 
 Done when the reply's first line states the move and its kind, e.g. "3.14.7 → 3.15.0 (minor)".
 
@@ -73,7 +74,7 @@ These are the groups in "Moved by an interpreter update" (`.fieldkit/conventions
 **Full version**, raised on both kinds of move:
 
 - `.python-version` (already raised in step 3)
-- base images: `FROM` in every Dockerfile, service `image:` tags
+- base images: `FROM` in every Dockerfile, service `image:` tags. Where a `FROM` is pinned by digest, re-resolve it for the new tag (`docker buildx imagetools inspect python:<tag>`).
 - CI: `python-version:` inputs, matrix entries, cache keys that embed the version
 
 **Minor only**, raised on a minor move:
