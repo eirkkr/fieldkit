@@ -18,7 +18,7 @@ Done when the reviewer has been told which test the work meets - or that it meet
 
 ## 2. Ask
 
-List what only the reviewer can decide, and `gh issue list --label change --state open` for a change this one overlaps or waits on. Ask one question at a time, each with the answer you would pick. A skill named for the questions - in the conversation, else under `## Change skills` in the repo's `CLAUDE.md` - asks in your place.
+List what only the reviewer can decide, and `gh issue list --label change --state open` for a change this one overlaps or waits on. Ask one question at a time, each with the answer you would pick, through the harness's question tool where it has one - the choices as options, yours first and marked recommended. A skill named for the questions - in the conversation, else under `## Change skills` in the repo's `CLAUDE.md` - asks in your place, still one question at a time, whatever pace its own instructions set.
 
 Done when every question has the reviewer's answer, or their word that it stays open.
 
