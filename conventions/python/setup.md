@@ -48,16 +48,16 @@ Common mistakes to avoid:
 
 ### Moved by an interpreter update
 
-The Python version moves in a change of its own, after the dependencies are current: support for a new Python arrives in packages' newer releases, and with them current, any failure after the move belongs to Python.
+The Python version moves in a change of its own, after the dependencies are current: support for a new Python arrives in packages' newer releases, and with them current, any failure after the update belongs to Python.
 
-- **Full version** - `.python-version`, and any base image tag naming the Python version (with its digest). Every move raises them. An image using `uv python install` has no Python pin of its own. A base image's OS release (`trixie` is Debian 13) moves when a newer one is out.
+- **Full version** - `.python-version`, and any base image tag naming the Python version (with its digest). Every Python update raises them. An image using `uv python install` has no Python pin of its own. A base image's OS release (`trixie` is Debian 13) moves when a newer one is out.
 - **Minor only** - `requires-python`, the `Programming Language :: Python :: X.Y` classifier, and tool targets such as ruff `target-version` and mypy `python_version`.
 
 ### Pins that must agree
 
 Where the same tool or version is pinned in more than one place, pin it to the same version everywhere and raise them together. A site that follows the latest release drifts from one pinned exactly, and nothing compares them.
 
-A repo can record its pin sites, and which must agree, in `docs/version-pins.md`. `update-deps` checks it against the tree, and `update-python` adds the sites an interpreter move finds.
+A repo can record its pin sites, and which must agree, in `docs/version-pins.md`. `update-deps` checks it against the tree, and `update-python` adds the sites a Python update finds.
 
 ## Python in a Docker image
 
