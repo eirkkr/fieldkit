@@ -40,7 +40,7 @@ Done when the outdated list has been reported, and on a minor move the user has 
 
 Prove the dependencies work on the target before you change anything else. On the working tree:
 
-1. `uv python pin <target patch>`. On a minor move, also set `requires-python` to the form in `.fieldkit/conventions/python/setup.md`. uv has no command for `requires-python`, so it is the one hand edit to `pyproject.toml` this skill makes.
+1. On a minor move, set `requires-python` to the form in `.fieldkit/conventions/python/setup.md` first, since `uv python pin` refuses a version outside it. uv has no command for `requires-python`, so it is the one hand edit to `pyproject.toml` this skill makes. Then run `uv python pin <target patch>`.
 2. Run `uv lock`. A dependency that caps `requires-python` below the target fails resolution here.
 3. Run `uv sync --all-groups --no-build`. A dependency with no wheel for the target fails here, even one that would build from source. For each failure, check whether the sdist is pure Python, which is safe to build. Compiled code with no wheel is a blocker.
 4. *Minor only.* Every tool `just check` runs must support the target. That includes the version name in the tool's own config, e.g. ruff `target-version = "py315"` and mypy `python_version`. A tool that rejects the target's version name, or whose newest release predates the target, is a blocker. `update-deps` may have a newer release that clears it.
