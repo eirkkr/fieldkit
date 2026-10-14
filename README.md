@@ -127,7 +127,7 @@ This symlinks each skill into `.claude/skills/` and prunes links to removed ones
 
 `update-deps` reviews changelogs and bumps dependencies with uv. It needs a `just check` recipe (the script warns if missing), and reads an optional `docs/version-pins.md` listing pins `uv tree --outdated` can't see and which must agree ([ADR 044](docs/decisions/044-repo-pins-in-a-consumer-file.md)).
 
-`update-python` moves the Python interpreter, patch or minor ([ADR 055](docs/decisions/055-python-interpreter-own-skill.md)): it stops if a dependency isn't ready for the target, then raises every pin naming the old version. It needs the same `just check` recipe.
+`update-python` updates the Python interpreter, patch or minor ([ADR 055](docs/decisions/055-python-interpreter-own-skill.md)): it stops if a dependency isn't ready for the target, then raises every pin naming the old version. It needs the same `just check` recipe.
 
 ## Blocking commits to the default branch
 
