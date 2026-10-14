@@ -36,7 +36,7 @@ For each direct dependency, apply this procedure:
 - Report findings under those four categories, with a direct link to the changelog so the user can verify independently.
 - Prefer `gh release view <tag> -R owner/repo` for tagged GitHub releases - it works on private repos and avoids guessing between CHANGELOG.md / CHANGES.rst / HISTORY.rst paths. Fall back to WebFetch on the project's documented changelog URL only if `gh` returns nothing useful.
 
-For indirect dependencies: a cursory scan is sufficient - focus on whether the change is safe rather than what to adopt.
+For routine bumps (Mode 1, step 2): a cursory scan is sufficient - focus on whether the change is safe rather than what to adopt.
 
 ### Adoption summary
 
@@ -53,7 +53,12 @@ Include every "new feature" or "new config option" surfaced above, with an expli
 
 1. Run `uv tree --outdated` to see what's outdated and why each package is installed. Work from deepest (indirect) to shallowest (direct) dependencies.
 
-2. For each package, apply the changelog review procedure above, then wait for the user to confirm before bumping.
+2. Sort each outdated package by what its bump can break, using the version boundaries in `.fieldkit/conventions/python/setup.md` (for a `0.x` package the minor is the breaking boundary):
+   - **Routine** - an indirect dependency, or a patch bump of a direct one. Either is a lock-only refresh inside constraints the project or a parent already chose. Give it the cursory scan, bump it without waiting, run `just check`, and commit the routine bumps as their own change before the rest.
+   - **Minor** - a direct dependency's minor bump. Apply the full changelog review, then wait for the user to confirm.
+   - **Major** - a direct dependency's major bump. Apply the full review, flag it, and wait for the user to confirm.
+
+   A direct dependency with a date-based version has no patch to read, so it is a minor. An indirect dependency whose newer release is outside its parent's cap stays put - report it as waiting on that parent.
 
 3. When bumping:
    - Always use `uv` commands; never hand-edit version constraints in `pyproject.toml` or change `uv.lock` directly.
@@ -98,5 +103,6 @@ When bumping a linter (ruff, mypy, djlint, rumdl, etc):
 ## Notes
 
 - Flag major version bumps explicitly before proceeding.
+- A bump can need a step outside uv before it can be verified, and a suite `just check` leaves out. A new `playwright` needs `playwright install` for its browser build, and the browser suite then has to run. When a bump touches what such a suite exercises, run it too.
 - When a library adds inline types (look for "inline types", "py.typed", or "replaces typeshed" in the changelog), check whether the project has a `types-<package>` stub in dev deps and propose removing it. The typeshed stubs PyPI page usually states the recommended action explicitly.
 - If `just check` fails after a bump, verify the failure is not pre-existing on the base branch before assuming the bump caused it (a quick `git stash && <linter> && git stash pop` confirms). If it is, say what an issue for it would contain and ask whether to file it or fix it here, then continue.
