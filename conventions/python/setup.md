@@ -58,3 +58,15 @@ The Python version moves in a change of its own, after the dependencies are curr
 Where the same tool or version is pinned in more than one place, pin it to the same version everywhere and raise them together. One site pinned exactly while another follows the latest release will drift, and nothing compares them - the exactly-pinned one is the copy that quietly falls behind.
 
 A repo can record its pin sites, and which must agree, in `docs/version-pins.md`. `update-deps` checks it against the tree, and `update-python` adds the sites an interpreter move finds.
+
+## Python in a Docker image
+
+Build the image the way Astral's [standalone example](https://github.com/astral-sh/uv-docker-example/blob/main/standalone.Dockerfile) does:
+
+- **A builder stage** on a slim Debian image (`debian:trixie-slim`), with uv copied in (`COPY --from=ghcr.io/astral-sh/uv:X /uv /uvx /bin/`). `uv python install` reads `.python-version` into a fixed directory (`UV_PYTHON_INSTALL_DIR=/python`, `UV_PYTHON_PREFERENCE=only-managed`), then `uv sync --frozen` builds the venv.
+- **A runtime stage** on the same Debian image and digest, copying `/python` and the app with its venv from the builder, and running as an unprivileged user. It carries no uv.
+
+The Dockerfile then names no Python version, so `.python-version` is the one full-version Python pin, for local runs and the image alike. The slim Debian image lacks what the official Python image adds on top of it: install `ca-certificates` in the runtime stage for anything that verifies TLS, and `netbase` and `tzdata` alongside it.
+
+- **A cache mount on every uv step:** `RUN --mount=type=cache,target=/root/.cache/uv`, with `UV_LINK_MODE=copy`, since uv can't hard-link into a mount. Without the mount, uv's cache is written into the layer and ships in every image built from it.
+- **The standalone builds include pip**, in the interpreter's own `site-packages`, though nothing in the image uses it. Image scanners report the CVEs of the packages pip vendors. The interpreter is marked externally managed (PEP 668), so removing pip takes `pip uninstall --break-system-packages pip`.
