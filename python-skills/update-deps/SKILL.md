@@ -58,7 +58,7 @@ Include every "new feature" or "new config option" surfaced above, with an expli
    - **Minor** - a direct dependency's minor bump. Apply the full changelog review, then wait for the user to confirm.
    - **Major** - a direct dependency's major bump. Apply the full review, flag it, and wait for the user to confirm.
 
-   A direct dependency with a date-based version has no patch to read, so it is a minor. An indirect dependency whose newer release is outside its parent's cap stays put - report it as waiting on that parent.
+   A direct dependency with a date-based version has no patch to read, so it is a minor. An indirect dependency whose newer release is outside its parent's cap stays put until the direct bumps land - a parent's new release often lifts the cap. Retry it then as a routine bump, and report any still held back as waiting on their parent.
 
 3. When bumping:
    - Always use `uv` commands; never hand-edit version constraints in `pyproject.toml` or change `uv.lock` directly.
