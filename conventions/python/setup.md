@@ -64,7 +64,7 @@ A repo can record its pin sites, and which must agree, in `docs/version-pins.md`
 Build the image the way Astral's [standalone example](https://github.com/astral-sh/uv-docker-example/blob/main/standalone.Dockerfile) does:
 
 - **A builder stage** on a slim Debian image (`debian:trixie-slim`), with uv copied in (`COPY --from=ghcr.io/astral-sh/uv:X /uv /uvx /bin/`). `uv python install` reads `.python-version` into a fixed directory (`UV_PYTHON_INSTALL_DIR=/python`, `UV_PYTHON_PREFERENCE=only-managed`), then `uv sync --frozen` builds the venv.
-- **A runtime stage** on the same Debian image and digest, copying `/python` and the app with its venv from the builder, and running as an unprivileged user. It carries no uv.
+- **A runtime stage** on the same Debian image and digest, copying `/python` and the app with its venv from the builder, and running as an unprivileged user created with a home directory - gunicorn 26 writes its control socket there, and logs a permission error on every start without one. It carries no uv.
 
 The Dockerfile then names no Python version, so `.python-version` is the one full-version Python pin, for local runs and the image alike. The slim Debian image lacks what the official Python image adds on top of it: install `ca-certificates` in the runtime stage for anything that verifies TLS, and `netbase` and `tzdata` alongside it.
 
