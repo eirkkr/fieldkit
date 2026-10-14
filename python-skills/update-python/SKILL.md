@@ -47,7 +47,7 @@ Prove the dependencies work on the target before you change anything else. On th
 
 Done when `uv lock` and the `--no-build` sync both succeed and, on a minor move, every tool is confirmed ready. Otherwise, a blocker list names each package, tool or image, what is missing, and the upstream issue tracking it.
 
-When there are blockers, restore the working tree to how you found it, report the list, and stop. Say what an issue to retry would contain (the blockers and how to recheck them), and ask whether to file it. When a minor move is blocked and the current minor has a newer patch, offer that patch move instead.
+When there are blockers, restore the working tree to how you found it and run `uv sync --all-groups` to put the environment back on the current Python. Then report the list and stop. Say what an issue to retry would contain (the blockers and how to recheck them), and ask whether to file it. When a minor move is blocked and the current minor has a newer patch, offer that patch move instead.
 
 ## 4. Review the release notes
 

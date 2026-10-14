@@ -14,7 +14,7 @@ Two modes:
 1. **Update** - find outdated packages, review changelogs, and bump them.
 2. **Review** - given already-bumped packages in the current diff, check changelogs and flag anything to adopt or address, without bumping further.
 
-Pick the mode; don't ask. `$ARGUMENTS` naming one settles it. Otherwise run Review if the branch's diff against the default branch changes a version in `pyproject.toml` or `uv.lock`, else Update. State the mode in the reply's first line so a wrong pick is caught early.
+Pick the mode; don't ask. `$ARGUMENTS` naming one settles it. Otherwise run Review if the branch's diff against the default branch changes a package version in `pyproject.toml` or `uv.lock`, else Update. A `requires-python` change is an interpreter move, which belongs to `update-python`, and does not count. State the mode in the reply's first line so a wrong pick is caught early.
 
 The repo needs:
 

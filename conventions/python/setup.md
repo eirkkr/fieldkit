@@ -46,6 +46,8 @@ Common mistakes to avoid:
 - **`.python-version`** - the exact patch developers and CI run, which `requires-python` only brackets.
 - **Pins that name only the Python minor** - `requires-python`, the `Programming Language :: Python :: X.Y` classifier, and tool targets such as ruff `target-version` and mypy `python_version`. A patch bump leaves them alone, but a move to a new minor has to raise them with `.python-version` and the base image.
 
+The Python pins - `.python-version`, the Python base image, and the minor-only pins - move with the interpreter, not with a dependency update. A dependency update reports a newer Python, and the interpreter moves in a change of its own, after the dependencies are current.
+
 Where the same tool is pinned in more than one place, pin it to the same version everywhere and raise them together. One site pinned exactly while another follows the latest release will drift, and nothing compares them - the exactly-pinned one is the copy that quietly falls behind.
 
 A repo can record its pin sites, and which must agree, in `docs/version-pins.md`; `update-deps` checks it against the tree, and `update-python` adds the sites an interpreter move finds.
