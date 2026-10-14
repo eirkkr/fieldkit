@@ -13,9 +13,7 @@ Nothing a workflow depends on changes without a commit saying so
 
   Not `@v4`, which moves with every 4.x release, and not `@v4.4.0`, since a tag can be re-pointed. A commit can't. Dependabot and Renovate both update this form, comment included.
 - **Runners:** a versioned image such as `ubuntu-24.04`, never `-latest`.
-- **Base images:** a Dockerfile's `FROM` names the tag and its digest, `debian:trixie-slim@sha256:<digest>`. An official image's tag is rebuilt whenever its OS ships security fixes, so the tag alone records nothing about what was built. `docker buildx imagetools inspect <image>:<tag>` prints a tag's current digest.
-
-  The digest freezes those security fixes too, so pair it with Dependabot's `docker` ecosystem, which opens a PR when the digest changes. Where a skill owns the image's version, as `update-python` does Python's, ignore Dependabot's version updates for that image. Dependabot reads `FROM` lines only: an image a Dockerfile pulls with `COPY --from=` (a uv binary, say) stays with the skills' sweep.
+- **Base images:** `FROM` names tag and digest, `debian:trixie-slim@sha256:<digest>` (`docker buildx imagetools inspect` prints it). Official tags are rebuilt for every OS security fix, so the digest is what records the build - and freezes those fixes, so add Dependabot's `docker` ecosystem to refresh it. Where a skill owns an image's version, as `update-python` does Python's, ignore Dependabot's version updates for it. Dependabot reads `FROM` only, so `COPY --from=` images stay with the skills' sweep.
 - **Tools a job installs:** through uv, at an exact version - from the lockfile where the repo has one (a dev dependency, `uv sync --locked`, and `setup-uv`'s `activate-environment: true` to put it on `PATH`), otherwise `uv tool install rust-just@1.58.0`. Never a vendor's install script: it puts a third-party host on every run, and installs whatever release is current.
 - **One tool, one version:** where a tool is pinned in several places - the lockfile, a Dockerfile, a workflow - every site names the same version, and they are raised together.
 
