@@ -39,12 +39,34 @@ Common mistakes to avoid:
 
 ## Version pins the dependency tooling does not manage
 
-`uv tree --outdated` reports project and dev dependencies. Several pins sit outside that view and go stale silently, so a dependency update has to look at them by hand:
+`uv tree --outdated` sees only project and dev dependencies. The pins below sit outside it and go stale silently, grouped by what moves them.
+
+### Moved by a dependency update
 
 - **`[build-system] requires`** - the build backend is not a dependency of the project, so it never appears in the tree. `uv_build` versions with uv itself, and an upper bound below the installed uv makes every `uv` command warn. Raise it with uv's own minor, following the 0.x rule above.
-- **Tool versions pinned in a Dockerfile or CI** - a `COPY --from=ghcr.io/...` line, a base image tag, an action's `version:` input, a service container's image.
-- **`.python-version`** - the exact patch developers and CI run, which `requires-python` only brackets.
+- **Tools pinned in a Dockerfile or CI** - a `COPY --from=ghcr.io/...` line, an action's `version:` input, a service container's image.
 
-Where the same tool is pinned in more than one place, pin it to the same version everywhere and raise them together. One site pinned exactly while another follows the latest release will drift, and nothing compares them - the exactly-pinned one is the copy that quietly falls behind.
+### Moved by an interpreter update
 
-A repo can record its pin sites, and which must agree, in `docs/version-pins.md`; `update-deps` checks it against the tree.
+The Python version moves in a change of its own, after the dependencies are current: support for a new Python arrives in packages' newer releases, and with them current, any failure after the move belongs to Python.
+
+- **Full version** - `.python-version`, and any base image tag naming the Python version (with its digest). Every move raises them. An image using `uv python install` has no Python pin of its own. A base image's OS release (`trixie` is Debian 13) moves when a newer one is out.
+- **Minor only** - `requires-python`, the `Programming Language :: Python :: X.Y` classifier, and tool targets such as ruff `target-version` and mypy `python_version`.
+
+### Pins that must agree
+
+Where the same tool or version is pinned in more than one place, pin it to the same version everywhere and raise them together. A site that follows the latest release drifts from one pinned exactly, and nothing compares them.
+
+A repo can record its pin sites, and which must agree, in `docs/version-pins.md`. `update-deps` checks it against the tree, and `update-python` adds the sites an interpreter move finds.
+
+## Python in a Docker image
+
+Follow Astral's [standalone example](https://github.com/astral-sh/uv-docker-example/blob/main/standalone.Dockerfile):
+
+- **Builder stage** on `debian:trixie-slim` with uv copied in: `uv python install` (with `UV_PYTHON_INSTALL_DIR=/python`, `UV_PYTHON_PREFERENCE=only-managed`), then `uv sync --frozen`.
+- **Runtime stage** on the same image and digest: copy `/python` and the app, install `ca-certificates` (for TLS verification), `netbase` and `tzdata`, and run as an unprivileged user with a home directory - gunicorn writes its control socket there. No uv.
+
+`.python-version` is then the only full-version Python pin. Two details:
+
+- Put `--mount=type=cache,target=/root/.cache/uv` on every uv step; `UV_LINK_MODE=copy` is for that mount. Without it, uv's cache ships in the image.
+- The standalone builds include pip, whose vendored packages image scanners flag. Removing it takes `pip uninstall --break-system-packages pip`, as the interpreter is marked externally managed (PEP 668).

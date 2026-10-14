@@ -14,7 +14,7 @@ Two modes:
 1. **Update** - find outdated packages, review changelogs, and bump them.
 2. **Review** - given already-bumped packages in the current diff, check changelogs and flag anything to adopt or address, without bumping further.
 
-Pick the mode; don't ask. `$ARGUMENTS` naming one settles it. Otherwise run Review if the branch's diff against the default branch changes a version in `pyproject.toml` or `uv.lock`, else Update. State the mode in the reply's first line so a wrong pick is caught early.
+Pick the mode; don't ask. `$ARGUMENTS` naming one settles it. Otherwise run Review if the branch's diff against the default branch changes a package version in `pyproject.toml` or `uv.lock`, else Update. A `requires-python` change belongs to `update-python` and doesn't count. State the mode in the reply's first line so a wrong pick is caught early.
 
 The repo needs:
 
@@ -36,7 +36,7 @@ For each direct dependency, apply this procedure:
 - Report findings under those four categories, with a direct link to the changelog so the user can verify independently.
 - Prefer `gh release view <tag> -R owner/repo` for tagged GitHub releases - it works on private repos and avoids guessing between CHANGELOG.md / CHANGES.rst / HISTORY.rst paths. Fall back to WebFetch on the project's documented changelog URL only if `gh` returns nothing useful.
 
-For indirect dependencies: a cursory scan is sufficient - focus on whether the change is safe rather than what to adopt.
+For routine bumps (Mode 1, step 2): a cursory scan is sufficient - focus on whether the change is safe rather than what to adopt.
 
 ### Adoption summary
 
@@ -53,24 +53,30 @@ Include every "new feature" or "new config option" surfaced above, with an expli
 
 1. Run `uv tree --outdated` to see what's outdated and why each package is installed. Work from deepest (indirect) to shallowest (direct) dependencies.
 
-2. For each package, apply the changelog review procedure above, then wait for the user to confirm before bumping.
+2. Sort each bump by the version boundaries in `.fieldkit/conventions/python/setup.md` (for `0.x`, the minor is the breaking one):
+   - **Routine** - an indirect dependency, or a direct one's patch: a lock-only refresh inside constraints already chosen. Cursory scan, bump without waiting, `just check`, and commit these first, on their own.
+   - **Minor** - a direct dependency's minor, or any date-based version. Full review, then wait for the user.
+   - **Major** - a direct dependency's major. Full review, flagged, then wait for the user.
+
+   An indirect dependency held back by its parent's cap is retried once the direct bumps land; report any still held back.
 
 3. When bumping:
    - Always use `uv` commands; never hand-edit version constraints in `pyproject.toml` or change `uv.lock` directly.
      - To change a constraint (e.g. raise a floor to the new minor): `uv add` for main deps, `uv add --dev` for dev deps.
      - To pick up a version that already satisfies the existing constraint (a lock-only refresh): `uv lock --upgrade-package <name>`, or `uv lock --upgrade` to refresh every dependency at once.
    - Follow the pinning convention in `.fieldkit/conventions/python/setup.md`.
-   - For patch and minor bumps, batch them and run `just check` once at the end. For major version bumps, do one at a time so failures attribute cleanly. The user can override this default.
+   - A bump whose `requires-python` excludes the project's Python waits on `update-python`: report it, leave it out, carry on.
+   - Batch the minor bumps and run `just check` once at the end. Bump majors one at a time, each with its own `just check`, so failures attribute cleanly. The user can override this default.
 
-4. Check the pins `uv tree --outdated` can't see (see "Version pins the dependency tooling does not manage" in `.fieldkit/conventions/python/setup.md`). Find them two ways:
+4. Check the pins `uv tree --outdated` can't see (see "Moved by a dependency update" in `.fieldkit/conventions/python/setup.md`). Find them two ways:
    - **Sweep the tree:** `[build-system] requires`, `.python-version`, `Dockerfile` `FROM` and `COPY --from=`, `uses:` and `version:` in `.github/`, service `image:` tags, `docker run` images, and `rev:` in `.pre-commit-config.yaml`.
    - **Read `docs/version-pins.md`** if present: which pins must agree, why, and how to verify a raise.
 
    If the two disagree, the file is stale - propose a fix alongside the bumps. With no file, report the sweep's pins.
 
-5. If new config options or rules are worth enabling, propose the change and wait for approval before editing config files. Adopting a newly-available option is part of the dependency update, not separate work: make the change
-   - and any small cleanup it surfaces, such as fixing newly-flagged lint
-   violations - on the dependency-update branch itself rather than deferring it to a follow-up issue. If the option is performance-related (e.g. a parallelism flag), benchmark it empirically across a range of values rather than assuming more is better.
+   Check an image tag naming an OS release (`mongo:7.0-noble`) for a newer one, and re-resolve the digest of any image whose tag you raise (`docker buildx imagetools inspect`). Leave Python's own pins to `update-python`: report a newer Python, and recommend running it after this update lands.
+
+5. If new config options or rules are worth enabling, propose the change and wait for approval before editing config files. Adopting a newly-available option is part of the dependency update, not separate work: make the change - and any small cleanup it surfaces, such as fixing newly-flagged lint violations - on the dependency-update branch itself rather than deferring it to a follow-up issue. If the option is performance-related (e.g. a parallelism flag), benchmark it empirically across a range of values rather than assuming more is better.
 
 ---
 
@@ -94,6 +100,6 @@ When bumping a linter (ruff, mypy, djlint, rumdl, etc):
 
 ## Notes
 
-- Flag major version bumps explicitly before proceeding.
+- Some bumps need a step outside uv and a suite `just check` skips: a new `playwright` needs `playwright install`, then the browser suite.
 - When a library adds inline types (look for "inline types", "py.typed", or "replaces typeshed" in the changelog), check whether the project has a `types-<package>` stub in dev deps and propose removing it. The typeshed stubs PyPI page usually states the recommended action explicitly.
 - If `just check` fails after a bump, verify the failure is not pre-existing on the base branch before assuming the bump caused it (a quick `git stash && <linter> && git stash pop` confirms). If it is, say what an issue for it would contain and ask whether to file it or fix it here, then continue.

@@ -58,3 +58,5 @@ Lightweight architecture decision records (ADRs) for non-obvious design choices.
 | 052 | [Divide what a change writes by its reader](052-divide-a-change-by-reader.md)                             | Accepted   |
 | 053 | [One line per paragraph](053-one-line-per-paragraph.md)                                                   | Accepted   |
 | 054 | [A change is an issue, and a stage is a pull request](054-a-change-is-an-issue.md)                        | Accepted   |
+| 055 | [The Python interpreter has its own skill](055-python-interpreter-own-skill.md)                           | Accepted   |
+| 056 | [Routine dependency bumps don't wait for confirmation](056-routine-dependency-bumps-dont-wait.md)         | Accepted   |

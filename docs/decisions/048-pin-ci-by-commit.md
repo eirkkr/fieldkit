@@ -25,3 +25,5 @@ Runners have no finer pin than the OS version: `ubuntu-24.04` stops the move to 
 - Nothing upgrades on its own. Without a bot proposing bumps, each upgrade is a manual edit of the SHA and its comment.
 - A pinned action misses security fixes until someone bumps it - the price of it not changing unannounced.
 - Consumer repos meet the rule through `kit-reconcile`, which lists existing workflows that break it as follow-ups.
+
+> Extended in `conventions/ci.md`: a Dockerfile's base image is pinned the same way, by tag and digest, with Dependabot proposing digest updates - so for base images, a bot does propose the bumps.
