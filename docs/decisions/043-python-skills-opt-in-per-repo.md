@@ -29,3 +29,5 @@ Alternatives rejected:
 - `skills/kit-reconcile` needs no change: its wiring check already reruns `enable-*.sh` for dangling `.claude/skills` links.
 - The committed links dangle in any checkout without `.fieldkit`, CI included - as the OpenSpec links do.
 - A second language would follow the same `<language>-skills/` and `enable-<language>.sh` pattern; nothing is generalised ahead of one.
+
+> Amended by [056](056-routine-dependency-bumps-dont-wait.md): routine bumps - indirect dependencies and direct patches - no longer wait for the human; direct minors and majors still do.

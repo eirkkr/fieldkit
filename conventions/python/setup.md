@@ -68,5 +68,7 @@ Build the image the way Astral's [standalone example](https://github.com/astral-
 
 The Dockerfile then names no Python version, so `.python-version` is the one full-version Python pin, for local runs and the image alike. The slim Debian image lacks what the official Python image adds on top of it: install `ca-certificates` in the runtime stage for anything that verifies TLS, and `netbase` and `tzdata` alongside it.
 
+Two details the layout depends on:
+
 - **A cache mount on every uv step:** `RUN --mount=type=cache,target=/root/.cache/uv`, with `UV_LINK_MODE=copy`, since uv can't hard-link into a mount. Without the mount, uv's cache is written into the layer and ships in every image built from it.
 - **The standalone builds include pip**, in the interpreter's own `site-packages`, though nothing in the image uses it. Image scanners report the CVEs of the packages pip vendors. The interpreter is marked externally managed (PEP 668), so removing pip takes `pip uninstall --break-system-packages pip`.
