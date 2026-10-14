@@ -68,6 +68,8 @@ Include every "new feature" or "new config option" surfaced above, with an expli
 
    If the two disagree, the file is stale - propose a fix alongside the bumps. With no file, report the sweep's pins.
 
+   Bump `.python-version` and Python base images only within their current minor. When a newer Python minor is out, report it and point to `update-python`, which moves the minor.
+
 5. If new config options or rules are worth enabling, propose the change and wait for approval before editing config files. Adopting a newly-available option is part of the dependency update, not separate work: make the change
    - and any small cleanup it surfaces, such as fixing newly-flagged lint
    violations - on the dependency-update branch itself rather than deferring it to a follow-up issue. If the option is performance-related (e.g. a parallelism flag), benchmark it empirically across a range of values rather than assuming more is better.

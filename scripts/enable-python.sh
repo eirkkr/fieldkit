@@ -42,7 +42,7 @@ for dest in .claude/skills/*; do
 done
 
 if ! grep -qE '^check( |:)' justfile 2>/dev/null; then
-    echo "No 'check' recipe in ./justfile - update-deps runs 'just check' after a bump" >&2
+    echo "No 'check' recipe in ./justfile - update-deps and update-python run 'just check'" >&2
 fi
 
 echo "Commit the .claude/skills links to finish enabling the Python skills."

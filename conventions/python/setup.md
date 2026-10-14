@@ -44,7 +44,8 @@ Common mistakes to avoid:
 - **`[build-system] requires`** - the build backend is not a dependency of the project, so it never appears in the tree. `uv_build` versions with uv itself, and an upper bound below the installed uv makes every `uv` command warn. Raise it with uv's own minor, following the 0.x rule above.
 - **Tool versions pinned in a Dockerfile or CI** - a `COPY --from=ghcr.io/...` line, a base image tag, an action's `version:` input, a service container's image.
 - **`.python-version`** - the exact patch developers and CI run, which `requires-python` only brackets.
+- **Pins that name only the Python minor** - `requires-python`, the `Programming Language :: Python :: X.Y` classifier, and tool targets such as ruff `target-version` and mypy `python_version`. A patch bump leaves them alone, but a move to a new minor has to raise them with `.python-version` and the base image.
 
 Where the same tool is pinned in more than one place, pin it to the same version everywhere and raise them together. One site pinned exactly while another follows the latest release will drift, and nothing compares them - the exactly-pinned one is the copy that quietly falls behind.
 
-A repo can record its pin sites, and which must agree, in `docs/version-pins.md`; `update-deps` checks it against the tree.
+A repo can record its pin sites, and which must agree, in `docs/version-pins.md`; `update-deps` checks it against the tree, and `update-python` adds the sites a minor move finds.

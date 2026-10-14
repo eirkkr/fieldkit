@@ -7,7 +7,7 @@ Like a survival field kit: the **manual** (conventions) and the **instruments** 
 ## What's actually in it
 
 - **Conventions** an agent reads as instructions - how to branch, commit, open a PR, record a decision, write a spec, work in Python. Split into a small always-on core and a larger set loaded only when the matching action comes up, so a session pays for what it uses.
-- **Claude Code assets** - skills (`push`, `pr`, `merge`, `change-plan`, `change-stage`, `kit-reconcile`, and `update-deps` for Python repos), git hooks that block commits to the default branch and commit messages breaking the rules, a `Stop` hook that catches formatter drift, `PreToolUse` hooks that refuse non-conforming branch names and squash messages, CI checks for PRs, a status line.
+- **Claude Code assets** - skills (`push`, `pr`, `merge`, `change-plan`, `change-stage`, `kit-reconcile`, `update-deps` and `update-python` for Python repos), git hooks that block commits to the default branch and commit messages breaking the rules, a `Stop` hook that catches formatter drift, `PreToolUse` hooks that refuse non-conforming branch names and squash messages, CI checks for PRs, a status line.
 - **The reasoning** - [`docs/decisions/`](docs/decisions/) holds an ADR per non-obvious choice. If you only read one thing, read those: they are the part that transfers, whatever your own setup looks like.
 
 ## Is this for you?
@@ -26,7 +26,7 @@ You are welcome to fork it, lift individual conventions, or just mine the ADRs f
 - `skills/` - shared Claude Code skills, symlinked into `~/.claude/skills` by `just install` (see Setup).
 - `repo-skills/` - vendored OpenSpec Claude Code skills, symlinked into an *opt-in* consumer repo's `.claude/skills` by `.fieldkit/scripts/enable-openspec.sh` (not by `just install` - see "Adopting OpenSpec in a consumer repo").
 - `repo-skills-overlay/` - the kit's own additions to those vendored skills, appended by `just openspec-refresh` after it regenerates them; one `<skill-name>.md` per skill patched. Both halves are checked in, so editing an overlay without regenerating leaves the vendored skill serving the old text - which still loads and still reads plausibly. `just lint` fails on that drift.
-- `python-skills/` - skills that only apply in a Python repo (`update-deps`), symlinked into an *opt-in* consumer repo's `.claude/skills` by `.fieldkit/scripts/enable-python.sh` (not by `just install` - see "Enabling the Python skills in a consumer repo").
+- `python-skills/` - skills that only apply in a Python repo (`update-deps`, `update-python`), symlinked into an *opt-in* consumer repo's `.claude/skills` by `.fieldkit/scripts/enable-python.sh` (not by `just install` - see "Enabling the Python skills in a consumer repo").
 - `schemas/` - kit-owned OpenSpec workflow schemas, linked file-by-file into an opt-in consumer repo's `openspec/schemas/`.
 - `agents/` - shared Claude Code subagents, symlinked into `~/.claude/agents` by `just install` (see Setup). None ship today: `push`, `pr` and `merge` run inline ([ADR 045](docs/decisions/045-inline-git-skills.md)), and `just install` prunes the links it made for them.
 - `statusline/` - the shared Claude Code status line script, symlinked to `~/.claude/statusline-command.sh` and wired up via `settings.json`'s `statusLine` key by `just install` (see Setup).
@@ -126,6 +126,8 @@ Python-only skills live in `python-skills/` and are opt-in per repo ([ADR 043](d
 This symlinks each skill into `.claude/skills/` and prunes links to removed ones, but won't replace a real directory - delete a local copy first. Rerun it when the kit adds a skill, and commit the links.
 
 `update-deps` reviews changelogs and bumps dependencies with uv. It needs a `just check` recipe (the script warns if missing), and reads an optional `docs/version-pins.md` listing pins `uv tree --outdated` can't see and which must agree ([ADR 044](docs/decisions/044-repo-pins-in-a-consumer-file.md)).
+
+`update-python` moves a project to a new Python minor. It stops before changing anything if a dependency is not ready for the target, then raises every pin that names the minor, including ones `update-deps` does not sweep ([ADR 055](docs/decisions/055-python-minor-moves-own-skill.md)). It needs the same `just check` recipe, and keeps `docs/version-pins.md` current when the repo has one.
 
 ## Blocking commits to the default branch
 
