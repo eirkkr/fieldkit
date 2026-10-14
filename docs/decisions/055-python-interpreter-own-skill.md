@@ -4,7 +4,9 @@
 
 Every move of a project's Python interpreter, patch (3.14.7 to 3.14.8) or minor (3.14 to 3.15), goes through `update-python`, a second skill in `python-skills/` ([ADR 043](043-python-skills-opt-in-per-repo.md)). `update-deps` keeps packages and tools. Its pin sweep ([ADR 044](044-repo-pins-in-a-consumer-file.md)) still reads `.python-version` and Python base images, but it reports a newer Python and leaves the move to `update-python`.
 
-The skill gates on readiness before it changes anything else. It runs `uv lock` and `uv sync --no-build` against the target, so a dependency with a capped `requires-python` or no wheel for the target stops the move before any other pin is raised. Then it reads the release notes, raises every pin, and checks with a `git grep` for the old version in all its spellings. A minor move adds the steps a patch move has no use for: What's New, tool readiness, the pins that name only the minor, and ruff's `UP` fixes.
+The skill gates on readiness before it changes anything else. It runs `uv lock` and `uv sync --no-build` against the target, so a dependency with a capped `requires-python` or no wheel for the target stops the move before any other pin is raised. Then it reads the release notes, raises every pin, and checks with a `git grep` for the old version in all its spellings. Dependencies go first: the skill checks for outdated packages and an outdated uv, and on a minor move recommends `update-deps` before it goes on. `update-deps`, in turn, recommends `update-python` after it, and reports a bump that needs a newer Python as waiting on it.
+
+A minor move adds the steps a patch move has no use for: What's New, tool readiness, the pins that name only the minor, and ruff's `UP` fixes.
 
 ## Reason
 
@@ -13,6 +15,8 @@ The skill gates on readiness before it changes anything else. It runs `uv lock` 
 The split is by what moves, not by how far. A first draft gave `update-python` minor moves only and left patches with `update-deps`, which meant choosing a skill by the size of a bump the user had not looked at yet. With the interpreter in one place, packages go to one skill and the interpreter to the other, and a patch move just skips the minor-only steps.
 
 The interpreter is also shaped differently from a package. `update-deps` goes through changelogs package by package, bumping what it can. An interpreter move has one set of release notes, touches pins across the repo, and in a new minor's first weeks is often blocked by a compiled dependency with no wheel yet. That blocker has to stop the run before anything changes.
+
+Dependencies go first because a new Python's support arrives in packages' newer releases. Run against a stale lock, the readiness gate reports blockers that a dependency update would clear, and ruff, mypy and uv only know a new version name from a release that postdates it. Once dependencies are green, a failure after the move belongs to Python. The exception is a package release that drops the current Python, which uv refuses to resolve, so `update-deps` holds that one bump back for after the move. On a patch move the order barely matters, so the skill notes what is outdated and carries on.
 
 Alternatives rejected:
 

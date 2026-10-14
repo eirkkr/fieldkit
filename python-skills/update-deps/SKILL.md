@@ -60,6 +60,7 @@ Include every "new feature" or "new config option" surfaced above, with an expli
      - To change a constraint (e.g. raise a floor to the new minor): `uv add` for main deps, `uv add --dev` for dev deps.
      - To pick up a version that already satisfies the existing constraint (a lock-only refresh): `uv lock --upgrade-package <name>`, or `uv lock --upgrade` to refresh every dependency at once.
    - Follow the pinning convention in `.fieldkit/conventions/python/setup.md`.
+   - A bump that fails because the new version's `requires-python` excludes the project's Python is waiting on `update-python`, not a dead end. Report it as such, leave it out, and carry on with the rest.
    - For patch and minor bumps, batch them and run `just check` once at the end. For major version bumps, do one at a time so failures attribute cleanly. The user can override this default.
 
 4. Check the pins `uv tree --outdated` can't see (see "Version pins the dependency tooling does not manage" in `.fieldkit/conventions/python/setup.md`). Find them two ways:
@@ -68,7 +69,7 @@ Include every "new feature" or "new config option" surfaced above, with an expli
 
    If the two disagree, the file is stale - propose a fix alongside the bumps. With no file, report the sweep's pins.
 
-   Leave `.python-version` and Python base images where they are. When a newer Python is out, report it and point to `update-python`, which moves the interpreter.
+   Leave `.python-version` and Python base images where they are. When a newer Python is out, report it and recommend running `update-python` once this update lands - dependencies go first, since their newer releases are where support for a new Python arrives.
 
 5. If new config options or rules are worth enabling, propose the change and wait for approval before editing config files. Adopting a newly-available option is part of the dependency update, not separate work: make the change
    - and any small cleanup it surfaces, such as fixing newly-flagged lint

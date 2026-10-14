@@ -21,11 +21,22 @@ The repo needs a `just check` recipe running the full lint, type-check, and test
 
 - Find releases with `uv python list --all-versions`. uv only knows the releases that existed when its own version shipped, so a release newer than uv returns nothing, or only release candidates. Before you conclude a release is missing, check python.org.
 - The target is a final release. Ask before you target a pre-release.
-- Every base image the repo builds from must exist at the target patch, e.g. `docker manifest inspect python:3.15.0-slim-trixie` for each `FROM`. A missing image is a blocker (step 2).
+- Every base image the repo builds from must exist at the target patch, e.g. `docker manifest inspect python:3.15.0-slim-trixie` for each `FROM`. A missing image is a blocker (step 3).
 
 Done when the reply's first line states the move and its kind, e.g. "3.14.7 → 3.15.0 (minor)".
 
-## 2. Readiness gate
+## 2. Dependencies first
+
+Bring packages and tools up to date before the interpreter. Their newer releases are where support for a new Python arrives, so a stale lock reports blockers a dependency update would clear, and with dependencies already green, any failure after the move belongs to Python.
+
+- Run `uv tree --outdated --depth 1` for the direct dependencies, every group included.
+- Compare `uv --version` with the newest uv release (`gh release view -R astral-sh/uv --json tagName`). An older uv may not know the target release at all.
+
+On a minor move with anything outdated, recommend running `update-deps` first and wait for the user's answer. Going ahead is their call. On a patch move, mention what is outdated and carry on.
+
+Done when the outdated list has been reported, and on a minor move the user has chosen.
+
+## 3. Readiness gate
 
 Prove the dependencies work on the target before you change anything else. On the working tree:
 
@@ -34,11 +45,11 @@ Prove the dependencies work on the target before you change anything else. On th
 3. Run `uv sync --all-groups --no-build`. A dependency with no wheel for the target fails here, even one that would build from source. For each failure, check whether the sdist is pure Python, which is safe to build. Compiled code with no wheel is a blocker.
 4. *Minor only.* Every tool `just check` runs must support the target. That includes the version name in the tool's own config, e.g. ruff `target-version = "py315"` and mypy `python_version`. A tool that rejects the target's version name, or whose newest release predates the target, is a blocker. `update-deps` may have a newer release that clears it.
 
-Done when steps 2 and 3 succeed and, on a minor move, every tool is confirmed ready. Otherwise, a blocker list names each package, tool or image, what is missing, and the upstream issue tracking it.
+Done when `uv lock` and the `--no-build` sync both succeed and, on a minor move, every tool is confirmed ready. Otherwise, a blocker list names each package, tool or image, what is missing, and the upstream issue tracking it.
 
 When there are blockers, restore the working tree to how you found it, report the list, and stop. Say what an issue to retry would contain (the blockers and how to recheck them), and ask whether to file it. When a minor move is blocked and the current minor has a newer patch, offer that patch move instead.
 
-## 3. Review the release notes
+## 4. Review the release notes
 
 On a minor move, read the target's full What's New, `https://docs.python.org/X.Y/whatsnew/X.Y.html`. Read all of it, not just the removals. On both kinds of move, read the changelog for every patch between the current version and the target (`https://docs.python.org/X.Y/whatsnew/changelog.html`). Report under four categories, linking each item:
 
@@ -55,17 +66,17 @@ Present the adoption summary exactly as `update-deps` does (`../update-deps/SKIL
 
 Done when every category has been reported, with any empty category stated as empty, and the summary has a verdict on every row.
 
-## 4. Raise every pin
+## 5. Raise every pin
 
 Every pin naming the full version moves on both kinds of move:
 
-- `.python-version` (already raised in step 2)
+- `.python-version` (already raised in step 3)
 - base images: `FROM` in every Dockerfile, service `image:` tags
 - CI: `python-version:` inputs, matrix entries, cache keys that embed the version
 
 *Minor only.* Some pins name only the minor, and a minor move raises them too:
 
-- `requires-python` (already raised in step 2)
+- `requires-python` (already raised in step 3)
 - `Programming Language :: Python :: X.Y` classifiers
 - tool targets: ruff `target-version`, mypy `python_version`, pyright `pythonVersion`, and the like
 - `.pre-commit-config.yaml` `default_language_version`, tox or nox environment lists
@@ -77,21 +88,22 @@ If `docs/version-pins.md` exists, add any pin site it is missing, and record whi
 
 Done when the grep's leftover hits are all justified.
 
-## 5. Verify
+## 6. Verify
 
 1. `uv lock` and `uv sync --all-groups`, so the lock and environment match the final pins.
 2. Clear tool caches built under the old interpreter: `ruff clean`, `rm -rf .mypy_cache`, and the like.
 3. *Minor only.* With ruff's `UP` rules enabled, run `uv run ruff check --select UP --fix` so the new target's syntax upgrades land in this change. Report what it rewrote.
-4. Run `just check`. Read the test output for new `DeprecationWarning`s and add them to step 3's deprecations.
+4. Run `just check`. Read the test output for new `DeprecationWarning`s and add them to step 4's deprecations.
 5. Rebuild every Dockerfile stage, and confirm the built image's `python --version` prints the target patch.
 
 If `just check` fails, check whether the failure already exists on the default branch before you blame the move. If it does, say what an issue for it would contain and ask whether to file it or fix it here.
 
 Done when `just check` is green and every image is built on the target.
 
-## 6. Report
+## 7. Report
 
 - the move, as in step 1
+- whether dependencies were brought up to date first, or why not
 - every pin changed, by file
 - the release-note findings and the adoption summary, with what was adopted
 - deprecations to plan for, and the warnings the test run surfaced
