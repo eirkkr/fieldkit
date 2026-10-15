@@ -27,11 +27,11 @@ A *fresh* agent is a subagent given only what is listed here, and nothing from t
 Any clear yes is approval.
 
 1. Comment the approval line ("Asking first, and approval"), the login being the reviewer's: `gh api user -q .login`.
-2. Where the brief lists stages, create each in order as a sub-issue (`gh issue create --parent <n>`), titled and filled as "A stage's issue" gives it, and mark one blocked (`gh issue edit <stage> --add-blocked-by <other>`) where it cannot be built without the other. A change of one pull request gets none.
+2. Where the brief lists stages and no sub-issues exist yet, create each in order as a sub-issue (`gh issue create --parent <n>`), titled and filled as "A stage's issue" gives it, and mark one blocked (`gh issue edit <stage> --add-blocked-by <other>`) where it cannot be built without the other. A change of one pull request gets none.
 3. Report what was created.
 
 Then stop, unless the approval also asked for the build: then start the `change-stage` skill.
 
 ## Turned down
 
-Close the issue as not planned, with a comment saying why, on the reviewer's word to close it.
+Close the issue as not planned, with a comment saying why, on the reviewer's word to close it. Close any stage sub-issues as not planned too.
