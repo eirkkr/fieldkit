@@ -2,13 +2,13 @@
 
 ## Decision
 
-A plan priced to find out whether to do a change ("Planning to decide" in [specs.md](../../conventions/specs.md)) gets its stage sub-issues when it is published, each holding that stage's steps. Every other plan still gets them on approval. If the answer is no, the stage sub-issues are closed as not planned with the change, and stay as the record of what each stage would have cost.
+A plan the reviewer asks for to find out whether to do a change - a plan priced to decide, "Planning to decide" in [specs.md](../../conventions/specs.md) - gets its stage sub-issues when it is published, each holding that stage's steps. Every other plan still gets them on approval. If the answer is no, the stage sub-issues are closed as not planned with the change, and stay as the record of what each stage would have cost.
 
 This amends [054](054-a-change-is-an-issue.md), which put a priced plan's steps into the first build notes and created no stage issue before approval.
 
 ## Reason
 
-The build notes are capped at about 150 lines, so that notes which outgrow the cap show a change that should have been two. A plan priced to decide is the one kind that is meant to be big: it exists because a decision is large and hard to undo. The first one to be moved onto this workflow from an older format - a consumer's database migration, costed and turned down - holds 19 stages and 212 lines of steps, beside a 181-line design. In the notes it would break the cap by itself, and the cap would stop meaning anything.
+The build notes are capped at about 150 lines, so that notes which outgrow the cap show a change that should have been two. A plan priced to decide is the one kind that is meant to be big: it exists because a decision is large and hard to undo. The first one to be moved onto this workflow from an older format - a consumer's database migration, costed and turned down - holds 19 stages in a 212-line task list, beside a 181-line design. In the notes it would break the cap by itself, and the cap would stop meaning anything.
 
 Sub-issues are already where a stage's steps live once it starts, so a reader of a turned-down plan finds each stage's price where a stage's steps always are. A stage's issue also has room for its own discussion, and for a correction found while pricing a later stage.
 

@@ -34,4 +34,4 @@ Then stop, unless the approval also asked for the build: then start the `change-
 
 ## Turned down
 
-Close the issue as not planned, with a comment saying why, on the reviewer's word to close it. Close its stage sub-issues, where a plan priced to decide has them, as not planned too.
+Close the issue as not planned, with a comment saying why, on the reviewer's word to close it. Close any stage sub-issues as not planned too.

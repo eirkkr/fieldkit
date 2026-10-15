@@ -45,7 +45,7 @@ Done when the stage is assigned to you.
 ## 4. Plan it
 
 1. Re-read the brief and the notes against the repository as it now is ("A stage's issue"). Where the brief is wrong, stop and tell the reviewer.
-2. Write the stage's steps and its branch name where "A stage's issue" puts them. Where a plan priced to decide wrote the steps already, correct them against the repository instead, and comment on what changed.
+2. Write the stage's steps and its branch name where "A stage's issue" puts them. Where the stage's issue already has `## Steps`, correct them against the repository instead, and comment on the stage's issue what changed.
 3. Fetch, and cut the branch from `origin/<default>`, whatever branch the session was on.
 
 Done when every step has a `Done when` that running or looking at something can check.
