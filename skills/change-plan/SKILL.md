@@ -27,6 +27,7 @@ Done when every question has the reviewer's answer, or their word that it stays 
 Write the brief ("The brief") for the reviewer, in plain words, and the first build notes ("The build notes") for the next agent. Run the plan past "What a plan tends to miss".
 
 - A change that fits one pull request says so under Stages, and has no stage lines.
+- A plan priced to decide ("Planning to decide") also has every stage's steps, as "A stage's issue" gives them, ready for its sub-issues.
 - An existing issue that asks for the change stays as it is. The brief names it.
 - Both are published as written: every line reads to someone who never saw this conversation.
 
@@ -36,7 +37,8 @@ Done when every section of the brief is filled or says it is empty, every requir
 
 1. File the issue with the `change` label, creating the label if the repo lacks it, and `--blocked-by <n>` for a change it waits on.
 2. Post the notes as its first comment.
-3. Show the reviewer the brief as published and the issue's URL.
-4. Say the plan has not been reviewed, and offer a review ("Review"): name it with the reason it is worth running here, or say why it is not.
+3. For a plan priced to decide, create each stage in order as a sub-issue (`gh issue create --parent <n>`), titled and filled as "A stage's issue" gives it, with its steps.
+4. Show the reviewer the brief as published and the issue's URL.
+5. Say the plan has not been reviewed, and offer a review ("Review"): name it with the reason it is worth running here, or say why it is not.
 
 Then stop. The reviewer's answer is the next step, and [ANSWER.md](ANSWER.md) handles it.

@@ -36,14 +36,14 @@ Everything but the requirements fits one screen.
 
 - Before the brief is written, the reviewer is asked what only they can decide, one question at a time.
 - Approval is the reviewer saying so with no conditions attached; anything less is a request for changes. It is recorded as a comment on the issue whose first line is `Plan approved by @<login>.`, and a change is built once it has that comment.
-- The stage sub-issues, where the brief lists stages, are created on approval.
-- A plan turned down is closed as not planned. Its brief and notes stay, as the record of what was priced and why it was not done.
+- The stage sub-issues, where the brief lists stages, are created on approval - or, for a plan priced to decide (below), as it is published.
+- A plan turned down is closed as not planned, its stage sub-issues with it. Its brief, notes and stages stay, as the record of what was priced and why it was not done.
 
 ### Planning to decide, not only to build
 
 Planning a change is also a way to find out whether to do it. A proposal argues from what a change offers; a plan is forced to price every part of it, and the two can disagree badly. Worth the days it costs where a decision is large, hard to undo, and argued mostly from principle.
 
-- For such a decision the steps of every stage are written before approval, into the first build notes.
+- For such a decision the steps of every stage are written before approval, each into its own stage's sub-issue, created as the plan is published. The build notes cannot hold them: a plan big enough to need pricing outgrows their cap. If the answer is no, the sub-issues are closed as not planned with the change, and the record keeps each stage's price where a reader looks for it.
 - **Plan growth is a decision signal.** A plan that stops growing has been understood; one still growing at the end of its own audit has not. Growth with no scope added means the work is bigger than anyone can yet see.
 - **If the answer is no, the plan is the most valuable thing produced.** Its closed issue is linked from the ADR and left in its original tense: rewriting it to fit the outcome edits the evidence.
 
@@ -85,7 +85,7 @@ A stage is the smallest part of a larger change that leaves the default branch g
 - It is a sub-issue of the change, titled `Stage <k> - <name>` and created with the stage's one line and the numbers of the requirements it delivers.
 - Stages run in the order the brief lists them. A stage is marked blocked by another only where it cannot be built without it - in its own change or in another - so the unmarked ones are those free to be reordered or dropped. A change that waits on another change is marked the same way.
 - Whoever starts a stage claims it first, by assigning its issue to themselves. A claimed stage is left to its owner.
-- Its steps are written when it starts, after the brief and the notes have been re-read against the repository as it then is. Where the notes are out of date the steps follow the repository, and the next notes say so; where the brief is wrong, the reviewer is told before anything is built. Each step is numbered and is one action with a `Done when ...` that running or looking at something can check.
+- Its steps are written when it starts, after the brief and the notes have been re-read against the repository as it then is. A stage of a plan priced to decide has its steps already: they are re-read the same way, corrected where the repository has moved, and each correction is said in a comment. Where the notes are out of date the steps follow the repository, and the next notes say so; where the brief is wrong, the reviewer is told before anything is built. Each step is numbered and is one action with a `Done when ...` that running or looking at something can check.
 - The steps go in the stage's issue under `## Steps`, with its branch under `## Branch`. A change of one pull request has them in a comment on its own issue, under the same two headings.
 - Something an earlier stage finds that changes a later one is edited into the later stage's issue, with a comment saying so.
 
