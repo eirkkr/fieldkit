@@ -7,17 +7,17 @@ Generic rules shared across repos, imported from a consumer's CLAUDE.md as `@.fi
 - Act-then-show by default: make the change, surface it, correct after. Ask first for the actions the table marks that way, for anything else outward-facing or irreversible, and for a genuinely new convention or design decision - that last one is gated even when the change itself is local.
 - Git and GitHub actions go through the `push`, `pr`, and `merge` skills - don't reach for `git commit`, `git push`, `gh pr create`, or `gh pr merge` directly, even mid-task and even when the step looks trivial. Read-only inspection (`git status`, `git diff`, `git log`) stays direct, as do actions no skill covers - read the matching doc below for those.
 
-| Action                                     | Approval      | Notes                                                          |
-| ------------------------------------------ | ------------- | -------------------------------------------------------------- |
-| Committing and pushing                     | act-then-show | each coherent piece as it lands, not one batch per session     |
-| Force-pushing a branch with an open PR     | ask first     | even when git.md's checks show nothing would be lost           |
-| Revising an open PR's title/body           | act-then-show | keep it true as the branch grows                               |
-| Filing an issue                            | ask first     | unless the user asked for one                                  |
-| Commenting on an issue, editing either     | act-then-show | surface what was filed so it can be corrected                  |
-| Closing an issue                           | ask first     | except the automatic close of a `Closes #X` PR on merge        |
-| Creating a branch off a non-default branch | ask first     | explain why first; off the default branch it needs no approval |
-| Opening a PR                               | ask first     | unless the user typed `/pr`                                    |
-| Merging                                    | ask first     | unless the user typed `/merge`; also conditioned on CI         |
+| Action | Approval | Notes |
+| --- | --- | --- |
+| Committing and pushing | act-then-show | each coherent piece as it lands, not one batch per session |
+| Force-pushing a branch with an open PR | ask first | even when git.md's checks show nothing would be lost |
+| Revising an open PR's title/body | act-then-show | keep it true as the branch grows |
+| Filing an issue | ask first | unless the user asked for one |
+| Commenting on an issue, editing either | act-then-show | surface what was filed so it can be corrected |
+| Closing an issue | ask first | except the automatic close of a `Closes #X` PR on merge |
+| Creating a branch off a non-default branch | ask first | explain why first; off the default branch it needs no approval |
+| Opening a PR | ask first | unless the user typed `/pr` |
+| Merging | ask first | unless the user typed `/merge`; also conditioned on CI |
 
 - Approval settles whether to act, not what the draft says: once given - a yes, or the `/pr`, `/merge` or issue request itself - draft it and go straight to it.
 - An issue settles that a finding is handled later and separately, which forecloses doing it now on the branch in hand. Say what the issue would say, and file it on a yes.
@@ -53,12 +53,12 @@ Read the matching file before the action, and only then. The `push`, `pr`, and `
 repo root - the directory the session is started from. Read
 .fieldkit/conventions/<file> from there, via the .fieldkit symlink. -->
 
-| Before...                                                                       | Read                               |
-| ------------------------------------------------------------------------------- | ---------------------------------- |
-| A git action `push`/`pr`/`merge` don't cover (rebase, tag, amend)               | .fieldkit/conventions/git.md       |
-| A GitHub action `pr`/`merge` don't cover (issues, comments, PR edits)           | .fieldkit/conventions/github.md    |
-| Writing an issue, ADR, spec or convention doc, or an exemption list             | .fieldkit/conventions/records.md   |
-| Recording a design decision (ADR)                                               | .fieldkit/conventions/decisions.md |
-| Starting work too big for one PR, or that leaves the user a decision            | .fieldkit/conventions/specs.md     |
-| Building a feature that calls an LLM                                            | .fieldkit/conventions/ai.md        |
-| Writing or editing a CI workflow, or a check or lint recipe                     | .fieldkit/conventions/ci.md        |
+| Before... | Read |
+| --- | --- |
+| A git action `push`/`pr`/`merge` don't cover (rebase, tag, amend) | .fieldkit/conventions/git.md |
+| A GitHub action `pr`/`merge` don't cover (issues, comments, PR edits) | .fieldkit/conventions/github.md |
+| Writing an issue, ADR, spec or convention doc, or an exemption list | .fieldkit/conventions/records.md |
+| Recording a design decision (ADR) | .fieldkit/conventions/decisions.md |
+| Starting work too big for one PR, or that leaves the user a decision | .fieldkit/conventions/specs.md |
+| Building a feature that calls an LLM | .fieldkit/conventions/ai.md |
+| Writing or editing a CI workflow, or a check or lint recipe | .fieldkit/conventions/ci.md |

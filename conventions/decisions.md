@@ -22,8 +22,8 @@ One file per decision in `docs/decisions/`, named `NNN-kebab-title.md` (zero-pad
 
 <!-- markdownlint-disable MD057 -->
 
-| #   | Decision                 | Status   |
-| --- | ------------------------ | -------- |
+| # | Decision | Status |
+| --- | --- | --- |
 | 001 | [Short title](001-...md) | Accepted |
 
 <!-- markdownlint-enable MD057 -->
