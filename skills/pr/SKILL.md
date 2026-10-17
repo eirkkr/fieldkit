@@ -20,4 +20,4 @@ Reaching this skill means opening the PR is approved - the user typed `/pr`, the
    - Both are published verbatim. Write every line for a reader who never saw this conversation, saying what the change is. Notes to yourself, and accounts of what was left out or how the wording was chosen, stay in the conversation.
 5. **Open it:** `gh pr create` against the default branch (`gh repo view --json defaultBranchRef -q .defaultBranchRef.name`), passing the title and body verbatim - the body through `--body-file` or a heredoc, so it keeps its formatting.
 6. **Read the body back** (`gh pr view --json body`) as that reader. A line that only makes sense as an answer to your own reasoning is the failure this catches; fix it with `gh pr edit`.
-7. **Report** the PR number and URL, and the title and body as opened.
+7. **Report** the PR number and URL, and the title and body as opened. Where the repo's `CLAUDE.md` names reviews under `## Reviews`, or in the doc that heading points to, offer the ones the diff matches, each with its reason; one runs when the user asks.
