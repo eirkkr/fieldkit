@@ -1,7 +1,7 @@
 # Table Format
 [MD060]
 enabled = true
-style = "aligned"
+style = "compact"
 
 # One line per paragraph (ADR 053).
 [MD013]

@@ -43,7 +43,7 @@ For routine bumps (Mode 1, step 2): a cursory scan is sufficient - focus on whet
 After the per-package reviews and before bumping, present a separate consolidated list:
 
 | Change | Applies? | Recommendation |
-| ------ | -------- | -------------- |
+| --- | --- | --- |
 
 Include every "new feature" or "new config option" surfaced above, with an explicit "n/a - we don't use X" or "yes - proposed change is Y" verdict. Empty rows are not allowed; if there are no adoption opportunities, say so explicitly. This forces the adoption review to be visible rather than buried.
 
