@@ -92,7 +92,7 @@ A stage is the smallest part of a larger change that leaves the default branch g
 ## Building a stage
 
 - **One step, one commit.** Its subject ends with the stage and step it is, as `(2.3)`, so a stage picked up again can be matched against its steps. Its body says why, and anything the step needed that the steps did not foresee.
-- **A small fix outside the stage stays in the stage's files.** Where it lies in a file the stage already touches and costs about as much as filing an issue or less, it is its own commit with no step number, and the PR body's **Changed from the plan** names it. Anywhere else it becomes an issue.
+- **A small fix outside the stage stays in the stage's files.** Where it is small, as [github.md](github.md) means it, and lies in a file the stage already touches, it is its own commit with no step number, and the PR body's **Changed from the plan** names it. Anywhere else it becomes an issue ([ADR 059](../docs/decisions/059-small-findings-are-fixed-in-place.md)).
 - **Green before the PR opens.** The repo's full check passes, not its tests alone.
 - **Then a full stop: the gate.** The PR waits for the reviewer to approve it or send it back. Any clear yes is approval, and approval is the word to merge. The next stage begins when it is asked for, on a branch cut from the default branch ([ADR 049](../docs/decisions/049-approval-does-not-start-the-next-stage.md)).
 - **What is sent back is fixed on the same branch and PR**, as plain commits. The steps stay as they were written.
