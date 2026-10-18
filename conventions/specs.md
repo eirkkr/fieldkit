@@ -102,7 +102,7 @@ A stage is the smallest part of a larger change that leaves the default branch g
 The PR body is the reviewer's page, and holds only what needs them:
 
 - The stage in a few sentences: what now works, and what does not yet.
-- **Changed from the plan** - anything built differently from the brief or from the steps, with the reason, or one line saying nothing was.
+- **Changed from the plan** - anything built differently from the brief or from the steps, with the reason, and any small fix outside the stage, or one line saying nothing was.
 - **Yours to overturn** - choices the agent made between real alternatives, or one line saying there were none.
 - **Try it** - one thing to do by hand and what a good result looks like, saying whether the agent was able to do it itself.
 - **Review** - which reviews have run on the PR as it now stands, or `Not run.`
