@@ -12,3 +12,7 @@ Issues, ADRs, specs and convention docs outlive the conversation that produced t
 
 - An exemption list records why each entry is exempt, in terms of the rule it escapes, so the reason could be used to refuse an entry. One describing what the code does instead ("uses the raw driver", "runs at startup") cannot be audited, and the list grows by precedent.
 - Known violations of a convention live in the issue tracker, not in the convention document - the document outlives them, and a stale list of files reads as permission.
+
+## Convention docs
+
+A convention doc is read by people as well as agents. It states git and GitHub mechanics as plain facts, and leaves the vocabulary of the agent's instructions - act-then-show, gate, dispatching a subagent - to `KIT.md` and the skill files that carry them out, so the doc reads without either open.
