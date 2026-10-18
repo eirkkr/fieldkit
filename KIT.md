@@ -1,6 +1,6 @@
 # Claude Guidance (Generic)
 
-Generic rules shared across repos, imported from a consumer's CLAUDE.md as `@.fieldkit/KIT.md` (the README covers setup). Repo-specific conventions, setup, and architecture live in the consumer repo's own docs - where the two conflict, flag it briefly before proceeding.
+Generic rules shared across repos, imported from a consumer's CLAUDE.md as `@.fieldkit/KIT.md`. Repo-specific conventions, setup, and architecture live in the consumer repo's own docs - where the two conflict, flag it briefly before proceeding.
 
 ## Always-on
 
@@ -23,7 +23,7 @@ Generic rules shared across repos, imported from a consumer's CLAUDE.md as `@.fi
 - A finding is *small* when fixing it costs less than filing an issue, or only slightly more - an issue costs a standalone body, a duplicate search, and a later branch, PR and review. A small finding unrelated to the branch's change is fixed on it, act-then-show, in its own commit named in the PR description. On a change's stage PR this holds only in files the stage already touches.
 - Any other finding becomes an issue. An issue settles that a finding is handled later and separately, which forecloses doing it now on the branch in hand. Say what the issue would say, and file it on a yes.
 - Merging also needs CI: a failed check or a conflict stops it (report that, don't merge around it), a running check is waited out, a green one merges with no further sign-off.
-- The PR a change's stage opens at its gate (see `conventions/specs.md`) needs no approval - one per stage, and opening it is part of reaching the gate. Nor do a change's own issue, when planning it was asked for, or its stage issues, once its plan is approved - or, for a plan priced to decide (`conventions/specs.md`), as it is published. Each stage's merge is gated like any other.
+- No approval is needed for the PR a change's stage opens at its gate - one per stage, part of reaching the gate - nor for a change's own issue when planning it was asked for, nor its stage issues once its plan is approved, or as it is published for a plan priced to decide (`conventions/specs.md`). Each stage's merge is gated like any other.
 - Commit onto the branch you're already on, even if its existing work looks unrelated.
 - A gate on a *follow-up* never holds the action before it: land the push, then ask.
 - Route anything learned that's worth keeping by scope: generic cross-repo lessons into the shared conventions kit, repo-specific ones into that repo's own docs.
@@ -49,11 +49,7 @@ Generic rules shared across repos, imported from a consumer's CLAUDE.md as `@.fi
 
 ## Load on Demand
 
-Read the matching file before the action, and only then. The `push`, `pr`, and `merge` skills read `git.md`/`github.md` themselves, so the actions they cover need no row here.
-
-<!-- Read-tool targets (not @-imports). Paths are relative to the consumer
-repo root - the directory the session is started from. Read
-.fieldkit/conventions/<file> from there, via the .fieldkit symlink. -->
+Read the matching file before the action, and only then.
 
 | Before... | Read |
 | --- | --- |
