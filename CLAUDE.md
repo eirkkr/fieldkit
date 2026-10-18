@@ -14,6 +14,10 @@ The kit is a public repository ([ADR 036](docs/decisions/036-public-mit-with-ups
 
 KIT.md's load-on-demand table gives targets as `.fieldkit/conventions/<file>`, which is correct in a consumer repo reaching the kit through its symlink. This repo has no `.fieldkit` symlink to itself ([ADR 014](docs/decisions/014-skills-not-commands.md)), so read those files at `conventions/<file>` instead.
 
+## Reviews
+
+Before offering reviews on a plan or a PR, read [docs/reviews.md](docs/reviews.md).
+
 ## Shared rules
 
 Everything below is [KIT.md](KIT.md), imported verbatim - the cross-repo rules every consumer gets. It carries its own heading.

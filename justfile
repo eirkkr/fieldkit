@@ -25,8 +25,8 @@ openspec-refresh:
 # Run all checks: the linters, plus this branch's name and its PR's title.
 check: lint check-branch-name check-pr-title
 
-# Lint markdown and check the vendored skills still carry their overlays.
-lint: rumdl check-overlays
+# Lint markdown, check the vendored skills still carry their overlays, and check the always-loaded text fits its budget.
+lint: rumdl check-overlays check-context-size
 
 # Lint all markdown.
 rumdl:
@@ -37,6 +37,10 @@ rumdl:
 # Check each vendored skill still ends with its overlay.
 check-overlays:
     @"{{ justfile_directory() }}/scripts/check-skill-overlays.sh" "{{ justfile_directory() }}"
+
+# Check the text the kit loads into every consumer session against its byte budget.
+check-context-size:
+    @"{{ justfile_directory() }}/scripts/check-context-size.sh" "{{ justfile_directory() }}"
 
 # Check this branch's name against git.md - the PR's branch in CI, else the checked-out one.
 check-branch-name:
