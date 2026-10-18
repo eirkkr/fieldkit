@@ -63,3 +63,4 @@ Lightweight architecture decision records (ADRs) for non-obvious design choices.
 | 057 | [A plan priced to decide keeps its stages in sub-issues](057-a-priced-plan-keeps-its-stages-in-sub-issues.md) | Accepted |
 | 058 | [Compact tables](058-compact-tables.md) | Accepted |
 | 059 | [Small findings are fixed in place](059-small-findings-are-fixed-in-place.md) | Accepted |
+| 060 | [Budget the always-loaded context in CI](060-budget-the-always-loaded-context.md) | Accepted |
