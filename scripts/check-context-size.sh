@@ -54,8 +54,9 @@ description() {
 total=0
 for file in "$kit/KIT.md" "$kit"/conventions/*/README.md; do
     [ -f "$file" ] || fail "missing ${file#"$kit"/}"
-    # An @-import pulls in a file this check doesn't count.
-    if grep -q '^@' "$file"; then
+    # An @-import, anywhere in a line, pulls in a file this check doesn't
+    # count. A code block or an @-mention trips this too, which fails loudly.
+    if grep -Eq '(^|[[:space:]])@[^[:space:]]' "$file"; then
         fail "${file#"$kit"/} @-imports a file this check doesn't count"
     fi
     bytes="$(wc -c <"$file")"
