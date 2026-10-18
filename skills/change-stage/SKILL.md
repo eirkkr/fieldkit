@@ -52,7 +52,7 @@ Done when every step has a `Done when` that running or looking at something can 
 
 ## 5. Build
 
-One step, one commit, through the `push` skill, as "Building a stage" gives its subject and body. Work you notice outside the stage is kept as an issue to offer at the gate.
+One step, one commit, through the `push` skill, as "Building a stage" gives its subject and body. Work you notice outside the stage is fixed in place or kept as an issue to offer at the gate, as "Building a stage" divides them.
 
 When a step cannot be verified, or shows the plan is wrong, stop and tell the reviewer.
 

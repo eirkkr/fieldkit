@@ -20,7 +20,8 @@ Generic rules shared across repos, imported from a consumer's CLAUDE.md as `@.fi
 | Merging | ask first | unless the user typed `/merge`; also conditioned on CI |
 
 - Approval settles whether to act, not what the draft says: once given - a yes, or the `/pr`, `/merge` or issue request itself - draft it and go straight to it.
-- An issue settles that a finding is handled later and separately, which forecloses doing it now on the branch in hand. Say what the issue would say, and file it on a yes.
+- A finding is *small* when fixing it costs less than filing an issue, or only slightly more - an issue costs a standalone body, a duplicate search, and a later branch, PR and review. A small finding unrelated to the branch's change is fixed on it, act-then-show, in its own commit named in the PR description. On a change's stage PR this holds only in files the stage already touches.
+- Any other finding becomes an issue. An issue settles that a finding is handled later and separately, which forecloses doing it now on the branch in hand. Say what the issue would say, and file it on a yes.
 - Merging also needs CI: a failed check or a conflict stops it (report that, don't merge around it), a running check is waited out, a green one merges with no further sign-off.
 - The PR a change's stage opens at its gate (see `conventions/specs.md`) needs no approval - one per stage, and opening it is part of reaching the gate. Nor do a change's own issue, when planning it was asked for, or its stage issues, once its plan is approved - or, for a plan priced to decide (`conventions/specs.md`), as it is published. Each stage's merge is gated like any other.
 - Commit onto the branch you're already on, even if its existing work looks unrelated.
@@ -28,6 +29,7 @@ Generic rules shared across repos, imported from a consumer's CLAUDE.md as `@.fi
 - Route anything learned that's worth keeping by scope: generic cross-repo lessons into the shared conventions kit, repo-specific ones into that repo's own docs.
 - `conventions/*.md` are read by humans too: state git/GitHub mechanics as plain facts, and keep this file's process vocabulary (act-then-show, gate, dispatching a subagent) here or in the skill/agent files that execute it, so a convention reads without `KIT.md` open.
 - Fix the underlying issue before reaching for a suppression (`# type: ignore`, `# noqa`, tool exclusion). Suppress only when the tool is wrong about the file's context (e.g. a generated or vendored file).
+- Recommend on correctness. Effort, churn and consistency with what is already there are costs, stated beside the recommendation - "X is more correct; switching costs Y." Where they are high enough to matter, give both options for the user to weigh. Consistency decides between options that are equally correct.
 - Delegate to a subagent for context isolation - keeping large, throwaway exploration out of the main window - not for a cheaper model on a small task. A fresh subagent re-pays context from scratch, which dominates a small task's cost. One that may edit files, a reviewer's mutation probe included, gets `isolation: "worktree"`: the working tree is shared with hooks, commits and other agents.
 - A count, or a claim about a file's contents, is re-derived from the tree as it is written into an ADR, spec, issue or commit message - never recalled, never carried over from an older document. Stale figures get repeated precisely because they are already written down.
 - Reading part of a file is not reading it. "This document never addresses X", drawn from a head-and-tail skim, is a claim about the part that was not read.
@@ -41,7 +43,7 @@ Generic rules shared across repos, imported from a consumer's CLAUDE.md as `@.fi
 
 - A green CI/lint pass confirms only machine-enforced rules; audit conventions enforced by review (ordering, spacing, doc accuracy) by hand against the diff.
 - When a branch introduces or changes a convention, audit existing code for violations and bring any docs that still teach the old pattern into line.
-- When editing a file, fix pre-existing convention violations in that file as part of the change; don't extend them. If the fix would span modules, file an issue instead.
+- When editing a file, fix pre-existing convention violations in that file as part of the change; don't extend them. A fix that isn't *small* (above) - spanning modules is the usual sign - becomes an issue instead.
 - An artifact edited many times needs reading end to end, as a document, before it is called finished. Every edit can be correct while the whole stops describing itself - the usual symptom is a stated goal the body has outgrown. A separate pass from auditing the diff, and it comes last.
 - Auditing prose for a phrase needs the text unwrapped first - hard-wrapped Markdown splits phrases across lines, where a line-based `grep` misses them and reports the file clean. Normalise whitespace before matching (e.g. read the file and `' '.join(text.split())`), and treat a no-hit result from a line-based search over wrapped prose as unproven, not as absence.
 
