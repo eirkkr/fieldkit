@@ -1,10 +1,10 @@
 # Claude Guidance (Generic)
 
-Generic rules shared across repos, imported from a consumer's CLAUDE.md as `@.fieldkit/KIT.md`. Repo-specific conventions, setup, and architecture live in the consumer repo's own docs - where the two conflict, flag it briefly before proceeding.
+Generic rules shared across repos. Where they conflict with the repo's own docs, flag it briefly before proceeding.
 
 ## Always-on
 
-- Act-then-show by default: make the change, surface it, correct after. Ask first for the actions the table marks that way, for anything else outward-facing or irreversible, and for a genuinely new convention or design decision - that last one is gated even when the change itself is local.
+- Act-then-show by default: make the change, surface it, correct after. Ask first for the actions the table marks that way, for anything else outward-facing or irreversible, and for a genuinely new convention or design decision, even a local one.
 - Git and GitHub actions go through the `push`, `pr`, and `merge` skills - don't reach for `git commit`, `git push`, `gh pr create`, or `gh pr merge` directly, even mid-task and even when the step looks trivial. Read-only inspection (`git status`, `git diff`, `git log`) stays direct, as do actions no skill covers - read the matching doc below for those.
 
 | Action | Approval | Notes |
@@ -21,7 +21,7 @@ Generic rules shared across repos, imported from a consumer's CLAUDE.md as `@.fi
 
 - Approval settles whether to act, not what the draft says: once given - a yes, or the `/pr`, `/merge` or issue request itself - draft it and go straight to it.
 - A finding is *small* when fixing it costs less than filing an issue, or only slightly more - an issue costs a standalone body, a duplicate search, and a later branch, PR and review. A small finding unrelated to the branch's change is fixed on it, act-then-show, in its own commit named in the PR description. On a change's stage PR this holds only in files the stage already touches.
-- Any other finding becomes an issue. An issue settles that a finding is handled later and separately, which forecloses doing it now on the branch in hand. Say what the issue would say, and file it on a yes.
+- Any other finding becomes an issue, handled later and not on the branch in hand: say what the issue would say, and file it on a yes.
 - Merging also needs CI: a failed check or a conflict stops it (report that, don't merge around it), a running check is waited out, a green one merges with no further sign-off.
 - No approval is needed for the PR a change's stage opens at its gate - one per stage, part of reaching the gate - nor for a change's own issue when planning it was asked for, nor its stage issues once its plan is approved, or as it is published for a plan priced to decide (`conventions/specs.md`). Each stage's merge is gated like any other.
 - Commit onto the branch you're already on, even if its existing work looks unrelated.
@@ -30,12 +30,12 @@ Generic rules shared across repos, imported from a consumer's CLAUDE.md as `@.fi
 - Fix the underlying issue before reaching for a suppression (`# type: ignore`, `# noqa`, tool exclusion). Suppress only when the tool is wrong about the file's context (e.g. a generated or vendored file).
 - Recommend on correctness. Effort, churn and consistency with what is already there are costs, stated beside the recommendation - "X is more correct; switching costs Y." Where they are high enough to matter, give both options for the user to weigh. Consistency decides between options that are equally correct.
 - Delegate to a subagent for context isolation - keeping large, throwaway exploration out of the main window - not for a cheaper model on a small task. A fresh subagent re-pays context from scratch, which dominates a small task's cost. One that may edit files, a reviewer's mutation probe included, gets `isolation: "worktree"`: the working tree is shared with hooks, commits and other agents.
-- A count, or a claim about a file's contents, is re-derived from the tree as it is written into an ADR, spec, issue or commit message - never recalled, never carried over from an older document. Stale figures get repeated precisely because they are already written down.
+- A count, or a claim about a file's contents, is re-derived from the tree as it is written into an ADR, spec, issue or commit message - never recalled, never carried over from an older document.
 - Reading part of a file is not reading it. "This document never addresses X", drawn from a head-and-tail skim, is a claim about the part that was not read.
 
 ### Linting and formatting
 
-- Don't run formatters or linters unless asked, for code or docs alike - the human runs these and CI enforces them, and a style slip reaching CI is the accepted cost of not burning tokens on lint churn. Match the surrounding style by eye, leaving line lengths and wrapping to CI.
+- Leave formatters and linters, for code and docs alike, to the human and CI unless asked: a style slip reaching CI costs less than lint churn. Match the surrounding style by eye, leaving line lengths and wrapping to CI.
 - Do run tests, for correctness feedback: the repo's canonical command with quiet, short-traceback flags, failing fast on the narrowest relevant selection while iterating, then the full suite before declaring work done.
 
 ### Reviewing and auditing

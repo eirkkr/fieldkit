@@ -10,7 +10,7 @@ kit="$1"
 # the total grew a bullet at a time with nothing measuring it. Over budget,
 # a PR trims, moves a rule behind the load-on-demand table, or raises the
 # budget here, where the reviewer sees it.
-budget=9282
+budget=8862
 
 # A frontmatter description, inline or as a folded `>-` block, joined to one
 # line as Claude Code shows it.

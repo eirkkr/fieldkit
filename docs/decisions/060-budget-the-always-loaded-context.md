@@ -2,7 +2,7 @@
 
 ## Decision
 
-`just check-context-size`, part of `just lint`, adds up the bytes the kit puts into every consumer session and fails when the total passes a budget set in `scripts/check-context-size.sh`. The total covers `KIT.md`, `conventions/python/README.md`, and the `description` of each skill in `skills/` and `python-skills/`, which Claude Code lists in every session where the skill is linked. The budget started at 9282 bytes, the total at the time (8438) plus 10%.
+`just check-context-size`, part of `just lint`, adds up the bytes the kit puts into every consumer session and fails when the total passes a budget set in `scripts/check-context-size.sh`. The total covers `KIT.md`, `conventions/python/README.md`, and the `description` of each skill in `skills/` and `python-skills/`, which Claude Code lists in every session where the skill is linked. The budget started at 8862 bytes, the total at the time (8057) plus 10%.
 
 ## Reason
 
@@ -10,7 +10,7 @@ Everything a consumer `@`-imports, and every linked skill's description, is in c
 
 The budget is not a cap. A PR that goes over it trims text, moves a rule behind the load-on-demand table, or raises the number in the script, and any of these shows in the diff for the reviewer to weigh.
 
-Before the budget was set, the always-loaded text was trimmed: redundant text in `KIT.md` was removed, the rule on the voice of convention docs moved to `conventions/records.md`, and the advice on searching hard-wrapped prose was dropped (see the note on [ADR 053](053-one-line-per-paragraph.md)). Together these cut `KIT.md` from 7941 to 6911 bytes.
+Before the budget was set, the always-loaded text was trimmed: redundant text in `KIT.md` was removed, the rule on the voice of convention docs moved to `conventions/records.md`, the advice on searching hard-wrapped prose was dropped (see the note on [ADR 053](053-one-line-per-paragraph.md)), and sentences that only explained a rule, or restated another, were cut. Together these cut `KIT.md` from 7941 to 6530 bytes.
 
 Rejected:
 
