@@ -15,4 +15,4 @@ Issues, ADRs, specs and convention docs outlive the conversation that produced t
 
 ## Convention docs
 
-A convention doc is read by people as well as agents. It states git and GitHub mechanics as plain facts, and leaves the vocabulary of the agent's instructions - act-then-show, gate, dispatching a subagent - to `KIT.md` and the skill files that carry them out, so the doc reads without either open.
+A convention doc is read by people as well as agents. It states git and GitHub mechanics as plain facts, and leaves the vocabulary of the agent's instructions - act-then-show, ask first, dispatching a subagent - to `KIT.md` and the skill files that carry them out, so the doc reads without either open.

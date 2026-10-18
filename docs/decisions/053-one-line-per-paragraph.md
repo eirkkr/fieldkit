@@ -22,4 +22,4 @@ Rejected:
 - KIT.md is unchanged. Agents don't run linters and match the surrounding style by eye, which after this change is one line per paragraph, so no instruction is needed; and a consumer's own `rumdl` config decides whether its prose is wrapped, so its audit-by-phrase advice stays.
 - Commit messages and PR bodies keep their own wrapping rules ([047](047-enforce-commit-messages.md)); this covers Markdown files only.
 
-> KIT.md's audit-by-phrase advice has since been removed: consumer repos no longer hard-wrap their Markdown either, so a phrase search no longer needs the text unwrapped first.
+> KIT.md's audit-by-phrase advice has since been removed: consumer repos no longer hard-wrap their Markdown either, so a phrase search no longer needs the text unwrapped first ([ADR 060](060-budget-the-always-loaded-context.md)).

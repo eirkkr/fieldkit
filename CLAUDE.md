@@ -16,7 +16,7 @@ KIT.md's load-on-demand table gives targets as `.fieldkit/conventions/<file>`, w
 
 ## Reviews
 
-The reviews to offer on a plan or a PR, by what the work holds: [docs/reviews.md](docs/reviews.md).
+Before offering reviews on a plan or a PR, read [docs/reviews.md](docs/reviews.md).
 
 ## Shared rules
 
