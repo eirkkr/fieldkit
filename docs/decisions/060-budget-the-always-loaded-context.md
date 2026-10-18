@@ -2,7 +2,7 @@
 
 ## Decision
 
-`just check-context-size`, part of `just lint`, adds up the bytes the kit puts into every consumer session and fails when the total passes a budget set in `scripts/check-context-size.sh`. The total covers `KIT.md`, `conventions/python/README.md`, and the `description` of each skill in `skills/` and `python-skills/`, which Claude Code lists in every session where the skill is linked. The budget started at 8862 bytes, the total at the time (8057) plus 10%.
+`just check-context-size`, part of `just lint`, adds up the bytes the kit puts into every consumer session and fails when the total passes a budget set in `scripts/check-context-size.sh`. The total covers `KIT.md`, each convention hub (`conventions/*/README.md`, today only the Python one), and the `description` of each skill in `skills/` and `python-skills/`, which Claude Code lists in every session where the skill is linked unless it sets `disable-model-invocation: true`. The hub and the Python skills are opt-in ([ADR 043](043-python-skills-opt-in-per-repo.md)), so the total is an upper bound: what a Python consumer loads. The budget started at 8726 bytes, the total at the time (7933) plus 10%, rounded down.
 
 ## Reason
 
@@ -10,7 +10,7 @@ Everything a consumer `@`-imports, and every linked skill's description, is in c
 
 The budget is not a cap. A PR that goes over it trims text, moves a rule behind the load-on-demand table, or raises the number in the script, and any of these shows in the diff for the reviewer to weigh.
 
-Before the budget was set, the always-loaded text was trimmed: redundant text in `KIT.md` was removed, the rule on the voice of convention docs moved to `conventions/records.md`, the advice on searching hard-wrapped prose was dropped (see the note on [ADR 053](053-one-line-per-paragraph.md)), and sentences that only explained a rule, or restated another, were cut. Together these cut `KIT.md` from 7941 to 6530 bytes.
+Before the budget was set, the always-loaded text was trimmed: redundant text in `KIT.md` was removed, the rule on the voice of convention docs moved to `conventions/records.md`, the advice on searching hard-wrapped prose was dropped (see the note on [ADR 053](053-one-line-per-paragraph.md)), and sentences that only explained a rule, or restated another, were cut. Together these cut `KIT.md` from 7941 to 6470 bytes.
 
 Rejected:
 
@@ -22,4 +22,6 @@ Rejected:
 
 - Consumers need no change: they read the same `KIT.md` and skills, which the kit's CI now checks.
 - The vendored OpenSpec skills are not counted. They are opt-in and are being removed.
-- A new skill, or a longer description, counts against the budget like a `KIT.md` bullet.
+- A new skill, or a longer description, counts against the budget like a `KIT.md` bullet. A skill set to `disable-model-invocation: true` is not listed, so it does not count.
+- The check fails, rather than counting 0, when it cannot read a skill's description, when an input file is missing, and when `KIT.md` or a hub `@`-imports a file it does not count.
+- Each skill's name and the listing's formatting are not counted, a few bytes per skill.
