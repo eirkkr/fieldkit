@@ -18,7 +18,7 @@ You are welcome to fork it, lift individual conventions, or just mine the ADRs f
 
 ## Layout
 
-- `KIT.md` - the entry point a consumer repo `@`-imports; holds the always-on rules directly and points to the opt-in, load-on-demand ones.
+- `KIT.md` - the entry point a consumer repo `@`-imports; holds the always-on rules directly and points to the opt-in, load-on-demand ones. It is in every consumer session, so `just lint` checks it, the Python hub and the skill descriptions against a byte budget ([ADR 060](docs/decisions/060-budget-the-always-loaded-context.md)).
 - `CLAUDE.md` - the kit's *own* repo-specific rules, not imported by consumers. It imports `KIT.md`, so a session in this repo gets both.
 - `conventions/` - the load-on-demand docs: `git`, `github`, `records`, `decisions`, `specs`, `ai`, `ci`, and `python/` for Python repos - a slim `README.md` hub indexing `code`, `setup`, and `testing`, each read on demand.
 - `docs/decisions/` - ADRs recording this repo's own non-obvious design choices; the one `docs/` subtree.
