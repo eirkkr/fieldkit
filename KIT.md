@@ -20,7 +20,8 @@ Generic rules shared across repos, imported from a consumer's CLAUDE.md as `@.fi
 | Merging | ask first | unless the user typed `/merge`; also conditioned on CI |
 
 - Approval settles whether to act, not what the draft says: once given - a yes, or the `/pr`, `/merge` or issue request itself - draft it and go straight to it.
-- An issue settles that a finding is handled later and separately, which forecloses doing it now on the branch in hand. Say what the issue would say, and file it on a yes.
+- A finding unrelated to the branch's change is fixed on it, act-then-show, when the fix costs less than filing an issue or only slightly more - an issue costs a standalone body, a duplicate search, and a later branch, PR and review. It goes in its own commit and is named in the PR description. On a change's stage PR this holds only in files the stage already touches.
+- A finding too big for that becomes an issue. An issue settles that a finding is handled later and separately, which forecloses doing it now on the branch in hand. Say what the issue would say, and file it on a yes.
 - Merging also needs CI: a failed check or a conflict stops it (report that, don't merge around it), a running check is waited out, a green one merges with no further sign-off.
 - The PR a change's stage opens at its gate (see `conventions/specs.md`) needs no approval - one per stage, and opening it is part of reaching the gate. Nor do a change's own issue, when planning it was asked for, or its stage issues, once its plan is approved - or, for a plan priced to decide (`conventions/specs.md`), as it is published. Each stage's merge is gated like any other.
 - Commit onto the branch you're already on, even if its existing work looks unrelated.
@@ -42,7 +43,7 @@ Generic rules shared across repos, imported from a consumer's CLAUDE.md as `@.fi
 
 - A green CI/lint pass confirms only machine-enforced rules; audit conventions enforced by review (ordering, spacing, doc accuracy) by hand against the diff.
 - When a branch introduces or changes a convention, audit existing code for violations and bring any docs that still teach the old pattern into line.
-- When editing a file, fix pre-existing convention violations in that file as part of the change; don't extend them. If the fix would span modules, file an issue instead.
+- When editing a file, fix pre-existing convention violations in that file as part of the change; don't extend them. If the fix would cost more than filing an issue - spanning modules is the usual sign - file one instead.
 - An artifact edited many times needs reading end to end, as a document, before it is called finished. Every edit can be correct while the whole stops describing itself - the usual symptom is a stated goal the body has outgrown. A separate pass from auditing the diff, and it comes last.
 - Auditing prose for a phrase needs the text unwrapped first - hard-wrapped Markdown splits phrases across lines, where a line-based `grep` misses them and reports the file clean. Normalise whitespace before matching (e.g. read the file and `' '.join(text.split())`), and treat a no-hit result from a line-based search over wrapped prose as unproven, not as absence.
 
