@@ -15,3 +15,5 @@ This repo has no application code or runtime dependencies - only a single linter
 - rumdl's built-in defaults (line-length=80, tables exempt) match the project requirements, so no config file is needed.
 
 Amended by [053](053-one-line-per-paragraph.md): the last consequence no longer holds - `.rumdl.toml` now sets MD013.
+
+> The kit now runs three linters this way, not one: shellcheck and shfmt for its shell scripts join rumdl, through `uvx --from shellcheck-py@...` and `uvx --from shfmt-py@...`. The reasoning holds for three. Their pins live in `scripts/check-shell.sh`, the one place each is named, rather than in the justfile.
