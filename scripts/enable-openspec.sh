@@ -40,13 +40,13 @@ schema="review-gated"
 mkdir -p "openspec/schemas/$schema/templates"
 for src in ".fieldkit/schemas/$schema/schema.yaml" \
     ".fieldkit/schemas/$schema/templates/"*.md; do
-    rel="${src#.fieldkit/schemas/$schema/}"
+    rel="${src#".fieldkit/schemas/$schema/"}"
     dest="openspec/schemas/$schema/$rel"
     # ../ back to the repo root: 3 levels from the schema dir, 4 from
     # templates/.
     case "$rel" in
-    */*) up="../../../../" ;;
-    *) up="../../../" ;;
+        */*) up="../../../../" ;;
+        *) up="../../../" ;;
     esac
     target="$up.fieldkit/schemas/$schema/$rel"
     if [ -L "$dest" ] && [ "$(readlink "$dest")" = "$target" ]; then

@@ -39,7 +39,7 @@ elif [ -e "$dest" ]; then
     exit 1
 else
     mkdir -p .github/workflows
-    printf '%s' "$content" > "$dest"
+    printf '%s' "$content" >"$dest"
     echo "Wrote $dest"
 fi
 

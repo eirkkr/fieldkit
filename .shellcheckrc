@@ -1,0 +1,3 @@
+# Empty on purpose: shellcheck stops at the first .shellcheckrc it finds
+# above a script, so this one keeps a ~/.shellcheckrc from changing what
+# just lint reports.

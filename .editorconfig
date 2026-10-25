@@ -1,0 +1,19 @@
+# Stops the lookup here, so an .editorconfig above the clone can't change
+# how shfmt or an editor formats the kit's scripts.
+root = true
+
+# Shell scripts, and hooks/ for hooks/pre-commit, which has no extension.
+# The Python hooks there get the same four-space indent, as PEP 8 has it.
+# shfmt reads these when given no style flags. Two sections, not one
+# [{*.sh,hooks/*}]: a slash anywhere in a glob anchors all of it to this
+# directory, so *.sh there would match top-level scripts only.
+# check-shell.sh fails on a shell script outside both.
+[*.sh]
+indent_style = space
+indent_size = 4
+switch_case_indent = true
+
+[hooks/*]
+indent_style = space
+indent_size = 4
+switch_case_indent = true
