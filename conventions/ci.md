@@ -36,12 +36,12 @@ Upgrading means editing the pin: change the SHA and its comment together.
 
 ## Shell scripts
 
-- **Tools:** shellcheck lints and shfmt formats ([ADR 061](../docs/decisions/061-shellcheck-and-shfmt.md)). `just lint` runs both; `just fix` runs `shfmt --write`.
-- **Pins:** the `shellcheck-py` and `shfmt-py` packages, whose wheels carry the binaries and work on any Python 3, so they never hold up a Python upgrade. With a lockfile they are dev dependencies; without one, `uvx --from shellcheck-py@<version> shellcheck` and `uvx --from shfmt-py@<version> shfmt`. shfmt-py numbers its own releases (4.2.0 ships shfmt 3.14.1). shellcheck-py has no Linux ARM64 wheel: there it builds from the sdist, which downloads the pinned shellcheck release from GitHub.
-- **Style:** shfmt's settings live in `.editorconfig`, which editors also read. `root = true` keeps an `.editorconfig` above the clone from merging in, so two machines format alike. The indent is each repo's choice; the kit's own scripts use four spaces with indented `case` arms (`indent_size = 4`, `switch_case_indent = true`, shfmt's `-i 4 -ci`), the default for a repo with no style yet. A section must match every script's path, the extensionless ones included - one outside every section gets shfmt's default, tabs. A slash in a section's glob anchors all of it to the repo root, so `[{*.sh,hooks/*}]` matches top-level `.sh` files only; give each pattern its own section.
-- **Config:** an empty `.shellcheckrc` at the repo root, which shellcheck finds before a `~/.shellcheckrc` that could otherwise disable checks on one machine.
-- **Files:** tracked files only (`git ls-files`), which leaves out a git-ignored `.fieldkit` and `node_modules/`, selected by the shebang on their first line, so an extensionless git hook is included. A whole-file grep also matches a shebang in a Markdown code block.
-- **Suppressions:** `# shellcheck disable=SCxxxx` on the one line, beside a comment saying why. For example, SC2064 on a `trap` that has to expand a function-local variable when it is set: by `EXIT` the local is gone, and `set -u` fails on it.
+- **Tools:** shellcheck lints, shfmt formats ([ADR 061](../docs/decisions/061-shellcheck-and-shfmt.md)). `just lint` runs both; `just fix` runs `shfmt --write`.
+- **Pins:** the `shellcheck-py` and `shfmt-py` packages - dev dependencies with a lockfile, else `uvx --from shfmt-py@<version> shfmt`. shfmt-py numbers its own releases: 4.2.0 ships shfmt 3.14.1.
+- **Style:** in `.editorconfig`, under `root = true` so a file above the clone can't merge in. The indent is each repo's; start from the kit's four spaces with indented `case` arms (`indent_size = 4`, `switch_case_indent = true`). A script matching no section gets shfmt's default, tabs. A slash in a glob anchors all of it to the root, so `[{*.sh,hooks/*}]` misses `scripts/*.sh` - give each pattern its own section.
+- **Config:** an empty `.shellcheckrc` at the root, so a `~/.shellcheckrc` can't change the result.
+- **Files:** `git ls-files`, selected by the shebang on the first line - which catches an extensionless hook and skips one in a Markdown code block.
+- **Suppressions:** `# shellcheck disable=SCxxxx` on the one line, beside a comment saying why.
 
 ## Triggers and input
 

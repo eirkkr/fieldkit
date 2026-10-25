@@ -20,5 +20,6 @@ shellcheck and shfmt are the de facto pair, and neither has a close rival. Rejec
 ## Consequences
 
 - A repo adopting the convention adds a check script, a `.editorconfig` and an empty `.shellcheckrc`; the kit's `scripts/check-shell.sh` is a worked example.
+- The packages' wheels carry the binaries and are tagged `py2.py3-none-<platform>`, so they install on any Python 3 and never hold up a Python upgrade.
 - shellcheck-py has no Linux ARM64 wheel, so on that platform its sdist downloads the pinned shellcheck release from GitHub at install.
 - shfmt-py numbers its own releases, so a pin bump checks which shfmt the package ships.
