@@ -33,7 +33,7 @@ You are welcome to fork it, lift individual conventions, or just mine the ADRs f
 - `statusline/` - the shared Claude Code status line script, symlinked to `~/.claude/statusline-command.sh` and wired up via `settings.json`'s `statusLine` key by `just install` (see Setup).
 - `hooks/` - shared hooks of both kinds, told apart by filename: the git `pre-commit` and `commit-msg` hooks, symlinked into an *opt-in* consumer repo's `.git/hooks` by `.fieldkit/scripts/enable-hooks.sh` (not by `just install` - `.git/hooks` is per-clone; see "Blocking commits to the default branch"), and the Claude Code session hooks `stop-autofix.py`, `pretooluse-branch-name.py` and `pretooluse-merge-message.py`, registered machine-wide by `just install`. `conventions.py` holds the branch and commit rules they all check against.
 - `.github/workflows/` - the kit's own CI (`lint.yml`, running `just lint`), and `pr-conventions.yml`, which checks each PR's title and branch name on the kit's own PRs and is also called by consumer repos (see "Checking PRs in CI").
-- `.editorconfig` - the shell scripts' style. `just lint` lints every tracked shell script, found by shebang, with shellcheck and checks its formatting against this style with shfmt; `just fix` applies it.
+- `.editorconfig`, `.shellcheckrc` - the shell scripts' style, read by editors and shfmt, and an empty shellcheck config that keeps a personal one out. `just lint` runs shellcheck on every tracked shell script (found by shebang, so `hooks/pre-commit` is included) and checks it against this style with shfmt; `just fix` reformats the scripts to match.
 - further areas as needs emerge - e.g. more Claude Code assets, shared scripts, editor/CI config.
 
 ## Setup

@@ -2,8 +2,11 @@
 # how shfmt or an editor formats the kit's scripts.
 root = true
 
-# Shell scripts, and the extensionless git hooks. shfmt reads these when
-# given no style flags.
+# Shell scripts, and hooks/ for hooks/pre-commit, which has no extension.
+# The Python hooks there get the same four-space indent, as PEP 8 has it.
+# shfmt reads these when given no style flags, and doesn't expand {a,b}
+# globs, hence two sections. check-shell.sh fails on a shell script
+# outside both.
 [*.sh]
 indent_style = space
 indent_size = 4

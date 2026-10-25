@@ -54,7 +54,11 @@ check-branch-name:
 check-pr-title:
     @"{{ justfile_directory() }}/scripts/check-pr-title.sh" "{{ justfile_directory() }}"
 
-# Auto-fix markdown issues and format the shell scripts.
+# Auto-fix markdown issues and format the shell scripts - both, even when one fails.
 fix:
-    uvx rumdl@0.2.26 check --fix .
-    @"{{ justfile_directory() }}/scripts/check-shell.sh" "{{ justfile_directory() }}" --fix
+    #!/usr/bin/env bash
+    set -uo pipefail
+    status=0
+    uvx rumdl@0.2.26 check --fix . || status=1
+    "{{ justfile_directory() }}/scripts/check-shell.sh" "{{ justfile_directory() }}" --fix || status=1
+    exit "$status"
