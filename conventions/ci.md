@@ -32,6 +32,15 @@ Upgrading means editing the pin: change the SHA and its comment together.
 - Each check runs in exactly one job, so a failure is reported once.
 - A recipe longer than a line or two calls a script in `scripts/`.
 - A check prints a line for each result, prefixed with its recipe name (`check-branch-name: ...`), on success as well as failure - so a pass is visible, and a log says which check spoke.
+- A check script that runs several tools catches each one's failure - `if ! tool ...; then echo "<recipe>: ..." >&2; status=1; fi` - and exits once, at the end. Bare under `set -e`, the first failing tool exits with no prefixed line, and the tools after it never run.
+
+## Shell scripts
+
+- **Tools:** shellcheck lints and shfmt formats. Neither has a close rival: bashate and beautysh check style only, and the meta-linters run these two inside a large image. `just lint` runs both; `just fix` runs `shfmt --write`.
+- **Pins:** as for any tool above. With a lockfile, they are the `shellcheck-py` and `shfmt-py` dev dependencies, whose wheels carry the binaries and are tagged `py2.py3-none-<platform>`, so they never hold up a Python upgrade. Without one, `uvx --from shellcheck-py@0.11.0.1 shellcheck`. shfmt-py numbers its own releases (4.2.0 ships shfmt 3.14.1), and shellcheck-py has no Linux ARM64 wheel, so on that platform it builds from the sdist.
+- **Style:** shfmt's settings live in `.editorconfig`, which editors read too, under `root = true`. Without it, an `.editorconfig` above the clone merges in, and two machines format differently. The indent is each repo's choice; the kit's own scripts use four spaces with indented `case` arms (`indent_size = 4`, `switch_case_indent = true`, shfmt's `-i 4 -ci`), the default for a repo with no style yet.
+- **Files:** tracked files only (`git ls-files`), which leaves out a git-ignored `.fieldkit` and `node_modules/`. A script with no extension, such as a git hook, is found by its shebang - on the first line only, since a whole-file grep also matches a shebang in a Markdown code block.
+- **Suppressions:** `# shellcheck disable=SCxxxx` on the one line, beside a comment saying why, and only where the tool is wrong about the context. For example, SC2064 on a `trap` that has to expand a function-local variable when it is set: by `EXIT` the local is gone, and `set -u` fails on it.
 
 ## Triggers and input
 
