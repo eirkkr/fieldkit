@@ -6,7 +6,7 @@ Which reviews to offer on this repo's plans and PRs; `conventions/specs.md`'s "R
 | --- | --- |
 | `mattpocock-skills:grilling` | Before a plan is written: the questions only the reviewer can answer |
 | A fresh agent (no skill) | A plan published: requirements, stage rules and guesses, as specs.md's "Review" describes |
-| `mattpocock-skills:code-review` | Every PR. Standards: the diff against the convention docs and ADRs. Spec: against the issue or the stage's steps |
+| `mattpocock-skills:code-review` | A diff that makes choices - new content, a convention applied, a stage's requirements to meet - not a mechanical rename. Standards: the diff against the convention docs and ADRs. Spec: against the issue or the stage's steps |
 | `mattpocock-skills:writing-for-agents` | `KIT.md`, `CLAUDE.md`, a skill, a convention doc, or a doc one of them points to: what an agent reads, checked for restatement, no-ops and rules worth disclosing |
 | `pr-review-toolkit:code-reviewer` | Logic in `scripts/` or `hooks/`: a diff that can go wrong in ways a check run misses, since the kit has no tests |
 | `pr-review-toolkit:silent-failure-hunter` | A hook or check with a fallback or a swallowed exit: one that fails open passes everything |
