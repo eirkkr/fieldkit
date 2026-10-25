@@ -25,14 +25,18 @@ openspec-refresh:
 # Run all checks: the linters, plus this branch's name and its PR's title.
 check: lint check-branch-name check-pr-title
 
-# Lint markdown, check the vendored skills still carry their overlays, and check the always-loaded text fits its budget.
-lint: rumdl check-overlays check-context-size
+# Lint markdown and shell scripts, check the vendored skills still carry their overlays, and check the always-loaded text fits its budget.
+lint: rumdl check-shell check-overlays check-context-size
 
 # Lint all markdown.
 rumdl:
     #!/usr/bin/env bash
     set -euo pipefail
     uvx rumdl@0.2.26 check . 2>&1 | sed '/^$/d; s/^/rumdl: /'
+
+# Lint the shell scripts with shellcheck and check their shfmt formatting.
+check-shell:
+    @"{{ justfile_directory() }}/scripts/check-shell.sh" "{{ justfile_directory() }}"
 
 # Check each vendored skill still ends with its overlay.
 check-overlays:
@@ -50,6 +54,7 @@ check-branch-name:
 check-pr-title:
     @"{{ justfile_directory() }}/scripts/check-pr-title.sh" "{{ justfile_directory() }}"
 
-# Auto-fix markdown issues.
+# Auto-fix markdown issues and format the shell scripts.
 fix:
     uvx rumdl@0.2.26 check --fix .
+    @"{{ justfile_directory() }}/scripts/check-shell.sh" "{{ justfile_directory() }}" --fix
