@@ -40,7 +40,7 @@ schema="review-gated"
 mkdir -p "openspec/schemas/$schema/templates"
 for src in ".fieldkit/schemas/$schema/schema.yaml" \
     ".fieldkit/schemas/$schema/templates/"*.md; do
-    rel="${src#.fieldkit/schemas/$schema/}"
+    rel="${src#".fieldkit/schemas/$schema/"}"
     dest="openspec/schemas/$schema/$rel"
     # ../ back to the repo root: 3 levels from the schema dir, 4 from
     # templates/.

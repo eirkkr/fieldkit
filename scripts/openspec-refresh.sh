@@ -2,7 +2,16 @@
 set -euo pipefail
 kit="$1"
 
-before="$(cd "$kit/repo-skills" && ls -d openspec-*/ 2>/dev/null | sort)"
+# The openspec skill dirs in repo-skills/, one name per line. A glob, not
+# `ls`, so a run with none yet lists nothing instead of failing.
+skill_dirs() {
+    local dir
+    for dir in "$kit"/repo-skills/openspec-*/; do
+        if [ -d "$dir" ]; then basename "$dir"; fi
+    done | sort
+}
+
+before="$(skill_dirs)"
 
 npm install --prefix "$kit" --save-exact "@fission-ai/openspec@latest"
 
@@ -32,7 +41,7 @@ for overlay in "$kit"/repo-skills-overlay/*.md; do
     echo "Applied overlay to $name"
 done
 
-after="$(cd "$kit/repo-skills" && ls -d openspec-*/ 2>/dev/null | sort)"
+after="$(skill_dirs)"
 
 new="$(comm -13 <(printf '%s' "$before") <(printf '%s' "$after"))"
 if [ -n "$new" ]; then
