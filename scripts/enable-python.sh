@@ -33,11 +33,11 @@ for dest in .claude/skills/*; do
     [ -L "$dest" ] || continue
     target="$(readlink "$dest")"
     case "$target" in
-    ../../.fieldkit/python-skills/*)
-        [ -d "$dest" ] && continue
-        rm "$dest"
-        echo "Removed stale skill link $dest ($target no longer exists)"
-        ;;
+        ../../.fieldkit/python-skills/*)
+            [ -d "$dest" ] && continue
+            rm "$dest"
+            echo "Removed stale skill link $dest ($target no longer exists)"
+            ;;
     esac
 done
 
