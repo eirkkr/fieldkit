@@ -4,9 +4,10 @@ root = true
 
 # Shell scripts, and hooks/ for hooks/pre-commit, which has no extension.
 # The Python hooks there get the same four-space indent, as PEP 8 has it.
-# shfmt reads these when given no style flags, and doesn't expand {a,b}
-# globs, hence two sections. check-shell.sh fails on a shell script
-# outside both.
+# shfmt reads these when given no style flags. Two sections, not one
+# [{*.sh,hooks/*}]: a slash anywhere in a glob anchors all of it to this
+# directory, so *.sh there would match top-level scripts only.
+# check-shell.sh fails on a shell script outside both.
 [*.sh]
 indent_style = space
 indent_size = 4
