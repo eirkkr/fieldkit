@@ -117,7 +117,7 @@ A decision made while a stage is reviewed is written down where it will be found
 
 Review is offered, and runs when the reviewer asks for it. A *fresh* agent is one given the work and the rules it checks against, and nothing from the planning or the build.
 
-- **When it is offered.** Each time the agent stops for the reviewer - a plan published, a PR at its gate, a fix made after either - it says what has not been reviewed and names the reviews worth running, with a reason for each drawn from what changed. Where none looks worth its cost, it says that.
+- **When it is offered.** Each time the agent stops for the reviewer - a plan published, a PR at its gate, a fix made after either - it says what has not been reviewed and names the reviews worth running, with a reason for each drawn from what changed. Where none looks worth its cost, it says that. No review is offered on every PR by default: each one a repo lists is a judgement on what the work holds, and a mechanical rename or a word swap usually earns none.
 - **A plan** is read by a fresh agent for requirements no test could hold, stages that break the stage rules, and what an agent building from it would have to guess.
 - **A PR** is read by fresh agents on two axes, kept apart: the repo's conventions, including whether everything a person will read is in plain words; and the requirements it says it delivers.
 - **Findings.** The building agent reproduces each one, then triages it: fixed here, edited into the later stage that will handle it, or listed as an issue to file. They go on the PR as a comment headed `## Review findings`, each with its outcome. Listed issues are filed when the reviewer says so.
@@ -130,7 +130,7 @@ Review is offered, and runs when the reviewer asks for it. A *fresh* agent is on
   | -------------------- | --------------------------------------------- |
   | `grilling`           | Before a plan is written                      |
   | None - a fresh agent | A plan published                              |
-  | `code-review`        | Every PR                                      |
+  | `code-review`        | A diff with judgement in it, not a rename     |
   | `security-review`    | A PR touching auth, input handling or secrets |
   ```
 
