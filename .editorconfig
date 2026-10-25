@@ -1,0 +1,15 @@
+# Stops the lookup here, so an .editorconfig above the clone can't change
+# how shfmt or an editor formats the kit's scripts.
+root = true
+
+# Shell scripts, and the extensionless git hooks. shfmt reads these when
+# given no style flags.
+[*.sh]
+indent_style = space
+indent_size = 4
+switch_case_indent = true
+
+[hooks/*]
+indent_style = space
+indent_size = 4
+switch_case_indent = true
