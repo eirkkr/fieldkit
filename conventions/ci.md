@@ -32,6 +32,16 @@ Upgrading means editing the pin: change the SHA and its comment together.
 - Each check runs in exactly one job, so a failure is reported once.
 - A recipe longer than a line or two calls a script in `scripts/`.
 - A check prints a line for each result, prefixed with its recipe name (`check-branch-name: ...`), on success as well as failure - so a pass is visible, and a log says which check spoke.
+- A check script that runs several tools catches each one's result - `if tool ...; then echo "<recipe>: tool passed"; else echo "<recipe>: tool failed" >&2; status=1; fi` - and exits once, at the end. Bare under `set -e`, the first failing tool exits with no prefixed line, and the tools after it never run.
+
+## Shell scripts
+
+- **Tools:** shellcheck lints, shfmt formats ([ADR 061](../docs/decisions/061-shellcheck-and-shfmt.md)). `just lint` runs both; `just fix` runs `shfmt --write`.
+- **Pins:** the `shellcheck-py` and `shfmt-py` packages - dev dependencies with a lockfile, else `uvx --from shfmt-py@<version> shfmt`. shfmt-py numbers its own releases: 4.2.0 ships shfmt 3.14.1.
+- **Style:** in `.editorconfig`, under `root = true` so a file above the clone can't merge in. The indent is each repo's; start from the kit's four spaces with indented `case` arms (`indent_size = 4`, `switch_case_indent = true`). A script matching no section gets shfmt's default, tabs. A slash in a glob anchors all of it to the root, so `[{*.sh,hooks/*}]` misses `scripts/*.sh` - give each pattern its own section.
+- **Config:** an empty `.shellcheckrc` at the root, so a `~/.shellcheckrc` can't change the result.
+- **Files:** `git ls-files`, selected by the shebang on the first line - which catches an extensionless hook and skips one in a Markdown code block.
+- **Suppressions:** `# shellcheck disable=SCxxxx` on the one line, beside a comment saying why.
 
 ## Triggers and input
 
