@@ -72,19 +72,19 @@ A is proposed first. It delivers most of the value, and it produces evidence of 
 ## Consequences
 
 - **The kit's part is small:** a convention, a zone script and three CI recipes. The changes it implies:
-    - `conventions/specs.md`: the PR body gains **Read these** (the `person` files touched, and why) and **Held by tests** (the `tests` files touched, and the guard each passed), both computed from the map. An `agent`-tier file touched means the fresh-agent review runs by default, not on offer.
-    - `change-stage`: runs the zone script before opening the PR and pastes its output into the body.
-    - `change-plan`: the plan review flags a requirement whose implementation would sit in a `tests` file, a sign the rule is in the wrong place.
-    - `conventions/ci.md`: the three guards.
-    - A consumer's `CLAUDE.md`: `## Reviews` points to the zone map.
+  - `conventions/specs.md`: the PR body gains **Read these** (the `person` files touched, and why) and **Held by tests** (the `tests` files touched, and the guard each passed), both computed from the map. An `agent`-tier file touched means the fresh-agent review runs by default, not on offer.
+  - `change-stage`: runs the zone script before opening the PR and pastes its output into the body.
+  - `change-plan`: the plan review flags a requirement whose implementation would sit in a `tests` file, a sign the rule is in the wrong place.
+  - `conventions/ci.md`: the three guards.
+  - A consumer's `CLAUDE.md`: `## Reviews` points to the zone map.
 - **Most of the cost falls on consumer repos,** which restructure toward the layout. That can be gradual: a file not yet split stays `person`.
 - **Risks, and what holds each:**
-    - A file is zoned wrongly and a rule lands unread. The map is itself `person`, so each zoning choice is reviewed, and the guards demote files that stop qualifying.
-    - A rule creeps into a mechanical file. The complexity lint fails the build.
-    - Tests cover lines but not behaviour, so test-held code looks safe. The mutation run demotes the area.
-    - Spreading a concept across files hurts navigation. One directory per concept with fixed suffixes keeps it together.
-    - Harm no test sees, such as a secret logged from a mapper. Secret handling and logging configuration are `person`, and a security review is offered when they are touched.
-    - Mutation runs are slow. They run on a schedule per zone, not per PR.
+  - A file is zoned wrongly and a rule lands unread. The map is itself `person`, so each zoning choice is reviewed, and the guards demote files that stop qualifying.
+  - A rule creeps into a mechanical file. The complexity lint fails the build.
+  - Tests cover lines but not behaviour, so test-held code looks safe. The mutation run demotes the area.
+  - Spreading a concept across files hurts navigation. One directory per concept with fixed suffixes keeps it together.
+  - Harm no test sees, such as a secret logged from a mapper. Secret handling and logging configuration are `person`, and a security review is offered when they are touched.
+  - Mutation runs are slow. They run on a schedule per zone, not per PR.
 - **This repo gains little.** The kit has no tests, so nearly everything here would be `person`. The benefit is in consumer repos with test suites, and one of those is where the zone script should be tried first.
 - **Rollout, if accepted,** as a change of four stages:
     1. The convention: tiers, the zone map format and the file-structure rule. Nothing enforced yet.
@@ -92,7 +92,7 @@ A is proposed first. It delivers most of the value, and it produces evidence of 
     3. The zone script and the PR body sections.
     4. Gates, only if B or C is chosen: amend 041 and 049, and teach `merge` to merge a `tests`-only stage on green CI.
 - **Open questions** before this is accepted:
-    - Gates: A, B or C?
-    - Are three tiers right, or is `agent` versus `tests` a line a repo won't maintain?
-    - Is the mutation run required for test-held files, or only advised?
-    - Does the zone map get its own file, or a section in each repo's `CLAUDE.md`?
+  - Gates: A, B or C?
+  - Are three tiers right, or is `agent` versus `tests` a line a repo won't maintain?
+  - Is the mutation run required for test-held files, or only advised?
+  - Does the zone map get its own file, or a section in each repo's `CLAUDE.md`?
