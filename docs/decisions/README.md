@@ -76,3 +76,4 @@ Lightweight architecture decision records (ADRs) for non-obvious design choices.
 | 070 | [One launcher starts Claude as the bot](070-kit-claude-launcher.md) | Accepted |
 | 071 | [The bot's token carries read:org](071-bot-token-includes-read-org.md) | Accepted |
 | 062 | [Review tiers are set by where code lives](062-review-tiers-by-location.md) | Proposed |
+| 062 | [Review tiers are set by where code lives](062-review-tiers-by-location.md) | Accepted |
