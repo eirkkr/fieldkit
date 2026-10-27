@@ -10,18 +10,25 @@ Each path in a consumer repo is assigned one of three review tiers, in a zone ma
 | `agent` | A fresh agent, plus tests | Implementation where tests miss some failures: logging, error handling, performance |
 | `tests` | CI only | Generated code, mechanical code, and implementation behind a contract the tests cover |
 
-The map is a file at the repo root in CODEOWNERS-style globs, for example:
+A consumer declares the paths that skip a person in an optional `docs/review-zones.md`: a table with one row per glob, giving its tier and why the paths may have it. A web app might hold:
 
-```text
-# review-zones
-person  src/**/types.py  src/**/rules.py  tests/**  migrations/**  .github/**
-agent   src/**/service.py  src/**/adapters/**
-tests   **/*.gen.*  src/**/mapping.py  src/**/wiring.py
+```markdown
+| Paths | Tier | Why a person need not read it |
+| --- | --- | --- |
+| `templates/**` | agent | Presentation only: the rules a page renders live in `person` files, and the PR's Try it shows the result |
+| `static/**/*.js` | agent | Display and wiring in the browser: no rule a person must agree to is decided here |
+| `**/*.gen.*` | tests | Generated from a reviewed schema, and CI regenerates and diffs it |
+| `src/**/mapping.py` | tests | Mechanical by lint: complexity is capped at 1 |
 ```
+
+- A path no row matches is `person`. A repo without the file keeps today's review of every line, and `person` rows are never needed.
+- Where globs overlap, the higher tier wins: `person` over `agent` over `tests`.
+- The zone map itself, and the tests, are `person` whatever a row says. The zone script refuses a row that would lower either.
+- Every row needs its reason, given in terms of the rule the paths escape, as [records.md](../../conventions/records.md) asks of any exemption list. A reason that only describes the files ("static assets") can't be used to refuse the next row, and the list grows by precedent. The zone script refuses a row with no reason.
 
 Tests are in the `person` tier on purpose. A behaviour change needs a test change, and a test change is read, so an agent cannot change behaviour without a person seeing it. A diff that touches only `tests`-tier code and no tests is a refactor the existing tests already vouch for.
 
-A file stays below `person` only while a mechanical guard says it may. Each kind of `tests`-tier file has its own guard, and a file that fails its guard moves up a tier:
+The two lower tiers are reached differently. A repo may declare a path `agent` with a reason alone: a fresh agent still reads every line, so nothing further guards it. That suits static files and templates, which need no restructuring to qualify. The `tests` tier needs a mechanical guard as well, since nothing reads it. Each kind of `tests`-tier file has its own guard, and a file that fails its guard moves up to `agent`:
 
 | Kind | Example | Guard |
 | --- | --- | --- |
@@ -56,6 +63,8 @@ Rejected:
 - **Tagging each stage step `Read` or `Tests`.** Steps map to commits, so the tags would give a reading list per commit. But the agent classifies its own work, the tags live in history rather than in the code, and every stage re-decides the same question for the same files.
 - **CODEOWNERS alone.** GitHub's CODEOWNERS file can say only "needs this owner" or nothing. It enforces the `person` tier natively, so `person` globs are mirrored into it with "Require review from Code Owners" on, but it has no way to tell `agent` from `tests`.
 - **A tier per file, recorded by comment in the file.** It can't be matched by glob, and nothing stops a change to the file from changing its own tier unread.
+- **A section in each repo's `CLAUDE.md`.** It would load in every session to serve one script, against the budget [060](060-budget-the-always-loaded-context.md) sets. A dedicated file at a fixed path, as `docs/version-pins.md` is for [044](044-repo-pins-in-a-consumer-file.md), gives the script a path that a renamed heading can't break.
+- **A bare glob list with no reasons, as CODEOWNERS is.** Nothing would record why a path was let off a person's review, so nothing could be used to refuse the next path.
 
 ### Gates
 
@@ -76,23 +85,23 @@ A is proposed first. It delivers most of the value, and it produces evidence of 
   - `change-stage`: runs the zone script before opening the PR and pastes its output into the body.
   - `change-plan`: the plan review flags a requirement whose implementation would sit in a `tests` file, a sign the rule is in the wrong place.
   - `conventions/ci.md`: the three guards.
-  - A consumer's `CLAUDE.md`: `## Reviews` points to the zone map.
-- **Most of the cost falls on consumer repos,** which restructure toward the layout. That can be gradual: a file not yet split stays `person`.
+  - A consumer's `docs/review-zones.md`: optional, and without it every path is `person`.
+- **Most of the cost falls on consumer repos,** which restructure toward the layout. That can be gradual: a file not yet split stays `person`. Declaring templates and static files `agent` needs no restructuring, so a repo gets a first benefit from a row or two.
 - **Risks, and what holds each:**
-  - A file is zoned wrongly and a rule lands unread. The map is itself `person`, so each zoning choice is reviewed, and the guards demote files that stop qualifying.
+  - A file is zoned wrongly and a rule lands unread. The map is itself `person`, and every row carries its reason, so each zoning choice is reviewed. The guards demote `tests` files that stop qualifying.
   - A rule creeps into a mechanical file. The complexity lint fails the build.
   - Tests cover lines but not behaviour, so test-held code looks safe. The mutation run demotes the area.
   - Spreading a concept across files hurts navigation. One directory per concept with fixed suffixes keeps it together.
   - Harm no test sees, such as a secret logged from a mapper. Secret handling and logging configuration are `person`, and a security review is offered when they are touched.
   - Mutation runs are slow. They run on a schedule per zone, not per PR.
-- **This repo gains little.** The kit has no tests, so nearly everything here would be `person`. The benefit is in consumer repos with test suites, and one of those is where the zone script should be tried first.
+- **This repo gains less.** The kit has no tests, so the `tests` tier is out of reach here, and only declared `agent` rows apply, such as templates. The full benefit is in consumer repos with test suites, and one of those is where the zone script should be tried first.
 - **Rollout, if accepted,** as a change of four stages:
     1. The convention: tiers, the zone map format and the file-structure rule. Nothing enforced yet.
     2. The guards: regenerate-and-diff, the scoped complexity lint, the scheduled mutation run.
-    3. The zone script and the PR body sections.
+    3. The zone script, which reads `docs/review-zones.md` and refuses rows that break its rules, and the PR body sections.
     4. Gates, only if B or C is chosen: amend 041 and 049, and teach `merge` to merge a `tests`-only stage on green CI.
 - **Open questions** before this is accepted:
   - Gates: A, B or C?
   - Are three tiers right, or is `agent` versus `tests` a line a repo won't maintain?
   - Is the mutation run required for test-held files, or only advised?
-  - Does the zone map get its own file, or a section in each repo's `CLAUDE.md`?
+  - May a repo declare a path `tests` with a reason alone, skipping agent review too, for files such as static assets that hold no logic at all?
