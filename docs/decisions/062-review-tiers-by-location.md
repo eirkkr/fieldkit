@@ -14,20 +14,20 @@ A *fresh* agent is one given the files and the rules they are checked against, a
 
 ### The zone map
 
-A consumer declares its tiers in an optional `docs/review-zones.md`. It names the repo's test cases on its first line, then holds a table with one row per glob, giving its tier and why the paths may have it. A web app might hold:
+A consumer declares its tiers in an optional `docs/review-zones.md`. It names the repo's test cases on its first line, then holds a table with one row per glob, giving its tier, the guard that keeps a `machine` row honest, and why the paths may have it. A web app might hold:
 
 ```markdown
 Test cases: `tests/**/test_*.py`
 
-| Paths | Tier | Why |
-| --- | --- | --- |
-| `templates/**` | agent | Presentation only: the rules a page renders live in `person` files |
-| `templates/auth/**` | person | Renders the sign-in and reset flows, where a wrong field leaks an account |
-| `static/**/*.js` | agent | Display and wiring in the browser: no rule a person must agree to is decided here |
-| `static/img/**` | machine | Not code: a review of an image diff can catch nothing |
-| `**/*.gen.*` | machine | Generated from a reviewed schema; the check regenerates and diffs it |
-| `src/**/mapping.py` | machine | Mechanical: the lint caps complexity at 1 |
-| `tests/**/factories.py` | agent | Builds test data: what a test asserts lives in the test cases |
+| Paths | Tier | Guard | Why |
+| --- | --- | --- | --- |
+| `templates/**` | agent | - | Presentation only: the rules a page renders live in `person` files |
+| `templates/auth/**` | person | - | Renders the sign-in and reset flows, where a wrong field leaks an account |
+| `static/**/*.js` | agent | - | Display and wiring in the browser: no rule a person must agree to is decided here |
+| `static/img/**` | machine | - | Not code: a review of an image diff can catch nothing |
+| `**/*.gen.*` | machine | `gen-check` | Generated from a reviewed schema |
+| `src/**/mapping.py` | machine | `lint-mechanical` | Mechanical: complexity is capped at 1 |
+| `tests/**/factories.py` | agent | - | Builds test data: what a test asserts lives in the test cases |
 ```
 
 - A path no row matches is `person`, so a repo without the file keeps today's review of every line. A `person` row carves a path back out of a broader row.
@@ -35,7 +35,7 @@ Test cases: `tests/**/test_*.py`
 - The zone map itself, and the test cases its first line names, are `person` whatever a row says. Test support code - fixtures, factories, setup and teardown - may be declared `agent`.
 - Every row needs its reason, given in terms of the rule the paths escape, as [records.md](../../conventions/records.md) asks of any exemption list. A reason that only describes the files ("static assets") can't be used to refuse the next row, and the list grows by precedent.
 
-The *zone script* reads the map and a diff, and reports the files the diff touches in each tier. It refuses a map with a row that has no reason, or that would lower the map or the test cases.
+The *zone script* reads the map and a diff, and reports the files the diff touches in each tier. It refuses a map with a row that has no reason, or that would lower the map or the test cases. A `machine` row's guard is the name of a `just` recipe in the repo, as `just check` is relied on by name ([044](044-repo-pins-in-a-consumer-file.md)): the kit can't know how each repo regenerates its code or which linter it runs. The script refuses a `machine` row whose recipe doesn't exist, unless the row is for files that aren't code, and runs the recipe of every `machine` row the diff touches.
 
 ### What each tier needs
 
@@ -78,6 +78,27 @@ A decision never goes in a `machine` file: if a mapper needs a condition, the co
 
 Until the question under "Gates" is settled, every stage keeps its human gate. The PR body names the `person` files touched, which is what the reviewer reads. The `agent` files are covered by the review that runs on them, and the `machine` files by their guards. The reviewer may open any of them, but isn't asked to.
 
+### Wiring it into a consumer
+
+The kit's existing pattern for consumer wiring carries it: an idempotent `enable-*.sh` script, a reusable workflow the consumer's CI calls, and `/kit-reconcile` re-running every enable script a repo has run.
+
+- **`.fieldkit/scripts/enable-review-zones.sh`** writes a starter `docs/review-zones.md` holding only the `Test cases:` line, and a caller workflow for the kit's reusable one, as `enable-pr-checks.sh` does. With no rows every path is `person`, so enabling changes nothing until a row is added.
+- **The reusable workflow** checks out the consumer at the PR's commit and the kit beside it, then runs the zone script on the PR's diff: the map's rules, the tiers touched, and the guard of every `machine` row touched.
+- **Locally**, `change-stage` runs the same script from `.fieldkit/scripts/` before it opens a PR.
+- **For Python repos**, the kit ships the `lint-mechanical` recipe's configuration: ruff's complexity rule at 1, scoped to the mechanical files. Other languages write their own recipe.
+
+The kit itself is not a consumer - it has no `.fieldkit` link to itself - so it runs the script from `just lint`, against its own map.
+
+### Adopting it
+
+A repo adopts in steps, cheapest first. Each is worth having on its own, and a repo can stop after any of them.
+
+1. **Enable it.** The map has no rows and nothing changes, which proves the wiring.
+2. **Rows that need no refactoring.** Images, fonts and vendored files to `machine`; templates, static code and test support code to `agent`. A row and a reason each.
+3. **Generated code.** Where the repo already generates code, a `gen-check` recipe and a row.
+4. **Refactoring toward the layout.** Real work, so planned as a change, one concept per stage: split the mechanical code out of mixed files, add the scoped lint, add the row.
+5. **Test-held rows,** only once a mutation tool runs on a schedule with a baseline score. They are the riskiest rows, so they come after the cheaper tiers have shown the map can be trusted.
+
 ## Reason
 
 A stage's gate asks a person to weigh every line of an agent's diff equally. Most of a typical diff is plumbing that tests already hold, so the decisions get the same skim as the mapper beside them. Separating what a person must read from what tests can hold puts the reviewer's attention where it is needed.
@@ -87,7 +108,7 @@ Tests can only check code against something a person has agreed to. So the line 
 Rejected:
 
 - **Tagging each stage step `Read` or `Tests`.** Steps map to commits, so the tags would give a reading list per commit. But the agent classifies its own work, the tags live in history rather than in the code, and every stage re-decides the same question for the same files.
-- **CODEOWNERS alone.** GitHub's CODEOWNERS file can say only "needs this owner" or nothing. It can enforce the `person` tier - an owner on `*`, then each `agent` and `machine` glob listed with no owner - but it can't tell `agent` from `machine`, and it records no reasons.
+- **CODEOWNERS alone.** GitHub's CODEOWNERS file can say only "needs this owner" or nothing. It can enforce the `person` tier - an owner on `*`, then each `agent` and `machine` glob listed with no owner - but it can't tell `agent` from `machine`, and it records no reasons. Requiring owner review would also block a repo whose PRs are opened under its owner's own account, since GitHub doesn't let an author approve their own PR.
 - **A tier per file, recorded by comment in the file.** It can't be matched by glob, and nothing stops a change to the file from changing its own tier unread.
 - **A section in each repo's `CLAUDE.md`.** It would load in every session to serve one script, the reason [044](044-repo-pins-in-a-consumer-file.md) gave for keeping pins out of `CLAUDE.md`. A dedicated file at a fixed path, as `docs/version-pins.md` is there, gives the script a path that a renamed heading can't break.
 - **Inferring test cases from the test runner's collection rules.** Every runner collects differently, and the script would have to know each one. A glob on the map's first line is one line for the repo to write, and the script reads it the same way whatever the runner.
@@ -121,13 +142,16 @@ A is proposed first. It delivers most of the value, and it produces evidence of 
   - Tests cover lines but not behaviour, so test-held code looks safe. The mutation run proposes raising the row.
   - Spreading a concept across files hurts navigation. One directory per concept with fixed suffixes keeps it together.
   - A secret leaks from a file nobody reads, such as a value logged from a mapper. Code that handles secrets is `person`.
-- **This repo gains little.** The kit has no tests and no code beyond its scripts and hooks, which are `person`, so the tiers have little to act on here. The benefit is in consumer repos with test suites, and one of those is where the zone script should be tried first.
+- **This repo gains little, but is the first to run it.** The kit has no tests, and its conventions, skills, hooks and scripts are instructions or logic, so they stay `person`. Its map is small: `repo-skills/` to `machine`, vendored and regenerated by `just openspec-refresh`, with `check-overlays` failing when an overlay and its vendored skill disagree; `package-lock.json` to `machine`, generated by npm; `LICENSE` and `NOTICE` as files that aren't code. That is enough to exercise the script and the map's rules on a real repo. The full benefit is in consumer repos with test suites.
 - **The rules above belong in a convention doc,** not an ADR: [decisions.md](../../conventions/decisions.md) keeps the rule a reader must follow out of the record of why. They are here while this is proposed, and stage 1 moves them.
-- **Rollout, if accepted,** as a change of four stages:
-    1. The convention: tiers, the zone map format and the file-structure rule, moved out of this ADR. Nothing enforced yet.
-    2. The guards: regenerate-and-diff, the scoped complexity lint, the scheduled mutation run.
-    3. The zone script, **Read these** in the PR body, and the agent review on `agent` files.
-    4. Gates, only if B or C is chosen.
+- **Rollout** as a change of four stages, with a fifth only if gates change:
+    1. The convention: tiers, the zone map format and the file-structure rule, moved out of this ADR, and the kit's own map. Nothing enforced yet.
+    2. The zone script and its reusable workflow, the enable script, and the script in the kit's `just lint`.
+    3. **Read these** in the PR body, and the agent review on `agent` files: `conventions/specs.md` and `change-stage`.
+    4. The guards' recipes: the Python `lint-mechanical` configuration, and `conventions/ci.md` on regenerate-and-diff and the scheduled mutation run.
+    5. Gates, only if B or C is chosen.
+
+  A skill that surveys a repo and proposes rows, with the files that are mostly plumbing as refactoring targets, is not yet specified: it waits until stage 2 has run on a real consumer.
 - **Open questions** before this is accepted:
   - Gates: A, B or C?
   - Are three tiers right, or is `agent` versus `machine` a line a repo won't maintain?
