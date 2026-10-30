@@ -44,3 +44,26 @@ Where it is available depends on the plan. GitHub's plans page lists protected b
 The script checks admin only: not that the role is exactly write, and not which scopes a classic token has. It shows whether the default branch has a protection rule or a ruleset, and cannot show that the protection would stop this bot without pushing to it.
 
 Tried once, with a fine-grained token on an organization member: it reached the organization's repos and the repo endpoint returned `permissions`. The classic token for a personal repo is untried.
+
+## Running Claude as the bot
+
+Keep the bot's token in a file only you can read, and start Claude through a small wrapper that loads it. The token is the limited credential, so it is fine for Claude to read it; anything with more power than that is not.
+
+Once, to save the token:
+
+```bash
+mkdir -p ~/.config/claude-bot && chmod 700 ~/.config/claude-bot
+( umask 077; read -rs -p "Bot token: " t; printf '%s' "$t" > ~/.config/claude-bot/token; echo )
+```
+
+Then add this to `~/.bashrc`, and open a new terminal:
+
+```bash
+claude-bot() { GH_TOKEN="$(cat ~/.config/claude-bot/token)" claude "$@"; }
+```
+
+`claude-bot` starts a session that acts as the bot, and plain `claude` still uses your own login. To check, ask the session to run `gh api user -q .login`: it should print the bot's login, not yours.
+
+- A token expires; when it does, make a new one and run the first command again.
+- Do not put the token in a Claude `settings.json` `env` block, where it sits in plain text in a file that may be shared.
+- This only chooses which credential Claude uses first. Your own token is still stored by `gh` on the same machine, and a session that wanted it could read it: [Keep the user's own GitHub token out of Claude's reach](https://github.com/eirkkr/fieldkit/issues/154).
