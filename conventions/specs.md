@@ -104,7 +104,7 @@ The PR body is the reviewer's page, and holds only what needs them:
 - The stage in a few sentences: what now works, and what does not yet.
 - **Changed from the plan** - anything built differently from the brief or from the steps, with the reason, and any small fix outside the stage, or one line saying nothing was.
 - **Yours to overturn** - choices the agent made between real alternatives, or one line saying there were none.
-- **Try it** - one thing to do by hand and what a good result looks like, saying whether the agent was able to do it itself.
+- **Try it** - one thing to do by hand and what a good result looks like, saying whether the agent was able to do it itself. Copy the steps and the expected result from the repo's manual-testing guide, where it has one.
 - **Review** - which reviews have run on the PR as it now stands, or `Not run.`
 
 Every other command in the body was run as written. The body closes the stage's issue, or for a change of one pull request, the change's.

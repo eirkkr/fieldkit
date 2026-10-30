@@ -122,6 +122,10 @@ Never cache an instance method: the cache keeps every instance alive (ruff's `B0
 
 [testing.md](testing.md#loading-test-data) applies this to test data loaders.
 
+## Narrowing a type
+
+Narrow a value the type allows but an earlier step has ruled out, such as an optional field already filtered on, with `typing.cast`, or change the type so the case cannot arise. No input reaches a guard for it, so no test covers it, and a repo that gates on coverage cannot keep it. The cast is only as true as that earlier step, so name the step in a comment.
+
 ## Exception handling
 
 On Python 3.14+ (PEP 758), an `except` clause catching several types is written *without* parentheses: `except KeyError, ValueError:`. This is current syntax, not a Python-2 relic - ruff's formatter rewrites the parenthesised `except (KeyError, ValueError):` to this form under a `py314`+ target, so the bare form is the house style. Don't "correct" it by adding parentheses; the formatter only reverts the change, and lint does not flag it. Parentheses are still required when binding the caught exception with `as` (`except (KeyError, ValueError) as exc:`).
