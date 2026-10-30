@@ -124,7 +124,7 @@ Never cache an instance method: the cache keeps every instance alive (ruff's `B0
 
 ## Narrowing a type
 
-A value the type allows but the caller rules out - an optional field that a function has already filtered on - is narrowed with `typing.cast`, or the type is changed so it cannot arise. Do not guard it with `assert x is not None` or a `raise AssertionError`: no input reaches that branch, so no test covers it, and a repo that gates on coverage cannot keep it. A `match` over an enum is different: it ends in `assert_never`, which the type checker enforces and no test needs to reach.
+Narrow a value the type allows but an earlier step has ruled out, such as an optional field already filtered on, with `typing.cast`, or change the type so the case cannot arise. No input reaches a guard for it, so no test covers it, and a repo that gates on coverage cannot keep it. The cast is only as true as that earlier step, so name the step in a comment.
 
 ## Exception handling
 

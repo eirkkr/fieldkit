@@ -24,7 +24,7 @@ Any answer that asks for something to change is this one.
 1. Fix it on the stage's branch, as plain commits.
 2. Comment on the PR what was asked and what changed ("What is said at a gate"), and bring the PR body up to date. A review that ran before the fix no longer covers it: the Review line says so.
 3. `gh pr checks --watch`.
-4. Show the reviewer what changed. Offer a review again where the fix is more than wording, with the reason, and stop.
+4. Show the reviewer what changed. Offer a review again where the fix is more than wording, with the reason, and stop. It reads the fix's diff.
 
 ## Approved
 

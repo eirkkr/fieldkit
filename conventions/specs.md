@@ -104,7 +104,7 @@ The PR body is the reviewer's page, and holds only what needs them:
 - The stage in a few sentences: what now works, and what does not yet.
 - **Changed from the plan** - anything built differently from the brief or from the steps, with the reason, and any small fix outside the stage, or one line saying nothing was.
 - **Yours to overturn** - choices the agent made between real alternatives, or one line saying there were none.
-- **Try it** - one thing to do by hand and what a good result looks like, saying whether the agent was able to do it itself. Where the repo has a testing guide that names the record, copy the steps and the expected result from it, not from memory: a step recalled wrongly sends the reviewer to the wrong page.
+- **Try it** - one thing to do by hand and what a good result looks like, saying whether the agent was able to do it itself. Copy the steps and the expected result from the repo's manual-testing guide, where it has one.
 - **Review** - which reviews have run on the PR as it now stands, or `Not run.`
 
 Every other command in the body was run as written. The body closes the stage's issue, or for a change of one pull request, the change's.
@@ -117,7 +117,7 @@ A decision made while a stage is reviewed is written down where it will be found
 
 Review is offered, and runs when the reviewer asks for it. A *fresh* agent is one given the work and the rules it checks against, and nothing from the planning or the build.
 
-- **When it is offered.** Each time the agent stops for the reviewer - a plan published, a PR at its gate, a fix made after either - it says what has not been reviewed and names the reviews worth running, with a reason for each drawn from what changed. A review offered after a fix reads that fix's diff, not the whole PR again: it is cheap, and it covers what no earlier review saw. Where none looks worth its cost, it says that. A mechanical rename or a word swap usually earns none, however the repo's list reads.
+- **When it is offered.** Each time the agent stops for the reviewer - a plan published, a PR at its gate, a fix made after either - it says what has not been reviewed and names the reviews worth running, with a reason for each drawn from what changed. Where none looks worth its cost, it says that. A mechanical rename or a word swap usually earns none, however the repo's list reads.
 - **A plan** is read by a fresh agent for requirements no test could hold, stages that break the stage rules, and what an agent building from it would have to guess.
 - **A PR review**, when run, reads it with fresh agents on two axes, kept apart: the repo's conventions, including whether everything a person will read is in plain words; and the requirements it says it delivers.
 - **Findings.** The building agent reproduces each one, then triages it: fixed here, edited into the later stage that will handle it, or listed as an issue to file. They go on the PR as a comment headed `## Review findings`, each with its outcome. Listed issues are filed when the reviewer says so.
