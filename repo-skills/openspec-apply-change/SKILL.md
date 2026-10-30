@@ -179,7 +179,7 @@ The note's two parts, the brief and the record, are the schema's: step 3's `open
 
 If the reviewer sends the stage back, fix it within that stage and rewrite the note. Do not open the next stage to carry the fix. The links do not need rewriting - both ends stay valid as fixes land.
 
-When the reviewer approves, record `git rev-parse --short HEAD` under **Reviewed at**, tick the box, and merge the PR. That commit is the record of the tree they signed off, kept because the squash-merge discards the branch holding it.
+When the reviewer approves, record `git rev-parse --short HEAD` under **Reviewed at**, tick the box, and merge the PR. That commit is the record of the tree they signed off, kept because the squash-merge discards the branch holding it. The closing commit is the one push an approval survives: merge the head it leaves, not the head the reviewer read.
 
 Then stop and report that the stage has merged. Approval is not a request for the next stage: start it only when the human asks, by invoking this skill again or by saying so - in the approval itself ("approved, carry on with stage 3") or later.
 

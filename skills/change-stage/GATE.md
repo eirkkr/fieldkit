@@ -32,7 +32,7 @@ Any clear yes is approval, and the word to merge.
 
 1. Write down what the gate decided ("What is said at a gate"): on the PR, in the brief with its comment if the plan changed, in an ADR committed to the stage's branch if it outlasts the change.
 2. File the issues the reviewer said yes to.
-3. Merge through the `merge` skill.
+3. Merge through the `merge` skill. Step 1's commit is the one a merge approval survives (ADR 062): the approved sha is the head it leaves.
 
 For a change of one pull request, the merge closes the change. Report it, and stop.
 
