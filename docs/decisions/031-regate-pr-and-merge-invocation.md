@@ -26,3 +26,5 @@ Alternatives rejected:
 - `CLAUDE.md`'s Always-on section splits into a push bullet (ungated, as before) and a pr/merge bullet (gated unless directly slash-invoked).
 - `skills/pr/SKILL.md` and `skills/merge/SKILL.md` no longer describe themselves as unconditionally act-then-show; they describe the invocation itself as the approval, then proceed exactly as before.
 - The gate now lives one level up from where 028/030 removed it: in the decision to call the skill, not inside the skill. This relies on Claude correctly distinguishing "the user typed the slash command" from "I decided to invoke this" each time - there's no stored state backing it, so if that distinction proves unreliable in practice, it's worth revisiting.
+
+> Amended by [062](062-a-push-voids-merge-approval.md): the invocation approves one head, not the branch as it later stands; a push that adds or rewrites a commit voids it.

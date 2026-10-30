@@ -422,6 +422,10 @@ apply:
     write a SHA into a gate the reviewer has not approved: a bookmark that is
     not where they stopped reading is worse than none.
 
+    The gate's approval commits - this one, and any ADR the decision record
+    needs - are the only pushes an approval survives: merge the head they
+    leave, not the head the reviewer read.
+
     Then stop and report that the stage has merged. Approval is not a
     request for the next stage. Start it only when the human asks, by
     running the apply skill again or by saying so - in the approval itself

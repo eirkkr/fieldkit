@@ -26,3 +26,5 @@ Alternatives rejected:
 - `conventions/git.md`'s "a red or still-running check blocks it outright" line no longer describes actual behavior for "still-running" and is corrected.
 
 > Completed by [039](039-always-on-gate-table.md): `KIT.md` carried the same "still-running blocks outright" line and was missed here; it is corrected there.
+>
+> Amended by [062](062-a-push-voids-merge-approval.md): waiting out CI does not extend an approval past a push; a new commit needs a new approval.
