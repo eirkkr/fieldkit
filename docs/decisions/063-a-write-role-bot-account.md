@@ -2,7 +2,7 @@
 
 ## Decision
 
-Claude acts on GitHub as a separate bot account, a machine account under GitHub's terms, whose role on each repo is write, never admin. A personal repo invites the bot as a collaborator and uses a classic token; an organization repo makes the bot a member, gives it write directly or through a team, and uses a fine-grained token, or a classic one where the organization blocks fine-grained tokens. Claude runs as the bot through a shell wrapper that sets `GH_TOKEN` and points git's credentials at `gh`. [conventions/bot-account.md](../../conventions/bot-account.md) gives the two paths as steps, with the tokens, scopes and checks, and `scripts/setup-bot-account.sh` prints short versions of the steps and checks the result.
+Claude acts on GitHub as a separate bot account, a machine account under GitHub's terms, whose role on each repo is write, never admin. A personal repo invites the bot as a collaborator and uses a classic token; an organization repo makes the bot a member, gives it write directly or through a team, and uses a fine-grained token, or a classic one where the organization blocks fine-grained tokens. Claude runs as the bot through a shell wrapper that sets `GH_TOKEN` and points git's credentials at `gh`. [conventions/bot-account.md](../../conventions/bot-account.md) gives the two paths as steps, with the tokens, scopes and checks, and `scripts/check-bot-account.sh` checks the bot's token against a repo.
 
 ## Reason
 
@@ -15,7 +15,7 @@ Rejected:
 - **A GitHub App installed on the repos.** Per-repo permissions and short-lived tokens make it the strictest option, but it needs a private key and token-minting code in front of `gh`. The doc mentions it as the stricter option and does not cover it.
 - **Moving every repo into an organization.** It would allow fine-grained tokens everywhere, but it moves repos and changes ownership to suit a token.
 - **A classic token for organization repos too.** It works, but where the bot can be a member a fine-grained token is narrower, so the doc offers that instead, and a classic token only as the fallback where an owner blocks fine-grained ones.
-- **A skill in place of the script.** The user runs the setup once, and a skill's description would load into every consumer session ([ADR 060](060-budget-the-always-loaded-context.md)).
+- **A skill in place of the script.** The user runs the check rarely, and a skill's description would load into every consumer session ([ADR 060](060-budget-the-always-loaded-context.md)).
 
 ## Consequences
 

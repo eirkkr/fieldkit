@@ -74,10 +74,10 @@ Worked when: the ruleset is listed as Active, or you have confirmed your plan do
 ### 5. Run the check script
 
 ```bash
-.fieldkit/scripts/setup-bot-account.sh <owner>/<repo>
+.fieldkit/scripts/check-bot-account.sh <owner>/<repo>
 ```
 
-In the kit itself the script is `scripts/setup-bot-account.sh`. In a consumer repo the kit is reached through its `.fieldkit` link, as above. You have done steps 1 to 4, so answer `s` when it asks who owns the repo to skip its short copy of them. It then asks for the bot's token without showing it; the token is never an argument, so it stays out of the process list. Paste it at the prompt: a `GH_TOKEN=...` prefix on the command is recorded in your shell history. It only reads from GitHub and stores nothing.
+In the kit itself the script is `scripts/check-bot-account.sh`; in a consumer repo the kit is reached through its `.fieldkit` link. The script asks for the bot's token without showing it; the token is never an argument, so it stays out of the process list. Paste it at the prompt: a `GH_TOKEN=...` prefix on the command is recorded in your shell history. It only reads from GitHub and stores nothing.
 
 | Line | Means |
 | --- | --- |

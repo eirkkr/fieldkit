@@ -1,28 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Walk the user through giving Claude a limited GitHub account, then check
-# the bot's token against one repo with read-only calls. See
-# conventions/bot-account.md for the steps in full and what each result
-# means.
+# Check a GitHub bot account's token against one repo with read-only calls.
+# The steps for making the bot and its token are in
+# conventions/bot-account.md, which also says what each result means.
 #
-#   setup-bot-account.sh owner/name
-#
-# At a terminal it asks which path applies (a personal repo or an
-# organization's) and prints that path's steps, waiting after each. With
-# stdin not a terminal it prints both paths, labelled, and does not wait.
+#   check-bot-account.sh owner/name
 #
 # The token is read from a hidden prompt, or from GH_TOKEN when that is
 # already set, and never from an argument, so it stays out of the process
-# list. Do not run it as GH_TOKEN=<token> setup-bot-account.sh: the shell
+# list. Do not run it as GH_TOKEN=<token> check-bot-account.sh: the shell
 # records that line in its history. Exit 0 when the token does not have
 # admin on the repo, 1 when it does, and 2 on any error: a usage error, no
 # token, a refused token, a failed account or repo lookup, a response with
-# no permissions, an answer the prompt cannot use, an interrupt, or a
-# missing gh. A failed protection lookup is only a note.
+# no permissions, an interrupt, or a missing gh. A failed protection lookup
+# is only a note.
 
 die() {
-    echo "setup-bot-account: $1" >&2
+    echo "check-bot-account: $1" >&2
     exit 2
 }
 
@@ -31,104 +26,17 @@ owner="${repo%%/*}"
 name="${repo#*/}"
 if [ "$#" -ne 1 ] || [[ ! "$repo" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]] ||
     [ "$owner" = . ] || [ "$owner" = .. ] || [ "$name" = . ] || [ "$name" = .. ]; then
-    die "usage: setup-bot-account.sh owner/name"
+    die "usage: check-bot-account.sh owner/name"
 fi
 
 command -v gh >/dev/null 2>&1 || die "gh not found - install the GitHub CLI first"
 
-# Ctrl-C at a prompt is an error exit like any other.
+# Ctrl-C at the token prompt is an error exit like any other.
 trap 'echo >&2; exit 2' INT
 
-interactive=false
-[ -t 0 ] && interactive=true
-
-# Print one step, then wait for Enter when a person is at the terminal.
-step() {
-    printf '\n'
-    printf '%s\n' "$@"
-    if "$interactive"; then
-        read -r -p "Press Enter when done... " _ || die "aborted"
-    fi
-}
-
-step_account() {
-    step "1. Create the bot account, in a private browser window." \
-        "   Give it its own email address. A plus address such as" \
-        "   you+claude@example.com may work if your provider supports it (untried)." \
-        "   Then, as the bot: Settings > Password and authentication >" \
-        "   Enable two-factor authentication." \
-        "   Worked when: you can log in as the bot with a second factor."
-}
-
-personal_steps() {
-    step_account
-    step "2. As yourself: $repo > Settings > Collaborators > Add people > the bot." \
-        "   Then, as the bot, accept the invitation from its email." \
-        "   Worked when: the bot is listed as a collaborator, not pending."
-    step "3. As the bot: Settings > Developer settings > Personal access tokens >" \
-        "   Tokens (classic) > Generate new token (classic)." \
-        "   Set an expiration. Tick repo only; leave workflow unticked." \
-        "   Generate token and copy it (it is shown once)."
-    step "4. As yourself: $repo > Settings > Rulesets > New ruleset >" \
-        "   New branch ruleset. Enforcement status: Active. Target: the default" \
-        "   branch. Turn on Restrict deletions, Block force pushes, and Require a" \
-        "   pull request before merging. Create." \
-        "   A private repo on a free plan most likely cannot do this; skip it then."
-}
-
-org_steps() {
-    step_account
-    step "2a. As an owner of $owner: People > Invite member > the bot, role Member" \
-        "   (never Owner: an owner has admin on every repo). As the bot, accept." \
-        "   Also check Settings > Member privileges > Base permissions is not" \
-        "   Admin: it applies to every member. The doc has the details and limits." \
-        "   Worked when: the bot is listed under People as a Member."
-    step "2b. Give the bot Write on $repo, either way:" \
-        "   - several repos: Teams > New team (for example bots), add the bot," \
-        "     then in each repo Settings > Collaborators and teams > Add teams >" \
-        "     the team, role Write" \
-        "   - one repo: in the repo, Settings > Collaborators and teams >" \
-        "     Add people > the bot, role Write" \
-        "   Worked when: the repo lists the bot or its team with Write."
-    step "3a. As the bot: Settings > Developer settings > Personal access tokens >" \
-        "   Fine-grained tokens > Generate new token." \
-        "   Set an expiration. Resource owner: $owner (not the bot itself)." \
-        "   Repository access: Only select repositories, and pick each repo." \
-        "   Permissions: Contents, Issues, Pull requests set to Read and write;" \
-        "   nothing else, no Administration. Generate token and copy it."
-    step "3b. As an owner of $owner: Settings > Personal access tokens >" \
-        "   Pending requests > the token > Approve. Until approved, the token" \
-        "   sees no private repo, and the check below answers 404."
-    step "4. As yourself: $repo > Settings > Rulesets > New ruleset >" \
-        "   New branch ruleset. Enforcement status: Active. Target: the default" \
-        "   branch. Turn on Restrict deletions, Block force pushes, and Require a" \
-        "   pull request before merging. Create." \
-        "   A private repo on a free plan most likely cannot do this; skip it then."
-}
-
-echo "Steps for giving Claude a limited GitHub account for $repo."
-if "$interactive"; then
-    echo "Who owns $repo?"
-    echo "  p - your personal account (classic token; this path is untried)"
-    echo "  o - an organization (fine-grained token)"
-    echo "  s - skip the steps, the bot and its token are ready"
-    read -r -p "p, o or s: " path || die "aborted"
-    case "$path" in
-        p | P) personal_steps ;;
-        o | O) org_steps ;;
-        s | S) ;;
-        *) die "answer p, o or s" ;;
-    esac
-else
-    echo "Not at a terminal, so both paths follow; use the one that matches"
-    echo "who owns $repo."
-    printf '\n== Path A: %s is owned by your personal account (untried) ==\n' "$repo"
-    personal_steps
-    printf '\n== Path B: %s is owned by an organization ==\n' "$repo"
-    org_steps
-fi
-
-printf '\nLast: the check. It reads from GitHub only, and does not store the token.\n'
+echo "Checking the bot's token against $repo. The steps for making the bot and"
+echo "its token are in conventions/bot-account.md (.fieldkit/conventions/ in a"
+echo "consumer repo)."
 if [ -z "${GH_TOKEN:-}" ]; then
     # read returns non-zero on a last line with no newline, token included.
     read -r -s -p "Bot token: " GH_TOKEN || [ -n "$GH_TOKEN" ] || die "no token given"
@@ -170,7 +78,7 @@ if ! info="$(gh api "repos/$repo" -q "$query" 2>"$errf")"; then
     case "$(err)" in
         *"HTTP 404"*)
             cat >&2 <<EOF
-setup-bot-account: GitHub answered 404 Not Found for repos/$repo.
+check-bot-account: GitHub answered 404 Not Found for repos/$repo.
 The token cannot see that repo. If the name is right, the usual causes are:
   - (organization) the token is waiting for an owner to approve it
     (the organization's Settings > Personal access tokens > Pending requests);
