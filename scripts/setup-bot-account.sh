@@ -3,9 +3,14 @@ set -euo pipefail
 
 # Walk the user through giving Claude a limited GitHub account, then check
 # the bot's token against one repo with read-only calls. See
-# conventions/bot-account.md for what each step is for.
+# conventions/bot-account.md for the steps in full and what each result
+# means.
 #
 #   GH_TOKEN=<bot token> setup-bot-account.sh owner/name
+#
+# At a terminal it asks which path applies (a personal repo or an
+# organization's) and prints that path's steps, waiting after each. With
+# stdin not a terminal it prints both paths, labelled, and does not wait.
 #
 # GH_TOKEN is read from the environment, or from a hidden prompt when unset,
 # and never from an argument, so it stays out of the process list and shell
@@ -28,30 +33,94 @@ fi
 
 command -v gh >/dev/null 2>&1 || die "gh not found - install the GitHub CLI first"
 
-# Wait for Enter between steps when a person is at the terminal; a piped
-# run prints the steps and goes on.
-pause() {
-    if [ -t 0 ]; then
+interactive=false
+[ -t 0 ] && interactive=true
+
+# Print one step, then wait for Enter when a person is at the terminal.
+step() {
+    printf '\n'
+    printf '%s\n' "$@"
+    if "$interactive"; then
         read -r -p "Press Enter when done... " _ || die "aborted"
     fi
 }
 
-step() {
-    printf '\n%s\n' "$1"
-    pause
+step_account() {
+    step "1. Create the bot account, in a private browser window." \
+        "   Give it its own email address. A plus address such as" \
+        "   you+claude@example.com may work if your provider supports it (untried)." \
+        "   Then, as the bot: Settings > Password and authentication >" \
+        "   Enable two-factor authentication." \
+        "   Worked when: you can log in as the bot with a second factor."
 }
 
-cat <<EOF
-Steps for a limited GitHub account for Claude. Do them in a browser logged
-in as the bot, except the invite, which the repo's owner sends.
-EOF
-step "1. Create a GitHub account for the bot, with its own email address."
-step "2. As the owner of $repo, invite the bot as a collaborator with the write role. For an organization repo, add it as a member with write on the repo instead. Never give it admin."
-step "3. Accept the invitation as the bot."
-step "4. As the bot, create the token. Personal repo: a classic token with the repo scope and no workflow scope. Organization repo: a fine-grained token limited to the repos it works in, with Contents, Pull requests and Issues set to read and write and no Administration."
-step "5. Protect the default branch with a ruleset or branch protection rule that requires a pull request and blocks force pushes and deletion."
-step "6. Paste the token at the prompt below, or set GH_TOKEN before running this script. It is checked here and not stored."
+personal_steps() {
+    step_account
+    step "2. As yourself: $repo > Settings > Collaborators > Add people > the bot." \
+        "   Then, as the bot, accept the invitation from its email." \
+        "   Worked when: the bot is listed as a collaborator, not pending."
+    step "3. As the bot: Settings > Developer settings > Personal access tokens >" \
+        "   Tokens (classic) > Generate new token (classic)." \
+        "   Set an expiration. Tick repo only; leave workflow unticked." \
+        "   Generate token and copy it (it is shown once)."
+    step "4. As yourself: $repo > Settings > Rulesets > New ruleset >" \
+        "   New branch ruleset. Enforcement status: Active. Target: the default" \
+        "   branch. Turn on Restrict deletions, Block force pushes, and Require a" \
+        "   pull request before merging. Create." \
+        "   A private repo on a free plan most likely cannot do this; skip it then."
+}
 
+org_steps() {
+    step_account
+    step "2. As an owner of $owner: People > Invite member > the bot, role Member" \
+        "   (never Owner: an owner has admin on every repo). As the bot, accept." \
+        "   Worked when: the bot is listed under People as a Member."
+    step "3. Give the bot Write on $repo, either way:" \
+        "   - several repos: Teams > New team (for example bots), add the bot," \
+        "     then in each repo Settings > Collaborators and teams > Add teams >" \
+        "     the team, role Write" \
+        "   - one repo: in the repo, Settings > Collaborators and teams >" \
+        "     Add people > the bot, role Write" \
+        "   Worked when: the repo lists the bot or its team with Write."
+    step "4. As the bot: Settings > Developer settings > Personal access tokens >" \
+        "   Fine-grained tokens > Generate new token." \
+        "   Resource owner: $owner (not the bot itself)." \
+        "   Repository access: Only select repositories, and pick each repo." \
+        "   Permissions: Contents, Issues, Pull requests set to Read and write;" \
+        "   nothing else, no Administration. Generate token and copy it."
+    step "5. As an owner of $owner: Settings > Personal access tokens >" \
+        "   Pending requests > the token > Approve. Until approved, the token" \
+        "   sees no private repo, and the check below answers 404."
+    step "6. As yourself: $repo > Settings > Rulesets > New ruleset >" \
+        "   New branch ruleset. Enforcement status: Active. Target: the default" \
+        "   branch. Turn on Restrict deletions, Block force pushes, and Require a" \
+        "   pull request before merging. Create." \
+        "   A private repo on a free plan most likely cannot do this; skip it then."
+}
+
+echo "Steps for giving Claude a limited GitHub account for $repo."
+if "$interactive"; then
+    echo "Who owns $repo?"
+    echo "  p - your personal account (classic token; this path is untried)"
+    echo "  o - an organization (fine-grained token)"
+    echo "  s - skip the steps, the bot and its token are ready"
+    read -r -p "p, o or s: " path || die "aborted"
+    case "$path" in
+        p | P) personal_steps ;;
+        o | O) org_steps ;;
+        s | S) ;;
+        *) die "answer p, o or s" ;;
+    esac
+else
+    echo "Not at a terminal, so both paths follow; use the one that matches"
+    echo "who owns $repo."
+    printf '\n== Path A: %s is owned by your personal account (untried) ==\n' "$repo"
+    personal_steps
+    printf '\n== Path B: %s is owned by an organization ==\n' "$repo"
+    org_steps
+fi
+
+printf '\nLast: the check. It reads from GitHub only, and does not store the token.\n'
 if [ -z "${GH_TOKEN:-}" ]; then
     # read returns non-zero on a last line with no newline, token included.
     read -r -s -p "Bot token: " GH_TOKEN || [ -n "$GH_TOKEN" ] || die "no token given"
@@ -63,57 +132,116 @@ export GH_TOKEN
 errf="$(mktemp)"
 trap 'rm -f "$errf"' EXIT
 
-# Read-only call; a failure is an error (exit 2), not a failed check. stderr
-# is kept out of the value, and the token is blanked from what is printed.
-api() {
-    local out
-    if ! out="$(gh api "$@" 2>"$errf")"; then
-        out="$(cat "$errf")"
-        die "gh api $1 failed: ${out//"$GH_TOKEN"/***}"
-    fi
-    printf '%s\n' "$out"
+# The last gh call's error output, on one line, with the token blanked.
+err() {
+    local e
+    e="$(tr '\n' ' ' <"$errf")"
+    e="${e//"$GH_TOKEN"/***}"
+    printf '%s' "${e% }"
 }
 
-login="$(api user -q .login)"
+if ! login="$(gh api user -q .login 2>"$errf")"; then
+    case "$(err)" in
+        *"HTTP 401"*) die "GitHub refused the token (HTTP 401): it is mistyped, expired or revoked. Make a new one and run this again." ;;
+        *) die "could not look up the token's account: $(err)" ;;
+    esac
+fi
 echo "pass: the token belongs to $login"
+echo "      That must be the bot's login. If it is yours, this is the wrong token."
 
-# permissions is absent from the response for some token kinds; treat that as
-# an error rather than as no admin.
-admin="$(api "repos/$repo" -q '.permissions.admin | tostring')"
-branch="$(api "repos/$repo" -q .default_branch)"
+# permissions is absent from the response for some token kinds; that is an
+# error, not a pass. Branch names cannot hold a tab, so tab-joining is safe.
+query='[(.permissions.admin | tostring), .default_branch, (.private | tostring), .owner.type] | join("\t")'
+if ! info="$(gh api "repos/$repo" -q "$query" 2>"$errf")"; then
+    case "$(err)" in
+        *"HTTP 404"*)
+            cat >&2 <<EOF
+setup-bot-account: GitHub answered 404 Not Found for repos/$repo.
+The token cannot see that repo. If the name is right, the usual causes are:
+  - the token is waiting for an organization owner to approve it
+    (the organization's Settings > Personal access tokens > Pending requests);
+    until then it reads public repos only
+  - the token's resource owner is the bot, not the organization
+  - the repo was not picked under Only select repositories
+  - the bot has not accepted its invitation, or is not yet on the team
+    that has access to the repo
+EOF
+            exit 2
+            ;;
+        *) die "could not look up $repo: $(err)" ;;
+    esac
+fi
+IFS=$'\t' read -r admin branch private owner_type <<<"$info"
+
+case "$owner_type" in
+    Organization) echo "note: $repo is owned by an organization, so path B applies" ;;
+    User) echo "note: $repo is owned by a personal account, so path A applies" ;;
+esac
 
 case "$admin" in
     true) status=1 ;;
     false) status=0 ;;
-    *) die "repos/$repo returned no permissions for this token" ;;
+    *) die "repos/$repo returned no permissions for this token, so admin cannot be checked" ;;
 esac
 
 if [ "$status" -eq 0 ]; then
     echo "pass: $login does not have admin on $repo"
+    echo "      Good: it cannot delete the repo, change its settings or lift protection."
 else
-    echo "fail: $login has admin on $repo - lower its role to write"
+    echo "fail: $login has admin on $repo"
+    echo "      Lower its role to Write. In an organization, check it is a Member,"
+    echo "      not an Owner, and that no team gives it Admin."
 fi
 
-# Protection is shown, not judged, and a lookup that fails or cannot be read
-# says so rather than guessing: a branch protection rule and a ruleset are
-# separate APIs, so either one counts. A branch name with characters that
-# would need URL-encoding is not looked up.
+# Protection is shown, not judged. A branch protection rule and a ruleset are
+# separate APIs, so either one counts, and each lookup that fails is named
+# with GitHub's message. A branch name with characters that would need
+# URL-encoding is not looked up.
 protected=""
 rules=""
+protected_err=""
+rules_err=""
 case "$branch" in
-    *[!A-Za-z0-9._/-]*) ;;
-    *)
-        protected="$(gh api "repos/$repo/branches/$branch" -q .protected 2>/dev/null || true)"
-        rules="$(gh api "repos/$repo/rules/branches/$branch" -q length 2>/dev/null || true)"
+    *[!A-Za-z0-9._/-]*)
+        echo "note: the default branch name $branch is not looked up here;"
+        echo "      check its protection under the repo's Settings > Rulesets"
+        exit "$status"
         ;;
 esac
+protected="$(gh api "repos/$repo/branches/$branch" -q .protected 2>"$errf")" || protected_err="$(err)"
+rules="$(gh api "repos/$repo/rules/branches/$branch" -q length 2>"$errf")" || rules_err="$(err)"
 
-if [ "$protected" = "true" ] || { [[ "$rules" =~ ^[0-9]+$ ]] && [ "$rules" -gt 0 ]; }; then
-    echo "note: the default branch $branch is protected"
-elif [ "$protected" = "false" ] && [ "$rules" = "0" ]; then
-    echo "note: the default branch $branch has no protection rule or ruleset, so $login can push to it"
+if [ "$protected" = true ] || { [[ "$rules" =~ ^[0-9]+$ ]] && [ "$rules" -gt 0 ]; }; then
+    echo "note: the default branch $branch is protected (a protection rule or ruleset applies)"
+    echo "      This check cannot tell whether it stops $login; test 1 in the doc does."
+elif [ "$protected" = false ] && [ "$rules" = 0 ]; then
+    echo "note: the default branch $branch has no branch protection rule or ruleset,"
+    echo "      so $login can push to, force-push and delete it."
+    if [ "$private" = true ]; then
+        echo "      $repo is private: on a free plan it most likely cannot have either."
+    fi
 else
-    echo "note: could not tell whether the default branch $branch is protected"
+    if [ -n "$protected_err" ]; then
+        echo "note: the branch protection lookup (repos/$repo/branches/$branch) failed: $protected_err"
+    fi
+    if [ -n "$rules_err" ]; then
+        echo "note: the ruleset lookup (repos/$repo/rules/branches/$branch) failed: $rules_err"
+    fi
+    if [ -z "$protected_err$rules_err" ]; then
+        echo "note: the protection lookups gave answers this check cannot read" \
+            "(protected: '$protected', rulesets: '$rules')"
+    fi
+    if [ "$private" = true ]; then
+        echo "      $repo is private, and on a free plan a private repo most likely"
+        echo "      cannot have protection, which would explain this."
+    fi
+    echo "      Treat $branch as unprotected until test 1 in the doc is refused."
 fi
 
+if [ "$status" -eq 0 ]; then
+    echo "Done: the token is limited as it should be. Next, test it by hand and"
+    echo "run Claude as the bot (steps 6 and 7 in the doc)."
+else
+    echo "Done: fix the role above, then run this again."
+fi
 exit "$status"
