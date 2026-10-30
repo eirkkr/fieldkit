@@ -59,3 +59,4 @@ Read the matching file before the action, and only then.
 | Starting work too big for one PR, or that leaves the user a decision | .fieldkit/conventions/specs.md |
 | Building a feature that calls an LLM | .fieldkit/conventions/ai.md |
 | Writing or editing a CI workflow, or a check or lint recipe | .fieldkit/conventions/ci.md |
+| Setting up a limited GitHub account for Claude | .fieldkit/conventions/bot-account.md |
