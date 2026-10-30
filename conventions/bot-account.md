@@ -11,7 +11,7 @@ The token depends on who owns the repo, because GitHub's fine-grained tokens do 
 | A personal account | A collaborator with the write role | Classic, `repo` scope, no `workflow` scope |
 | An organization (optional) | An organization member with write on the repo | Fine-grained, with the repo selected |
 
-- The fine-grained option has two preconditions: the bot is a member of the organization, not an outside collaborator, and the organization allows fine-grained tokens (it can require an owner to approve each one). Neither has been tried against a real organization, so treat this row as untried.
+- The fine-grained option has two preconditions: the bot is a member of the organization, not an outside collaborator, and the organization allows fine-grained tokens (it can require an owner to approve each one). It was tried once, on private repos in an organization on a free plan: the token reached them only after an owner approved it, and the script then showed no admin.
 - A classic token reaches every repo the bot can reach, so the bot's role is its only limit.
 - A GitHub App installed on the repos is stricter still, with per-repo permissions and tokens that expire after an hour. It needs a private key and token-minting code in front of `gh`, and this doc does not cover it.
 
@@ -43,4 +43,4 @@ Where it is available depends on the plan. GitHub's plans page lists protected b
 
 The script checks admin only: not that the role is exactly write, and not which scopes a classic token has. It shows whether the default branch has a protection rule or a ruleset, and cannot show that the protection would stop this bot without pushing to it.
 
-Two things here are untried: that a fine-grained token on an organization member can reach an organization repo, and that the repo endpoint returns `permissions` for both kinds of token.
+Tried once, with a fine-grained token on an organization member: it reached the organization's repos and the repo endpoint returned `permissions`. The classic token for a personal repo is untried.
