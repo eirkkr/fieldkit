@@ -28,3 +28,5 @@ Alternatives rejected:
 > Amended by [033](033-pr-agent-opens-the-pr.md): the rejected alternative above contrasts this ADR's single-boundary choice with `skills/pr` running `gh pr create` directly. `pr` has since moved to the same shape decided here, so the contrast no longer holds - the reasoning for keeping merge whole does, and 033 adopts it rather than reversing it.
 >
 > Amended by [045](045-inline-git-skills.md): the decisions here still sit with the skill, but the agent they were handed to is gone - the skill now runs the commands itself, in the same turn.
+>
+> Amended by [062](062-a-push-voids-merge-approval.md): approval to merge covers the head it was given at; a later push voids it, and CI alone no longer lets the merge go ahead.
