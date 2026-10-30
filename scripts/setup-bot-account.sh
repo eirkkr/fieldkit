@@ -6,17 +6,20 @@ set -euo pipefail
 # conventions/bot-account.md for the steps in full and what each result
 # means.
 #
-#   GH_TOKEN=<bot token> setup-bot-account.sh owner/name
+#   setup-bot-account.sh owner/name
 #
 # At a terminal it asks which path applies (a personal repo or an
 # organization's) and prints that path's steps, waiting after each. With
 # stdin not a terminal it prints both paths, labelled, and does not wait.
 #
-# GH_TOKEN is read from the environment, or from a hidden prompt when unset,
-# and never from an argument, so it stays out of the process list and shell
-# history. Exit 0 when the token does not have admin on the repo, 1 when it
-# does, and 2 on a usage error, no token, an invalid token, an API error or
-# a missing gh.
+# The token is read from a hidden prompt, or from GH_TOKEN when that is
+# already set, and never from an argument, so it stays out of the process
+# list. Do not run it as GH_TOKEN=<token> setup-bot-account.sh: the shell
+# records that line in its history. Exit 0 when the token does not have
+# admin on the repo, 1 when it does, and 2 on any error: a usage error, no
+# token, a refused token, a failed account or repo lookup, a response with
+# no permissions, an answer the prompt cannot use, an interrupt, or a
+# missing gh. A failed protection lookup is only a note.
 
 die() {
     echo "setup-bot-account: $1" >&2
@@ -32,6 +35,9 @@ if [ "$#" -ne 1 ] || [[ ! "$repo" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]] ||
 fi
 
 command -v gh >/dev/null 2>&1 || die "gh not found - install the GitHub CLI first"
+
+# Ctrl-C at a prompt is an error exit like any other.
+trap 'echo >&2; exit 2' INT
 
 interactive=false
 [ -t 0 ] && interactive=true
@@ -74,6 +80,8 @@ org_steps() {
     step_account
     step "2a. As an owner of $owner: People > Invite member > the bot, role Member" \
         "   (never Owner: an owner has admin on every repo). As the bot, accept." \
+        "   Also check Settings > Member privileges > Base permissions is not" \
+        "   Admin: it applies to every member. The doc has the details and limits." \
         "   Worked when: the bot is listed under People as a Member."
     step "2b. Give the bot Write on $repo, either way:" \
         "   - several repos: Teams > New team (for example bots), add the bot," \
@@ -128,6 +136,9 @@ if [ -z "${GH_TOKEN:-}" ]; then
 fi
 [ -n "$GH_TOKEN" ] || die "no token given"
 export GH_TOKEN
+# This check is about github.com; a GH_HOST in the environment would send it
+# to another host, under another login.
+export GH_HOST=github.com
 
 errf="$(mktemp)"
 trap 'rm -f "$errf"' EXIT
@@ -135,8 +146,9 @@ trap 'rm -f "$errf"' EXIT
 # The last gh call's error output, on one line, with the token blanked.
 err() {
     local e
-    e="$(tr '\n' ' ' <"$errf" | tr -d '\000-\010\013-\037\177')"
+    e="$(<"$errf")"
     e="${e//"$GH_TOKEN"/***}"
+    e="$(printf '%s' "$e" | tr '\n' ' ' | tr -d '\000-\010\013-\037\177')"
     printf '%s' "${e% }"
 }
 
@@ -146,6 +158,7 @@ if ! login="$(gh api user -q .login 2>"$errf")"; then
         *) die "could not look up the token's account: $(err)" ;;
     esac
 fi
+[[ "$login" =~ ^[A-Za-z0-9-]+$ ]] || die "GitHub returned a login this check cannot read"
 echo "pass: the token belongs to $login"
 echo "      That must be the bot's login. If it is yours, this is the wrong token."
 
@@ -214,7 +227,7 @@ show_protection() {
     local protected="" rules="" protected_err="" rules_err=""
     case "$branch" in
         "" | *[!A-Za-z0-9._/-]*)
-            echo "note: the default branch name has characters this check does not look up;"
+            echo "note: the default branch name is empty or has characters this check does not look up;"
             echo "      check its protection under the repo's Settings > Rulesets"
             return
             ;;
@@ -240,7 +253,8 @@ show_protection() {
         fi
         if [ -z "$protected_err$rules_err" ]; then
             echo "note: the protection lookups gave answers this check cannot read" \
-                "(protected: '$protected', rulesets: '$rules')"
+                "(protected: '$(printf '%s' "$protected" | LC_ALL=C tr -cd '[:print:]')'," \
+                "rulesets: '$(printf '%s' "$rules" | LC_ALL=C tr -cd '[:print:]')')"
         fi
         if [ "$private" = true ] && [ -n "$rules_err" ]; then
             echo "      $repo is private, and on a free plan a private repo most likely"
@@ -251,7 +265,9 @@ show_protection() {
 }
 show_protection
 
-if [ "$status" -ne 0 ]; then
+if [ "$status" -ne 0 ] && [ "$owner_type" = User ]; then
+    echo "Done: make a token as the bot, then run this again."
+elif [ "$status" -ne 0 ]; then
     echo "Done: fix the role above, then run this again."
 elif [ "$push" = true ]; then
     echo "Done: the token has no admin and can push. Next, test it by hand and"
