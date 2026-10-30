@@ -12,7 +12,7 @@ Rejected:
 
 - **A fine-grained token on the user's own account.** It narrows the token but leaves the identity: the account still has admin, and any repo the token reaches is reached as an admin.
 - **A fine-grained token on the bot everywhere.** GitHub's fine-grained tokens do not support a repository collaborator, so the bot could not reach a personal repo with one. Only the organization case works.
-- **A GitHub App installed on the repos.** Per-repo permissions and tokens that expire after an hour make it the strictest option, but it needs a private key and token-minting code in front of `gh`. The doc mentions it as the stricter option and does not cover it.
+- **A GitHub App installed on the repos.** Per-repo permissions and short-lived tokens make it the strictest option, but it needs a private key and token-minting code in front of `gh`. The doc mentions it as the stricter option and does not cover it.
 - **Moving every repo into an organization.** It would allow fine-grained tokens everywhere, but it moves repos and changes ownership to suit a token.
 - **A classic token for organization repos too.** It works, but where the bot can be a member a fine-grained token is narrower, so the doc offers that instead.
 - **A skill in place of the script.** The user runs the setup once, and a skill's description would load into every consumer session ([ADR 060](060-budget-the-always-loaded-context.md)).
