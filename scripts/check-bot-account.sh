@@ -80,12 +80,8 @@ if ! info="$(gh api "repos/$repo" -q "$query" 2>"$errf")"; then
             cat >&2 <<EOF
 check-bot-account: GitHub answered 404 Not Found for repos/$repo.
 The token cannot see that repo. If the name is right, the usual causes are:
-  - (organization) the token is waiting for an owner to approve it
-    (the organization's Settings > Personal access tokens > Pending requests);
-    until then it cannot reach anything that is not public
-  - (organization) the token's resource owner is the bot, not the organization
-  - (organization) the repo was not picked under Only select repositories
-  - (personal repo) the classic token was made without the repo scope
+  - the token was made without the repo scope
+  - (organization) the organization blocks classic tokens
   - the bot has not accepted its invitation, or is not yet on the team
     that has access to the repo
 EOF
@@ -95,11 +91,6 @@ EOF
     esac
 fi
 IFS=$'\x1f' read -r admin push branch private owner_type <<<"$info"
-
-case "$owner_type" in
-    Organization) echo "note: $repo is owned by an organization, so path B applies" ;;
-    User) echo "note: $repo is owned by a personal account, so path A applies" ;;
-esac
 
 case "$admin" in
     true) status=1 ;;

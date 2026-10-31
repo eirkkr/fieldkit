@@ -4,21 +4,16 @@ Claude runs `gh` and `git` with whatever token it finds, normally its user's own
 
 Claims about GitHub below link their page and were checked on 2026-10-30.
 
-## Decide your path
+## Which token
 
-| The repos are owned by | Path | The bot is | Token |
-| --- | --- | --- | --- |
-| Your personal account | A | A collaborator on each repo | Classic, `repo` scope only |
-| An organization | B | An organization member, with Write on each repo | Fine-grained, for the organization, with the repos selected |
+A classic token with the `repo` scope, for every repo, personal or organization. A session holds one token, and a fine-grained token reaches one owner only and cannot reach a repo where the bot is just a collaborator ([managing personal access tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)), so only a classic token works across owners. Its cost: it reaches every repo the bot can reach, so the bot's role on each is the only limit.
 
-The token type follows the owner because GitHub's fine-grained tokens do not support contributing "to repositories where the user is an outside or repository collaborator" ([managing personal access tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)). So on path B the bot has to be a member of the organization, not a collaborator on its repos. A fine-grained token also reaches one owner only, so repos owned by two organizations need a token for each.
-
-Path B was tried once, with a fine-grained token on private repos in an organization on a free plan. Path A, with a classic token, is untried.
+Tried against a personal repo. An organization's repos with a classic token are untried.
 
 ## You need
 
 - `gh`, the GitHub CLI, and a bash shell. In zsh, `read -rs -p "Bot token: " X` fails; write it as `read -rs "X?Bot token: "` in steps 6 and 7, and use `~/.zshrc` in step 7.
-- To own the repos (path A), or to be an Owner of the organization (path B): inviting the bot, making a team and approving the token all need one.
+- To own the repos, or be an Owner of the organization: inviting the bot needs one.
 
 ## Steps
 
@@ -34,32 +29,17 @@ Worked when: you can log in as the bot, and it asks for a second factor.
 
 ### 2. Give the bot access
 
-**Path A, a personal repo.** As yourself, open the repo, then Settings, Collaborators, Add people, and pick the bot ([inviting collaborators](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-access-to-your-personal-repositories/inviting-collaborators-to-a-personal-repository)). A personal repo has one collaborator level, which can push and merge but not change settings or delete the repo; there is no role to choose ([permission levels](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-personal-account-settings/permission-levels-for-a-personal-account-repository)). As the bot, accept the invitation from its email. Repeat for each repo.
+**A personal repo.** As yourself, open the repo, then Settings, Collaborators, Add people, and pick the bot ([inviting collaborators](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-access-to-your-personal-repositories/inviting-collaborators-to-a-personal-repository)). A personal repo has one collaborator level, which can push and merge but not change settings or delete the repo; there is no role to choose ([permission levels](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-personal-account-settings/permission-levels-for-a-personal-account-repository)). As the bot, accept the invitation from its email. Repeat for each repo.
 
-**Path B, an organization.** First make the bot a member: as an owner, open the organization, then People, Invite member, and leave its role as Member, never Owner ([inviting users](https://docs.github.com/en/organizations/managing-membership-in-your-organization/inviting-users-to-join-your-organization)). An owner has "complete administrative access" to the organization ([roles in an organization](https://docs.github.com/en/organizations/managing-peoples-access-to-your-organization-with-roles/roles-in-an-organization)). As the bot, accept the invitation. As an owner, also check Settings, Member privileges, Base permissions: it applies to every member on every repo of the organization, so it must not be Admin. Lowering it also changes what every human member can reach, so if it is already No permission or Read, leave it ([base permissions](https://docs.github.com/en/organizations/managing-user-access-to-your-organizations-repositories/managing-repository-roles/setting-base-permissions-for-an-organization)).
+**An organization's repo.** As an owner, open the organization, then People, Invite member, and leave the role as Member, never Owner ([inviting users](https://docs.github.com/en/organizations/managing-membership-in-your-organization/inviting-users-to-join-your-organization)). An owner has "complete administrative access" to the organization ([roles in an organization](https://docs.github.com/en/organizations/managing-peoples-access-to-your-organization-with-roles/roles-in-an-organization)). As the bot, accept the invitation. Then, in each repo, open Settings, Collaborators and teams, Add people, pick the bot, and choose Write ([managing access to a repository](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/managing-teams-and-people-with-access-to-your-repository)). Also check the organization's Settings, Member privileges, Base permissions: it applies to every member on every repo, so it must not be Admin. If it is already No permission or Read, leave it ([base permissions](https://docs.github.com/en/organizations/managing-user-access-to-your-organizations-repositories/managing-repository-roles/setting-base-permissions-for-an-organization)). An owner can block classic tokens for the whole organization ([token policy](https://docs.github.com/en/organizations/managing-programmatic-access-to-your-organization/setting-a-personal-access-token-policy-for-your-organization)); if so, this doc does not work for that organization's repos.
 
-Then give it Write on each repo, one of two ways:
-
-- **Through a team, for several repos.** Create a team (Teams, New team, for example `bots`) ([creating a team](https://docs.github.com/en/organizations/organizing-members-into-teams/creating-a-team)) and add the bot to it. In each repo, open Settings, Collaborators and teams, Add teams, pick the team, and choose the Write role. A later repo then needs one step, and every bot on the team gets the same role.
-- **Directly, for one repo.** In the repo, open Settings, Collaborators and teams, Add people, pick the bot, and choose Write ([managing access to a repository](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/managing-teams-and-people-with-access-to-your-repository)).
-
-Worked when: on path A, the bot is listed as a collaborator, not pending. On path B, the repo's Collaborators and teams page lists the bot, or its team, with Write.
+Worked when: the bot is listed as a collaborator, not pending, on a personal repo; on an organization's repo, the Collaborators and teams page lists the bot with Write.
 
 ### 3. Make the bot's token
 
-Log in as the bot, then your profile picture at the top right, Settings, Developer settings, Personal access tokens. Set an expiration you will remember to renew.
+Log in as the bot, then your profile picture at the top right, Settings, Developer settings, Personal access tokens, Tokens (classic), Generate new token, Generate new token (classic). Set an expiration you will remember to renew. Tick `repo` and nothing else; leave `workflow` unticked, so the bot cannot add or edit workflow files. Generate token, and copy it: it is shown once.
 
-**Path A, a classic token.** Tokens (classic), Generate new token, Generate new token (classic). Tick `repo` and nothing else; leave `workflow` unticked, so the bot cannot add or edit workflow files. Generate token, and copy it: it is shown once.
-
-**Path B, a fine-grained token.** Fine-grained tokens, Generate new token, then:
-
-- **Resource owner:** the organization. Left as the bot itself, the token reaches none of the organization's private repos.
-- **Repository access:** Only select repositories, and pick every repo the bot works in.
-- **Permissions:** under repository permissions, set Contents, Issues and Pull requests to Read and write. Leave Administration and the rest at no access (Metadata switches to Read-only by itself).
-
-Generate token, and copy it. If the organization requires approval, an owner must now approve the token: the organization's Settings, Personal access tokens, Pending requests, the token, Approve ([managing token requests](https://docs.github.com/en/organizations/managing-programmatic-access-to-your-organization/managing-requests-for-personal-access-tokens-in-your-organization)). Until then it cannot reach anything that is not public: "an organization owner must approve the token before it can be used to access any resources that are not public", so a private repo looks missing to it. An owner can also block fine-grained tokens for the whole organization ([token policy](https://docs.github.com/en/organizations/managing-programmatic-access-to-your-organization/setting-a-personal-access-token-policy-for-your-organization)); then a classic token made as in path A may work for its repos, unless the organization restricts classic tokens too on the same page. That classic token reaches every repo the bot can reach, which includes every repo the base permission opens to members.
-
-Worked when: the token is listed on the bot's token page. On path B, an owner sees it under the organization's Settings, Personal access tokens, Active tokens, not Pending requests.
+Worked when: the token is listed on the bot's token page.
 
 ### 4. Protect the default branch
 
@@ -82,10 +62,9 @@ In the kit itself the script is `scripts/check-bot-account.sh`; in a consumer re
 | Line | Means |
 | --- | --- |
 | `pass: the token belongs to <login>` | The token works. `<login>` must be the bot, not you. |
-| `note: <repo> is owned by ...` | Which path applies. If it is not the one you followed, you made the wrong kind of token. |
 | `pass: <login> does not have admin on <repo>` | Good. Exit status 0. |
-| `note: <login> cannot push to <repo>` | No admin, but no Write either: the invitation, team, token approval or `repo` scope is missing. Exit status 0. |
-| `fail: <login> has admin on <repo>` | On path A, only the owner has admin, so this is your token, not the bot's. On path B, lower its role to Write: check it is a Member, not an Owner, that no team gives it Admin, and that the base permission is not Admin. Exit status 1. |
+| `note: <login> cannot push to <repo>` | No admin, but no Write either: the invitation, team or `repo` scope is missing. Exit status 0. |
+| `fail: <login> has admin on <repo>` | On a personal repo, only the owner has admin, so this is your token, not the bot's. On an organization's, lower the bot's role to Write: check it is a Member, not an Owner, that no team gives it Admin, and that the base permission is not Admin. Exit status 1. |
 | `note: ... is protected` | A branch protection rule or ruleset applies. The script cannot tell whether it would stop the bot; test 1 below does. |
 | `note: ... has no branch protection rule or ruleset` | The bot can push to, force-push and delete the default branch. |
 | `note: the ... lookup (repos/...) failed: ...` | That protection lookup was refused, with GitHub's message. For the ruleset lookup on a private repo, the likely reason is a plan without protection. |
@@ -98,11 +77,9 @@ Exit status 2 means the script stopped on an error, and its message says which. 
 
 A 404 on the repo, when the name is right, usually means one of these:
 
-- Path B: the token is still pending an owner's approval (step 3).
-- Path B: the token's resource owner is the bot, not the organization.
-- Path B: the repo was not picked under Only select repositories.
-- Path A: the classic token was made without the `repo` scope.
-- Either path: the bot has not accepted its invitation, or is not yet on the team with access.
+- The token was made without the `repo` scope.
+- The bot has not accepted its invitation, or is not yet on the team with access.
+- The organization blocks classic tokens.
 
 The script checks Admin and whether the bot can push: not that the role is exactly Write, and not which scopes a classic token has.
 
@@ -132,7 +109,7 @@ What a good result looks like:
 
 1. On a protected branch, an error that names the rule or protection, and no new commit on the default branch. An error about `sha` is not a refusal: it means `bot-check.txt` already exists there. If the command succeeds, the protection does not cover the bot: delete `bot-check.txt` from the default branch in the web interface and check the ruleset.
 2. Each command prints JSON or a URL, the pull request opens, and the close deletes the `bot-check` branch.
-3. `HTTP 403` or `HTTP 404`. A list of webhooks, even an empty `[]`, means the token has Admin. On path B this tests the token's permissions, not the bot's role; the script's admin check covers the role.
+3. `HTTP 403` or `HTTP 404`. A list of webhooks, even an empty `[]`, means the token has Admin.
 
 ### 7. Run Claude as the bot
 
@@ -187,7 +164,7 @@ What Write does not stop is pushing, force-pushing and deleting on a branch with
 
 ### Token scopes
 
-- `workflow` "grants the ability to add and update GitHub Actions workflow files" ([scopes for OAuth apps](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps)); without it the bot can still push a branch whose code CI runs. A classic token reaches every repo the bot can reach, so the bot's role is its only limit.
+`workflow` "grants the ability to add and update GitHub Actions workflow files" ([scopes for OAuth apps](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps)); without it the bot can still push a branch whose code CI runs.
 
 A GitHub App installed on the repos is stricter still, with per-repo permissions and short-lived tokens. It needs a private key and token-minting code in front of `gh`, and this doc does not cover it.
 
