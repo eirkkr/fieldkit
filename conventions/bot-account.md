@@ -125,6 +125,7 @@ mkdir -p ~/.config/bot-account/gh && chmod 700 ~/.config/bot-account
 Then add one line to `~/.bashrc` (or `~/.zshrc`) pointing at the kit's script, and open a new terminal. Use the path of your kit checkout; in a consumer repo the script is also at `.fieldkit/scripts/as-bot.sh`:
 
 ```bash
+# Run a command as the GitHub bot account, e.g. `as-bot claude`.
 alias as-bot=~/src/fieldkit/scripts/as-bot.sh
 ```
 
