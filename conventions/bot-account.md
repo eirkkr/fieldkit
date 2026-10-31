@@ -118,17 +118,17 @@ Keep the bot's token in a file only you can read, and start Claude through a scr
 Once, to save the token (the `umask` makes a new file readable only by you, and the `rm` clears any older, wider file first; `gh` is given the empty `gh` directory below as its own settings folder):
 
 ```bash
-mkdir -p ~/.config/claude-bot/gh && chmod 700 ~/.config/claude-bot
-( umask 077; rm -f ~/.config/claude-bot/token; read -rs -p "Bot token: " t; printf '%s' "$t" > ~/.config/claude-bot/token; echo )
+mkdir -p ~/.config/bot-account/gh && chmod 700 ~/.config/bot-account
+( umask 077; rm -f ~/.config/bot-account/token; read -rs -p "Bot token: " t; printf '%s' "$t" > ~/.config/bot-account/token; echo )
 ```
 
-Then add one line to `~/.bashrc` (or `~/.zshrc`) pointing at the kit's script, and open a new terminal. Use the path of your kit checkout; in a consumer repo the script is also at `.fieldkit/scripts/claude-bot.sh`:
+Then add one line to `~/.bashrc` (or `~/.zshrc`) pointing at the kit's script, and open a new terminal. Use the path of your kit checkout; in a consumer repo the script is also at `.fieldkit/scripts/as-bot.sh`:
 
 ```bash
-alias claude-bot=~/src/fieldkit/scripts/claude-bot.sh
+alias as-bot=~/src/fieldkit/scripts/as-bot.sh
 ```
 
-The script, `scripts/claude-bot.sh`, sets the following for the one Claude session it starts, then runs `claude` with your arguments.
+The script, `scripts/as-bot.sh`, sets the following for the one command it starts, then runs that command with your arguments. Start Claude with `as-bot claude`.
 
 What each part does, for this one session only (your own `gh` and git settings are unchanged):
 
@@ -138,7 +138,7 @@ What each part does, for this one session only (your own `gh` and git settings a
 - `GIT_SSH_COMMAND=false` makes every SSH connection fail, so git cannot push with your SSH key.
 - `GIT_CONFIG_COUNT=4` says four key and value pairs of git settings follow. Pair 0 has an empty value and clears any credential helper you use, such as a keychain holding your own login. Pair 1 makes `gh`, and so the bot's token, answer for github.com. Pairs 2 and 3 rewrite `git@github.com:` and `ssh://git@github.com/` remotes to HTTPS, so they work as the bot instead of failing. A remote through an SSH host alias is not rewritten, and fails.
 
-`claude-bot` starts a session that acts as the bot, and plain `claude` still uses your own login. Worked when: asked to run `gh api user -q .login`, the session prints the bot's login, not yours; and `git config --get credential.https://github.com.helper` prints `!gh auth git-credential`. Commits still carry your name and email unless you also set `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL` and the `GIT_COMMITTER_` pair.
+`as-bot claude` starts a session that acts as the bot, and plain `claude` still uses your own login. Worked when: asked to run `gh api user -q .login`, the session prints the bot's login, not yours; and `git config --get credential.https://github.com.helper` prints `!gh auth git-credential`. Commits still carry your name and email unless you also set `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL` and the `GIT_COMMITTER_` pair.
 
 - A token expires; when it does, make a new one and run the save-the-token commands above again.
 - Do not put the token in a Claude `settings.json` `env` block, where it sits in plain text in a file that may be shared.

@@ -2,7 +2,7 @@
 
 ## Decision
 
-Claude acts on GitHub as a separate bot account, a machine account under GitHub's terms, whose role on each repo is write, never admin. One classic token with the `repo` scope serves every repo. A personal repo invites the bot as a collaborator; an organization repo makes the bot a member with write on the repo. Claude runs as the bot through a shell wrapper that sets `GH_TOKEN` and points git's credentials at `gh`. [conventions/bot-account.md](../../conventions/bot-account.md) gives the steps, with the token, scope and checks, and `scripts/check-bot-account.sh` checks the bot's token against a repo.
+Claude acts on GitHub as a separate bot account, a machine account under GitHub's terms, whose role on each repo is write, never admin. One classic token with the `repo` scope serves every repo. A personal repo invites the bot as a collaborator; an organization repo makes the bot a member with write on the repo. Claude runs as the bot through a script that sets `GH_TOKEN` and points git's credentials at `gh`. [conventions/bot-account.md](../../conventions/bot-account.md) gives the steps, with the token, scope and checks, and `scripts/check-bot-account.sh` checks the bot's token against a repo.
 
 ## Reason
 
