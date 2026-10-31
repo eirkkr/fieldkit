@@ -6,7 +6,7 @@ Claims about GitHub below link their page and were checked on 2026-10-30.
 
 ## Which token
 
-A classic token with the `repo` scope, for every repo, personal or organization. A session holds one token, and a fine-grained token reaches one owner only and cannot reach a repo where the bot is just a collaborator ([managing personal access tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)), so of the two token kinds only a classic one works across owners. Its cost: it reaches every repo the bot can reach, so the bot's role on each is what keeps it from admin actions. An organization that blocks classic tokens ([token policy](https://docs.github.com/en/organizations/managing-programmatic-access-to-your-organization/setting-a-personal-access-token-policy-for-your-organization)) cannot use this doc: check its Settings, Personal access tokens first.
+A classic token with the `repo` scope, for every repo, personal or organization; [ADR 063](../docs/decisions/063-a-write-role-bot-account.md) says why not a fine-grained one. It reaches every repo the bot can reach, so the bot's role on each is what keeps it from admin actions. An organization that blocks classic tokens ([token policy](https://docs.github.com/en/organizations/managing-programmatic-access-to-your-organization/setting-a-personal-access-token-policy-for-your-organization)) cannot use this doc: check its Settings, Personal access tokens first.
 
 Tried with this classic token against a personal repo and an organization's repo, including running Claude as the bot through `as-bot`.
 
@@ -55,7 +55,7 @@ Merge it before relying on it: GitHub reads the version on the pull request's ba
 
 As yourself, open the repo, then Settings, Rulesets in the sidebar, New ruleset, New branch ruleset ([creating rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/creating-rulesets-for-a-repository)). Set Enforcement status to Active and add the default branch as a target. Turn on Restrict deletions, Block force pushes and Require a pull request before merging, and under the pull request rule set Required approvals to 1 and turn on Require review from Code Owners ([available rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets)). Then Add bypass, pick the Repository admin role, and set its mode to For pull requests only. Create. To change a ruleset that already exists, open it from the Rulesets list, change the same settings, and Save changes. Only an admin (on a personal repo, the owner) can manage rulesets, so the bot cannot lift it.
 
-What this gives you: the bot cannot push to the default branch, and cannot merge its own pull request, because only a listed code owner's approval counts and the bot is not listed. You approve its pull requests. Your own pull requests still go through a pull request, but as an admin you can merge them without an approval. The bot is not an admin, so it has no such pass. The bypass list takes roles, teams and apps, not individual users, so on an organization repo anyone with the admin role gets the pass too.
+The result: the bot cannot push to the default branch or merge its own pull request, and you approve its pull requests. Your own pull requests still go through a pull request, but as an admin you can merge them without an approval. The bypass list takes roles, teams and apps, not individual users, so on an organization repo anyone with the admin role gets the pass too. [ADR 063](../docs/decisions/063-a-write-role-bot-account.md) says why it is built this way.
 
 Two things this does not do. It covers branches only: a bot with Write can also push tags, so if pushing a tag runs a release workflow, add a ruleset that targets tags and restricts their creation, updates and deletion. And the required checks still run code the bot can change, so a green check from a bot's pull request shows less than one from yours; read the diff before approving.
 
@@ -165,9 +165,9 @@ What each part does, for this one session only (your own `gh` and git settings a
 
 ## Reference
 
-### Why Write
+### What the roles allow
 
-Write is the lowest repository role that can push: Read and Triage cannot ([repository roles for an organization](https://docs.github.com/en/organizations/managing-user-access-to-your-organizations-repositories/repository-roles-for-an-organization)). Maintain adds repository management the bot does not need, and only Admin can delete or transfer a repo, change its settings, or manage branch protection rules and rulesets. A personal repo has no roles to choose from: its collaborators can push and merge, and only the owner can delete or archive the repo, change its settings, or invite collaborators ([permission levels for a personal repository](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-personal-account-settings/permission-levels-for-a-personal-account-repository)).
+Read and Triage cannot push; Write can ([repository roles for an organization](https://docs.github.com/en/organizations/managing-user-access-to-your-organizations-repositories/repository-roles-for-an-organization)). Only Admin can delete or transfer a repo, change its settings, or manage branch protection rules and rulesets. A personal repo has no roles to choose from: its collaborators can push and merge, and only the owner can delete or archive the repo, change its settings, or invite collaborators ([permission levels for a personal repository](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-personal-account-settings/permission-levels-for-a-personal-account-repository)).
 
 What Write does not stop is pushing, force-pushing and deleting on a branch with no protection. A protected branch blocks force pushes and deletion by default ([about protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches)), and an unprotected one has no such rule.
 
@@ -175,7 +175,7 @@ What Write does not stop is pushing, force-pushing and deleting on a branch with
 
 `workflow` "grants the ability to add and update GitHub Actions workflow files" ([scopes for OAuth apps](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps)); without it the bot can still push a branch whose code CI runs.
 
-A GitHub App installed on the repos is stricter still, with per-repo permissions and short-lived tokens. It needs a private key and token-minting code in front of `gh`, and this doc does not cover it.
+A GitHub App installed on the repos is stricter still; this doc does not cover it (see [ADR 063](../docs/decisions/063-a-write-role-bot-account.md)).
 
 ### Plan limits
 
