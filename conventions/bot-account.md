@@ -119,9 +119,9 @@ What a good result looks like:
 2. Each command prints JSON or a URL, the pull request opens, and the close deletes the `bot-check` branch.
 3. `HTTP 403` or `HTTP 404`. A list of webhooks, even an empty `[]`, means the token has Admin.
 
-### 7. Run Claude as the bot
+### 7. Run a command as the bot
 
-Keep the bot's token in a file only you can read, and start Claude through a script that loads it. The token is the limited credential, so it is fine for Claude to read it; anything with more power than that is not. The save command is for bash; in zsh, use `read -rs "t?Bot token: "`.
+Keep the bot's token in a file only you can read, and start Claude, or another agent, through a script that loads it. The token is the limited credential, so it is fine for Claude to read it; anything with more power than that is not. The save command is for bash; in zsh, use `read -rs "t?Bot token: "`.
 
 Once, to save the token (the `umask` makes a new file readable only by you, and the `rm` clears any older, wider file first; `gh` is given the `gh` directory the next command creates, empty, as its own settings folder):
 
