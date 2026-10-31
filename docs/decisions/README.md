@@ -66,3 +66,4 @@ Lightweight architecture decision records (ADRs) for non-obvious design choices.
 | 060 | [Budget the always-loaded context in CI](060-budget-the-always-loaded-context.md) | Accepted |
 | 061 | [Lint shell scripts with shellcheck and shfmt](061-shellcheck-and-shfmt.md) | Accepted |
 | 062 | [A push voids merge approval](062-a-push-voids-merge-approval.md) | Accepted |
+| 063 | [Give Claude a write-role bot account](063-a-write-role-bot-account.md) | Accepted |
