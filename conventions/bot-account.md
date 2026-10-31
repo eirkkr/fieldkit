@@ -13,7 +13,7 @@ Tried with this classic token against a personal repo and an organization's repo
 ## You need
 
 - `gh`, the GitHub CLI, and a bash shell. In zsh, `read -rs -p "Bot token: " X` fails; write it as `read -rs "X?Bot token: "` in steps 6 and 7.
-- To own the repos, or be an Owner of the organization: inviting the bot needs one.
+- To own the personal repos, or be an Owner of the organization, so you can invite the bot.
 
 ## Steps
 
@@ -57,7 +57,7 @@ Worked when: the ruleset is listed as Active, or you have confirmed your plan do
 .fieldkit/scripts/check-bot-account.sh <owner>/<repo>
 ```
 
-In the kit itself the script is `scripts/check-bot-account.sh`; in a consumer repo the kit is reached through its `.fieldkit` link. The script asks for the bot's token without showing it; the token is never an argument, so it stays out of the process list. Paste it at the prompt (if your shell exports a `GH_TOKEN`, the script uses it without asking, so `unset GH_TOKEN` first): a `GH_TOKEN=...` prefix on the command is recorded in your shell history. It only reads from GitHub and stores nothing.
+In the kit itself the script is `scripts/check-bot-account.sh`; in a consumer repo the kit is reached through its `.fieldkit` link. The script asks for the bot's token without showing it; the token is never an argument, so it stays out of the process list. Paste it at the prompt: a `GH_TOKEN=...` prefix on the command is recorded in your shell history. If your shell already exports a `GH_TOKEN`, the script uses it without asking, so `unset GH_TOKEN` first. It only reads from GitHub and stores nothing.
 
 | Line | Means |
 | --- | --- |
@@ -78,14 +78,16 @@ Exit status 2 means the script stopped on an error, and its message says which. 
 A 404 on the repo, when the name is right, usually means one of these:
 
 - The token was made without the `repo` scope.
-- The bot has not accepted its invitation, or does not have Write on the repo.
+- The bot has not accepted its invitation, or has no access to the repo.
 - The organization blocks classic tokens.
 
 The script checks Admin and whether the bot can push: not that the role is exactly Write, and not which scopes a classic token has.
 
+Worked when: the exit status is 0 and the login on the first line is the bot's.
+
 ### 6. Test by hand
 
-Run these in your own terminal with the bot's token, one at a time. They use only `gh`, and when every command succeeds they leave nothing behind but a closed pull request. If a run stops partway, delete the leftover branch with `gh api -X DELETE repos/<owner>/<repo>/git/refs/heads/bot-check` before running again.
+Run these in your own terminal with the bot's token. They use only `gh`. Test 2 leaves nothing behind but a closed pull request; if it stops partway, delete the leftover branch with `gh api -X DELETE repos/<owner>/<repo>/git/refs/heads/bot-check` before running again.
 
 ```bash
 read -rs -p "Bot token: " GH_TOKEN; export GH_TOKEN; echo
@@ -93,8 +95,6 @@ gh api user -q .login   # must print the bot's login; if it prints yours, STOP a
 R=<owner>/<repo>
 B=$(gh api repos/$R -q .default_branch)
 SHA=$(gh api repos/$R/git/ref/heads/$B -q .object.sha)
-# 1. writing straight to the default branch: refused only if the branch is protected. SKIP this on a repo without protection: it succeeds, as a real commit that triggers any push workflow
-gh api -X PUT repos/$R/contents/bot-check.txt -f message="bot check" -f content="$(printf hi | base64)" -f branch=$B
 # 2. branch, commit, PR: should all work
 gh api -X POST repos/$R/git/refs -f ref=refs/heads/bot-check -f sha=$SHA
 gh api -X PUT repos/$R/contents/bot-check.txt -f message="bot check" -f content="$(printf hi | base64)" -f branch=bot-check
@@ -102,8 +102,16 @@ gh pr create -R $R --head bot-check --base $B --title "Bot check" --body "Throwa
 gh pr close -R $R bot-check --delete-branch
 # 3. an admin-only read: should be refused (403 or 404)
 gh api repos/$R/hooks
-unset GH_TOKEN
 ```
+
+Test 1 is separate, and only for a repo whose default branch is protected: on an unprotected one it succeeds, as a real commit that triggers any push workflow. Run it in the same terminal:
+
+```bash
+# 1. writing straight to the default branch: should be refused
+gh api -X PUT repos/$R/contents/bot-check.txt -f message="bot check" -f content="$(printf hi | base64)" -f branch=$B
+```
+
+When you are done, run `unset GH_TOKEN`.
 
 What a good result looks like:
 
@@ -115,14 +123,14 @@ What a good result looks like:
 
 Keep the bot's token in a file only you can read, and start Claude through a script that loads it. The token is the limited credential, so it is fine for Claude to read it; anything with more power than that is not. The save command is for bash; in zsh, use `read -rs "t?Bot token: "`.
 
-Once, to save the token (the `umask` makes a new file readable only by you, and the `rm` clears any older, wider file first; `gh` is given the empty `gh` directory below as its own settings folder):
+Once, to save the token (the `umask` makes a new file readable only by you, and the `rm` clears any older, wider file first; `gh` is given the `gh` directory the next command creates, empty, as its own settings folder):
 
 ```bash
 mkdir -p ~/.config/bot-account/gh && chmod 700 ~/.config/bot-account
 ( umask 077; rm -f ~/.config/bot-account/token; read -rs -p "Bot token: " t; printf '%s' "$t" > ~/.config/bot-account/token; echo )
 ```
 
-Then add one line to `~/.bashrc` (or `~/.zshrc`) pointing at the kit's script, and open a new terminal. Use the path of your kit checkout; in a consumer repo the script is also at `.fieldkit/scripts/as-bot.sh`:
+Then add one line to `~/.bashrc` (or `~/.zshrc`) pointing at the kit's script, and open a new terminal. Use the absolute path of your kit checkout, which a consumer repo's `.fieldkit` link points to (a relative path works only from one directory):
 
 ```bash
 # Run a command as the GitHub bot account, e.g. `as-bot claude`.
@@ -133,9 +141,9 @@ The script, `scripts/as-bot.sh`, sets the following for the one command it start
 
 What each part does, for this one session only (your own `gh` and git settings are unchanged):
 
-- The token check refuses to start when the token file is missing or empty. Without that, `gh` would treat an empty `GH_TOKEN` as unset and fall back to your own stored login (observed with `gh`).
-- The `unset` line drops other GitHub tokens your shell may export, which `gh` or other tools would otherwise use.
-- `GH_HOST` and `GH_CONFIG_DIR` point `gh` at github.com and at an empty settings folder, so it cannot find your stored login at all.
+- The token check refuses to start when the token file is missing or empty. Without that, `gh` would treat an empty `GH_TOKEN` as unset, and the session would run without the bot's token instead of failing (observed with `gh`).
+- The `unset` line drops other GitHub tokens your shell may export, and any askpass program or injected git settings, which `gh`, git or other tools would otherwise use.
+- `GH_HOST` and `GH_CONFIG_DIR` point `gh` at github.com and at an empty settings folder, so `gh` cannot find your stored login.
 - `GIT_SSH_COMMAND=false` makes every SSH connection fail, so git cannot push with your SSH key.
 - `GIT_CONFIG_COUNT=4` says four key and value pairs of git settings follow. Pair 0 has an empty value and clears any credential helper you use, such as a keychain holding your own login. Pair 1 makes `gh`, and so the bot's token, answer for github.com. Pairs 2 and 3 rewrite `git@github.com:` and `ssh://git@github.com/` remotes to HTTPS, so they work as the bot instead of failing. A remote through an SSH host alias is not rewritten, and fails.
 
@@ -143,7 +151,7 @@ What each part does, for this one session only (your own `gh` and git settings a
 
 - A token expires; when it does, make a new one and run the save-the-token commands above again.
 - Do not put the token in a Claude `settings.json` `env` block, where it sits in plain text in a file that may be shared.
-- This makes the bot the credential Claude uses by default; it is not a wall. Your own token is still stored on the same machine, and a session that wanted it could read the file, use your SSH agent, or point `GH_CONFIG_DIR` at your own `gh` settings (see "Not covered here").
+- This makes the bot the credential Claude uses by default; it is not a wall. Your own token is still stored on the same machine, and a session that wanted it could read the file, use your SSH agent or keys with `ssh` directly, point `GH_CONFIG_DIR` at your own `gh` settings, or let git fall back to a login in `~/.netrc` (see "Not covered here").
 
 ## Reference
 
@@ -170,4 +178,4 @@ GitHub's terms allow a machine account: one "set up by an individual human who a
 ### Not covered here
 
 - Settings and hooks that refuse destructive commands before they run: [Guard destructive git and gh commands with settings and hooks](https://github.com/eirkkr/fieldkit/issues/155).
-- Keeping the user's own token out of Claude's reach, without which a bot account protects nothing: [Keep the user's own GitHub token out of Claude's reach](https://github.com/eirkkr/fieldkit/issues/154).
+- Keeping the user's own token out of Claude's reach, without which a bot account is not a wall: [Keep the user's own GitHub token out of Claude's reach](https://github.com/eirkkr/fieldkit/issues/154).

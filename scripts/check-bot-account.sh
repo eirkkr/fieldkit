@@ -82,8 +82,7 @@ check-bot-account: GitHub answered 404 Not Found for repos/$repo.
 The token cannot see that repo. If the name is right, the usual causes are:
   - the token was made without the repo scope
   - (organization) the organization blocks classic tokens
-  - the bot has not accepted its invitation, or is not yet on the team
-    that has access to the repo
+  - the bot has not accepted its invitation, or has no access to the repo
 EOF
             exit 2
             ;;

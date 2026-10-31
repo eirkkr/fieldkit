@@ -2,7 +2,7 @@
 
 ## Decision
 
-Claude acts on GitHub as a separate bot account, a machine account under GitHub's terms, whose role on each repo is write, never admin. One classic token with the `repo` scope serves every repo. A personal repo invites the bot as a collaborator; an organization repo makes the bot a member with write on the repo. Claude runs as the bot through a script that sets `GH_TOKEN` and points git's credentials at `gh`. [conventions/bot-account.md](../../conventions/bot-account.md) gives the steps, with the token, scope and checks, and `scripts/check-bot-account.sh` checks the bot's token against a repo.
+Claude acts on GitHub as a separate bot account, a machine account under GitHub's terms, whose role on each repo is write, never admin. One classic token with the `repo` scope serves every repo. A personal repo invites the bot as a collaborator; an organization repo makes the bot a member with write on the repo. Claude runs as the bot through `scripts/as-bot.sh`, which reads the token from `~/.config/bot-account/token` and sets `GH_TOKEN` and points git's credentials at `gh`. [conventions/bot-account.md](../../conventions/bot-account.md) gives the steps, with the token, scope and checks, and `scripts/check-bot-account.sh` checks the bot's token against a repo.
 
 ## Reason
 
@@ -23,4 +23,4 @@ Rejected:
 - The bot can still push, force-push and delete on a default branch with no protection. GitHub's plans page lists protected branches for private repos under Pro and Team and not Free, which suggests a private repo on a free plan stays open to the bot; the doc says that and does not recommend a plan.
 - The classic token was tried against a personal repo and an organization's repo, running Claude as the bot. The doc says so.
 - GitHub's terms allow one free machine account per person, created by a human and used only for automated tasks, so the user creates the bot and it does nothing else.
-- A bot account does nothing while the user's own token is readable on the same machine, and settings and hooks that refuse destructive commands are not yet written. Both are separate work: [keeping the user's token out of Claude's reach](https://github.com/eirkkr/fieldkit/issues/154), and [guarding destructive git and gh commands](https://github.com/eirkkr/fieldkit/issues/155).
+- A bot account is not a wall while the user's own token is readable on the same machine, and settings and hooks that refuse destructive commands are not yet written. Both are separate work: [keeping the user's token out of Claude's reach](https://github.com/eirkkr/fieldkit/issues/154), and [guarding destructive git and gh commands](https://github.com/eirkkr/fieldkit/issues/155).

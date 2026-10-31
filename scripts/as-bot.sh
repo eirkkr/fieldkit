@@ -21,6 +21,7 @@ if [ -z "$token" ]; then
 fi
 
 unset GITHUB_TOKEN GH_ENTERPRISE_TOKEN GITHUB_ENTERPRISE_TOKEN
+unset GIT_ASKPASS SSH_ASKPASS GIT_CONFIG_PARAMETERS
 export GH_TOKEN="$token"
 export GH_HOST=github.com
 export GH_CONFIG_DIR="$dir/gh"
