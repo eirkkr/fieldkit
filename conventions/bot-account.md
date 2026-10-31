@@ -1,8 +1,8 @@
 # A limited GitHub account for Claude
 
-Claude runs `gh` and `git` with whatever token it finds, normally its user's own, so it can do anything its user can, including deleting a repo or editing its protection rules. A separate bot account whose role is Write, never Admin, takes the repo-admin actions out of reach. It does not stop a Write-role bot pushing to a branch with no protection, or pushing a branch whose code CI then runs.
+Claude runs `gh` and `git` with whatever token it finds, normally its user's own, so it can do anything its user can, including deleting a repo or editing its protection rules. A separate bot account whose role is Write, never Admin, takes the repo-admin actions out of reach. This doc covers making the bot and its token, protecting the default branch so the bot's pull requests need your approval, checking the setup, and running a command as the bot. It does not stop a Write-role bot pushing to a branch with no protection, or pushing a branch whose code CI then runs.
 
-Claims about GitHub below link their page and were checked on 2026-10-30.
+Claims about GitHub below link their page and were checked on 2026-10-30 or 2026-10-31.
 
 ## Which token
 
@@ -45,21 +45,21 @@ Worked when: the token is listed on the bot's token page.
 
 A private repo on a free plan most likely cannot have this: see "Plan limits" below. If so, skip the step and know that the bot can push, force-push and delete on the default branch.
 
-Before the ruleset, add a `CODEOWNERS` file naming who may approve pull requests. On the default branch, create `.github/CODEOWNERS` containing your username (more usernames, separated by spaces, to allow more people; each needs write access to the repo, and on a personal repo there are no teams) ([about code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)):
+Before the ruleset, add a `CODEOWNERS` file naming who may approve pull requests. Add `.github/CODEOWNERS` containing your username (more usernames, separated by spaces, to allow more people; each needs write access to the repo, and on a personal repo there are no teams) ([about code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)):
 
 ```text
 * @<your-username>
 ```
 
-Merge it before relying on it: GitHub reads the version on the pull request's base branch, so a bot's pull request should not be able to edit its way into the list (not tried here).
+Get it onto the default branch before turning on the ruleset (a ruleset that already exists refuses a direct commit, so use a pull request). GitHub reads the version on the pull request's base branch, so a bot's pull request should not be able to edit its way into the list (not tried here; [about code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)).
 
-As yourself, open the repo, then Settings, Rulesets in the sidebar, New ruleset, New branch ruleset ([creating rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/creating-rulesets-for-a-repository)). Set Enforcement status to Active and add the default branch as a target. Turn on Restrict deletions, Block force pushes and Require a pull request before merging, and under the pull request rule set Required approvals to 1 and turn on Require review from Code Owners ([available rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets)). Then Add bypass, pick the Repository admin role, and set its mode to For pull requests only. Create. To change a ruleset that already exists, open it from the Rulesets list, change the same settings, and Save changes. Only an admin (on a personal repo, the owner) can manage rulesets, so the bot cannot lift it.
+As yourself, open the repo, then Settings, Rulesets in the sidebar, New ruleset, New branch ruleset ([creating rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/creating-rulesets-for-a-repository)). Set Enforcement status to Active and add the default branch as a target. Turn on Restrict deletions, Block force pushes and Require a pull request before merging, and under the pull request rule set Required approvals to 1, turn on Dismiss stale pull request approvals when new commits are pushed, and turn on Require review from Code Owners. Also turn on Require status checks to pass: add the checks your CI runs, set each one's source to GitHub Actions, and turn on Require branches to be up to date before merging ([available rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets)). Then Add bypass, pick the Repository admin role, and set its mode to For pull requests only. Create. To change a ruleset that already exists, open it from the Rulesets list, change the same settings, and Save changes. Only an admin (on a personal repo, the owner) can manage rulesets, so the bot cannot lift it.
 
-The result: the bot cannot push to the default branch or merge its own pull request, and you approve its pull requests. Your own pull requests still go through a pull request, but as an admin you can merge them without an approval. The bypass list takes roles, teams and apps, not individual users, so on an organization repo anyone with the admin role gets the pass too. [ADR 063](../docs/decisions/063-a-write-role-bot-account.md) says why it is built this way.
+The result: the bot cannot push to the default branch, and cannot merge its own pull request until you approve it; a later push by the bot withdraws your approval. You approve its pull requests. Your own pull requests still go through a pull request, but as an admin you can merge them without an approval. This gate has not been tried yet. The bypass list takes roles, teams and apps, not individual users ([creating rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/creating-rulesets-for-a-repository)), so on an organization repo anyone with the admin role gets the pass too. [ADR 063](../docs/decisions/063-a-write-role-bot-account.md) says why it is built this way.
 
-Two things this does not do. It covers branches only: a bot with Write can also push tags, so if pushing a tag runs a release workflow, add a ruleset that targets tags and restricts their creation, updates and deletion. And the required checks still run code the bot can change, so a green check from a bot's pull request shows less than one from yours; read the diff before approving.
+Three things this does not do. It covers the default branch only: the bot can still push, force-push and delete other branches, and a bot with Write can also push tags, so if pushing a tag runs a release workflow, add a ruleset that targets tags and restricts their creation, updates and deletion. The required checks still run code the bot can change, so a green check on a bot's pull request shows less than one on yours: read the diff before approving, keep Settings, Actions, General on read-only default workflow permissions with "Allow GitHub Actions to create and approve pull requests" off, and leave auto-merge off. And the pass covers only pull requests you open: a bot with Write can push to your open branch, so read a pull request's commit list before merging one of your own, and read closely any pull request that touches `CODEOWNERS`.
 
-Worked when: the ruleset is listed as Active and `.github/CODEOWNERS` is on the default branch, or you have confirmed your plan does not offer rulesets. To see it hold, have the bot open a real pull request and check that GitHub asks for a review from you and will not let the bot merge it.
+Worked when: the ruleset is listed as Active and `.github/CODEOWNERS` is on the default branch, or you have confirmed your plan does not offer rulesets. To see it hold, have the bot open a real pull request and look at it: GitHub should ask for your review and keep its merge button blocked. Do not try the merge on a throwaway pull request to find out; if the gate is missing, it merges.
 
 ### 5. Run the check script
 
@@ -140,16 +140,14 @@ mkdir -p ~/.config/bot-account/gh && chmod 700 ~/.config/bot-account
 ( umask 077; rm -f ~/.config/bot-account/token; read -rs -p "Bot token: " t; printf '%s' "$t" > ~/.config/bot-account/token; echo )
 ```
 
-Then add one line to `~/.bashrc` (or `~/.zshrc`) pointing at the kit's script, and open a new terminal. Use the absolute path of your kit checkout, which a consumer repo's `.fieldkit` link points to (a relative path works only from one directory):
+Then add this alias to `~/.bashrc` (or `~/.zshrc`) pointing at the kit's script, and open a new terminal. Use the absolute path of your kit checkout, which a consumer repo's `.fieldkit` link points to (a relative path works only from one directory):
 
 ```bash
 # Run a command as the GitHub bot account, e.g. `as-bot claude`.
 alias as-bot=~/src/fieldkit/scripts/as-bot.sh
 ```
 
-The script, `scripts/as-bot.sh`, sets the following for the one command it starts, then runs that command with your arguments. Start Claude with `as-bot claude`.
-
-What each part does, for this one session only (your own `gh` and git settings are unchanged):
+The script, `scripts/as-bot.sh`, runs the command you give it (`as-bot claude` starts Claude) with these settings, for that one command only; your own `gh` and git settings are unchanged:
 
 - The token check refuses to start when the token file is missing or empty. Without that, `gh` would treat an empty `GH_TOKEN` as unset, and the session would run without the bot's token instead of failing (observed with `gh`).
 - The `unset` line drops other GitHub tokens your shell may export, and any askpass program or injected git settings, which `gh`, git or other tools would otherwise use.
@@ -158,6 +156,8 @@ What each part does, for this one session only (your own `gh` and git settings a
 - `GIT_CONFIG_COUNT=4` says four key and value pairs of git settings follow. Pair 0 has an empty value and clears any credential helper you use, such as a keychain holding your own login. Pair 1 makes `gh`, and so the bot's token, answer for github.com. Pairs 2 and 3 rewrite `git@github.com:` and `ssh://git@github.com/` remotes to HTTPS, so they work as the bot instead of failing. A remote through an SSH host alias is not rewritten, and fails.
 
 `as-bot claude` starts a session that acts as the bot, and plain `claude` still uses your own login. Worked when: asked to run `gh api user -q .login`, the session prints the bot's login, not yours; and `git config --get credential.https://github.com.helper` prints `!gh auth git-credential`. Commits still carry your name and email unless you also set `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL` and the `GIT_COMMITTER_` pair; "Who gets credit" below says what that does to your profile.
+
+Three more things:
 
 - A token expires; when it does, make a new one and run the save-the-token commands above again.
 - Do not put the token in a Claude `settings.json` `env` block, where it sits in plain text in a file that may be shared.
@@ -190,9 +190,9 @@ What lands on a profile's contribution graph follows the account an action is ma
 | A commit Claude makes | You, if git's `user.email` is yours (it is unless you set `GIT_AUTHOR_*`) | The commit stores its author; the pusher is not recorded. Tried: GitHub's API shows this branch's commits as authored by the user's account. |
 | A pull request, issue or comment Claude opens with `gh` | The bot | It is made under the bot's login. |
 | You approving or commenting on the bot's pull request | You | It is made under your login. |
-| Squash-merging the bot's pull request | The bot, not you | The squash commit's author is whoever opened the pull request, and you are not on it. Tried on three squash merges in a public repo, where the pull request opener was credited although a bot had written the commit. The kit's `merge` skill squashes. |
+| Squash-merging the bot's pull request | The bot, not you | The squash commit's author is whoever opened the pull request, and you are not on it. Tried on three squash merges in a public repo (vercel/next.js pull requests 100961, 100947 and 100935), where the pull request opener was credited although a bot had written the commit. The kit's `merge` skill squashes. |
 | Rebase-and-merging it | The original commit authors (you) and whoever merged | GitHub's page says rebased commits credit "the original authors of the commit and the person who rebased the commits". Not tried here. |
-| A merge commit | The merge commit, to whoever merges; the commits inside keep their authors | Tried on a public repo that merges with merge commits: the merge commit was authored by the merger. The inner commits keeping their authors is how git works. |
+| A merge commit | The merge commit, to whoever merges; the commits inside keep their authors | Tried on a public repo that merges with merge commits (cli/cli pull request 14879): the merge commit was authored by the merger. The inner commits keeping their authors is how git works. |
 
 So with squash merges, which this kit uses, the commit that reaches the default branch is the bot's even when the work in it was committed under your email. To have it count for you, open the pull request yourself from the bot's pushed branch, or merge another way. To make the bot's commits the bot's, set `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL` and the `GIT_COMMITTER_` pair for `as-bot`. Contributions can take up to 24 hours to appear. Not tried: a merged pull request made end to end through `as-bot`.
 
