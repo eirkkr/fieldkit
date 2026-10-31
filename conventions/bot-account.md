@@ -147,7 +147,7 @@ What each part does, for this one session only (your own `gh` and git settings a
 - `GIT_SSH_COMMAND=false` makes every SSH connection fail, so git cannot push with your SSH key.
 - `GIT_CONFIG_COUNT=4` says four key and value pairs of git settings follow. Pair 0 has an empty value and clears any credential helper you use, such as a keychain holding your own login. Pair 1 makes `gh`, and so the bot's token, answer for github.com. Pairs 2 and 3 rewrite `git@github.com:` and `ssh://git@github.com/` remotes to HTTPS, so they work as the bot instead of failing. A remote through an SSH host alias is not rewritten, and fails.
 
-`as-bot claude` starts a session that acts as the bot, and plain `claude` still uses your own login. Worked when: asked to run `gh api user -q .login`, the session prints the bot's login, not yours; and `git config --get credential.https://github.com.helper` prints `!gh auth git-credential`. Commits still carry your name and email unless you also set `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL` and the `GIT_COMMITTER_` pair.
+`as-bot claude` starts a session that acts as the bot, and plain `claude` still uses your own login. Worked when: asked to run `gh api user -q .login`, the session prints the bot's login, not yours; and `git config --get credential.https://github.com.helper` prints `!gh auth git-credential`. Commits still carry your name and email unless you also set `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL` and the `GIT_COMMITTER_` pair; "Who gets credit" below says what that does to your profile.
 
 - A token expires; when it does, make a new one and run the save-the-token commands above again.
 - Do not put the token in a Claude `settings.json` `env` block, where it sits in plain text in a file that may be shared.
@@ -170,6 +170,21 @@ A GitHub App installed on the repos is stricter still, with per-repo permissions
 ### Plan limits
 
 GitHub's plans page lists protected branches under "Advanced tools and insights in private repositories" for Pro and Team, does not list them for Free, and gives a free organization "unlimited private repositories with a limited feature set" ([GitHub's plans](https://docs.github.com/en/get-started/learning-about-github/githubs-plans)). That suggests a private repo on a free plan cannot have a ruleset or branch protection rule, so the bot can push to its default branch; the page does not say so outright, so this is inferred. Public repos are not affected. Without server-side protection, the only guards are local hooks and settings, which Claude can work around (see "Not covered here").
+
+### Who gets credit
+
+What lands on a profile's contribution graph follows the account an action is made under, and for commits the author email, not who pushed. GitHub's rules, checked on 2026-10-31 ([contributions on your profile](https://docs.github.com/en/account-and-profile/reference/profile-contributions-reference), [why contributions are not showing up](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-github-profile/managing-contribution-settings-on-your-profile/why-are-my-contributions-not-showing-up-on-my-profile)): a commit counts only if its author email is linked to the account and it is on the default branch (or `gh-pages`) of a standalone repo; opening an issue, proposing a pull request and submitting a review also count, for the account that did them.
+
+| What happens in an `as-bot` session | Credited to | Why |
+| --- | --- | --- |
+| A commit Claude makes | You, if git's `user.email` is yours (it is unless you set `GIT_AUTHOR_*`) | The commit stores its author; the pusher is not recorded. Tried: GitHub's API shows this branch's commits as authored by the user's account. |
+| A pull request, issue or comment Claude opens with `gh` | The bot | It is made under the bot's login. |
+| You approving or commenting on the bot's pull request | You | It is made under your login. |
+| Squash-merging the bot's pull request | The bot, not you | The squash commit's author is whoever opened the pull request, and you are not on it. Tried on three squash merges in a public repo, where the pull request opener was credited although a bot had written the commit. The kit's `merge` skill squashes. |
+| Rebase-and-merging it | The original commit authors (you) and whoever merged | GitHub's page says rebased commits credit "the original authors of the commit and the person who rebased the commits". Not tried here. |
+| A merge commit | The merge commit, to whoever merges; the commits inside keep their authors | Tried on a public repo that merges with merge commits: the merge commit was authored by the merger. The inner commits keeping their authors is how git works. |
+
+So with squash merges, which this kit uses, the commit that reaches the default branch is the bot's even when the work in it was committed under your email. To have it count for you, open the pull request yourself from the bot's pushed branch, or merge another way. To make the bot's commits the bot's, set `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL` and the `GIT_COMMITTER_` pair for `as-bot`. Contributions can take up to 24 hours to appear. Not tried: a merged pull request made end to end through `as-bot`.
 
 ### Terms
 
