@@ -6,7 +6,7 @@ Claims about GitHub below link their page and were checked on 2026-10-30.
 
 ## Which token
 
-A classic token with the `repo` scope, for every repo, personal or organization. A session holds one token, and a fine-grained token reaches one owner only and cannot reach a repo where the bot is just a collaborator ([managing personal access tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)), so only a classic token works across owners. Its cost: it reaches every repo the bot can reach, so the bot's role on each is the only limit.
+A classic token with the `repo` scope, for every repo, personal or organization. A session holds one token, and a fine-grained token reaches one owner only and cannot reach a repo where the bot is just a collaborator ([managing personal access tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)), so of the two token kinds only a classic one works across owners. Its cost: it reaches every repo the bot can reach, so the bot's role on each is what keeps it from admin actions. An organization that blocks classic tokens ([token policy](https://docs.github.com/en/organizations/managing-programmatic-access-to-your-organization/setting-a-personal-access-token-policy-for-your-organization)) cannot use this doc: check its Settings, Personal access tokens first.
 
 Tried against a personal repo. An organization's repos with a classic token are untried.
 
@@ -31,7 +31,7 @@ Worked when: you can log in as the bot, and it asks for a second factor.
 
 **A personal repo.** As yourself, open the repo, then Settings, Collaborators, Add people, and pick the bot ([inviting collaborators](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-access-to-your-personal-repositories/inviting-collaborators-to-a-personal-repository)). A personal repo has one collaborator level, which can push and merge but not change settings or delete the repo; there is no role to choose ([permission levels](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-personal-account-settings/permission-levels-for-a-personal-account-repository)). As the bot, accept the invitation from its email. Repeat for each repo.
 
-**An organization's repo.** As an owner, open the organization, then People, Invite member, and leave the role as Member, never Owner ([inviting users](https://docs.github.com/en/organizations/managing-membership-in-your-organization/inviting-users-to-join-your-organization)). An owner has "complete administrative access" to the organization ([roles in an organization](https://docs.github.com/en/organizations/managing-peoples-access-to-your-organization-with-roles/roles-in-an-organization)). As the bot, accept the invitation. Then, in each repo, open Settings, Collaborators and teams, Add people, pick the bot, and choose Write ([managing access to a repository](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/managing-teams-and-people-with-access-to-your-repository)). Also check the organization's Settings, Member privileges, Base permissions: it applies to every member on every repo, so it must not be Admin. If it is already No permission or Read, leave it ([base permissions](https://docs.github.com/en/organizations/managing-user-access-to-your-organizations-repositories/managing-repository-roles/setting-base-permissions-for-an-organization)). An owner can block classic tokens for the whole organization ([token policy](https://docs.github.com/en/organizations/managing-programmatic-access-to-your-organization/setting-a-personal-access-token-policy-for-your-organization)); if so, this doc does not work for that organization's repos.
+**An organization's repo.** As an owner, open the organization, then People, Invite member, and leave the role as Member, never Owner ([inviting users](https://docs.github.com/en/organizations/managing-membership-in-your-organization/inviting-users-to-join-your-organization)). An owner has "complete administrative access" to the organization ([roles in an organization](https://docs.github.com/en/organizations/managing-peoples-access-to-your-organization-with-roles/roles-in-an-organization)). As the bot, accept the invitation. Then, in each repo, open Settings, Collaborators and teams, Add people, pick the bot, and choose Write ([managing access to a repository](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/managing-teams-and-people-with-access-to-your-repository)). Also check the organization's Settings, Member privileges, Base permissions: it applies to every member on every repo, so it must not be Admin. If it is already No permission or Read, leave it ([base permissions](https://docs.github.com/en/organizations/managing-user-access-to-your-organizations-repositories/managing-repository-roles/setting-base-permissions-for-an-organization)).
 
 Worked when: the bot is listed as a collaborator, not pending, on a personal repo; on an organization's repo, the Collaborators and teams page lists the bot with Write.
 
@@ -57,13 +57,13 @@ Worked when: the ruleset is listed as Active, or you have confirmed your plan do
 .fieldkit/scripts/check-bot-account.sh <owner>/<repo>
 ```
 
-In the kit itself the script is `scripts/check-bot-account.sh`; in a consumer repo the kit is reached through its `.fieldkit` link. The script asks for the bot's token without showing it; the token is never an argument, so it stays out of the process list. Paste it at the prompt: a `GH_TOKEN=...` prefix on the command is recorded in your shell history. It only reads from GitHub and stores nothing.
+In the kit itself the script is `scripts/check-bot-account.sh`; in a consumer repo the kit is reached through its `.fieldkit` link. The script asks for the bot's token without showing it; the token is never an argument, so it stays out of the process list. Paste it at the prompt (if your shell exports a `GH_TOKEN`, the script uses it without asking, so `unset GH_TOKEN` first): a `GH_TOKEN=...` prefix on the command is recorded in your shell history. It only reads from GitHub and stores nothing.
 
 | Line | Means |
 | --- | --- |
 | `pass: the token belongs to <login>` | The token works. `<login>` must be the bot, not you. |
 | `pass: <login> does not have admin on <repo>` | Good. Exit status 0. |
-| `note: <login> cannot push to <repo>` | No admin, but no Write either: the invitation, team or `repo` scope is missing. Exit status 0. |
+| `note: <login> cannot push to <repo>` | No admin, but no Write either: the invitation, the Write grant or the `repo` scope is missing. Exit status 0. |
 | `fail: <login> has admin on <repo>` | On a personal repo, only the owner has admin, so this is your token, not the bot's. On an organization's, lower the bot's role to Write: check it is a Member, not an Owner, that no team gives it Admin, and that the base permission is not Admin. Exit status 1. |
 | `note: ... is protected` | A branch protection rule or ruleset applies. The script cannot tell whether it would stop the bot; test 1 below does. |
 | `note: ... has no branch protection rule or ruleset` | The bot can push to, force-push and delete the default branch. |
@@ -78,7 +78,7 @@ Exit status 2 means the script stopped on an error, and its message says which. 
 A 404 on the repo, when the name is right, usually means one of these:
 
 - The token was made without the `repo` scope.
-- The bot has not accepted its invitation, or is not yet on the team with access.
+- The bot has not accepted its invitation, or does not have Write on the repo.
 - The organization blocks classic tokens.
 
 The script checks Admin and whether the bot can push: not that the role is exactly Write, and not which scopes a classic token has.
@@ -115,11 +115,11 @@ What a good result looks like:
 
 Keep the bot's token in a file only you can read, and start Claude through a small wrapper that loads it. The token is the limited credential, so it is fine for Claude to read it; anything with more power than that is not. These commands are for bash; in zsh, save the token with `read -rs "t?Bot token: "` and put the function in `~/.zshrc`.
 
-Once, to save the token (the `umask` makes the file readable only by you; `gh` is given the empty `gh` directory below as its own settings folder):
+Once, to save the token (the `umask` makes a new file readable only by you, and the `rm` clears any older, wider file first; `gh` is given the empty `gh` directory below as its own settings folder):
 
 ```bash
 mkdir -p ~/.config/claude-bot/gh && chmod 700 ~/.config/claude-bot
-( umask 077; read -rs -p "Bot token: " t; printf '%s' "$t" > ~/.config/claude-bot/token; echo )
+( umask 077; rm -f ~/.config/claude-bot/token; read -rs -p "Bot token: " t; printf '%s' "$t" > ~/.config/claude-bot/token; echo )
 ```
 
 Then add this to `~/.bashrc`, and open a new terminal:
@@ -128,22 +128,26 @@ Then add this to `~/.bashrc`, and open a new terminal:
 claude-bot() {
     local t
     t="$(cat ~/.config/claude-bot/token)" && [ -n "$t" ] || { echo "claude-bot: no bot token" >&2; return 1; }
-    GH_TOKEN="$t" \
-        GH_HOST=github.com \
-        GH_CONFIG_DIR="$HOME/.config/claude-bot/gh" \
-        GIT_SSH_COMMAND=false \
-        GIT_CONFIG_COUNT=4 \
-        GIT_CONFIG_KEY_0=credential.helper GIT_CONFIG_VALUE_0= \
-        GIT_CONFIG_KEY_1=credential.https://github.com.helper GIT_CONFIG_VALUE_1='!gh auth git-credential' \
-        GIT_CONFIG_KEY_2=url.https://github.com/.insteadOf GIT_CONFIG_VALUE_2=git@github.com: \
-        GIT_CONFIG_KEY_3=url.https://github.com/.insteadOf GIT_CONFIG_VALUE_3=ssh://git@github.com/ \
-        claude "$@"
+    (
+        unset GITHUB_TOKEN GH_ENTERPRISE_TOKEN GITHUB_ENTERPRISE_TOKEN
+        GH_TOKEN="$t" \
+            GH_HOST=github.com \
+            GH_CONFIG_DIR="$HOME/.config/claude-bot/gh" \
+            GIT_SSH_COMMAND=false \
+            GIT_CONFIG_COUNT=4 \
+            GIT_CONFIG_KEY_0=credential.helper GIT_CONFIG_VALUE_0= \
+            GIT_CONFIG_KEY_1=credential.https://github.com.helper GIT_CONFIG_VALUE_1='!gh auth git-credential' \
+            GIT_CONFIG_KEY_2=url.https://github.com/.insteadOf GIT_CONFIG_VALUE_2=git@github.com: \
+            GIT_CONFIG_KEY_3=url.https://github.com/.insteadOf GIT_CONFIG_VALUE_3=ssh://git@github.com/ \
+            claude "$@"
+    )
 }
 ```
 
 What each part does, for this one session only (your own `gh` and git settings are unchanged):
 
 - The first line refuses to start when the token file is missing or empty. Without that, `gh` would treat an empty `GH_TOKEN` as unset and fall back to your own stored login (observed with `gh`).
+- The `unset` line, in a subshell so your own shell keeps them, drops other GitHub tokens your shell may export, which `gh` or other tools would otherwise use.
 - `GH_HOST` and `GH_CONFIG_DIR` point `gh` at github.com and at an empty settings folder, so it cannot find your stored login at all.
 - `GIT_SSH_COMMAND=false` makes every SSH connection fail, so git cannot push with your SSH key.
 - `GIT_CONFIG_COUNT=4` says four key and value pairs of git settings follow. Pair 0 has an empty value and clears any credential helper you use, such as a keychain holding your own login. Pair 1 makes `gh`, and so the bot's token, answer for github.com. Pairs 2 and 3 rewrite `git@github.com:` and `ssh://git@github.com/` remotes to HTTPS, so they work as the bot instead of failing. A remote through an SSH host alias is not rewritten, and fails.
@@ -152,7 +156,7 @@ What each part does, for this one session only (your own `gh` and git settings a
 
 - A token expires; when it does, make a new one and run the save-the-token commands above again.
 - Do not put the token in a Claude `settings.json` `env` block, where it sits in plain text in a file that may be shared.
-- This makes the bot the credential Claude uses by default; it is not a wall. Your own token is still stored on the same machine, and a session that wanted it could read the file (see "Not covered here").
+- This makes the bot the credential Claude uses by default; it is not a wall. Your own token is still stored on the same machine, and a session that wanted it could read the file, use your SSH agent, or point `GH_CONFIG_DIR` at your own `gh` settings (see "Not covered here").
 
 ## Reference
 

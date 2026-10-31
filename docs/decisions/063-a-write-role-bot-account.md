@@ -11,7 +11,7 @@ Claude uses whatever token `gh` holds, normally its user's own, so it can do any
 Rejected:
 
 - **A fine-grained token on the user's own account.** It narrows the token but leaves the identity: the account still has admin, and any repo the token reaches is reached as an admin.
-- **A fine-grained token on the bot.** It is narrower, but it reaches one owner only and, per GitHub, cannot reach a repo where the bot is a collaborator. A session holds one token, so it could not work on a personal repo and an organization's repos together. Used first for an organization's repos on a free plan; dropped to keep one path.
+- **A fine-grained token on the bot.** It is narrower, but it reaches one owner only and, per GitHub, cannot reach a repo where the bot is a collaborator. A session holds one token, so it could not work on a personal repo and an organization's repos together. Dropped to keep one path.
 - **A GitHub App installed on the repos.** Per-repo permissions and short-lived tokens make it the strictest option, but it needs a private key and token-minting code in front of `gh`. The doc mentions it as the stricter option and does not cover it.
 - **Moving every repo into an organization.** It would allow fine-grained tokens everywhere, but it moves repos and changes ownership to suit a token.
 - **A skill in place of the script.** The user runs the check rarely, and a skill's description would load into every consumer session ([ADR 060](060-budget-the-always-loaded-context.md)).

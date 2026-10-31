@@ -48,7 +48,7 @@ export GH_TOKEN
 # to another host, under another login.
 export GH_HOST=github.com
 
-errf="$(mktemp)"
+errf="$(mktemp)" || die "could not make a temporary file"
 trap 'rm -f "$errf"' EXIT
 
 # The last gh call's error output, on one line, with the token blanked.
@@ -104,8 +104,8 @@ if [ "$status" -eq 0 ]; then
         echo "      Good: it cannot delete the repo or change its protection rules."
     else
         echo "note: $login cannot push to $repo, so Claude could not open a PR as it."
-        echo "      Check that the invitation is accepted, the team has Write, the"
-        echo "      token is approved, and a classic token has the repo scope."
+        echo "      Check that the invitation is accepted, the bot has Write on the"
+        echo "      repo, and the token has the repo scope."
     fi
 elif [ "$owner_type" = User ]; then
     echo "fail: $login has admin on $repo"
