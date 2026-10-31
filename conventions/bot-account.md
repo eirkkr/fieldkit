@@ -45,11 +45,21 @@ Worked when: the token is listed on the bot's token page.
 
 A private repo on a free plan most likely cannot have this: see "Plan limits" below. If so, skip the step and know that the bot can push, force-push and delete on the default branch.
 
-As yourself, open the repo, then Settings, Rulesets in the sidebar, New ruleset, New branch ruleset ([creating rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/creating-rulesets-for-a-repository)). Set Enforcement status to Active, add the default branch as a target, and turn on Restrict deletions, Block force pushes, and Require a pull request before merging ([available rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets)). Create. Only an admin (on a personal repo, the owner) can manage rulesets, so the bot cannot lift it.
+Before the ruleset, add a `CODEOWNERS` file naming who may approve pull requests. On the default branch, create `.github/CODEOWNERS` containing your username (more usernames, separated by spaces, to allow more people; each needs write access to the repo, and on a personal repo there are no teams) ([about code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)):
 
-Three things this does not do. It applies to you too, unless you add yourself to the ruleset's bypass list. It does not stop the bot merging its own pull request: with no approvals required, it can open one and merge it at once; setting Required approvals to 1 stops that, and then you approve each of the bot's pull requests yourself; on an organization repo, add yourself to the bypass list too, or your own pull requests need someone else's approval. And it covers branches only: a bot with Write can also push tags, so if pushing a tag runs a release workflow, add a ruleset that targets tags and restricts their creation, updates and deletion.
+```text
+* @<your-username>
+```
 
-Worked when: the ruleset is listed as Active, or you have confirmed your plan does not offer it.
+Merge it before relying on it: GitHub reads the version on the pull request's base branch, so a bot's pull request should not be able to edit its way into the list (not tried here).
+
+As yourself, open the repo, then Settings, Rulesets in the sidebar, New ruleset, New branch ruleset ([creating rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/creating-rulesets-for-a-repository)). Set Enforcement status to Active and add the default branch as a target. Turn on Restrict deletions, Block force pushes and Require a pull request before merging, and under the pull request rule set Required approvals to 1 and turn on Require review from Code Owners ([available rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets)). Then Add bypass, pick the Repository admin role, and set its mode to For pull requests only. Create. Only an admin (on a personal repo, the owner) can manage rulesets, so the bot cannot lift it.
+
+What this gives you: the bot cannot push to the default branch, and cannot merge its own pull request, because only a listed code owner's approval counts and the bot is not listed. You approve its pull requests. Your own pull requests still go through a pull request, but as an admin you can merge them without an approval. The bot is not an admin, so it has no such pass. The bypass list takes roles, teams and apps, not individual users, so on an organization repo anyone with the admin role gets the pass too.
+
+Two things this does not do. It covers branches only: a bot with Write can also push tags, so if pushing a tag runs a release workflow, add a ruleset that targets tags and restricts their creation, updates and deletion. And the required checks still run code the bot can change, so a green check from a bot's pull request shows less than one from yours; read the diff before approving.
+
+Worked when: the ruleset is listed as Active and `.github/CODEOWNERS` is on the default branch, or you have confirmed your plan does not offer rulesets. To see it hold, have the bot open a real pull request and check that GitHub asks for a review from you and will not let the bot merge it.
 
 ### 5. Run the check script
 
