@@ -12,7 +12,7 @@ Tried against a personal repo. An organization's repos with a classic token are 
 
 ## You need
 
-- `gh`, the GitHub CLI, and a bash shell. In zsh, `read -rs -p "Bot token: " X` fails; write it as `read -rs "X?Bot token: "` in steps 6 and 7, and use `~/.zshrc` in step 7.
+- `gh`, the GitHub CLI, and a bash shell. In zsh, `read -rs -p "Bot token: " X` fails; write it as `read -rs "X?Bot token: "` in steps 6 and 7.
 - To own the repos, or be an Owner of the organization: inviting the bot needs one.
 
 ## Steps
@@ -113,7 +113,7 @@ What a good result looks like:
 
 ### 7. Run Claude as the bot
 
-Keep the bot's token in a file only you can read, and start Claude through a small wrapper that loads it. The token is the limited credential, so it is fine for Claude to read it; anything with more power than that is not. These commands are for bash; in zsh, save the token with `read -rs "t?Bot token: "` and put the function in `~/.zshrc`.
+Keep the bot's token in a file only you can read, and start Claude through a script that loads it. The token is the limited credential, so it is fine for Claude to read it; anything with more power than that is not. The save command is for bash; in zsh, use `read -rs "t?Bot token: "`.
 
 Once, to save the token (the `umask` makes a new file readable only by you, and the `rm` clears any older, wider file first; `gh` is given the empty `gh` directory below as its own settings folder):
 
@@ -122,32 +122,18 @@ mkdir -p ~/.config/claude-bot/gh && chmod 700 ~/.config/claude-bot
 ( umask 077; rm -f ~/.config/claude-bot/token; read -rs -p "Bot token: " t; printf '%s' "$t" > ~/.config/claude-bot/token; echo )
 ```
 
-Then add this to `~/.bashrc`, and open a new terminal:
+Then add one line to `~/.bashrc` (or `~/.zshrc`) pointing at the kit's script, and open a new terminal. Use the path of your kit checkout; in a consumer repo the script is also at `.fieldkit/scripts/claude-bot.sh`:
 
 ```bash
-claude-bot() {
-    local t
-    t="$(cat ~/.config/claude-bot/token)" && [ -n "$t" ] || { echo "claude-bot: no bot token" >&2; return 1; }
-    (
-        unset GITHUB_TOKEN GH_ENTERPRISE_TOKEN GITHUB_ENTERPRISE_TOKEN
-        GH_TOKEN="$t" \
-            GH_HOST=github.com \
-            GH_CONFIG_DIR="$HOME/.config/claude-bot/gh" \
-            GIT_SSH_COMMAND=false \
-            GIT_CONFIG_COUNT=4 \
-            GIT_CONFIG_KEY_0=credential.helper GIT_CONFIG_VALUE_0= \
-            GIT_CONFIG_KEY_1=credential.https://github.com.helper GIT_CONFIG_VALUE_1='!gh auth git-credential' \
-            GIT_CONFIG_KEY_2=url.https://github.com/.insteadOf GIT_CONFIG_VALUE_2=git@github.com: \
-            GIT_CONFIG_KEY_3=url.https://github.com/.insteadOf GIT_CONFIG_VALUE_3=ssh://git@github.com/ \
-            claude "$@"
-    )
-}
+alias claude-bot=~/src/fieldkit/scripts/claude-bot.sh
 ```
+
+The script, `scripts/claude-bot.sh`, sets the following for the one Claude session it starts, then runs `claude` with your arguments.
 
 What each part does, for this one session only (your own `gh` and git settings are unchanged):
 
-- The first line refuses to start when the token file is missing or empty. Without that, `gh` would treat an empty `GH_TOKEN` as unset and fall back to your own stored login (observed with `gh`).
-- The `unset` line, in a subshell so your own shell keeps them, drops other GitHub tokens your shell may export, which `gh` or other tools would otherwise use.
+- The token check refuses to start when the token file is missing or empty. Without that, `gh` would treat an empty `GH_TOKEN` as unset and fall back to your own stored login (observed with `gh`).
+- The `unset` line drops other GitHub tokens your shell may export, which `gh` or other tools would otherwise use.
 - `GH_HOST` and `GH_CONFIG_DIR` point `gh` at github.com and at an empty settings folder, so it cannot find your stored login at all.
 - `GIT_SSH_COMMAND=false` makes every SSH connection fail, so git cannot push with your SSH key.
 - `GIT_CONFIG_COUNT=4` says four key and value pairs of git settings follow. Pair 0 has an empty value and clears any credential helper you use, such as a keychain holding your own login. Pair 1 makes `gh`, and so the bot's token, answer for github.com. Pairs 2 and 3 rewrite `git@github.com:` and `ssh://git@github.com/` remotes to HTTPS, so they work as the bot instead of failing. A remote through an SSH host alias is not rewritten, and fails.
