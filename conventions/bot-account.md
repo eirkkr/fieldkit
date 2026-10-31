@@ -8,7 +8,7 @@ Claims about GitHub below link their page and were checked on 2026-10-30.
 
 A classic token with the `repo` scope, for every repo, personal or organization. A session holds one token, and a fine-grained token reaches one owner only and cannot reach a repo where the bot is just a collaborator ([managing personal access tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)), so of the two token kinds only a classic one works across owners. Its cost: it reaches every repo the bot can reach, so the bot's role on each is what keeps it from admin actions. An organization that blocks classic tokens ([token policy](https://docs.github.com/en/organizations/managing-programmatic-access-to-your-organization/setting-a-personal-access-token-policy-for-your-organization)) cannot use this doc: check its Settings, Personal access tokens first.
 
-Tried against a personal repo. An organization's repos with a classic token are untried.
+Tried with this classic token against a personal repo and an organization's repo, including running Claude as the bot through `as-bot`.
 
 ## You need
 

@@ -21,6 +21,6 @@ Rejected:
 - The classic token reaches every repo the bot can reach, so the role is the only limit, and it must stay at write.
 - An organization that blocks classic tokens is not served by this doc.
 - The bot can still push, force-push and delete on a default branch with no protection. GitHub's plans page lists protected branches for private repos under Pro and Team and not Free, which suggests a private repo on a free plan stays open to the bot; the doc says that and does not recommend a plan.
-- The classic token was tried against a personal repo; an organization's repos with a classic token are untried. The doc says so.
+- The classic token was tried against a personal repo and an organization's repo, running Claude as the bot. The doc says so.
 - GitHub's terms allow one free machine account per person, created by a human and used only for automated tasks, so the user creates the bot and it does nothing else.
 - A bot account does nothing while the user's own token is readable on the same machine, and settings and hooks that refuse destructive commands are not yet written. Both are separate work: [keeping the user's token out of Claude's reach](https://github.com/eirkkr/fieldkit/issues/154), and [guarding destructive git and gh commands](https://github.com/eirkkr/fieldkit/issues/155).
