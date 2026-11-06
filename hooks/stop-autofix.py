@@ -5,7 +5,8 @@ Two steps in one process, because Claude Code runs all of an event's hooks in
 parallel - as separate hooks these would race:
 
 1. If the repo names one in `fieldkit.fixCommand` (git config), run it. Its
-   output is discarded, never fed back to the agent - see ADR 007. The working
+   output is discarded, never fed back to the agent - see ADR 007 (064 supersedes it for
+   the agent's own lint runs; the hook is unaffected). The working
    tree is digested either side of the run, so which files the fixer rewrote is
    measured rather than inferred. Both digests are taken against one pinned
    commit, so a commit landing mid-run can't make an untouched file read as
@@ -94,7 +95,7 @@ def run_fixer(root, base):
 
     Returns the command, every path it rewrote, and the subset it dirtied from a
     clean state. Output is deliberately discarded: ADR 007 keeps lint and format
-    output away from the agent, and a failing fixer must not block the turn.
+    output away from the agent (064 leaves that alone), and a failing fixer must not block the turn.
     """
     command = (git(root, "config", FIX_CONFIG) or "").strip()
     if not command:

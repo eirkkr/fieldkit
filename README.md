@@ -162,7 +162,7 @@ To turn on step 1, name the command in the repo's git config - there's no defaul
 git config fieldkit.fixCommand "just fix"
 ```
 
-Its output is discarded rather than fed back to Claude, and a failing or hanging fixer can never block the turn. This is the per-repo opt-in auto-fixer [ADR 007](docs/decisions/007-agents-dont-run-linters.md) anticipated: agents still don't run linters, and the kit still owns no format command of its own - only the mechanism.
+Its output is discarded rather than fed back to Claude, and a failing or hanging fixer can never block the turn. This is the per-repo opt-in auto-fixer [ADR 007](docs/decisions/007-agents-dont-run-linters.md) anticipated; agents don't iterate on lint ([ADR 064](docs/decisions/064-agents-run-the-local-check-before-review.md)), and the kit still owns no format command of its own - only the mechanism.
 
 Like `fieldkit.defaultBranch`, it's per *clone*, so a fresh checkout needs it set again. Git config can't be committed, so put the command in a `setup`-style recipe rather than leaving it as folklore - that keeps it version-controlled and reviewable while still needing a deliberate human run, so no command is ever auto-executed out of repo content. The kit does this to itself with `just setup`.
 
