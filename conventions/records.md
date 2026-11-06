@@ -1,18 +1,18 @@
 # Written records
 
-Issues, ADRs, specs and convention docs outlive the conversation that produced them, and are acted on by someone who never saw it.
+Issues, ADRs, specs and convention docs outlive the conversation that produced them and are acted on by someone who never saw it.
 
 ## The body stands alone
 
-- An issue, ADR or spec is read without the conversation that produced it, so everything needed to act on it belongs in the body: the decisions still open, the docs that must change alongside the code, the reasoning behind a choice that looks arbitrary, and anything the conversation built that the reader would otherwise rebuild - a prompt or script that worked, where each change has to go, what it cost.
-- Two tests before filing. A plan to brief whoever picks the work up means something is missing from the body. And read as the person who will act on it, the body is finished when they could start the first step without asking.
-- A later finding that changes what the body says is edited into the body, not left in a comment beneath it, where someone acting on the body alone would miss it.
+- Everything needed to act belongs in the body: open decisions, docs that must change alongside the code, the reasoning behind a choice that looks arbitrary, and whatever the conversation built that the reader would otherwise rebuild (a prompt or script that worked, where each change goes, what it cost).
+- Before filing, read it as the person who will act: it is finished when they could start the first step without asking. Planning to brief them means something is missing.
+- A later finding that changes the body is edited into it, not left in a comment beneath, where a reader of the body alone would miss it.
 
 ## Exemptions and violations
 
-- An exemption list records why each entry is exempt, in terms of the rule it escapes, so the reason could be used to refuse an entry. One describing what the code does instead ("uses the raw driver", "runs at startup") cannot be audited, and the list grows by precedent.
-- Known violations of a convention live in the issue tracker, not in the convention document - the document outlives them, and a stale list of files reads as permission.
+- An exemption list gives each entry's reason in terms of the rule it escapes, so the reason could refuse an entry. A reason describing what the code does instead ("uses the raw driver", "runs at startup") can't be audited, and the list grows by precedent.
+- Known violations of a convention live in the issue tracker, not the convention doc: the doc outlives them, and a stale list of files reads as permission.
 
 ## Convention docs
 
-A convention doc is read by people as well as agents. It states git and GitHub mechanics as plain facts, and leaves the vocabulary of the agent's instructions - act-then-show, ask first, dispatching a subagent - to `KIT.md` and the skill files that carry them out, so the doc reads without either open.
+A convention doc is read by people as well as agents. It states git and GitHub mechanics as plain facts and leaves the agent-instruction vocabulary (act-then-show, ask first, dispatching a subagent) to `KIT.md` and the skills, so it reads without either open.

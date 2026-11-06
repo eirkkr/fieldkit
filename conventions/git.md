@@ -18,16 +18,14 @@
 - The description starts lowercase and has no trailing period.
 - The subject is at most 72 characters - GitHub cuts longer ones on its commit pages.
 - For more context, add a body after a blank line, every line at most 72 characters, so `git log`'s 4-space indent still fits 80 columns. A line that is one unbreakable word - a URL or a path, optionally after a list marker or a `[1]:` label - may run longer, since it can't be wrapped.
-- Commit often - each coherent piece of work as it lands, not one batch at the end of the work. Small commits are easier to review, revert, and reword.
 
 ## Pull requests and merging
 
 - PR title follows the Commits rules above. It becomes the squash subject once GitHub appends `(#N)`, so the 72 includes that suffix. A `!` title needs a `BREAKING CHANGE:` line in the PR body, which the squash body carries on. No issue numbers in the title.
 - `Closes #X` in the PR body references a tracked issue the work resolves - and when there is none, there's simply no such line. A mention in prose closes nothing. A number is never inferred, and never the PR's own: issues and PRs share one number space, so a wrong guess still resolves to something, and `gh issue view <N>` returns a PR just as happily. The check is `gh api repos/{owner}/{repo}/issues/<N> -q '.pull_request.url // "issue"'`, where any output but `issue` means `N` is a PR.
-- A sentence about the PR's own state - "unmerged", "in review" - turns false at the merge, so it is rewritten on the branch first.
+- A sentence about the PR's own state ("unmerged", "in review") turns false at the merge: rewrite it on the branch first.
 - Always `git push` before `gh pr merge` (squash merge uses remote state).
-- Work in progress stays on the branch - push freely, but don't open a PR until the work is ready for review.
-- Once a PR is open, every later push to that branch has to leave the description still true. Checking is part of the push, not a separate step: push first, check the body against the branch as pushed, and apply a revision right away if it's gone stale (see [github.md](github.md)).
+- Every push to an open PR's branch must leave its description true: push, check the body against the branch as pushed, and revise it at once if stale ([github.md](github.md)).
 - Squash-merge: synthesise a subject + body summarising the whole change; don't concatenate commit messages. Append `(#PR)` to a custom `--subject` manually (GitHub omits it when you provide a custom subject). The footer takes its `Closes #X` lines from both `gh pr view --json closingIssuesReferences -q '.closingIssuesReferences[].number'` and the PR body's closing-keyword lines (`Closes`, `Fixes`, `Resolves`), each number checked as above. GitHub's list can be empty at merge time, and an issue it has not linked stays open, so the footer is what closes it. With neither, omit the line.
 - Merge once CI is green and the PR has no conflicts; a red check or unresolved conflicts block it outright, a still-running check is waited out instead. Where a repo uses [Manual CI](ci.md#manual-ci), a `skipping` check is not green.
 
@@ -43,12 +41,7 @@
 
 ## Hooks and CI checks
 
-- The kit ships two git hooks, installed from the repo root with `.fieldkit/scripts/enable-hooks.sh` - once per clone, since `.git/hooks` isn't version controlled:
-  - `pre-commit` refuses commits on the default branch. It takes the default branch from the `fieldkit.defaultBranch` git config when set, otherwise `origin/HEAD`, otherwise `main`; set that config to override the guess, or in a repo whose `origin/HEAD` isn't set.
-  - `commit-msg` refuses a commit breaking the Commits rules. Messages git writes itself - merges, reverts, `fixup!`, `squash!` - pass.
-- Don't reach for `--no-verify` to get past either - a refusal means the commit belongs on a branch, or its message needs fixing.
-- Two Claude Code `PreToolUse` hooks, registered by `just install`, act only in a repo with `.fieldkit` or in the kit, and only see Claude's Bash commands:
-  - one refuses creating or renaming a branch to a name breaking the Branches rules, before anything is committed to it;
-  - one checks the squash message Claude passes to `gh pr merge`: the Commits rules, plus the `(#N)` suffix matching the PR.
-- CI checks each PR's title and its branch's name, however they were made - the title as the squash subject it becomes. Enable it from the repo root with `.fieldkit/scripts/enable-pr-checks.sh`, and commit the workflow it writes. PRs opened by bots are exempt, since bots name branches and PRs from their own config.
-- All of these enforce the rules from constants in the kit's `hooks/conventions.py`, which mirror the Branches and Commits bullets above. A change to the rules changes both.
+- Git hooks, installed once per clone from the repo root with `.fieldkit/scripts/enable-hooks.sh`: `pre-commit` refuses commits on the default branch (from `fieldkit.defaultBranch` git config, else `origin/HEAD`, else `main`); `commit-msg` refuses a message breaking the Commits rules (git's own merge, revert, `fixup!` and `squash!` messages pass). A refusal means the commit belongs on a branch or its message needs fixing, so `--no-verify` is never the answer.
+- Two Claude Code `PreToolUse` hooks, registered by `just install`, act only in a repo with `.fieldkit` or in the kit, on Claude's Bash commands: one refuses creating or renaming a branch to a name breaking the Branches rules; one checks the squash message passed to `gh pr merge` (Commits rules, plus a `(#N)` suffix matching the PR).
+- CI checks each PR's title and branch name. Enable it with `.fieldkit/scripts/enable-pr-checks.sh` and commit the workflow it writes. Bot-opened PRs are exempt.
+- All of these enforce constants in the kit's `hooks/conventions.py`, which mirror the Branches and Commits bullets above: a rule change changes both.
