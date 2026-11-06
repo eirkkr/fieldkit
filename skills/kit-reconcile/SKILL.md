@@ -25,7 +25,7 @@ Fix each unresolved reference here, usually a one-line path change. `git -C .fie
 
 Then re-run every `enable-*.sh` this repo has already run (its links or files are present), even where nothing dangles: each is idempotent, and a kit change can add to what one installs (`enable-hooks.sh` gaining `commit-msg` reaches no clone until re-run). Enabling one the repo never ran is the human's call.
 
-Then check the workflows running the kit's scripts. For each `actions/checkout` step in `.github/workflows/` whose `repository:` matches this repo's kit (`owner/name` from `git -C .fieldkit remote get-url origin`): a `ref:` of 40 hex characters is a pin; a branch, a tag or no `ref:` is an unpinned checkout, which `conventions/ci.md` ("Pin everything a workflow runs on") rules out. Report each by file. For a pin, count how far behind the kit's `main` it is with `git -C .fieldkit rev-list --count <pin>..main`; report it unmeasured if the pin is not in the local clone. Edit nothing: pins in CI are the human's to raise.
+Then check the workflows running the kit's scripts. For each `actions/checkout` step in `.github/workflows/` whose `repository:` matches this repo's kit (`owner/name` from `git -C .fieldkit remote get-url origin`): a `ref:` of 40 hex characters is a pin; a branch, a tag or no `ref:` is an unpinned checkout, which `conventions/ci.md` ("Pin everything a workflow runs on") rules out. Report each by file. For a pin, count how far behind the kit's `main` it is with `git -C .fieldkit rev-list --count <pin>..main`; report it unmeasured if the pin is not in the local clone. Pin or raise each to the kit commit being reconciled to (`git -C .fieldkit rev-parse main`, the SHA the marker gets), on the reconcile branch: it is kit wiring, same as the marker. Edit only that `ref:`; any other pin in CI is not this skill's.
 
 ## Resolve the range
 
@@ -42,14 +42,18 @@ Read the kit history for that range with `git -C .fieldkit log main` and `git -C
 
 1. Audit agent-facing docs and instructions for anything now contradicting the kit; bring them into line.
 2. Make any repo-side change the new rules imply: commands, recipes, config.
-3. Leave human-facing tooling (CI, pre-commit, linters) alone; report CI pins, don't edit them. Exception: what the kit's `enable-*.sh` scripts wrote (links, hooks, CI caller workflows) is kit wiring, kept current in the references step.
+3. Leave other human-facing tooling (CI, pre-commit, linters) alone. Exceptions, both kit wiring kept current in the references step: what the kit's `enable-*.sh` scripts wrote (links, hooks, CI caller workflows), and the kit checkout's `ref:` pin.
 
-## Surface codebase follow-ups
+## Codebase follow-ups
 
-The steps above reconcile *instructions*, not the *codebase*. For each changed convention in range, judge whether existing code now violates it. List those as the issues they would become (title and finding in a sentence), file on a yes; sweeping the code is a separate job. Also list each unpinned or behind pinned kit checkout found above as an issue to raise it, whatever the range.
+The steps above reconcile *instructions*, not the *codebase*. For each changed convention in range, judge whether existing code now violates it.
+
+Default: everything lands on the reconcile branch, one PR. A violation fix that is *small* (KIT.md's definition) goes in as its own commit, named in the PR description. Never open a second branch or file a separate issue for something small, the CI pin included.
+
+Bigish: a fix spanning modules, needing a design call, or likely to bloat the PR's review. Stop and ask: fold in, file an issue (title and finding in a sentence), or skip. Sweeping the whole codebase stays a separate job.
 
 ## Advance the marker and open the PR
 
 Set `.fieldkit-rev` to the kit HEAD reconciled to (`git -C .fieldkit rev-parse main`), creating it if absent; commit the bump with the reconcile edits. Nothing to change: still open a marker-only PR, recording the repo was checked up to this commit.
 
-Follow the kit's git conventions: show me the proposed changes for approval before editing, work on a branch, open a PR.
+Follow the kit's git conventions: work on one reconcile branch, open a PR. Act-then-show: make the edits, then show what changed; no approval before editing. Ask first only for a bigish follow-up (above).

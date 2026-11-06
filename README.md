@@ -216,14 +216,14 @@ After merging a rule change here, a consumer repo may need matching changes - do
 /kit-reconcile
 ```
 
-It reviews the kit's recent history, then reconciles this repo's agent-facing docs and tooling to the current conventions, working on a branch and showing the changes for approval before editing.
+It reviews the kit's recent history, then reconciles this repo's agent-facing docs and tooling to the current conventions, working on one branch and PR and showing what changed. It asks only when something bigish comes up.
 
-It also checks, whatever the range, that this repo's references into the kit still resolve - the `.fieldkit` symlink, every `@.fieldkit/...` import, the `.fieldkit/...` paths in tracked files, and any link into the kit that now dangles. A stale instruction loads and says the wrong thing; a broken reference doesn't load at all, leaving the session with rules missing rather than wrong. Unresolved references are fixed in the same run - see [ADR 040](docs/decisions/040-reconcile-verifies-references.md). It separately reports a workflow that checks out the kit unpinned, or at a pin behind the kit's `main`, and leaves that CI edit to you.
+It also checks, whatever the range, that this repo's references into the kit still resolve - the `.fieldkit` symlink, every `@.fieldkit/...` import, the `.fieldkit/...` paths in tracked files, and any link into the kit that now dangles. A stale instruction loads and says the wrong thing; a broken reference doesn't load at all, leaving the session with rules missing rather than wrong. Unresolved references are fixed in the same run - see [ADR 040](docs/decisions/040-reconcile-verifies-references.md). A workflow that checks out the kit unpinned, or at a pin behind the kit's `main`, has its `ref:` pinned or raised to the reconciled commit on the same branch.
 
 Each consumer tracks how far it has caught up in a committed `.fieldkit-rev` file - the kit commit it was last reconciled to. With no argument the command reconciles every kit commit since that marker, then advances it; a no-op reconcile still opens a marker-only PR, recording the repo was checked. On a repo with no marker yet it reviews just the latest commit, warns, and creates the file. Override the range with `/kit-reconcile N` (the last N commits) or `/kit-reconcile latest` (the latest only). See
 [ADR 012](docs/decisions/012-reconcile-marker.md).
 
-`/kit-reconcile` reconciles *instructions*, not the codebase. When a convention change also implies source edits, it files an issue for each affected convention and reports them; the actual code sweep is a separate, still-to-be-built `/kit-audit` command.
+`/kit-reconcile` reconciles *instructions*, not the codebase. When a convention change also implies source edits, it fixes small violations on the same branch and asks before anything bigger (fold in, file an issue, or skip); the actual code sweep is a separate, still-to-be-built `/kit-audit` command.
 
 The skill is defined in `skills/kit-reconcile/SKILL.md` and wired up by `just install` (see Setup); editing that file updates it everywhere.
 
