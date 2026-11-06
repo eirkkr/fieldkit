@@ -45,5 +45,16 @@ Upgrading means editing the pin: change the SHA and its comment together.
 
 ## Triggers and input
 
-- Workflows run on `on: pull_request` with no draft filter: every PR runs every check ([ADR 011](../docs/decisions/011-wip-on-branches.md) keeps unfinished work on branches, not in draft PRs). Add `types: [..., edited]` only for a check that reads the PR's title or body, so a retitled PR is checked again.
+- Workflows run on `on: pull_request` with no draft filter: every PR runs every check ([ADR 011](../docs/decisions/011-wip-on-branches.md) keeps unfinished work on branches, not in draft PRs), unless the repo chooses [Manual CI](#manual-ci). Add `types: [..., edited]` only for a check that reads the PR's title or body, so a retitled PR is checked again.
 - PR text - the title, body or branch name - reaches a script through `env:`, never interpolated as `${{ }}` into `run:`. It is user input, and interpolated it runs as shell.
+
+## Manual CI
+
+For a repo that wants CI only when started, not on every push ([ADR 065](../docs/decisions/065-manual-ci-skips-until-re-run.md)); the default above stays every check on every PR.
+
+- **Skip on a push, run on a re-run.** The workflow triggers on `pull_request`, and its job carries `if: github.run_attempt > 1`. A push is attempt 1, so the PR shows the job skipped, and a skipped job gets no runner, so nothing is billed. A re-run - the button on the PR, or `gh run rerun <id>` - is attempt 2: the job runs and its result replaces the skipped entry on the PR. A push starts a new run, skipped again, so a pass always belongs to its head.
+- **Not `workflow_dispatch`.** Its check runs do not appear on the PR.
+- **One workflow per job, under a shared filename prefix,** so each re-runs alone and a script can re-run them all by glob.
+- **A check on the PR's text runs for real when that text changes.** Give it its own workflow, trigger on `opened`, `reopened` and `edited`, and gate it `github.run_attempt > 1 || github.event.action != 'synchronize'`. An edit then shows its result within a minute and leaves the other jobs' passes alone.
+- **`skipping` is not a pass.** A merge needs `pass` for every job, and `gh pr checks --watch` returns on skipped checks, so read the result again. Say so in the repo's own merge rule; without branch protection nothing enforces it.
+- **A re-run reuses the original merge ref,** so if the base branch moved since the push it tests the earlier merge.

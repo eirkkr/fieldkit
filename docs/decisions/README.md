@@ -68,3 +68,4 @@ Lightweight architecture decision records (ADRs) for non-obvious design choices.
 | 062 | [A push voids merge approval](062-a-push-voids-merge-approval.md) | Accepted |
 | 063 | [Give Claude a write-role bot account](063-a-write-role-bot-account.md) | Accepted |
 | 064 | [Agents run the local check once, before review](064-agents-run-the-local-check-before-review.md) | Accepted |
+| 065 | [Manual CI skips on a push and runs on a re-run](065-manual-ci-skips-until-re-run.md) | Accepted |
