@@ -4,48 +4,45 @@ Where these rules conflict with the repo's own docs, flag it briefly before proc
 
 ## Always-on
 
-- Act-then-show by default: make the change, surface it, correct after. Ask first for the actions the table marks that way, for anything else outward-facing or irreversible, and for a genuinely new convention or design decision, even a local one.
-- Git and GitHub actions go through the `push`, `pr`, and `merge` skills - don't reach for `git commit`, `git push`, `gh pr create`, or `gh pr merge` directly, even mid-task and even when the step looks trivial. Read-only inspection (`git status`, `git diff`, `git log`) stays direct, as do actions no skill covers - read the matching doc below for those.
+- Default act-then-show: change, surface, correct after. Ask first for the table's marked actions, anything else outward-facing or irreversible, and any new convention or design decision, even local.
+- Git and GitHub actions go through the `push`, `pr`, `merge` skills, never raw `git commit`, `git push`, `gh pr create`, `gh pr merge`, even mid-task. Read-only inspection (`git status`, `git diff`, `git log`) and actions no skill covers stay direct; for those read the matching doc below.
 
 | Action | Approval | Notes |
 | --- | --- | --- |
-| Committing and pushing | act-then-show | each coherent piece as it lands, not one batch per session |
-| Force-pushing a branch with an open PR | ask first | even when git.md's checks show nothing would be lost |
-| Revising an open PR's title/body | act-then-show | keep it true as the branch grows |
-| Filing an issue | ask first | unless the user asked for one |
-| Commenting on an issue, editing either | act-then-show | surface what was filed so it can be corrected |
-| Closing an issue | ask first | except the automatic close of a `Closes #X` PR on merge |
-| Creating a branch off a non-default branch | ask first | explain why first; off the default branch it needs no approval |
-| Opening a PR | ask first | unless the user typed `/pr` |
-| Merging | ask first | unless the user typed `/merge`; also conditioned on CI |
+| Committing and pushing | act-then-show | each coherent piece as it lands |
+| Force-pushing a branch with an open PR | ask first | even when git.md's checks show nothing lost |
+| Revising an open PR's title/body | act-then-show | keep true as branch grows |
+| Filing an issue | ask first | unless user asked, or a change's plan files it (`conventions/specs.md`) |
+| Commenting on or editing an issue | act-then-show | surface what was filed |
+| Closing an issue | ask first | except a `Closes #X` PR's close on merge |
+| Branching off a non-default branch | ask first | explain why; off default needs none |
+| Opening a PR | ask first | unless user typed `/pr`, or it is a change stage's gate PR |
+| Merging | ask first | unless user typed `/merge`; needs CI |
 
-- Approval settles whether to act, not what the draft says: once given - a yes, or the `/pr`, `/merge` or issue request itself - draft it and go straight to it.
-- A finding is *small* when fixing it costs less than filing an issue, or only slightly more - an issue costs a standalone body, a duplicate search, and a later branch, PR and review. A small finding unrelated to the branch's change is fixed on it, act-then-show, in its own commit named in the PR description. On a change's stage PR this holds only in files the stage already touches.
-- Any other finding becomes an issue, handled later and not on the branch in hand: say what the issue would say, and file it on a yes.
-- Merging also needs CI: a failed check, a conflict or a required review not yet given stops it (report that; don't merge around it with `--admin` or a ruleset edit unless the user asks), a running check is waited out, a green one merges with no further sign-off.
-- Approval covers one head: the short SHA named when asking, or the head at a typed `/merge`. A push that adds or rewrites a commit voids it - a fix, a rebase, anyone's: stop, report, ask again; a fresh yes approves the new head. The one exception is this PR's gate approval commits (the `change-stage` skill's GATE.md).
-- No approval is needed for: the PR a change's stage opens at its gate, one per stage; a change's own issue, when planning it was asked for; its stage issues, once the plan is approved, or as the plan is published when it is priced to decide (`conventions/specs.md`). Each stage's merge is gated like any other.
-- Commit onto the branch you're already on, even if its existing work looks unrelated.
+- Approval settles whether to act, not what the draft says. Once given (a yes, or the `/pr`, `/merge` or issue request itself), draft and go straight to it.
+- Merging needs CI. Failed check, conflict or missing required review stops it: report, never `--admin` or edit a ruleset unless asked. Running check: wait. Green: merge, no further sign-off.
+- Approval covers one head: the short SHA named when asking, or the head at a typed `/merge`. Any push adding or rewriting a commit voids it (a fix, a rebase, anyone's): stop, report, ask again. Sole exception: this PR's gate approval commits (`change-stage` GATE.md).
+- Commit onto the current branch, even if its work looks unrelated.
 - A gate on a *follow-up* never holds the action before it: land the push, then ask.
-- Route anything learned that's worth keeping by scope: generic cross-repo lessons into the shared conventions kit, repo-specific ones into that repo's own docs.
-- Fix the underlying issue before reaching for a suppression (`# type: ignore`, `# noqa`, tool exclusion). Suppress only when the tool is wrong about the file's context (e.g. a generated or vendored file).
-- Recommend on correctness. Effort, churn and consistency with what is already there are costs, stated beside the recommendation - "X is more correct; switching costs Y." Where they are high enough to matter, give both options for the user to weigh. Consistency decides between options that are equally correct.
-- Delegate to a subagent for context isolation - keeping large, throwaway exploration out of the main window - not for a cheaper model on a small task. A fresh subagent re-pays context from scratch, which dominates a small task's cost. One that may edit files, a reviewer's mutation probe included, gets `isolation: "worktree"`: the working tree is shared with hooks, commits and other agents.
-- A count, or a claim about a file's contents, is re-derived from the tree as it is written into an ADR, spec, issue or commit message - never recalled, never carried over from an older document.
-- Reading part of a file is not reading it. "This document never addresses X", drawn from a head-and-tail skim, is a claim about the part that was not read.
+- A finding is *small* when fixing costs less than filing an issue, or slightly more. Small and unrelated: fix on the branch, act-then-show, own commit, named in the PR description; on a change's stage PR, only in files the stage already touches. Any other finding becomes an issue: say what it would say, file on a yes.
+- Route lessons worth keeping by scope: generic to the shared conventions kit, repo-specific to that repo's docs.
+- Fix the cause before suppressing (`# type: ignore`, `# noqa`, tool exclusion). Suppress only when the tool is wrong about the file's context (generated, vendored).
+- Recommend on correctness; state effort, churn and consistency as costs beside it ("X is more correct; switching costs Y"). When costs are high enough to matter, give both options. Consistency decides only between equally correct options.
+- Delegate to a subagent to isolate context (large throwaway exploration), not to save on a small task: a fresh subagent re-pays context. One that may edit files, a reviewer's mutation probe included, gets `isolation: "worktree"`.
+- Re-derive any count or file-contents claim from the tree as you write it into an ADR, spec, issue or commit message. Partial read is not reading: never claim what a document "never addresses" from one.
 
 ### Linting and formatting
 
-- Lint once, at readiness: while iterating, match the surrounding style by eye, no linters. Before handing work over (a PR to open, `/pr` included; a stage's gate), run the repo's full local check and fix what it reports in its own commit via `push`. `/merge` is no handover: a fix would void the approved head.
-- That run also covers starting CI: run it again only if code changed since. Run more of what CI runs only where the repo's docs ask; ask first for a slow recipe.
-- Do run tests, for correctness feedback: the repo's canonical command with quiet, short-traceback flags, failing fast on the narrowest relevant selection while iterating, then the full suite before declaring work done.
+- Lint once, at readiness. While iterating, match surrounding style by eye, no linters. Before handover (PR to open, `/pr` included; a stage's gate), run the repo's full local check, fix what it reports in its own commit via `push`. `/merge` is no handover: a fix would void the approved head.
+- That run also covers starting CI; rerun only if code changed since. Run more of CI only where the repo's docs ask; ask first for a slow recipe.
+- Run tests for correctness feedback: repo's canonical command, quiet, short tracebacks, fail-fast on the narrowest relevant selection while iterating, full suite before declaring done.
 
 ### Reviewing and auditing
 
-- A green CI/lint pass confirms only machine-enforced rules; audit conventions enforced by review (ordering, spacing, doc accuracy) by hand against the diff.
-- When a branch introduces or changes a convention, audit existing code for violations and bring any docs that still teach the old pattern into line.
-- When editing a file, fix pre-existing convention violations in that file as part of the change; don't extend them. A fix that isn't *small* (above) - spanning modules is the usual sign - becomes an issue instead.
-- An artifact edited many times needs reading end to end, as a document, before it is called finished. Every edit can be correct while the whole stops describing itself - the usual symptom is a stated goal the body has outgrown. A separate pass from auditing the diff, and it comes last.
+- Green CI covers only machine-enforced rules. Audit review-enforced conventions (ordering, spacing, doc accuracy) by hand against the diff.
+- A branch that adds or changes a convention: audit existing code for violations, fix docs still teaching the old pattern.
+- Fix pre-existing convention violations in files you edit; never extend them. A fix that isn't *small* (usually spanning modules) becomes an issue.
+- Read an artifact edited many times end to end, as a document, before calling it finished: every edit can be right while the whole drifts from its stated goal. Last pass.
 
 ## Load on Demand
 
@@ -55,7 +52,7 @@ Read the matching file before the action, and only then.
 | --- | --- |
 | A git action `push`/`pr`/`merge` don't cover (rebase, tag, amend) | .fieldkit/conventions/git.md |
 | A GitHub action `pr`/`merge` don't cover (issues, comments, PR edits) | .fieldkit/conventions/github.md |
-| Writing an issue, ADR, spec or convention doc, or an exemption list | .fieldkit/conventions/records.md |
+| Writing an issue, ADR, spec or convention doc, an exemption list, or editing KIT.md or a skill | .fieldkit/conventions/records.md |
 | Recording a design decision (ADR) | .fieldkit/conventions/decisions.md |
 | Starting work too big for one PR, or that leaves the user a decision | .fieldkit/conventions/specs.md |
 | Building a feature that calls an LLM | .fieldkit/conventions/ai.md |

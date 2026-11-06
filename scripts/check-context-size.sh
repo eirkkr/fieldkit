@@ -11,7 +11,7 @@ kit="$1"
 # listing's formatting are not counted. Over budget, a PR trims, moves a
 # rule behind the load-on-demand table, or raises the budget here, where the
 # reviewer sees it.
-budget=8726
+budget=7700
 
 fail() {
     echo "check-context-size: $1" >&2

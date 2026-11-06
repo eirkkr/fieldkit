@@ -2,7 +2,7 @@
 
 ## Decision
 
-A finding unrelated to a branch's change is fixed on that branch when the fix costs less than filing an issue, or only slightly more. The fix is its own commit, and the PR description names it. Claude makes it act-then-show, like any other commit on the branch. A larger finding becomes an issue, as before. On a change's stage PR, a fix in place is allowed only in a file the stage already touches. Its commit has no step number, and the PR body's **Changed from the plan** names it. The rules are in `KIT.md`, `conventions/github.md`, `conventions/specs.md` ("Building a stage") and the `change-stage` skill.
+A finding unrelated to a branch's change is fixed on that branch when the fix costs less than filing an issue, or only slightly more. The fix is its own commit, and the PR description names it. Claude makes it act-then-show, like any other commit on the branch. A larger finding becomes an issue, as before. On a change's stage PR, a fix in place is allowed only in a file the stage already touches. Its commit has no step number, and the PR body's **Changed from the plan** names it. The rules are in `KIT.md`, `conventions/specs.md`, `conventions/specs.md` ("Building a stage") and the `change-stage` skill.
 
 ## Reason
 

@@ -36,23 +36,23 @@ Everything but the requirements fits one screen.
 
 - Before the brief is written, the reviewer is asked what only they can decide, one question at a time.
 - Approval is the reviewer saying so with no conditions attached; anything less is a request for changes. It is recorded as a comment on the issue whose first line is `Plan approved by @<login>.`, and a change is built once it has that comment.
-- The stage sub-issues, where the brief lists stages, are created on approval - or, for a plan priced to decide (below), as it is published.
+- The change's own issue, when planning was asked for, and each stage's PR at its gate (one per stage) need no further approval; each stage's merge is still gated. The stage sub-issues, where the brief lists stages, are created on approval - or, for a plan priced to decide (below), as it is published.
 - A plan turned down is closed as not planned, its stage sub-issues with it. Its brief, notes and stages stay, as the record of what was priced and why it was not done.
 
 ### Planning to decide, not only to build
 
-Planning a change is also a way to find out whether to do it. A proposal argues from what a change offers; a plan is forced to price every part of it, and the two can disagree badly. Worth the days it costs where a decision is large, hard to undo, and argued mostly from principle.
+A plan prices every part of a change, where a proposal argues only from what it offers; the two can disagree badly. Worth the days where a decision is large, hard to undo, and argued mostly from principle.
 
-- **A plan priced to decide** is one the reviewer asks for to find out whether to do a change. The steps of every stage are written before approval, each into its own stage's sub-issue, created as the plan is published.
-- **Plan growth is a decision signal.** A plan that stops growing has been understood; one still growing at the end of its own audit has not. Growth with no scope added means the work is bigger than anyone can yet see.
-- **If the answer is no, the plan is the most valuable thing produced.** The change's closed issue is linked from the ADR and left, with its stages, in its original tense: rewriting it to fit the outcome edits the evidence.
+- **A plan priced to decide** is one the reviewer asks for to learn whether to do a change. Every stage's steps are written before approval, each into its sub-issue, created as the plan is published.
+- **Plan growth is a decision signal.** One still growing at the end of its own audit has not been understood; growth with no added scope means the work is bigger than anyone can yet see.
+- **If the answer is no, the plan is the most valuable output.** Link the closed issue from the ADR and leave it, with its stages, in its original tense: rewriting it edits the evidence.
 
 ### What a plan tends to miss
 
-- When a change replaces a component - a library, a datastore, a framework - the risk is rarely in the features being replaced, which are visible and get ported. It is in the **guarantees the old one supplied incidentally**, which nothing wrote down because nothing had to provide them. The prompt that finds them: what does the current design rely on that no line of code asks for?
+- When a change replaces a component (library, datastore, framework), the risk is the **guarantees the old one supplied incidentally**, which nothing wrote down. Ask: what does the current design rely on that no line of code asks for?
 
-  One consumer's evaluation of leaving a document store surfaced three, none in the ADR comparing the options, each of which would have shipped broken: API keys could not outlive their user because they were embedded in it; a thread could share the request's connection because the driver's client was thread-safe; and records written before a mid-file fault stayed written, because each write stood alone.
-- An example artifact can be authoritative for *shape*, but its *values* are audited before it becomes a golden fixture: a golden test enshrines whatever is in it, bugs included.
+  One consumer's evaluation of leaving a document store found three, none in the ADR comparing options: API keys could not outlive their user because they were embedded in it; a thread could share the request's connection because the driver's client was thread-safe; records written before a mid-file fault stayed written, because each write stood alone.
+- An example artifact is authoritative for *shape*; audit its *values* before it becomes a golden fixture, which enshrines whatever is in it, bugs included.
 
 ## The build notes
 
@@ -92,7 +92,7 @@ A stage is the smallest part of a larger change that leaves the default branch g
 ## Building a stage
 
 - **One step, one commit.** Its subject ends with the stage and step it is, as `(2.3)`, so a stage picked up again can be matched against its steps. Its body says why, and anything the step needed that the steps did not foresee.
-- **A small fix outside the stage stays in the stage's files.** Where it is small, as [github.md](github.md) means it, and lies in a file the stage already touches, it is its own commit with no step number, and the PR body's **Changed from the plan** names it. Anywhere else it becomes an issue ([ADR 059](../docs/decisions/059-small-findings-are-fixed-in-place.md)).
+- **A small fix outside the stage stays in the stage's files.** Where it is small (cheaper to fix than to file, or close to it) and lies in a file the stage already touches, it is its own commit with no step number, and the PR body's **Changed from the plan** names it. Anywhere else it becomes an issue ([ADR 059](../docs/decisions/059-small-findings-are-fixed-in-place.md)).
 - **Green before the PR opens.** The repo's full check passes, not its tests alone.
 - **Then a full stop: the gate.** The PR waits for the reviewer to approve it or send it back. Any clear yes is approval, and approval is the word to merge. The next stage begins when it is asked for, on a branch cut from the default branch ([ADR 049](../docs/decisions/049-approval-does-not-start-the-next-stage.md)).
 - **What is sent back is fixed on the same branch and PR**, as plain commits. The steps stay as they were written.
@@ -121,18 +121,7 @@ Review is offered, and runs when the reviewer asks for it. A *fresh* agent is on
 - **A plan** is read by a fresh agent for requirements no test could hold, stages that break the stage rules, and what an agent building from it would have to guess.
 - **A PR review**, when run, reads it with fresh agents on two axes, kept apart: the repo's conventions, including whether everything a person will read is in plain words; and the requirements it says it delivers.
 - **Findings.** The building agent reproduces each one, then triages it: fixed here, edited into the later stage that will handle it, or listed as an issue to file. They go on the PR as a comment headed `## Review findings`, each with its outcome. Listed issues are filed when the reviewer says so.
-- **Which skills.** A repo names the skills to offer, each with when to offer it, under a `## Reviews` heading in its own `CLAUDE.md` - or in a doc that heading points to, where the list is long enough to cost its place in every turn. The reviewer names one for a single run. The conversation wins over the repo, and the repo over the two axes above.
-
-  ```markdown
-  ## Reviews
-
-  | Skill or agent       | When to offer                                 |
-  | -------------------- | --------------------------------------------- |
-  | `grilling`           | Before a plan is written                      |
-  | None - a fresh agent | A plan published                              |
-  | `code-review`        | A diff that makes choices, not a rename       |
-  | `security-review`    | A PR touching auth, input handling or secrets |
-  ```
+- **Which skills.** A repo names the skills to offer, each with when to offer it, as a table of skill and "When to offer" (for example `code-review` | a diff that makes choices, not a rename; "None - a fresh agent" | a plan published) under a `## Reviews` heading in its own `CLAUDE.md`, or in a doc that heading points to. The reviewer names one for a single run. The conversation wins over the repo, and the repo over the two axes above.
 
 ## The final review
 
