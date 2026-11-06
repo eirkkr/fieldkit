@@ -37,7 +37,7 @@ Where these rules conflict with the repo's own docs, flag it briefly before proc
 ### Linting and formatting
 
 - Lint once, at readiness: while iterating, match the surrounding style by eye and leave the tools alone. When the work is ready for the human's review or approval - before asking to open a PR, at a stage's gate, even when `/pr` or `/merge` was typed - run the repo's full local check and fix what it reports, committed through `push`.
-- Before starting CI on GitHub, run locally what CI runs, where the repo has a recipe for it. Ask first for a recipe that is slow or destructive, such as one that erases a database.
+- That run is the one before starting CI on GitHub too: run it again only if code changed since, and run more of what CI runs only where the repo asks for it. Ask first for a recipe that is slow or destructive, such as one that erases a database.
 - Do run tests, for correctness feedback: the repo's canonical command with quiet, short-traceback flags, failing fast on the narrowest relevant selection while iterating, then the full suite before declaring work done.
 
 ### Reviewing and auditing
