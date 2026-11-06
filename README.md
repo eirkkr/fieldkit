@@ -162,7 +162,7 @@ To turn on step 1, name the command in the repo's git config - there's no defaul
 git config fieldkit.fixCommand "just fix"
 ```
 
-Its output is discarded rather than fed back to Claude, and a failing or hanging fixer can never block the turn. This is the per-repo opt-in auto-fixer [ADR 007](docs/decisions/007-agents-dont-run-linters.md) anticipated: agents still don't run linters, and the kit still owns no format command of its own - only the mechanism.
+Its output is discarded rather than fed back to Claude, and a failing or hanging fixer can never block the turn. This is the per-repo opt-in auto-fixer [ADR 007](docs/decisions/007-agents-dont-run-linters.md) anticipated; agents don't iterate on lint ([ADR 064](docs/decisions/064-agents-run-the-local-check-before-review.md)), and the kit still owns no format command of its own - only the mechanism.
 
 Like `fieldkit.defaultBranch`, it's per *clone*, so a fresh checkout needs it set again. Git config can't be committed, so put the command in a `setup`-style recipe rather than leaving it as folklore - that keeps it version-controlled and reviewable while still needing a deliberate human run, so no command is ever auto-executed out of repo content. The kit does this to itself with `just setup`.
 
@@ -230,7 +230,7 @@ The skill is defined in `skills/kit-reconcile/SKILL.md` and wired up by `just in
 
 ## Feeding failures back to an agent
 
-Agents don't run linters or formatters ([ADR 007](docs/decisions/007-agents-dont-run-linters.md)) - you run those and hand back any failures. (Tests are different: the agent runs those itself as part of its loop.) When you do need to feed command output back, do it cheaply:
+Agents don't run linters or formatters while iterating, but run the repo's full local check once when the work is ready for review, and fix what it reports ([ADR 064](docs/decisions/064-agents-run-the-local-check-before-review.md), which replaced [ADR 007](docs/decisions/007-agents-dont-run-linters.md)). Tests are different: the agent runs those itself as part of its loop. When you do need to feed command output back, do it cheaply:
 
 - Type `!<command>` in the Claude Code prompt. It runs in the session and the output lands in context directly - no copy-paste.
 - Filter at the source so only failures land, not noise, using the tool's own quiet/errors-only flags (the exact command is per-repo) - e.g. `pytest -q --tb=line` or `ruff check --output-format=concise`. Pipe through `tail`/`grep` for anything still noisy.

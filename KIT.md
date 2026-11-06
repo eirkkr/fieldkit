@@ -36,7 +36,8 @@ Where these rules conflict with the repo's own docs, flag it briefly before proc
 
 ### Linting and formatting
 
-- Leave formatters and linters, for code and docs alike, to the human and CI unless asked: a style slip reaching CI costs less than lint churn. Match the surrounding style by eye, leaving line lengths and wrapping to CI.
+- Lint once, at readiness: while iterating, match the surrounding style by eye, no linters. Before handing work over (a PR to open, `/pr` included; a stage's gate), run the repo's full local check and fix what it reports in its own commit via `push`. `/merge` is no handover: a fix would void the approved head.
+- That run also covers starting CI: run it again only if code changed since. Run more of what CI runs only where the repo's docs ask; ask first for a slow recipe.
 - Do run tests, for correctness feedback: the repo's canonical command with quiet, short-traceback flags, failing fast on the narrowest relevant selection while iterating, then the full suite before declaring work done.
 
 ### Reviewing and auditing

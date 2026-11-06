@@ -10,7 +10,7 @@ Lightweight architecture decision records (ADRs) for non-obvious design choices.
 | 004 | [Lint with uvx, not a uv project](004-lint-via-uvx.md) | Accepted |
 | 005 | [Flat, content-shaped structure](005-flat-repo-structure.md) | Accepted |
 | 006 | [Symlink kit reference](006-symlink-kit-reference.md) | Accepted |
-| 007 | [Agents don't run linters](007-agents-dont-run-linters.md) | Accepted |
+| 007 | [Agents don't run linters](007-agents-dont-run-linters.md) | Superseded |
 | 008 | [Gate on outward or irreversible actions](008-outward-irreversible.md) | Accepted |
 | 009 | [User-level commands, per-repo conventions](009-user-level-commands-not-conventions.md) | Superseded |
 | 010 | [Python hub and on-demand spokes](010-python-hub-and-spokes.md) | Accepted |
@@ -67,3 +67,4 @@ Lightweight architecture decision records (ADRs) for non-obvious design choices.
 | 061 | [Lint shell scripts with shellcheck and shfmt](061-shellcheck-and-shfmt.md) | Accepted |
 | 062 | [A push voids merge approval](062-a-push-voids-merge-approval.md) | Accepted |
 | 063 | [Give Claude a write-role bot account](063-a-write-role-bot-account.md) | Accepted |
+| 064 | [Agents run the local check once, before review](064-agents-run-the-local-check-before-review.md) | Accepted |
