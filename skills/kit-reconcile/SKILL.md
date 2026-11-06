@@ -25,7 +25,7 @@ Fix each unresolved reference here, usually a one-line path change. `git -C .fie
 
 Then re-run every `enable-*.sh` this repo has already run (its links or files are present), even where nothing dangles: each is idempotent, and a kit change can add to what one installs (`enable-hooks.sh` gaining `commit-msg` reaches no clone until re-run). Enabling one the repo never ran is the human's call.
 
-Then check the workflows running the kit's scripts. For each `actions/checkout` step in `.github/workflows/` whose `repository:` matches this repo's kit (`owner/name` from `git -C .fieldkit remote get-url origin`): a `ref:` of 40 hex characters is a pin; a branch, a tag or no `ref:` is an unpinned checkout, which `conventions/ci.md` ("Pin everything a workflow runs on") rules out. Report each by file. For a pin, count how far behind the kit's `main` it is with `git -C .fieldkit rev-list --count <pin>..main`; report it unmeasured if the pin is not in the local clone. Pin or raise each to the kit commit being reconciled to (`git -C .fieldkit rev-parse main`, the SHA the marker gets), on the reconcile branch: it is kit wiring, same as the marker. Edit only that `ref:`; any other pin in CI is not this skill's.
+Then check the workflows running the kit's scripts. For each `actions/checkout` step in `.github/workflows/` whose `repository:` matches this repo's kit (`owner/name` from `git -C .fieldkit remote get-url origin`): a `ref:` of 40 hex characters is a pin; a branch, a tag or no `ref:` is an unpinned checkout, which `conventions/ci.md` ("Pin everything a workflow runs on") rules out. For a pin, count how far behind the kit's `main` it is with `git -C .fieldkit rev-list --count <pin>..main`; unmeasured if the pin is not in the local clone. Then pin or raise each to the kit commit being reconciled to (`git -C .fieldkit rev-parse main`, the SHA the marker gets): kit wiring, same as the marker. Edit only that `ref:`; other CI pins are not this skill's. Report each by file: before, after, distance.
 
 ## Resolve the range
 
@@ -48,9 +48,9 @@ Read the kit history for that range with `git -C .fieldkit log main` and `git -C
 
 The steps above reconcile *instructions*, not the *codebase*. For each changed convention in range, judge whether existing code now violates it.
 
-Default: everything lands on the reconcile branch, one PR. A violation fix that is *small* (KIT.md's definition) goes in as its own commit, named in the PR description. Never open a second branch or file a separate issue for something small, the CI pin included.
+A violation fix that is *small* (KIT.md's definition) goes on the reconcile branch as its own commit, named in the PR description. The CI pin is one.
 
-Bigish: a fix spanning modules, needing a design call, or likely to bloat the PR's review. Stop and ask: fold in, file an issue (title and finding in a sentence), or skip. Sweeping the whole codebase stays a separate job.
+Anything not small is *bigish*: stop and ask: fold in, file an issue (title and finding in a sentence), or skip. Sweeping the whole codebase stays a separate job.
 
 ## Advance the marker and open the PR
 

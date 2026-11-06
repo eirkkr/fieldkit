@@ -6,7 +6,7 @@
 
 - The kit checkout's `ref:` in the consumer's workflows is pinned or raised to the commit being reconciled to, in the same PR as the marker bump.
 - A small violation fix (KIT.md's definition) is its own commit on that branch, named in the PR description. It gets no separate issue or branch.
-- A bigish follow-up, meaning one that spans modules, needs a design call or would bloat the PR's review, stops the run to ask: fold it in, file an issue, or skip it.
+- A bigish follow-up, meaning any finding that isn't small by KIT.md's definition (usually one spanning modules), stops the run to ask: fold it in, file an issue, or skip it.
 - The skill edits first and shows the result, instead of asking approval before editing.
 
 ## Reason
