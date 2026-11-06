@@ -36,7 +36,7 @@ Where these rules conflict with the repo's own docs, flag it briefly before proc
 
 ### Linting and formatting
 
-- Leave formatters and linters, for code and docs alike, to the human and CI unless asked: a style slip reaching CI costs less than lint churn. Match the surrounding style by eye, leaving line lengths and wrapping to CI.
+- Don't run formatters or linters while iterating: match the surrounding style by eye, leaving line lengths and wrapping to the tool. Run the repo's full local check once, when the work is ready for the human's review or approval - a PR to open, a stage at its gate - and fix what it reports as a plain commit, so nobody reads a diff with lint in it. Before starting CI on GitHub, run locally what CI runs, where the repo has a recipe for it, so the run confirms what passed rather than discovers what failed.
 - Do run tests, for correctness feedback: the repo's canonical command with quiet, short-traceback flags, failing fast on the narrowest relevant selection while iterating, then the full suite before declaring work done.
 
 ### Reviewing and auditing
