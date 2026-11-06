@@ -25,6 +25,8 @@ Fix each unresolved reference here rather than reporting it onward - usually a o
 
 Then re-run every `enable-*.sh` this repo has already run - the ones whose links or files are present - even where nothing dangles. Each is idempotent, and a kit change can add to what one installs: `enable-hooks.sh` gaining `commit-msg` reaches no clone until it's re-run. Enabling one the repo never ran is the human's call.
 
+Then check the workflows that run the kit's scripts. For each `actions/checkout` step in `.github/workflows/` whose `repository:` matches this repo's kit (`owner/name` from `git -C .fieldkit remote get-url origin`), a `ref:` of 40 hex characters is a pin; a branch, a tag or no `ref:` is an unpinned checkout, which `conventions/ci.md` ("Pin everything a workflow runs on") rules out. Report each one by file. For a pin, count how far behind the kit's `main` it is with `git -C .fieldkit rev-list --count <pin>..main`, and report it unmeasured if the pin is not in the local clone. Edit nothing: pins in CI are the human's to raise.
+
 ## Resolve the range
 
 The marker file `.fieldkit-rev` at this repo's root records the kit commit this repo was last reconciled to as a bare SHA. The kit squash-merges, so each commit on its `main` is one change. Resolve the range from `$ARGUMENTS`:
@@ -40,11 +42,11 @@ Read the kit history for that range with `git -C .fieldkit log main` and `git -C
 
 1. Audit agent-facing docs and instructions for anything that now contradicts the kit, and bring them into line.
 2. Make any repo-side change the new rules imply - commands, recipes, config.
-3. Leave human-facing tooling alone: don't touch CI, pre-commit, or the linters themselves. This reconciles agent instructions, not the human's tools. The exception is what the kit's own `enable-*.sh` scripts wrote - its links, hooks and CI caller workflows are kit wiring, kept current in the references step above.
+3. Leave human-facing tooling alone: don't touch CI, pre-commit, or the linters themselves. This reconciles agent instructions, not the human's tools. Pins in CI are reported, not edited. The exception is what the kit's own `enable-*.sh` scripts wrote - its links, hooks and CI caller workflows are kit wiring, kept current in the references step above.
 
 ## Surface codebase follow-ups
 
-The steps above reconcile *instructions*, not the *codebase*. Some convention changes also imply source edits this command does not make - a style or language rule the existing code now violates. For each changed convention in range, judge whether it has codebase implications. List the ones that do, each as the issue it would become - title and the finding in a sentence - and file them on a yes. Don't sweep the code here; that's a separate job.
+The steps above reconcile *instructions*, not the *codebase*. Some convention changes also imply source edits this command does not make - a style or language rule the existing code now violates. For each changed convention in range, judge whether it has codebase implications. List the ones that do, each as the issue it would become - title and the finding in a sentence - and file them on a yes. Don't sweep the code here; that's a separate job. Also list each unpinned or behind pinned kit checkout found above as an issue to raise it, whatever the range.
 
 ## Advance the marker and open the PR
 
