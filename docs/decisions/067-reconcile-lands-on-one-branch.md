@@ -21,4 +21,5 @@ Alternatives rejected:
 ## Consequences
 
 - Extends [ADR 012](012-reconcile-marker.md) and [ADR 040](040-reconcile-verifies-references.md): reconcile still audits instructions first, but now also edits one CI line and may fix small code violations. Other human-facing tooling is still left alone.
+- Changes [ADR 042](042-regate-issue-filing.md)'s follow-up step: a small finding is fixed on the branch rather than proposed as an issue, and a bigish one is still proposed and filed only on a yes.
 - A reconcile PR can be larger than a marker bump, with each fix in its own commit so it can be reverted alone.
