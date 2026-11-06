@@ -16,3 +16,12 @@ Issues, ADRs, specs and convention docs outlive the conversation that produced t
 ## Convention docs
 
 A convention doc is read by people as well as agents. It states git and GitHub mechanics as plain facts and leaves the agent-instruction vocabulary (act-then-show, ask first, dispatching a subagent) to `KIT.md` and the skills, so it reads without either open.
+
+## Style follows the primary reader
+
+([ADR 066](../docs/decisions/066-style-follows-the-primary-reader.md))
+
+- **Agents first** (`KIT.md`, `CLAUDE.md`, `docs/reviews.md`, skill bodies): telegraphic. No articles or filler, clauses folded with a colon, fragments in bullets and steps.
+- **People first** (`conventions/`, ADRs, `README.md`): concise full sentences.
+- Either way, keep each rule's conditions and exceptions ("unless", "only when") explicit, and write a full sentence where a fragment could be read two ways. Never shorten away step order, "Done when" criteria, headings other files cite, or strings a script matches.
+- A file with both audiences takes the first reader's style; when unsure, full sentences.

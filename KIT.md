@@ -52,7 +52,7 @@ Read the matching file before the action, and only then.
 | --- | --- |
 | A git action `push`/`pr`/`merge` don't cover (rebase, tag, amend) | .fieldkit/conventions/git.md |
 | A GitHub action `pr`/`merge` don't cover (issues, comments, PR edits) | .fieldkit/conventions/github.md |
-| Writing an issue, ADR, spec or convention doc, or an exemption list | .fieldkit/conventions/records.md |
+| Writing an issue, ADR, spec or convention doc, an exemption list, or editing KIT.md or a skill | .fieldkit/conventions/records.md |
 | Recording a design decision (ADR) | .fieldkit/conventions/decisions.md |
 | Starting work too big for one PR, or that leaves the user a decision | .fieldkit/conventions/specs.md |
 | Building a feature that calls an LLM | .fieldkit/conventions/ai.md |
