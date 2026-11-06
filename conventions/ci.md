@@ -45,5 +45,15 @@ Upgrading means editing the pin: change the SHA and its comment together.
 
 ## Triggers and input
 
-- Workflows run on `on: pull_request` with no draft filter: every PR runs every check ([ADR 011](../docs/decisions/011-wip-on-branches.md) keeps unfinished work on branches, not in draft PRs). Add `types: [..., edited]` only for a check that reads the PR's title or body, so a retitled PR is checked again.
+- Workflows run on `on: pull_request` with no draft filter: every PR runs every check ([ADR 011](../docs/decisions/011-wip-on-branches.md) keeps unfinished work on branches, not in draft PRs), unless the repo chooses [Manual CI](#manual-ci). Add `types: [..., edited]` only for a check that reads the PR's title or body, so a retitled PR is checked again.
 - PR text - the title, body or branch name - reaches a script through `env:`, never interpolated as `${{ }}` into `run:`. It is user input, and interpolated it runs as shell.
+
+## Manual CI
+
+For a repo that wants CI only when started, not on every push ([ADR 065](../docs/decisions/065-manual-ci-skips-until-re-run.md)).
+
+- **State the merge rule in the repo's own docs:** a merge needs `pass` for every job, and a `skipping` check is not a pass. Nothing enforces it without branch protection. The `merge` skill finds such a repo by `github.run_attempt > 1` in `.github/workflows/*.yml`, so keep that gate in each job's `if:` and name the files `.yml`.
+- **Trigger on `pull_request` and gate each job `if: github.run_attempt > 1`.** A push is attempt 1, so the PR shows the job skipped and no runner is used. A re-run - the PR's button, or `gh run rerun <id>` - has `run_attempt` above 1: the job runs and its result replaces the skipped entry on the PR. `gh run rerun --failed` does not run skipped jobs. A push starts a new run, skipped again, so a pass belongs to its head. `workflow_dispatch` is not an option: its check runs do not appear on the PR.
+- **One workflow per job, under a shared filename prefix** such as `check-*.yml`, so each can be re-run alone and a glob finds them all.
+- **A check on the PR's text - title, body or branch name - runs for real when that text changes.** Give it its own workflow, trigger it on `opened`, `reopened`, `edited` and `synchronize`, and put `if: github.run_attempt > 1 || github.event.action != 'synchronize'` on the job. It runs on open and on an edit, skips on a push unless re-run, and an edit leaves the other jobs' passes alone.
+- **A re-run reuses the original merge ref.** If the base branch moved since the push, push again before re-running.
