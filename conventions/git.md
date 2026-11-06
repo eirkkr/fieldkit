@@ -29,7 +29,7 @@
 - Work in progress stays on the branch - push freely, but don't open a PR until the work is ready for review.
 - Once a PR is open, every later push to that branch has to leave the description still true. Checking is part of the push, not a separate step: push first, check the body against the branch as pushed, and apply a revision right away if it's gone stale (see [github.md](github.md)).
 - Squash-merge: synthesise a subject + body summarising the whole change; don't concatenate commit messages. Append `(#PR)` to a custom `--subject` manually (GitHub omits it when you provide a custom subject). The footer takes its `Closes #X` lines from both `gh pr view --json closingIssuesReferences -q '.closingIssuesReferences[].number'` and the PR body's closing-keyword lines (`Closes`, `Fixes`, `Resolves`), each number checked as above. GitHub's list can be empty at merge time, and an issue it has not linked stays open, so the footer is what closes it. With neither, omit the line.
-- Merge once CI is green and the PR has no conflicts; a red check or unresolved conflicts block it outright, a still-running check is waited out instead.
+- Merge once CI is green and the PR has no conflicts; a red check or unresolved conflicts block it outright, a still-running check is waited out instead. Where a repo uses [Manual CI](ci.md#manual-ci), a `skipping` check is not green.
 
 ## Rewriting history
 
