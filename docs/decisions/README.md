@@ -70,3 +70,4 @@ Lightweight architecture decision records (ADRs) for non-obvious design choices.
 | 064 | [Agents run the local check once, before review](064-agents-run-the-local-check-before-review.md) | Accepted |
 | 065 | [Manual CI skips on a push and runs on a re-run](065-manual-ci-skips-until-re-run.md) | Accepted |
 | 066 | [Writing style follows the primary reader](066-style-follows-the-primary-reader.md) | Accepted |
+| 067 | [Reconcile lands everything on one branch](067-reconcile-lands-on-one-branch.md) | Accepted |
