@@ -23,7 +23,7 @@ Conventions for authoring Python source. Several rules below have no linter and 
 
 ## Member ordering
 
-Order modules: constants, then public functions and classes, then private helpers (callers above callees). Order class members:
+Relies on review (no linter). Order modules: constants, then public functions and classes, then private helpers (callers above callees). Order class members:
 
 1. Class variables and constants
 2. `__init__`, then other dunders
@@ -57,7 +57,7 @@ Let the side that owns the value pass it to the other, so it is written once: ha
 
 ## Multi-line text
 
-Write text of three or more lines as it will appear: one triple-quoted block passed through `textwrap.dedent`, the call ending in `.strip()`, with the opening and closing quotes on lines of their own. Blank lines count as lines; shorter text stays one literal.
+Relies on review (no linter). Write text of three or more lines as it will appear: one triple-quoted block passed through `textwrap.dedent`, the call ending in `.strip()`, with the opening and closing quotes on lines of their own. Blank lines count as lines; shorter text stays one literal.
 
 ```python
 _BODY = textwrap.dedent(

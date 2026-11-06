@@ -121,7 +121,7 @@ Review is offered, and runs when the reviewer asks for it. A *fresh* agent is on
 - **A plan** is read by a fresh agent for requirements no test could hold, stages that break the stage rules, and what an agent building from it would have to guess.
 - **A PR review**, when run, reads it with fresh agents on two axes, kept apart: the repo's conventions, including whether everything a person will read is in plain words; and the requirements it says it delivers.
 - **Findings.** The building agent reproduces each one, then triages it: fixed here, edited into the later stage that will handle it, or listed as an issue to file. They go on the PR as a comment headed `## Review findings`, each with its outcome. Listed issues are filed when the reviewer says so.
-- **Which skills.** A repo names the skills to offer, each with when to offer it, as a table of skill and "When to offer" (for example `code-review` | a diff that makes choices, not a rename) under a `## Reviews` heading in its own `CLAUDE.md`, or in a doc that heading points to. The reviewer names one for a single run. The conversation wins over the repo, and the repo over the two axes above.
+- **Which skills.** A repo names the skills to offer, each with when to offer it, as a table of skill and "When to offer" (for example `code-review` | a diff that makes choices, not a rename; "None - a fresh agent" | a plan published) under a `## Reviews` heading in its own `CLAUDE.md`, or in a doc that heading points to. The reviewer names one for a single run. The conversation wins over the repo, and the repo over the two axes above.
 
 ## The final review
 

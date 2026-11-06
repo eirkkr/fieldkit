@@ -18,7 +18,7 @@ Done when the reviewer has been told which test the work meets, or that it meets
 
 ## 2. Ask
 
-List what only the reviewer can decide, including (for a large, hard-to-undo change) whether to price it to decide whether to do it at all ("Planning to decide"). Run `gh issue list --label change --state open` for a change this one overlaps or waits on. Ask one question at a time, each with the answer you would pick, through the harness's question tool where it has one (choices as options, yours first, marked recommended). A skill named for the questions, in the conversation or else under `## Reviews` in the repo's `CLAUDE.md` (or the doc it points to), asks in your place, still one at a time.
+List what only the reviewer can decide, including (for a large, hard-to-undo change) whether to price it to decide whether to do it at all ("Planning to decide"). Run `gh issue list --label change --state open` for a change this one overlaps or waits on. Ask one question at a time, each with the answer you would pick, through the harness's question tool where it has one (choices as options, yours first, marked recommended). A skill named for the questions, in the conversation or else under `## Reviews` in the repo's `CLAUDE.md` (or the doc it points to), asks in your place, still one at a time whatever pace its own instructions set.
 
 Done when every question has the reviewer's answer, or their word that it stays open.
 

@@ -28,4 +28,4 @@ Rejected:
 
 ## Update
 
-A later trim cut `KIT.md` to about 5.8 KB by moving the change-workflow exemptions into `conventions/specs.md` and tightening the wording, and the budget dropped to 7700 bytes, about 6% above the new total (7281). The trim also tightened the on-demand convention docs and split `conventions/bot-account.md`'s reference material into its own file, which loads only when a step points to it.
+A later trim cut `KIT.md` to about 5.7 KB by moving the change-workflow exemptions into `conventions/specs.md` and tightening the wording, and the budget dropped to 7700 bytes, about 8% above the new total (7144). The trim also tightened the on-demand convention docs and split `conventions/bot-account.md`'s reference material into its own file, which loads only when a step points to it.

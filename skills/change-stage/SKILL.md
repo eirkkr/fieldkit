@@ -38,7 +38,7 @@ A stage is *at its gate* when open, assigned, and its branch has an open PR.
 
 ## 3. Claim a stage
 
-Take the stage named, else the first in the brief's order that is open, unassigned and unblocked. A named stage that is blocked or assigned is reported to the reviewer, not claimed. Claim it: `gh issue edit <stage> --add-assignee @me`.
+Take the stage named, else the first in the brief's order that is open, unassigned and has no open blocker. A named stage that is blocked or assigned is reported to the reviewer, not claimed. Claim it: `gh issue edit <stage> --add-assignee @me`.
 
 Done when the stage is assigned to you.
 
