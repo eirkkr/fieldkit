@@ -1,0 +1,8 @@
+version: 2
+updates:
+  # Keeps each action's pinned commit and its version comment current
+  # (conventions/ci.md, "Pin everything a workflow runs on").
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
