@@ -20,6 +20,7 @@ From this repo's root, check:
 3. **The mentions.** Every other `.fieldkit/...` path in a tracked file - READMEs, scripts, `.claude/` config. One `grep -rn '\.fieldkit/'` covers it.
 4. **The wiring.** Links into the kit that now dangle (`find . -xtype l`, plus `.git/hooks/`, which `find` won't reach). `.claude/skills/` and `openspec/schemas/` are linked file by file, so a kit-side rename breaks them.
 5. **The CI callers.** Every `uses: <kit-repo>/.github/workflows/<file>@...` in `.github/workflows/` names a file that exists at `.fieldkit/.github/workflows/<file>`. A missing one fails every PR.
+6. **Pinned kit checkouts.** Every `actions/checkout` step in `.github/workflows/` whose `repository:` is the kit and whose `ref:` is a commit SHA, as `conventions/ci.md` asks of a workflow that runs the kit's scripts. Compare each with the kit's `main` (`git -C .fieldkit rev-parse main`). A pin behind it is not unresolved, so don't raise it here - that is a CI edit - but report its file and how far behind it is, and list raising it with the follow-ups below.
 
 Fix each unresolved reference here rather than reporting it onward - usually a one-line path change. `git -C .fieldkit log --diff-filter=DR --name-status -- <old-path>` finds where the target moved; if it was removed rather than moved, drop the reference and say so. For a dangling link or a CI caller naming a missing workflow, re-run the matching `.fieldkit/scripts/enable-*.sh` rather than editing it by hand - `enable-pr-checks.sh` replaces a caller an earlier version wrote.
 
