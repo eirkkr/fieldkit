@@ -20,11 +20,12 @@ From this repo's root, check:
 3. **The mentions.** Every other `.fieldkit/...` path in a tracked file - READMEs, scripts, `.claude/` config. One `grep -rn '\.fieldkit/'` covers it.
 4. **The wiring.** Links into the kit that now dangle (`find . -xtype l`, plus `.git/hooks/`, which `find` won't reach). `.claude/skills/` and `openspec/schemas/` are linked file by file, so a kit-side rename breaks them.
 5. **The CI callers.** Every `uses: <kit-repo>/.github/workflows/<file>@...` in `.github/workflows/` names a file that exists at `.fieldkit/.github/workflows/<file>`. A missing one fails every PR.
-6. **Pinned kit checkouts.** Every `actions/checkout` step in `.github/workflows/` whose `repository:` is the kit and whose `ref:` is a commit SHA, as `conventions/ci.md` asks of a workflow that runs the kit's scripts. Compare each with the kit's `main` (`git -C .fieldkit rev-parse main`). A pin behind it is not unresolved, so don't raise it here - that is a CI edit - but report its file and how far behind it is, and list raising it with the follow-ups below.
 
 Fix each unresolved reference here rather than reporting it onward - usually a one-line path change. `git -C .fieldkit log --diff-filter=DR --name-status -- <old-path>` finds where the target moved; if it was removed rather than moved, drop the reference and say so. For a dangling link or a CI caller naming a missing workflow, re-run the matching `.fieldkit/scripts/enable-*.sh` rather than editing it by hand - `enable-pr-checks.sh` replaces a caller an earlier version wrote.
 
 Then re-run every `enable-*.sh` this repo has already run - the ones whose links or files are present - even where nothing dangles. Each is idempotent, and a kit change can add to what one installs: `enable-hooks.sh` gaining `commit-msg` reaches no clone until it's re-run. Enabling one the repo never ran is the human's call.
+
+Then check the workflows that run the kit's scripts. For each `actions/checkout` step in `.github/workflows/` whose `repository:` matches this repo's kit (`owner/name` from `git -C .fieldkit remote get-url origin`), a `ref:` of 40 hex characters is a pin; a branch, a tag or no `ref:` is an unpinned checkout, which `conventions/ci.md` ("Pin everything a workflow runs on") rules out. Report each one by file. For a pin, count how far behind the kit's `main` it is with `git -C .fieldkit rev-list --count <pin>..main`, and report it unmeasured if the pin is not in the local clone. Edit nothing: pins in CI are the human's to raise.
 
 ## Resolve the range
 
@@ -41,11 +42,11 @@ Read the kit history for that range with `git -C .fieldkit log main` and `git -C
 
 1. Audit agent-facing docs and instructions for anything that now contradicts the kit, and bring them into line.
 2. Make any repo-side change the new rules imply - commands, recipes, config.
-3. Leave human-facing tooling alone: don't touch CI, pre-commit, or the linters themselves. This reconciles agent instructions, not the human's tools. The exception is what the kit's own `enable-*.sh` scripts wrote - its links, hooks and CI caller workflows are kit wiring, kept current in the references step above.
+3. Leave human-facing tooling alone: don't touch CI, pre-commit, or the linters themselves. This reconciles agent instructions, not the human's tools. Pins in CI are reported, not edited. The exception is what the kit's own `enable-*.sh` scripts wrote - its links, hooks and CI caller workflows are kit wiring, kept current in the references step above.
 
 ## Surface codebase follow-ups
 
-The steps above reconcile *instructions*, not the *codebase*. Some convention changes also imply source edits this command does not make - a style or language rule the existing code now violates. For each changed convention in range, judge whether it has codebase implications. List the ones that do, each as the issue it would become - title and the finding in a sentence - and file them on a yes. Don't sweep the code here; that's a separate job.
+The steps above reconcile *instructions*, not the *codebase*. Some convention changes also imply source edits this command does not make - a style or language rule the existing code now violates. For each changed convention in range, judge whether it has codebase implications. List the ones that do, each as the issue it would become - title and the finding in a sentence - and file them on a yes. Don't sweep the code here; that's a separate job. Also list each unpinned or behind pinned kit checkout found above as an issue to raise it, whatever the range.
 
 ## Advance the marker and open the PR
 
