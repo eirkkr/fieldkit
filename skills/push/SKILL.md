@@ -6,7 +6,7 @@ argument-hint: "[short summary of what changed and why]"
 
 # Commit and push
 
-Decide, from context already in hand plus `conventions/git.md`'s branch and commit conventions - run `git status`/`git diff` yourself if you need them to pin this down:
+Decide, from context in hand plus `conventions/git.md`'s branch and commit rules (run `git status`/`git diff` if needed):
 
 - the branch name (a new `type/short-description` if the current branch is the default branch, otherwise the current branch)
 - the commit message

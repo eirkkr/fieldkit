@@ -18,7 +18,7 @@ Done when the reviewer has been told which test the work meets - or that it meet
 
 ## 2. Ask
 
-List what only the reviewer can decide - including, where the change is large and hard to undo, whether they want it priced to decide whether to do it at all ("Planning to decide") - and `gh issue list --label change --state open` for a change this one overlaps or waits on. Ask one question at a time, each with the answer you would pick, through the harness's question tool where it has one - the choices as options, yours first and marked recommended. A skill named for the questions - in the conversation, else under `## Reviews` in the repo's `CLAUDE.md` or the doc that heading points to - asks in your place, still one question at a time, whatever pace its own instructions set.
+List what only the reviewer can decide, including (for a large, hard-to-undo change) whether to price it to decide whether to do it at all ("Planning to decide"), and run `gh issue list --label change --state open` for a change this one overlaps or waits on. Ask one question at a time, each with the answer you would pick, through the harness's question tool where it has one (choices as options, yours first, marked recommended). A skill named for the questions, in the conversation or else under `## Reviews` in the repo's `CLAUDE.md` (or the doc it points to), asks in your place, still one at a time.
 
 Done when every question has the reviewer's answer, or their word that it stays open.
 
@@ -29,7 +29,7 @@ Write the brief ("The brief") for the reviewer, in plain words, and the first bu
 - A change that fits one pull request says so under Stages, and has no stage lines.
 - A plan priced to decide ("Planning to decide") also has every stage's steps, as "A stage's issue" gives them, ready for its sub-issues.
 - An existing issue that asks for the change stays as it is. The brief names it.
-- Both are published as written: every line reads to someone who never saw this conversation.
+- Both are published as written, every line readable by someone who never saw this conversation.
 
 Done when every section of the brief is filled or says it is empty, every requirement is delivered by a stage or named as not yet specified, everything but the requirements fits one screen, and, for a plan priced to decide, every stage has its steps, each with a `Done when`.
 

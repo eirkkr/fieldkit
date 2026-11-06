@@ -38,7 +38,7 @@ A stage is *at its gate* when it is open and assigned and its branch has an open
 
 ## 3. Claim a stage
 
-Take the stage named, else the first in the brief's order that is open, unassigned and has no open blocker. A stage named that is blocked or assigned is reported to the reviewer in place of being claimed. Claim it: `gh issue edit <stage> --add-assignee @me`.
+Take the stage named, else the first in the brief's order that is open, unassigned and unblocked. A named stage that is blocked or assigned is reported to the reviewer, not claimed. Claim it: `gh issue edit <stage> --add-assignee @me`.
 
 Done when the stage is assigned to you.
 
@@ -52,7 +52,7 @@ Done when every step has a `Done when` that running or looking at something can 
 
 ## 5. Build
 
-One step, one commit, through the `push` skill, as "Building a stage" gives its subject and body. Work you notice outside the stage is fixed in place or kept as an issue to offer at the gate, as "Building a stage" divides them.
+One step, one commit, through the `push` skill, as "Building a stage" gives its subject and body. Work noticed outside the stage is fixed in place or kept as an issue for the gate, as "Building a stage" divides them.
 
 When a step cannot be verified, or shows the plan is wrong, stop and tell the reviewer.
 
