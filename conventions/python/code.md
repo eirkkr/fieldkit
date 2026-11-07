@@ -5,7 +5,7 @@ Conventions for authoring Python source. Several rules below have no linter and 
 ## Docstrings
 
 - Google-style; comply with ruff's `D` rules.
-- Modules and classes: single line, sentence case, no trailing period.
+- Modules and classes: single line, sentence case, ending in the punctuation ruff's `D415` requires (a period, question mark or exclamation point).
 - Public functions and methods: summary line, then `Args:` / `Returns:` / `Raises:` as needed; descriptions are full sentences ending in a period.
 - Private (`_`-prefixed): not required; add one only when the logic isn't self-evident.
 
