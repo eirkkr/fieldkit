@@ -12,7 +12,7 @@ What the token leaves out: `workflow` (so no editing workflow files, which GitHu
 
 `gh pr edit` needs `read:org`: it sends a GraphQL query that asks for organization and login fields, and fails with "Your token has not been granted the required scopes". It failed on an organization's repo with the bot's token and on a personal repo with a `repo`-only token, so the cause is the token's scopes, not the account type. The same edit through the REST API needs only `repo` and worked with the bot's token: `gh api -X PATCH repos/{owner}/{repo}/pulls/<n> -F body=@<file>`. `gh auth status` prints `Missing required token scopes: 'read:org'` for this token, which is expected.
 
-The other `gh` commands the skills use, on a personal repo with a `repo`-only token: `gh pr create`, `gh pr merge`, `gh pr view` and `gh issue edit` worked, and `gh pr checks` returned its result. On an organization's repo, `gh pr checks` printed the same scope error but still returned its result; the others were not tried there.
+The other `gh` commands the skills use all worked with the bot's token on both a personal repo and an organization's repo: `gh pr create`, `gh pr merge`, `gh pr view`, `gh pr checks` and `gh issue edit`. `gh pr checks --watch` printed the same scope error as `gh pr edit` but still returned its result. Only `gh pr edit` needs the REST form.
 
 What Write does not stop is pushing, force-pushing and deleting on a branch with no protection. A protected branch blocks force pushes and deletion by default ([about protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches)), and an unprotected one has no such rule.
 
