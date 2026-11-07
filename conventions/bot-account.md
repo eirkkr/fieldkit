@@ -10,7 +10,7 @@ A classic token with the `repo` scope, for every repo, personal or organization;
 
 Tried with this classic token against a personal repo and an organization's repo, including running Claude as the bot through `as-bot`.
 
-With only `repo`, `gh pr edit` fails on the missing `read:org` scope. Edit a pull request through the REST API instead; [the reference](bot-account-reference.md#what-the-roles-allow) has the command and the other `gh` commands tried.
+With this token, `gh pr edit` fails on the missing `read:org` scope. Edit a pull request through the REST API instead; [the reference](bot-account-reference.md#what-the-roles-allow) has the command and the other `gh` commands tried.
 
 ## You need
 

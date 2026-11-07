@@ -21,7 +21,7 @@ Then run it, in this turn:
 3. Stage exactly the listed files by name, never `git add -A` or `.`.
 4. Commit with the message via heredoc, keeping its line breaks.
 5. Push, with `-u origin <branch>` on the branch's first push.
-6. PR description needed revising: apply with `gh pr edit`. Fails with "required scopes" (`read:org`): `gh api -X PATCH repos/{owner}/{repo}/pulls/<n> -F body=@<file>`.
+6. PR description needed revising: apply with `gh pr edit`; if it fails with "required scopes" (`read:org`), use `gh api -X PATCH repos/{owner}/{repo}/pulls/<n> -F body=@<file>`.
 7. Stop. Opening a PR and merging are their own skills.
 
 Report the commit (short hash and subject), the branch, whether the push succeeded, and any PR edit made.
