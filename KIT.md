@@ -18,6 +18,7 @@ Where these rules conflict with the repo's own docs, flag it briefly before proc
 | Branching off a non-default branch | ask first | explain why; off default needs none |
 | Opening a PR | ask first | unless user typed `/pr`, or it is a change stage's gate PR |
 | Merging | ask first | unless user typed `/merge`; needs CI |
+| Starting CI by hand (a repo's recipe that re-runs or dispatches it) | ask first | name PR and head; a yes covers that head; `/merge` does not cover it |
 
 - Approval settles whether to act, not what the draft says. Once given (a yes, or the `/pr`, `/merge` or issue request itself), draft and go straight to it.
 - Merging needs CI. Failed check, conflict or missing required review stops it: report, never `--admin` or edit a ruleset unless asked. Running check: wait. Green: merge, no further sign-off.
@@ -34,7 +35,7 @@ Where these rules conflict with the repo's own docs, flag it briefly before proc
 ### Linting and formatting
 
 - Lint once, at readiness. While iterating, match surrounding style by eye, no linters. Before handover (PR to open, `/pr` included; a stage's gate), run the repo's full local check, fix what it reports in its own commit via `push`. `/merge` is no handover: a fix would void the approved head.
-- That run also covers starting CI; rerun only if code changed since. Run more of CI only where the repo's docs ask; ask first for a slow recipe.
+- That run does not start CI: starting it is ask first (table). Run more of CI only where the repo's docs ask; ask first for a slow recipe.
 - Run tests for correctness feedback: repo's canonical command, quiet, short tracebacks, fail-fast on the narrowest relevant selection while iterating, full suite before declaring done.
 
 ### Reviewing and auditing

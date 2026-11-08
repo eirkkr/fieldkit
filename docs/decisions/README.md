@@ -71,3 +71,4 @@ Lightweight architecture decision records (ADRs) for non-obvious design choices.
 | 065 | [Manual CI skips on a push and runs on a re-run](065-manual-ci-skips-until-re-run.md) | Accepted |
 | 066 | [Writing style follows the primary reader](066-style-follows-the-primary-reader.md) | Accepted |
 | 067 | [Reconcile lands everything on one branch](067-reconcile-lands-on-one-branch.md) | Accepted |
+| 068 | [Starting CI by hand is asked first](068-ask-before-starting-ci.md) | Accepted |
