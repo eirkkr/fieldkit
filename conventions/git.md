@@ -28,6 +28,7 @@
 - Work in progress stays on the branch: push freely, but open a PR only when the work is ready for review.
 - Every push to an open PR's branch must leave its description true: push, check the body against the branch as pushed, and revise it at once if stale ([github.md](github.md)).
 - Squash-merge: synthesise a subject + body summarising the whole change; don't concatenate commit messages. Append `(#PR)` to a custom `--subject` manually (GitHub omits it when you provide a custom subject). The footer takes its `Closes #X` lines from both `gh pr view --json closingIssuesReferences -q '.closingIssuesReferences[].number'` and the PR body's closing-keyword lines (`Closes`, `Fixes`, `Resolves`), each number checked as above. GitHub's list can be empty at merge time, and an issue it has not linked stays open, so the footer is what closes it. With neither, omit the line.
+- Squash credit: the squash commit's author is the PR's opener, so a bot opener takes the credit. Below any `Closes` lines, after a blank line, add `Co-authored-by: Name <id+login@users.noreply.github.com>` for each commit author in `gh pr view --json commits` whose login is not the PR author's (`gh api users/<login> -q .id` gives the id). An author with no login gets no line.
 - Merge once CI is green and the PR has no conflicts; a red check or unresolved conflicts block it outright, a still-running check is waited out instead. Where a repo uses [Manual CI](ci.md#manual-ci), a `skipping` check is not green.
 
 ## Rewriting history
