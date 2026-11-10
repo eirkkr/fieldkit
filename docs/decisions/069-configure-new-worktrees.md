@@ -24,7 +24,7 @@ Alternatives rejected:
 
 ## Consequences
 
-- The settings do not make worktrees the default: Claude Code has no setting for that, so starting in a worktree stays a `--worktree` flag, which `kit-claude` adds ([ADR 070](070-kit-claude-launcher.md)).
+- The settings do not make worktrees the default: Claude Code has no setting for that. The rule to work in one is in `git.md` and `KIT.md`, and the agent follows it with `EnterWorktree`, which uses these settings: checked on Claude Code 2.1.322, a worktree it made started at `origin/<default-branch>` and had the `.fieldkit` link.
 - Keep the `git.md` branching bullet. The base setting backs it for worktrees and does not replace it.
 - Entries a user already has in `symlinkDirectories` stay; `.fieldkit` is appended.
 - `"head"` stays available for a one-off by editing `settings.json` by hand; the next `just install` asks before restoring `"fresh"`, and keeps the `.fieldkit` link whichever way you answer.

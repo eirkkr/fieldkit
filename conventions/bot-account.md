@@ -149,7 +149,7 @@ mkdir -p ~/.config/bot-account/gh && chmod 700 ~/.config/bot-account
 Then add this alias to `~/.bashrc` (or `~/.zshrc`) pointing at the kit's script, and open a new terminal. Use the absolute path of your kit checkout, which a consumer repo's `.fieldkit` link points to (a relative path works only from one directory):
 
 ```bash
-# Start Claude as the GitHub bot account, in a git worktree when inside a repo.
+# Start Claude as the GitHub bot account.
 alias kit-claude=~/src/fieldkit/scripts/kit-claude.sh
 ```
 
@@ -161,7 +161,7 @@ alias kit-claude=~/src/fieldkit/scripts/kit-claude.sh
 - `GIT_SSH_COMMAND=false` makes every SSH connection fail, so git cannot push with your SSH key.
 - `GIT_CONFIG_COUNT=4` says four key and value pairs of git settings follow. Pair 0 has an empty value and clears any credential helper you use, such as a keychain holding your own login. Pair 1 makes `gh`, and so the bot's token, answer for github.com. Pairs 2 and 3 rewrite `git@github.com:` and `ssh://git@github.com/` remotes to HTTPS, so they work as the bot instead of failing. A remote through an SSH host alias is not rewritten, and fails.
 
-`kit-claude` starts a session that acts as the bot, in a new worktree when run inside a git repo. It refuses to start when the token is missing, as `as-bot.sh` does, and does not fall back to your login. `kit-claude --self` starts it as you instead of the bot. Every other argument goes to `claude` unchanged (`kit-claude "fix the login bug"`, `kit-claude --resume`), and so does a subcommand (`kit-claude mcp list`). The script adds `--worktree` after those arguments, because the flag takes an optional name and a prompt in front of it would be read as one. It leaves the flag off when you pass `-w` or `--worktree` yourself, resume a session (`-c`, `-r`, `--from-pr`, `--teleport`), or run a subcommand: a resumed session returns to the worktree it was in, and a subcommand takes no worktree. The worktree branches from the remote default branch and gets the repo's `.fieldkit` link, both of which `just install` sets up ([ADR 069](../docs/decisions/069-configure-new-worktrees.md)). Plain `claude` still uses your own login.
+`kit-claude` starts a session that acts as the bot. It refuses to start when the token is missing, as `as-bot.sh` does, and does not fall back to your login. `kit-claude --self` starts it as you instead of the bot, and every other argument goes to `claude` unchanged (`kit-claude --resume`, `kit-claude mcp list`). Plain `claude` still uses your own login.
 
 Worked when, in a `kit-claude` session: asked to run `gh api user -q .login`, the session prints the bot's login, not yours; and `git config --get credential.https://github.com.helper` prints `!gh auth git-credential`. Commits still carry your name and email unless you also set `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL` and the `GIT_COMMITTER_` pair; "Who gets credit" in the reference says what that does to your profile.
 
