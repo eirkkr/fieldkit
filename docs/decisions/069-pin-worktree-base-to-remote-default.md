@@ -4,7 +4,7 @@
 
 `just install` sets `worktree.baseRef` to `"fresh"` in `~/.claude/settings.json`, through `scripts/pin-worktree-base.sh`. A new Claude Code worktree then branches from `origin/<default-branch>`, never from the local `HEAD`.
 
-The script writes silently when the file has no `worktree.baseRef` or already holds `"fresh"`. If the key holds another value, it shows the diff and asks before overwriting, as `disable-attribution.sh` does ([ADR 017](017-attribution-via-settings-not-instructions.md)).
+The script writes without asking when the file has no `worktree` key, or its `worktree` object has no `baseRef`: a missing `baseRef` already means `"fresh"`, so nothing changes in behaviour. This is narrower than `disable-attribution.sh` ([ADR 017](017-attribution-via-settings-not-instructions.md)), which asks whenever an existing file differs. If `worktree` holds anything else (a different `baseRef`, or a value that is not an object), the script shows the diff and asks before overwriting it.
 
 ## Reason
 
@@ -15,7 +15,7 @@ The script writes silently when the file has no `worktree.baseRef` or already ho
 Alternatives rejected:
 
 - **Rely on the default.** Correct today, but silent: nothing records the intent, and a default change would stack work with no warning.
-- **Set it per repo in a committed `.claude/settings.json`.** The base branch is a machine-wide preference that every consumer repo shares, so per-repo wiring would repeat it in each one. This is the user-level versus per-repo split of [ADR 009](009-user-level-commands-not-conventions.md).
+- **Set it per repo in a committed `.claude/settings.json`.** The base branch is a machine-wide preference, not a project one, so per-repo wiring would repeat it in every consumer repo and miss a repo that is not one. Like attribution in ADR 017, it belongs in user settings.
 - **Drop the `git.md` instruction in favour of the setting.** The setting only controls where a new worktree starts. `git.md` governs every branch, including a plain `git checkout -b` in the main checkout and machines that never ran `just install`.
 
 ## Consequences

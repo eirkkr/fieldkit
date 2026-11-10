@@ -17,9 +17,8 @@ def main() -> None:
     old_text = SETTINGS.read_text() if SETTINGS.exists() else None
     data = json.loads(old_text) if old_text is not None else {}
 
-    worktree = data.get("worktree")
-    if not isinstance(worktree, dict):
-        worktree = {}
+    raw = data.get("worktree")
+    worktree = raw if isinstance(raw, dict) else {}
     current = worktree.get("baseRef")
 
     if current == PINNED:
@@ -30,8 +29,10 @@ def main() -> None:
     new_data["worktree"] = {**worktree, "baseRef": PINNED}
     new_text = json.dumps(new_data, indent=2) + "\n"
 
-    # Nothing to conflict with: no file, or no baseRef set. Write silently.
-    if current is None:
+    # Nothing to conflict with: no `worktree` key, or an object with no baseRef.
+    # A missing baseRef already means "fresh", so writing it changes nothing.
+    # Any other `worktree` value would be discarded, so that asks.
+    if raw is None or (isinstance(raw, dict) and current is None):
         SETTINGS.parent.mkdir(parents=True, exist_ok=True)
         SETTINGS.write_text(new_text)
         print("Set worktree.baseRef to fresh in ~/.claude/settings.json")
@@ -43,7 +44,8 @@ def main() -> None:
         fromfile="current ~/.claude/settings.json",
         tofile="proposed ~/.claude/settings.json",
     )
-    print(f"worktree.baseRef is {current!r} in ~/.claude/settings.json:")
+    held = current if isinstance(raw, dict) else raw
+    print(f"worktree is set to {held!r} in ~/.claude/settings.json:")
     print("".join(diff))
     reply = input("Pin new worktrees to the remote default branch? [y/N] ").strip().lower()
     if reply == "y":
