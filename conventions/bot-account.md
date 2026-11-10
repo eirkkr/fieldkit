@@ -151,6 +151,8 @@ Then add this alias to `~/.bashrc` (or `~/.zshrc`) pointing at the kit's script,
 ```bash
 # Run a command as the GitHub bot account, e.g. `as-bot claude`.
 alias as-bot=~/src/fieldkit/scripts/as-bot.sh
+# Start Claude as the bot, in a git worktree when inside a repo.
+alias kit-claude=~/src/fieldkit/scripts/kit-claude.sh
 ```
 
 The script, `scripts/as-bot.sh`, runs the command you give it (`as-bot claude` starts Claude) with these settings, for that one command only; your own `gh` and git settings are unchanged:
@@ -161,7 +163,9 @@ The script, `scripts/as-bot.sh`, runs the command you give it (`as-bot claude` s
 - `GIT_SSH_COMMAND=false` makes every SSH connection fail, so git cannot push with your SSH key.
 - `GIT_CONFIG_COUNT=4` says four key and value pairs of git settings follow. Pair 0 has an empty value and clears any credential helper you use, such as a keychain holding your own login. Pair 1 makes `gh`, and so the bot's token, answer for github.com. Pairs 2 and 3 rewrite `git@github.com:` and `ssh://git@github.com/` remotes to HTTPS, so they work as the bot instead of failing. A remote through an SSH host alias is not rewritten, and fails.
 
-`as-bot claude` starts a session that acts as the bot, and plain `claude` still uses your own login. Worked when: asked to run `gh api user -q .login`, the session prints the bot's login, not yours; and `git config --get credential.https://github.com.helper` prints `!gh auth git-credential`. Commits still carry your name and email unless you also set `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL` and the `GIT_COMMITTER_` pair; "Who gets credit" in the reference says what that does to your profile.
+`kit-claude` is `as-bot` plus `claude --worktree`, so the usual way to start a session is `kit-claude`. Inside a git repo it starts Claude in a new worktree (outside one it starts Claude in the current directory), and it refuses to start when the token is missing, as `as-bot` does. `kit-claude --self` starts it as you instead of the bot, and any other arguments go to `claude` unchanged (`kit-claude --resume`). The worktree branches from the remote default branch, which `just install` pins ([ADR 069](../docs/decisions/069-pin-worktree-base-to-remote-default.md)).
+
+`as-bot claude` starts a session that acts as the bot without a worktree, and plain `claude` still uses your own login. Worked when: asked to run `gh api user -q .login`, the session prints the bot's login, not yours; and `git config --get credential.https://github.com.helper` prints `!gh auth git-credential`. Commits still carry your name and email unless you also set `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL` and the `GIT_COMMITTER_` pair; "Who gets credit" in the reference says what that does to your profile.
 
 Three more things:
 
