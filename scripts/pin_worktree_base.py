@@ -30,9 +30,10 @@ def main() -> None:
     new_text = json.dumps(new_data, indent=2) + "\n"
 
     # Nothing to conflict with: no `worktree` key, or an object with no baseRef.
+    # (An explicit null is a value, so it asks.)
     # A missing baseRef already means "fresh", so writing it changes nothing.
     # Any other `worktree` value would be discarded, so that asks.
-    if raw is None or (isinstance(raw, dict) and current is None):
+    if "worktree" not in data or (isinstance(raw, dict) and current is None):
         SETTINGS.parent.mkdir(parents=True, exist_ok=True)
         SETTINGS.write_text(new_text)
         print("Set worktree.baseRef to fresh in ~/.claude/settings.json")
@@ -44,12 +45,12 @@ def main() -> None:
         fromfile="current ~/.claude/settings.json",
         tofile="proposed ~/.claude/settings.json",
     )
-    held = current if isinstance(raw, dict) else raw
-    print(f"worktree is set to {held!r} in ~/.claude/settings.json:")
+    print(f"worktree is set to {raw!r} in ~/.claude/settings.json:")
     print("".join(diff))
     try:
         reply = input("Pin new worktrees to the remote default branch? [y/N] ").strip().lower()
     except EOFError:  # no terminal: take the default, N
+        print()
         reply = ""
     if reply == "y":
         SETTINGS.write_text(new_text)

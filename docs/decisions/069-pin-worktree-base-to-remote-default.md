@@ -20,7 +20,7 @@ Alternatives rejected:
 
 ## Consequences
 
-- The setting does not make worktrees the default: Claude Code has no setting for that, so starting in a worktree stays a `--worktree` flag, or a shell function that adds it.
+- The setting does not make worktrees the default: Claude Code has no setting for that, so starting in a worktree stays a `--worktree` flag, which `kit-claude` adds ([ADR 070](070-kit-claude-launcher.md)).
 - Keep the `git.md` branching bullet. This pin backs it for worktrees and does not replace it.
 - `"head"` stays available for a one-off by editing `settings.json` by hand; the next `just install` asks before restoring `"fresh"`.
 - If Claude Code renames or removes `worktree.baseRef`, update this ADR and `scripts/pin_worktree_base.py`.

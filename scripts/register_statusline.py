@@ -41,6 +41,7 @@ def main() -> None:
     try:
         reply = input("Apply this change to set statusLine? [y/N] ").strip().lower()
     except EOFError:  # no terminal: take the default, N
+        print()
         reply = ""
     if reply == "y":
         SETTINGS.write_text(new_text)
