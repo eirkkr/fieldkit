@@ -47,7 +47,10 @@ def main() -> None:
     held = current if isinstance(raw, dict) else raw
     print(f"worktree is set to {held!r} in ~/.claude/settings.json:")
     print("".join(diff))
-    reply = input("Pin new worktrees to the remote default branch? [y/N] ").strip().lower()
+    try:
+        reply = input("Pin new worktrees to the remote default branch? [y/N] ").strip().lower()
+    except EOFError:  # no terminal: take the default, N
+        reply = ""
     if reply == "y":
         SETTINGS.write_text(new_text)
         print("Updated ~/.claude/settings.json")
