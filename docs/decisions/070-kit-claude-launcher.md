@@ -26,6 +26,7 @@ Alternatives rejected:
 - `--worktree` takes an optional name, so a flag placed before a prompt swallows it: `claude --worktree "fix the bug"` fails with an invalid worktree name, where `claude "fix the bug" --worktree` starts. The script therefore adds the flag after the user's arguments, and before a `--` if there is one.
 - It leaves the flag off when the arguments already hold `-w` or `--worktree`, or resume a session with `-c`, `--continue`, `-r` or `--resume`. Claude Code returns a resumed session to the worktree it ended in, so adding the flag would only make a second one.
 - The flag is left out outside a git work tree, which `claude` refuses with an error, and in a bare repo or a `.git` directory, where `git rev-parse --is-inside-work-tree` exits 0 but prints `false`.
+- A session in a worktree finds `.fieldkit` through the `symlinkDirectories` entry that `just install` writes ([ADR 069](069-configure-new-worktrees.md)); without it the worktree has no link to the kit.
 - `--self` counts only as the first argument. A later one goes to `claude`.
 - The script resolves its own directory with `readlink -f` and stops if that fails. Without the check, a failed lookup would leave `as-bot.sh` to be looked up in the current directory, where a repo could plant one.
 - If Claude Code gives `--worktree` a setting that makes it the default, drop the flag from the script and keep the rest.
