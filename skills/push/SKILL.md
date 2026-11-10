@@ -8,7 +8,7 @@ argument-hint: "[short summary of what changed and why]"
 
 Decide, from context in hand plus `conventions/git.md`'s branch and commit rules (run `git status`/`git diff` if needed):
 
-- branch name: the current branch, unless it is the default branch or an unpushed `worktree-*` one (a worktree not yet renamed): then a new `type/short-description`
+- branch name: the current branch, unless it is the default branch or breaks git.md's branch-name rules (`worktree-<name>` from `EnterWorktree`): then a new `type/short-description`, reusing `<name>` where it fits
 - commit message
 - exact list of files to stage
 
@@ -18,9 +18,9 @@ Then run it, in this turn:
 
 1. `git status`. Unexpected tree (mid-merge, files touched outside the list, unrelated change mixed in): stop and ask.
 2. Branch name needs changing:
-   - on the default branch (`gh repo view --json defaultBranchRef -q .defaultBranchRef.name`): the work started outside a worktree, and a worktree would leave its changes behind. Create and switch to the new branch here.
-   - on an unpushed `worktree-*` branch: `git branch -m <new name>`.
-   - on a pushed `worktree-*` branch: stop and ask, a rename would orphan the remote branch.
+   - on the default branch (`gh repo view --json defaultBranchRef -q .defaultBranchRef.name`): the edits are in this checkout and a worktree would leave them behind. Create and switch to the new branch here, not in a worktree.
+   - on a branch that breaks the rules, no remote branch yet (`git ls-remote --exit-code --heads origin <branch>` fails): `git branch -m <new name>`.
+   - on a branch that breaks the rules and is pushed: stop and ask, a rename would orphan the remote branch.
 3. Stage exactly the listed files by name, never `git add -A` or `.`.
 4. Commit with the message via heredoc, keeping its line breaks.
 5. Push, with `-u origin <branch>` on the branch's first push.

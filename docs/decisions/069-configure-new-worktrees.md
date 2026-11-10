@@ -7,7 +7,7 @@
 - `baseRef` to `"fresh"`, so a new Claude Code worktree branches from `origin/<default-branch>`, never from the local `HEAD`.
 - `symlinkDirectories` to include `".fieldkit"`, so a new worktree gets the `.fieldkit` link a consumer repo keeps in its main checkout.
 
-The script first writes whatever replaces nothing, without asking: a missing or null `worktree`, `baseRef` or `symlinkDirectories` is filled, and `.fieldkit` is appended to a list that lacks it. Then it shows the diff and asks before replacing anything the user holds: a different `baseRef`, a `symlinkDirectories` that is not a list, or a `worktree` that is not an object. Declining a `baseRef` question therefore keeps the `.fieldkit` link and leaves the held value alone. Where the shape itself is wrong (a `worktree` or `symlinkDirectories` of the wrong type), nothing is written until the user accepts. This is narrower than `disable-attribution.sh` ([ADR 017](017-attribution-via-settings-not-instructions.md)), which asks whenever an existing file differs. When both keys are already right it changes nothing.
+The script first writes whatever replaces nothing, without asking: a missing or null `worktree`, `baseRef` or `symlinkDirectories` is filled, and `.fieldkit` is appended to a list that lacks it. Then it shows the diff and asks before replacing anything the user holds: a different `baseRef`, a `symlinkDirectories` that is not a list, or a `worktree` that is not an object. Declining a `baseRef` question therefore keeps the `.fieldkit` link and leaves the held value alone. A `worktree` that is not an object is left alone entirely until the user accepts. This is narrower than `disable-attribution.sh` ([ADR 017](017-attribution-via-settings-not-instructions.md)), which asks whenever an existing file differs. When both keys are already right it changes nothing.
 
 ## Reason
 
@@ -19,12 +19,12 @@ Alternatives rejected:
 
 - **Rely on the defaults.** The base is right today but silent, and the link is missing, so a session in a worktree would lose the kit's rules.
 - **Set them per repo in a committed `.claude/settings.json`.** Both are machine-wide preferences, not project ones, so per-repo wiring would repeat them in every consumer repo and miss a repo that is not one. Like attribution in ADR 017, they belong in user settings.
-- **Drop the `git.md` instruction in favour of the base setting.** The setting only controls where a new worktree starts. `git.md` governs every branch, including a plain `git checkout -b` in the main checkout and machines that never ran `just install`.
+- **Drop the `git.md` instruction in favour of the base setting.** The setting only controls where a new worktree starts. `git.md` governs every branch, including a plain `git checkout -b` in a session that did not use a worktree, and machines that never ran `just install`.
 - **Two scripts, one per key.** They edit the same object in the same file, so one script keeps a single read and write and a single prompt.
 
 ## Consequences
 
-- The settings do not make worktrees the default: Claude Code has no setting for that. The rule to work in one is in `git.md` and `KIT.md`, and the agent follows it with `EnterWorktree`, which uses these settings: checked on Claude Code 2.1.322, a worktree it made started at `origin/<default-branch>` and had the `.fieldkit` link.
+- The settings do not make worktrees the default: Claude Code has no setting for that in an interactive session (`worktree.bgIsolation` covers background ones). The rule to work in one is in `git.md` and `KIT.md`, and the agent follows it with `EnterWorktree`, which uses these settings: checked on Claude Code 2.1.322, a worktree it made started at `origin/<default-branch>` and had the `.fieldkit` link.
 - Keep the `git.md` branching bullet. The base setting backs it for worktrees and does not replace it.
 - Entries a user already has in `symlinkDirectories` stay; `.fieldkit` is appended.
 - `"head"` stays available for a one-off by editing `settings.json` by hand; the next `just install` asks before restoring `"fresh"`, and keeps the `.fieldkit` link whichever way you answer.
