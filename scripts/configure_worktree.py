@@ -25,8 +25,7 @@ def plan(data: dict) -> tuple[dict, dict]:
     not a list would be discarded, so only the second result has them.
     """
     raw = data.get("worktree")
-    if "worktree" in data and not isinstance(raw, dict):
-        # An explicit null counts as a value here: it asks, like any other.
+    if raw is not None and not isinstance(raw, dict):
         full = {**data, "worktree": {"baseRef": PINNED, "symlinkDirectories": [LINKED]}}
         return data, full
 
@@ -78,7 +77,7 @@ def main() -> None:
         fromfile="current ~/.claude/settings.json",
         tofile="proposed ~/.claude/settings.json",
     )
-    print(f"worktree is set to {json.dumps(data.get('worktree'))} in ~/.claude/settings.json:")
+    print(f"worktree is set to {json.dumps(safe.get('worktree'))} in ~/.claude/settings.json:")
     print("".join(diff))
     try:
         reply = input("Replace it with the kit's worktree settings? [y/N] ").strip().lower()
@@ -89,7 +88,8 @@ def main() -> None:
         SETTINGS.write_text(dump(full))
         print("Updated ~/.claude/settings.json")
     else:
-        print("Skipped - left the rest of ~/.claude/settings.json unchanged")
+        rest = "the rest of " if safe != data else ""
+        print(f"Skipped - left {rest}~/.claude/settings.json unchanged")
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ The bot is the default and the user's own login is the opt-in. With no bot token
 
 ## Reason
 
-Both habits, acting as the bot and working in a worktree, are meant to be the normal way to start a session, and typing them as `as-bot claude --worktree` each time invites skipping one. A `claude()` shell function that adds `--worktree` cannot do it: `as-bot.sh` ends in `exec "$@"`, which a script resolves through `PATH`, so it never sees the user's shell functions or aliases and would start a plain `claude`. A script in the kit works through `as-bot` and lives in the repo, where shellcheck covers it, not in each user's dotfiles.
+Both habits, acting as the bot and working in a worktree, are meant to be the normal way to start a session, and typing them as `as-bot.sh claude --worktree` each time invites skipping one. A `claude()` shell function that adds `--worktree` cannot do it: `as-bot.sh` ends in `exec "$@"`, which a script resolves through `PATH`, so it never sees the user's shell functions or aliases and would start a plain `claude`. A script in the kit works through `as-bot.sh` and lives in the repo, where shellcheck covers it, not in each user's dotfiles.
 
 The bot is the default because the bot is the limited credential: a session that forgot to opt in would act with the user's own, broader login. Failing without a token, instead of falling back, keeps a missing file from quietly widening what the session can do.
 
