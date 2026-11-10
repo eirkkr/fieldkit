@@ -73,4 +73,4 @@ Lightweight architecture decision records (ADRs) for non-obvious design choices.
 | 067 | [Reconcile lands everything on one branch](067-reconcile-lands-on-one-branch.md) | Accepted |
 | 068 | [Starting CI by hand is asked first](068-ask-before-starting-ci.md) | Accepted |
 | 069 | [Configure new worktrees: the remote default base and the .fieldkit link](069-configure-new-worktrees.md) | Accepted |
-| 070 | [One launcher starts Claude as the bot, in a worktree](070-kit-claude-launcher.md) | Accepted |
+| 070 | [One launcher starts Claude as the bot](070-kit-claude-launcher.md) | Accepted |
