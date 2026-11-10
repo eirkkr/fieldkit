@@ -4,7 +4,7 @@
 
 The kit ships `scripts/kit-claude.sh`, aliased as `kit-claude` ([bot-account.md](../../conventions/bot-account.md), step 7). It starts `claude` as the bot account through `as-bot.sh`, and adds `--worktree` when run inside a git work tree. `kit-claude --self` starts Claude as the user instead; every other argument goes to `claude` unchanged.
 
-The bot is the default and the user's own login is the opt-in. With no bot token, `kit-claude` stops with `as-bot`'s error and does not fall back to the user's login. There is no option to start without a worktree: the kit documents one way to start a session, and it is a worktree.
+The bot is the default and the user's own login is the opt-in. With no bot token, `kit-claude` stops with `as-bot.sh`'s error and does not fall back to the user's login. There is no option to start without a worktree: the kit documents one way to start a session, and it is a worktree.
 
 ## Reason
 
@@ -14,8 +14,8 @@ The bot is the default because the bot is the limited credential: a session that
 
 Alternatives rejected:
 
-- **A `claude()` shell function in the user's dotfiles.** It does not reach `as-bot claude`, for the reason above, and its logic would be unreviewed and per user.
-- **Teach `as-bot.sh` to add `--worktree`.** `as-bot` runs any command (`as-bot gh ...`), and would then know about one program's flags.
+- **A `claude()` shell function in the user's dotfiles.** It does not reach `as-bot.sh claude`, for the reason above, and its logic would be unreviewed and per user.
+- **Teach `as-bot.sh` to add `--worktree`.** `as-bot.sh` runs any command (`as-bot.sh gh ...`), and would then know about one program's flags.
 - **User login as the default, `--bot` to opt in.** The safer credential would then need remembering every time.
 - **Fall back to the user's login without a token.** It turns a setup mistake into a session with more power than the user meant to give.
 - **Pass a generated worktree name, `--worktree kit-<timestamp>`.** It would let `--worktree` stand before the arguments, but it gives up Claude Code's own names.
@@ -24,7 +24,10 @@ Alternatives rejected:
 
 - `as-bot.sh` is unchanged and still runs any other command, by its path. The kit documents no alias for it.
 - `--worktree` takes an optional name, so a flag placed before a prompt swallows it: `claude --worktree "fix the bug"` fails with an invalid worktree name, where `claude "fix the bug" --worktree` starts. The script therefore adds the flag after the user's arguments, and before a `--` if there is one.
-- It leaves the flag off when the arguments already hold `-w` or `--worktree`, or resume a session with `-c`, `--continue`, `-r` or `--resume`. Claude Code returns a resumed session to the worktree it ended in, so adding the flag would only make a second one.
+- It leaves the flag off when the arguments already hold `-w` or `--worktree`, or resume a session with `-c`, `--continue`, `-r`, `--resume`, `--from-pr` or `--teleport`. Claude Code returns a resumed session to the worktree it ended in, so adding the flag would only make a second one.
+- It also leaves the flag off when the first argument is one of `claude`'s subcommands (`mcp`, `auth`, `agents`, `attach`, `logs` and the rest of the list in the script, taken from `claude --help`). A subcommand rejects the flag with `unknown option '--worktree'`, so `kit-claude mcp list` would otherwise fail in any repo. A subcommand that `claude` adds later and the list lacks fails the same loud way, and is a one-word addition.
+- The flag scan is by prefix and by position: `-wNAME`, `-cp` and `-rc` count, and a value that happens to equal one of these flags (`--append-system-prompt -c`) is taken for the flag. The worst result is a session without a worktree, never one with different credentials.
+- The script avoids expanding an empty array, which `set -u` rejects on bash before 4.4, including the 3.2 that macOS ships. Tested on 3.2, 4.3 and 5.2.
 - The flag is left out outside a git work tree, which `claude` refuses with an error, and in a bare repo or a `.git` directory, where `git rev-parse --is-inside-work-tree` exits 0 but prints `false`.
 - A session in a worktree finds `.fieldkit` through the `symlinkDirectories` entry that `just install` writes ([ADR 069](069-configure-new-worktrees.md)); without it the worktree has no link to the kit.
 - `--self` counts only as the first argument. A later one goes to `claude`.

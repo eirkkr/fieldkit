@@ -16,70 +16,80 @@ PINNED = "fresh"
 LINKED = ".fieldkit"
 
 
-def plan(data: dict) -> tuple[dict, bool]:
-    """Return the settings with both worktree keys set, and whether doing so
-    replaces a value the user holds.
+def plan(data: dict) -> tuple[dict, dict]:
+    """Return the settings with the changes that replace nothing, and with all.
 
-    Adding an entry to a list, or filling a missing or null key, replaces
-    nothing. A non-object `worktree`, another baseRef, or a
-    symlinkDirectories that is not a list would be discarded, so that asks.
+    Filling a missing or null key, or adding an entry to a list, replaces
+    nothing, so it is the first result and is written without asking. A
+    non-object `worktree`, another baseRef, or a symlinkDirectories that is
+    not a list would be discarded, so only the second result has them.
     """
     raw = data.get("worktree")
-    worktree = dict(raw) if isinstance(raw, dict) else {}
-    replaces = "worktree" in data and not isinstance(raw, dict)
+    if "worktree" in data and not isinstance(raw, dict):
+        # An explicit null counts as a value here: it asks, like any other.
+        full = {**data, "worktree": {"baseRef": PINNED, "symlinkDirectories": [LINKED]}}
+        return data, full
 
-    base = worktree.get("baseRef")
-    if base != PINNED:
-        replaces = replaces or base is not None
-        worktree["baseRef"] = PINNED
+    safe_wt = dict(raw) if isinstance(raw, dict) else {}
+    full_wt = dict(safe_wt)
 
-    links = worktree.get("symlinkDirectories")
+    base = safe_wt.get("baseRef")
+    if base is None:
+        safe_wt["baseRef"] = PINNED
+    full_wt["baseRef"] = PINNED
+
+    links = safe_wt.get("symlinkDirectories")
     if links is None:
-        worktree["symlinkDirectories"] = [LINKED]
-    elif not isinstance(links, list):
-        replaces = True
-        worktree["symlinkDirectories"] = [LINKED]
-    elif LINKED not in links:
-        worktree["symlinkDirectories"] = [*links, LINKED]
+        safe_wt["symlinkDirectories"] = [LINKED]
+        full_wt["symlinkDirectories"] = [LINKED]
+    elif isinstance(links, list):
+        if LINKED not in links:
+            safe_wt["symlinkDirectories"] = [*links, LINKED]
+        full_wt["symlinkDirectories"] = safe_wt["symlinkDirectories"]
+    else:
+        full_wt["symlinkDirectories"] = [LINKED]
 
-    return {**data, "worktree": worktree}, replaces
+    return {**data, "worktree": safe_wt}, {**data, "worktree": full_wt}
+
+
+def dump(data: dict) -> str:
+    return json.dumps(data, indent=2) + "\n"
 
 
 def main() -> None:
     old_text = SETTINGS.read_text() if SETTINGS.exists() else None
     data = json.loads(old_text) if old_text is not None else {}
 
-    new_data, replaces = plan(data)
-    if new_data == data:
+    safe, full = plan(data)
+    if full == data:
         print("worktree settings already set in ~/.claude/settings.json, no change")
         return
 
-    new_text = json.dumps(new_data, indent=2) + "\n"
-
-    if not replaces:
+    if safe != data:
         SETTINGS.parent.mkdir(parents=True, exist_ok=True)
-        SETTINGS.write_text(new_text)
-        print("Set worktree.baseRef and worktree.symlinkDirectories in ~/.claude/settings.json")
-        return
+        SETTINGS.write_text(dump(safe))
+        print("Updated worktree settings in ~/.claude/settings.json")
+        if full == safe:
+            return
 
     diff = difflib.unified_diff(
-        (old_text or "").splitlines(keepends=True),
-        new_text.splitlines(keepends=True),
+        dump(safe).splitlines(keepends=True),
+        dump(full).splitlines(keepends=True),
         fromfile="current ~/.claude/settings.json",
         tofile="proposed ~/.claude/settings.json",
     )
-    print(f"worktree is set to {data.get('worktree')!r} in ~/.claude/settings.json:")
+    print(f"worktree is set to {json.dumps(data.get('worktree'))} in ~/.claude/settings.json:")
     print("".join(diff))
     try:
-        reply = input("Apply the worktree settings (base branch, .fieldkit link)? [y/N] ").strip().lower()
+        reply = input("Replace it with the kit's worktree settings? [y/N] ").strip().lower()
     except EOFError:  # no terminal: take the default, N
         print()
         reply = ""
     if reply == "y":
-        SETTINGS.write_text(new_text)
+        SETTINGS.write_text(dump(full))
         print("Updated ~/.claude/settings.json")
     else:
-        print("Skipped - left ~/.claude/settings.json unchanged")
+        print("Skipped - left the rest of ~/.claude/settings.json unchanged")
 
 
 if __name__ == "__main__":
