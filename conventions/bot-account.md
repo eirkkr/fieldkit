@@ -8,7 +8,7 @@ Claims about GitHub below link their page and were checked on 2026-10-30 or 2026
 
 A classic token with the `repo` scope, for every repo, personal or organization; [ADR 063](../docs/decisions/063-a-write-role-bot-account.md) says why not a fine-grained one. It reaches every repo the bot can reach, so the bot's role on each is what keeps it from admin actions. An organization that blocks classic tokens ([token policy](https://docs.github.com/en/organizations/managing-programmatic-access-to-your-organization/setting-a-personal-access-token-policy-for-your-organization)) cannot use this doc: check its Settings, Personal access tokens first.
 
-Tried with this classic token against a personal repo and an organization's repo, including running Claude as the bot through `as-bot`.
+Tried with this classic token against a personal repo and an organization's repo, including running Claude as the bot through `kit-claude`.
 
 With this token, `gh pr edit` fails on the missing `read:org` scope. Edit a pull request through the REST API instead; [the reference](bot-account-reference.md#what-the-roles-allow) has the command and the other `gh` commands tried.
 
@@ -135,7 +135,7 @@ What a good result looks like:
 2. Each command prints JSON or a URL, the pull request opens, and the close deletes the `bot-check` branch.
 3. `HTTP 403` or `HTTP 404`. A list of webhooks, even an empty `[]`, means the token has Admin.
 
-### 7. Run a command as the bot
+### 7. Start Claude as the bot
 
 Keep the bot's token in a file only you can read, and start Claude, or another agent, through a script that loads it. The token is the limited credential, so it is fine for Claude to read it; anything with more power than that is not. The save command is for bash; in zsh, use `read -rs "t?Bot token: "`.
 
@@ -149,11 +149,11 @@ mkdir -p ~/.config/bot-account/gh && chmod 700 ~/.config/bot-account
 Then add this alias to `~/.bashrc` (or `~/.zshrc`) pointing at the kit's script, and open a new terminal. Use the absolute path of your kit checkout, which a consumer repo's `.fieldkit` link points to (a relative path works only from one directory):
 
 ```bash
-# Run a command as the GitHub bot account, e.g. `as-bot claude`.
-alias as-bot=~/src/fieldkit/scripts/as-bot.sh
+# Start Claude as the GitHub bot account.
+alias kit-claude=~/src/fieldkit/scripts/kit-claude.sh
 ```
 
-The script, `scripts/as-bot.sh`, runs the command you give it (`as-bot claude` starts Claude) with these settings, for that one command only; your own `gh` and git settings are unchanged:
+`kit-claude` runs `claude` through the kit's `scripts/as-bot.sh`, which starts it with these settings, for that one command only; your own `gh` and git settings are unchanged:
 
 - The token check refuses to start when the token file is missing or empty. Without that, `gh` would treat an empty `GH_TOKEN` as unset, and the session would run without the bot's token instead of failing (observed with `gh`).
 - The `unset` line drops other GitHub tokens your shell may export, and any askpass program or injected git settings, which `gh`, git or other tools would otherwise use.
@@ -161,7 +161,9 @@ The script, `scripts/as-bot.sh`, runs the command you give it (`as-bot claude` s
 - `GIT_SSH_COMMAND=false` makes every SSH connection fail, so git cannot push with your SSH key.
 - `GIT_CONFIG_COUNT=4` says four key and value pairs of git settings follow. Pair 0 has an empty value and clears any credential helper you use, such as a keychain holding your own login. Pair 1 makes `gh`, and so the bot's token, answer for github.com. Pairs 2 and 3 rewrite `git@github.com:` and `ssh://git@github.com/` remotes to HTTPS, so they work as the bot instead of failing. A remote through an SSH host alias is not rewritten, and fails.
 
-`as-bot claude` starts a session that acts as the bot, and plain `claude` still uses your own login. Worked when: asked to run `gh api user -q .login`, the session prints the bot's login, not yours; and `git config --get credential.https://github.com.helper` prints `!gh auth git-credential`. Commits still carry your name and email unless you also set `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL` and the `GIT_COMMITTER_` pair; "Who gets credit" in the reference says what that does to your profile.
+`kit-claude` starts a session that acts as the bot. It refuses to start when the token is missing, as `as-bot.sh` does, and does not fall back to your login. `kit-claude --self` starts it as you instead of the bot, and every other argument goes to `claude` unchanged (`kit-claude --resume`, `kit-claude mcp list`). Plain `claude` still uses your own login.
+
+Worked when, in a `kit-claude` session: asked to run `gh api user -q .login`, the session prints the bot's login, not yours; and `git config --get credential.https://github.com.helper` prints `!gh auth git-credential`. Commits still carry your name and email unless you also set `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL` and the `GIT_COMMITTER_` pair; "Who gets credit" in the reference says what that does to your profile.
 
 Three more things:
 

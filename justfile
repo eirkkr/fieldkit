@@ -10,6 +10,7 @@ install:
     @"{{ justfile_directory() }}/scripts/link-statusline.sh" "{{ justfile_directory() }}"
     @"{{ justfile_directory() }}/scripts/register-dir.sh" "{{ justfile_directory() }}"
     @"{{ justfile_directory() }}/scripts/disable-attribution.sh" "{{ justfile_directory() }}"
+    @"{{ justfile_directory() }}/scripts/configure-worktree.sh" "{{ justfile_directory() }}"
     @"{{ justfile_directory() }}/scripts/register-statusline.sh" "{{ justfile_directory() }}"
     @"{{ justfile_directory() }}/scripts/register-hooks.sh" "{{ justfile_directory() }}"
 

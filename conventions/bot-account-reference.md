@@ -30,7 +30,7 @@ GitHub's plans page lists protected branches under "Advanced tools and insights 
 
 What lands on a profile's contribution graph follows the account an action is made under, and for commits the author email, not who pushed. GitHub's rules, checked on 2026-10-31 ([contributions on your profile](https://docs.github.com/en/account-and-profile/reference/profile-contributions-reference), [why contributions are not showing up](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-github-profile/managing-contribution-settings-on-your-profile/why-are-my-contributions-not-showing-up-on-my-profile)): a commit counts only if its author email is linked to the account and it is on the default branch (or `gh-pages`) of a standalone repo; opening an issue, proposing a pull request and submitting a review also count, for the account that did them.
 
-| What happens in an `as-bot` session | Credited to | Why |
+| What happens in a `kit-claude` session | Credited to | Why |
 | --- | --- | --- |
 | A commit Claude makes | You, if git's `user.email` is yours (it is unless you set `GIT_AUTHOR_*`) | The commit stores its author; the pusher is not recorded. Tried: GitHub's API shows this branch's commits as authored by the user's account. |
 | A pull request, issue or comment Claude opens with `gh` | The bot | It is made under the bot's login. |
@@ -40,7 +40,7 @@ What lands on a profile's contribution graph follows the account an action is ma
 | Rebase-and-merging it | The original commit authors (you) and whoever merged | GitHub's page says rebased commits credit "the original authors of the commit and the person who rebased the commits". Not tried here. |
 | A merge commit | The merge commit, to whoever merges; the commits inside keep their authors | Tried on a public repo that merges with merge commits (cli/cli pull request 14879): the merge commit was authored by the merger. The inner commits keeping their authors is how git works. |
 
-So with squash merges, which this kit uses, the commit that reaches the default branch is the bot's even when the work in it was committed under your email. To have it count for you, name yourself as co-author in the squash message (the `merge` skill does), open the pull request yourself from the bot's pushed branch, or merge another way. To make the bot's commits the bot's, set `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL` and the `GIT_COMMITTER_` pair for `as-bot`. Contributions can take up to 24 hours to appear. Not tried: a merged pull request made end to end through `as-bot`.
+So with squash merges, which this kit uses, the commit that reaches the default branch is the bot's even when the work in it was committed under your email. To have it count for you, name yourself as co-author in the squash message (the `merge` skill does), open the pull request yourself from the bot's pushed branch, or merge another way. To make the bot's commits the bot's, set `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL` and the `GIT_COMMITTER_` pair for a `kit-claude` session. Contributions can take up to 24 hours to appear. Not tried: a merged pull request made end to end through `kit-claude`.
 
 ## Terms
 

@@ -42,7 +42,11 @@ def main() -> None:
     )
     print("~/.claude/settings.json already exists and differs from the expected result:")
     print("".join(diff))
-    reply = input("Apply this change to disable AI attribution? [y/N] ").strip().lower()
+    try:
+        reply = input("Apply this change to disable AI attribution? [y/N] ").strip().lower()
+    except EOFError:  # no terminal: take the default, N
+        print()
+        reply = ""
     if reply == "y":
         SETTINGS.write_text(new_text)
         print("Updated ~/.claude/settings.json")
