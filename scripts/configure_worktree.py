@@ -51,7 +51,7 @@ def plan(data: dict) -> tuple[dict, dict]:
 
 
 def main() -> None:
-    _, data = settings_edit.load()
+    old_text, data = settings_edit.load()
 
     safe, full = plan(data)
     if full == data:
@@ -66,7 +66,8 @@ def main() -> None:
 
     rest = "the rest of " if safe != data else ""
     settings_edit.confirm_and_write(
-        settings_edit.dump(safe),
+        # Nothing written yet: diff against the file itself, so a reformat shows.
+        old_text if safe == data else settings_edit.dump(safe),
         full,
         "Replace it with the kit's worktree settings?",
         heading=f"worktree is set to {json.dumps(safe.get('worktree'))} in ~/.claude/settings.json:",

@@ -19,10 +19,13 @@ DIFFERS = f"{LABEL} already exists and differs from the expected result:"
 def load() -> tuple[str | None, dict]:
     """The file's text (None if absent) and its parsed settings.
 
-    Exits if the file holds JSON that isn't an object.
+    Exits if the file isn't valid JSON, or holds JSON that isn't an object.
     """
     old_text = SETTINGS.read_text() if SETTINGS.exists() else None
-    data = json.loads(old_text) if old_text is not None else {}
+    try:
+        data = json.loads(old_text) if old_text is not None else {}
+    except json.JSONDecodeError as err:
+        raise SystemExit(f"{LABEL} isn't valid JSON ({err}); fix it by hand and re-run") from err
     if not isinstance(data, dict):
         raise SystemExit(f"{LABEL} isn't a JSON object; fix it by hand and re-run")
     return old_text, data
