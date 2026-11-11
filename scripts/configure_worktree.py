@@ -7,11 +7,10 @@ files, and a consumer repo gitignores its .fieldkit link). Run via
 directly.
 """
 
-import difflib
 import json
-import pathlib
 
-SETTINGS = pathlib.Path.home() / ".claude" / "settings.json"
+import settings_edit
+
 PINNED = "fresh"
 LINKED = ".fieldkit"
 
@@ -51,13 +50,8 @@ def plan(data: dict) -> tuple[dict, dict]:
     return {**data, "worktree": safe_wt}, {**data, "worktree": full_wt}
 
 
-def dump(data: dict) -> str:
-    return json.dumps(data, indent=2) + "\n"
-
-
 def main() -> None:
-    old_text = SETTINGS.read_text() if SETTINGS.exists() else None
-    data = json.loads(old_text) if old_text is not None else {}
+    _, data = settings_edit.load()
 
     safe, full = plan(data)
     if full == data:
@@ -65,31 +59,19 @@ def main() -> None:
         return
 
     if safe != data:
-        SETTINGS.parent.mkdir(parents=True, exist_ok=True)
-        SETTINGS.write_text(dump(safe))
+        settings_edit.write(safe)
         print("Updated worktree settings in ~/.claude/settings.json")
         if full == safe:
             return
 
-    diff = difflib.unified_diff(
-        dump(safe).splitlines(keepends=True),
-        dump(full).splitlines(keepends=True),
-        fromfile="current ~/.claude/settings.json",
-        tofile="proposed ~/.claude/settings.json",
+    rest = "the rest of " if safe != data else ""
+    settings_edit.confirm_and_write(
+        safe,
+        full,
+        "Replace it with the kit's worktree settings?",
+        heading=f"worktree is set to {json.dumps(safe.get('worktree'))} in ~/.claude/settings.json:",
+        skipped=f"Skipped - left {rest}~/.claude/settings.json unchanged",
     )
-    print(f"worktree is set to {json.dumps(safe.get('worktree'))} in ~/.claude/settings.json:")
-    print("".join(diff))
-    try:
-        reply = input("Replace it with the kit's worktree settings? [y/N] ").strip().lower()
-    except EOFError:  # no terminal: take the default, N
-        print()
-        reply = ""
-    if reply == "y":
-        SETTINGS.write_text(dump(full))
-        print("Updated ~/.claude/settings.json")
-    else:
-        rest = "the rest of " if safe != data else ""
-        print(f"Skipped - left {rest}~/.claude/settings.json unchanged")
 
 
 if __name__ == "__main__":

@@ -4,13 +4,11 @@ Run via `just install` (scripts/register-hooks.sh); not meant to be invoked
 directly. Takes the kit directory as its one argument.
 """
 
-import difflib
 import json
-import pathlib
 import sys
 from typing import NamedTuple
 
-SETTINGS = pathlib.Path.home() / ".claude" / "settings.json"
+import settings_edit
 
 
 class Hook(NamedTuple):
@@ -32,8 +30,7 @@ HOOKS = (
 
 def main() -> None:
     kit = sys.argv[1].rstrip("/")
-    old_text = SETTINGS.read_text() if SETTINGS.exists() else None
-    data = json.loads(old_text) if old_text is not None else {}
+    old_text, data = settings_edit.load()
 
     new_data = data
     for hook in HOOKS:
@@ -41,32 +38,12 @@ def main() -> None:
     if new_data == data:
         print("Kit hooks already registered in ~/.claude/settings.json, no change")
         return
-    new_text = json.dumps(new_data, indent=2) + "\n"
 
     if old_text is None:
-        SETTINGS.parent.mkdir(parents=True, exist_ok=True)
-        SETTINGS.write_text(new_text)
-        print("Created ~/.claude/settings.json with the kit hooks")
+        settings_edit.create(new_data, "Created ~/.claude/settings.json with the kit hooks")
         return
 
-    diff = difflib.unified_diff(
-        old_text.splitlines(keepends=True),
-        new_text.splitlines(keepends=True),
-        fromfile="current ~/.claude/settings.json",
-        tofile="proposed ~/.claude/settings.json",
-    )
-    print("~/.claude/settings.json already exists and differs from the expected result:")
-    print("".join(diff))
-    try:
-        reply = input("Apply this change to register the kit hooks? [y/N] ").strip().lower()
-    except EOFError:  # no terminal: take the default, N
-        print()
-        reply = ""
-    if reply == "y":
-        SETTINGS.write_text(new_text)
-        print("Updated ~/.claude/settings.json")
-    else:
-        print("Skipped - left ~/.claude/settings.json unchanged")
+    settings_edit.confirm_and_write(old_text, new_data, "Apply this change to register the kit hooks?")
 
 
 def command_for(kit: str, hook: Hook) -> str:
