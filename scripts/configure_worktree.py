@@ -66,7 +66,7 @@ def main() -> None:
 
     rest = "the rest of " if safe != data else ""
     settings_edit.confirm_and_write(
-        safe,
+        settings_edit.dump(safe),
         full,
         "Replace it with the kit's worktree settings?",
         heading=f"worktree is set to {json.dumps(safe.get('worktree'))} in ~/.claude/settings.json:",

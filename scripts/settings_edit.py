@@ -2,8 +2,9 @@
 
 Each script decides what the new ~/.claude/settings.json should be and when
 to ask; this module loads the file, shows the diff, takes the answer (EOF
-counts as N) and writes. Imported as a sibling by the scripts under
-`uv run python scripts/<name>.py`; not meant to be run.
+counts as N) and writes. Imported as a sibling module: the running script's directory is on
+`sys.path`, so the callers must stay in `scripts/` and be run as scripts
+(`uv run python scripts/<name>.py`), not with `-m`. Not meant to be run.
 """
 
 import difflib
@@ -16,7 +17,10 @@ DIFFERS = f"{LABEL} already exists and differs from the expected result:"
 
 
 def load() -> tuple[str | None, dict]:
-    """The file's text (None if absent) and its parsed settings."""
+    """The file's text (None if absent) and its parsed settings.
+
+    Exits if the file holds JSON that isn't an object.
+    """
     old_text = SETTINGS.read_text() if SETTINGS.exists() else None
     data = json.loads(old_text) if old_text is not None else {}
     if not isinstance(data, dict):
@@ -40,19 +44,18 @@ def create(data: dict, message: str) -> None:
 
 
 def confirm_and_write(
-    current: dict | str,
+    current_text: str,
     new_data: dict,
     question: str,
     *,
     heading: str = DIFFERS,
     skipped: str = f"Skipped - left {LABEL} unchanged",
 ) -> None:
-    """Show the diff from `current` to `new_data`, ask, then write or skip.
+    """Show the diff from `current_text` to `new_data`, ask, then write or skip.
 
-    `current` is the file's text, or the settings as they will stand on disk
-    when an earlier step has already written part of the change.
+    `heading` and `skipped` default to the whole-file wording; override them
+    when the caller has already written part of the change.
     """
-    current_text = current if isinstance(current, str) else dump(current)
     diff = difflib.unified_diff(
         current_text.splitlines(keepends=True),
         dump(new_data).splitlines(keepends=True),
