@@ -7,7 +7,7 @@ Each path in a consumer repo is assigned one of three review tiers, in a zone ma
 | Tier | Reviewed by | Typical contents |
 | --- | --- | --- |
 | `person` | A person, every line | Interfaces and types, domain rules, test cases, migrations, auth and secrets, CI and hooks, LLM prompts, the zone map itself |
-| `agent` | A fresh agent, every line, plus the tests | Orchestration, error handling, templates, static files, test support code |
+| `agent` | A fresh agent, every line, once the reviewer agrees to the review, plus the tests | Orchestration, error handling, templates, static files, test support code |
 | `machine` | Automated checks only, run locally or in CI | Generated code, mechanical code, implementation behind a contract the tests cover, and assets that aren't code |
 
 A *fresh* agent is one given the files and the rules they are checked against, and nothing from the planning or the build, as `conventions/specs.md` defines it.
@@ -35,13 +35,13 @@ Test cases: `tests/**/test_*.py`
 - The zone map itself, and the test cases its first line names, are `person` whatever a row says. Test support code - fixtures, factories, setup and teardown - may be declared `agent`.
 - Every row needs its reason, given in terms of the rule the paths escape, as [records.md](../../conventions/records.md) asks of any exemption list. A reason that only describes the files ("static assets") can't be used to refuse the next row, and the list grows by precedent.
 
-The *zone script* reads the map and a diff, and reports the files the diff touches in each tier. It refuses a map with a row that has no reason, or that would lower the map or the test cases. A `machine` row's guard is the name of a `just` recipe in the repo, as `just check` is relied on by name ([044](044-repo-pins-in-a-consumer-file.md)): the kit can't know how each repo regenerates its code or which linter it runs. The script refuses a `machine` row whose recipe doesn't exist, unless the row is for files that aren't code, and runs the recipe of every `machine` row the diff touches.
+The *zone script* reads the map and a diff, and reports the files the diff touches in each tier. It refuses a map with a row that has no reason, or that would lower the map or the test cases. A `machine` row's guard is the name of a `just` recipe in the repo, as `just check` is relied on by name ([044](044-repo-pins-in-a-consumer-file.md)): the kit can't know how each repo regenerates its code or which linter it runs. The script refuses a `machine` row whose recipe doesn't exist, unless the row is for files that aren't code, and runs the recipe of every `machine` row the diff touches. It also lists separately every file the diff adds under an `agent` or `machine` row, since a person no longer sees new files there by default and the reviewer decides whether to open them.
 
 ### What each tier needs
 
 **`person`** needs nothing: it is where every path starts. Test cases are kept here on purpose. The `machine` tier is only safe if a person has agreed to what the tests check, and a behaviour change needs a change to a test case, so an agent cannot change behaviour without a person seeing it.
 
-**`agent`** needs a reason, and the fresh-agent review. That review runs on every diff that touches an `agent` file, not only when the reviewer asks for one. This is an exception to `conventions/specs.md`, where review is offered and runs on request: the tier's whole claim is that an agent reads every line, and a review that may not run would leave those files read by nobody. Templates, static code and test support code qualify with no restructuring. The review also checks that test support code holds no assertions: a helper that hides one, such as `assert_order_valid()`, is a test case, and belongs with them.
+**`agent`** needs a reason, and the fresh-agent review. A diff that touches an `agent` file gets that review strongly suggested, with the reason that no person reads those files, and it runs on the reviewer's yes. Reviews are never run unasked, so this follows `conventions/specs.md` and the review loop of [Review loop, step pause and a record for every stage](https://github.com/eirkkr/fieldkit/issues/173) rather than excepting them. The cost is that a reviewer who declines leaves those files read by nobody, so the PR body says so and records the decline. Which review runs follows the order `conventions/specs.md` gives: the reviewer's word, the repo's `## Reviews` table, then the fresh-agent axes. Templates, static code and test support code qualify with no restructuring. The review also checks that test support code holds no assertions: a helper that hides one, such as `assert_order_valid()`, is a test case, and belongs with them.
 
 **`machine`** needs a reason and a mechanical guard, since nothing reads it. Each kind has its own guard:
 
@@ -76,7 +76,7 @@ A decision never goes in a `machine` file: if a mapper needs a condition, the co
 
 ### At the gate
 
-Every stage keeps its human gate (see "Gates", under Reason). The PR body names the `person` files touched, which is what the reviewer reads. The `agent` files are covered by the review that runs on them, and the `machine` files by their guards. The reviewer may open any of them, but isn't asked to.
+Every stage keeps its human gate (see "Gates", under Reason). The PR body names the `person` files touched, which is what the reviewer reads. The `agent` files are covered by the review suggested for them, if the reviewer accepts it, and the `machine` files by their guards. The reviewer may open any of them, but isn't asked to.
 
 ### Wiring it into a consumer
 
@@ -130,8 +130,8 @@ A is chosen. It delivers most of the value, and it produces evidence of how ofte
 ## Consequences
 
 - **The kit's part is small:** a convention, the zone script and three check recipes. The changes it implies:
-  - `conventions/specs.md`: the PR body gains **Read these**, the `person` files touched, computed by the zone script. The fresh-agent review runs on every diff that touches an `agent` file, as the exception above.
-  - `change-stage`: runs the zone script before opening the PR, puts **Read these** in the body, and runs the agent review where `agent` files are touched.
+  - `conventions/specs.md`: the PR body gains **Read these**, the `person` files touched, computed by the zone script. The PR body also lists the files the diff adds under an `agent` or `machine` row, and the fresh-agent review is strongly suggested for any diff that touches an `agent` file.
+  - `change-stage`: runs the zone script before opening the PR, puts **Read these** in the body, and suggests the agent review where `agent` files are touched, running it on the reviewer's yes.
   - `conventions/ci.md`: the guards - regenerate-and-diff, the scoped complexity lint, the scheduled mutation run.
   - A consumer's `docs/review-zones.md`: optional, and without it every path is `person`.
 - **Most of the cost falls on consumer repos,** which restructure toward the layout. That can be gradual: a file not yet split stays `person`. Rows for templates, static files and test support code need no restructuring, so a repo gets a first benefit from a row or two.
@@ -147,7 +147,7 @@ A is chosen. It delivers most of the value, and it produces evidence of how ofte
 - **Rollout** as a change of four stages:
     1. The convention: tiers, the zone map format and the file-structure rule, moved out of this ADR, and the kit's own map. Nothing enforced yet.
     2. The zone script and its reusable workflow, the enable script, and the script in the kit's `just lint`.
-    3. **Read these** in the PR body, and the agent review on `agent` files: `conventions/specs.md` and `change-stage`.
+    3. **Read these** in the PR body, and the suggested agent review on `agent` files: `conventions/specs.md` and `change-stage`.
     4. The guards' recipes: the Python `lint-mechanical` configuration, and `conventions/ci.md` on regenerate-and-diff and the scheduled mutation run.
 
   A skill that surveys a repo and proposes rows, with the files that are mostly plumbing as refactoring targets, is not yet specified: it waits until stage 2 has run on a real consumer.
