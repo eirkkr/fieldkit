@@ -14,7 +14,7 @@ set -euo pipefail
 # admin on the repo, 1 when it does, and 2 on any error: a usage error, no
 # token, a refused token, a failed account or repo lookup, a response with
 # no permissions, an interrupt, or a missing gh. A failed protection lookup
-# is only a note.
+# or scope lookup, and a missing token scope, are only notes.
 
 die() {
     echo "check-bot-account: $1" >&2
@@ -69,6 +69,42 @@ fi
 [[ "$login" =~ ^[A-Za-z0-9-]+$ ]] || die "GitHub returned a login this check cannot read"
 echo "pass: the token belongs to $login"
 echo "      That must be the bot's login. If it is yours, this is the wrong token."
+
+# Scopes come back in the X-OAuth-Scopes header. Every outcome here is a note,
+# never a failure: a fine-grained token sends no header, and a missing scope
+# leaves the rest working. write:org and admin:org stand in for read:org.
+check_scopes() {
+    local headers line scopes="" found=false
+    if ! headers="$(gh api -i user 2>"$errf")"; then
+        echo "note: could not read the token's scopes: $(err)"
+        return 0
+    fi
+    while IFS= read -r line; do
+        line="${line%$'\r'}"
+        if [[ "$line" =~ ^[Xx]-[Oo][Aa]uth-[Ss]copes:(.*)$ ]]; then
+            found=true
+            scopes=" ${BASH_REMATCH[1]//,/ } "
+            break
+        fi
+    done <<<"$headers"
+    if [ "$found" = false ]; then
+        echo "note: GitHub sent no X-OAuth-Scopes header (a fine-grained token sends none),"
+        echo "      so the token's scopes cannot be checked. The doc asks for a classic token."
+        return 0
+    fi
+    local missing=""
+    [[ "$scopes" == *" repo "* ]] || missing="repo"
+    if [[ "$scopes" != *" read:org "* && "$scopes" != *" write:org "* && "$scopes" != *" admin:org "* ]]; then
+        missing="${missing:+$missing and }read:org"
+    fi
+    if [ -z "$missing" ]; then
+        echo "pass: the token has the repo and read:org scopes"
+    else
+        echo "note: the token is missing: $missing. gh pr edit needs read:org and pushing"
+        echo "      needs repo. Edit the token's scopes, or make a new one (step 3 in the doc)."
+    fi
+}
+check_scopes
 
 # permissions is absent from the response for some token kinds; that is an
 # error, not a pass. The fields are joined with the unit separator, which
