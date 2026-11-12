@@ -32,3 +32,5 @@ Rejected:
 - The classic token was tried against a personal repo and an organization's repo, running Claude as the bot. The doc says so.
 - GitHub's terms allow one free machine account per person, created by a human and used only for automated tasks, so the user creates the bot and it does nothing else.
 - A bot account is not a wall while the user's own token is readable on the same machine, and settings and hooks that refuse destructive commands are not yet written. Both are separate work: [keeping the user's token out of Claude's reach](https://github.com/eirkkr/fieldkit/issues/154), and [guarding destructive git and gh commands](https://github.com/eirkkr/fieldkit/issues/155).
+
+> Amended by [071](071-bot-token-includes-read-org.md): the token carries `read:org` as well as `repo`, so `gh pr edit` works and needs no REST fallback.
