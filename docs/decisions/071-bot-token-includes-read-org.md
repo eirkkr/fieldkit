@@ -20,4 +20,4 @@ Rejected:
 ## Consequences
 
 - A `repo`-only token still fails at `gh pr edit`, with the scope error above, until its scopes are edited; the other `gh` commands the skills use worked with it.
-- `scripts/check-bot-account.sh` reads the token's scopes from the `X-OAuth-Scopes` header and notes a missing `repo` or `read:org`, so a `repo`-only token is flagged. It is a note, not a failure: the token works for the rest.
+- `scripts/check-bot-account.sh` notes a missing `repo` or `read:org`, so a `repo`-only token is flagged.

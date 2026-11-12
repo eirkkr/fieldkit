@@ -13,8 +13,8 @@ set -euo pipefail
 # records that line in its history. Exit 0 when the token does not have
 # admin on the repo, 1 when it does, and 2 on any error: a usage error, no
 # token, a refused token, a failed account or repo lookup, a response with
-# no permissions, an interrupt, or a missing gh. A failed protection lookup,
-# a failed or empty scope lookup and a missing token scope are only notes.
+# no permissions, an interrupt, or a missing gh. A failed protection lookup
+# or scope lookup, and a missing token scope, are only notes.
 
 die() {
     echo "check-bot-account: $1" >&2
@@ -70,12 +70,9 @@ fi
 echo "pass: the token belongs to $login"
 echo "      That must be the bot's login. If it is yours, this is the wrong token."
 
-# A classic token's scopes come back in the X-OAuth-Scopes header of any call
-# made with it. A failed call is a note with GitHub's message, not a pass. A
-# fine-grained token sends no such header, so a missing header is a note, not
-# "no scopes". A missing scope is only a note too: the token works for the
-# rest. read:org is also granted by write:org and admin:org, which GitHub
-# lists in place of it.
+# Scopes come back in the X-OAuth-Scopes header. Every outcome here is a note,
+# never a failure: a fine-grained token sends no header, and a missing scope
+# leaves the rest working. write:org and admin:org stand in for read:org.
 check_scopes() {
     local headers line scopes="" found=false
     if ! headers="$(gh api -i user 2>"$errf")"; then
@@ -91,9 +88,8 @@ check_scopes() {
         fi
     done <<<"$headers"
     if [ "$found" = false ]; then
-        echo "note: GitHub sent no X-OAuth-Scopes header, so this check cannot read the"
-        echo "      token's scopes (for example, a fine-grained token sends none). The doc"
-        echo "      asks for a classic token with repo and read:org."
+        echo "note: GitHub sent no X-OAuth-Scopes header (a fine-grained token sends none),"
+        echo "      so the token's scopes cannot be checked. The doc asks for a classic token."
         return 0
     fi
     local missing=""
@@ -104,10 +100,8 @@ check_scopes() {
     if [ -z "$missing" ]; then
         echo "pass: the token has the repo and read:org scopes"
     else
-        echo "note: the token is missing: $missing. repo is what lets the bot push"
-        echo "      and open pull requests; without read:org, gh pr edit fails with"
-        echo "      \"required scopes\". Edit the token's scopes, or make a new one (step 3"
-        echo "      in the doc)."
+        echo "note: the token is missing: $missing. gh pr edit needs read:org and pushing"
+        echo "      needs repo. Edit the token's scopes, or make a new one (step 3 in the doc)."
     fi
 }
 check_scopes

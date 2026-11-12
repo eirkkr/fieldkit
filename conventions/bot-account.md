@@ -78,10 +78,10 @@ In the kit itself the script is `scripts/check-bot-account.sh`; in a consumer re
 | Line | Means |
 | --- | --- |
 | `pass: the token belongs to <login>` | The token works. `<login>` must be the bot, not you. |
-| `pass: the token has the repo and read:org scopes` | A classic token with both scopes the doc asks for. GitHub lists them in the `X-OAuth-Scopes` header; `write:org` or `admin:org` stands in for `read:org`. |
+| `pass: the token has the repo and read:org scopes` | A classic token with both scopes. `write:org` or `admin:org` stands in for `read:org`. |
 | `note: the token is missing: <scopes>` | `<scopes>` is `repo`, `read:org` or `repo and read:org`. The token works for the rest, but `gh pr edit` fails without `read:org`. Fix the token in step 3. Exit status 0. |
 | `note: GitHub sent no X-OAuth-Scopes header ...` | The check cannot read the scopes: a fine-grained token, for one, sends no such header, and the doc asks for a classic one. Exit status 0. |
-| `note: could not read the token's scopes: ...` | The scope lookup failed, with GitHub's message; run the script again. Exit status 0. |
+| `note: could not read the token's scopes: ...` | The scope lookup failed; run the script again. Exit status 0. |
 | `pass: <login> does not have admin on <repo>` | Good. Exit status 0. |
 | `note: <login> cannot push to <repo>` | No admin, but no Write either: the invitation, the Write grant or the `repo` scope is missing. Exit status 0. |
 | `fail: <login> has admin on <repo>` | On a personal repo, only the owner has admin, so this is your token, not the bot's. On an organization's, lower the bot's role to Write: check it is a Member, not an Owner, that no team gives it Admin, and that the base permission is not Admin. Exit status 1. |
@@ -101,7 +101,7 @@ A 404 on the repo, when the name is right, usually means one of these:
 - The bot has not accepted its invitation, or has no access to the repo.
 - The organization blocks classic tokens.
 
-The script checks Admin, whether the bot can push, and which scopes a classic token has (tried 2026-11-12: GitHub sent `X-Oauth-Scopes: read:org, repo` for the bot's token). It does not check that the role is exactly Write.
+The script checks Admin, whether the bot can push, and which scopes a classic token has. It does not check that the role is exactly Write.
 
 Worked when: the exit status is 0 and the login on the first line is the bot's.
 
