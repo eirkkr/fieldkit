@@ -37,7 +37,7 @@ Everything but the requirements fits one screen.
 - Before the brief is written, the reviewer is asked what only they can decide, one question at a time.
 - Approval is the reviewer saying so with no conditions attached; anything less is a request for changes. It is recorded as a comment on the issue whose first line is `Plan approved.`, and a change is built once it has that comment.
 - The comment's author is the approver, so the text names no one, and the comment counts only when its author has admin permission on the repository. `gh api repos/{owner}/{repo}/collaborators/<author login>/permission -q .permission` prints `admin` for one; `maintain` and lower roles print less and do not count. The bot account has Write, as `bot-account.md` sets it up, so its comment never counts.
-- An agent whose own account lacks admin gives the reviewer this command, `<n>` being the plan's issue number, to run in the reviewer's own shell, which has their credentials:
+- An agent whose own account lacks admin gives the reviewer this command, `<n>` being the plan's issue number:
 
   ```bash
   gh issue comment <n> --body "Plan approved."
