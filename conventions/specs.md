@@ -36,8 +36,7 @@ Everything but the requirements fits one screen.
 
 - Before the brief is written, the reviewer is asked what only they can decide, one question at a time.
 - Approval is the reviewer saying so with no conditions attached; anything less is a request for changes. It is recorded as a comment on the issue whose first line is `Plan approved by @<login>.`, and a change is built once it has that comment.
-- The login is the reviewer's, never the account the agent runs as. The reviewer is the first user named in `.github/CODEOWNERS`, skipping comments, the path pattern and any `@org/team` entry. Failing that, it is the repository's owner when the repository is personal (`gh repo view --json owner,isInOrganization`, `isInOrganization` false). Failing that, it is whoever the agent asks.
-- The comment counts only when the reviewer wrote it, so an agent running as another account, a bot's included, asks the reviewer to post the line themselves. Logins compare case-insensitively.
+- The login is the approver's own, never the account an agent runs as. The comment counts only when its author has admin permission on the repository (`gh api repos/{owner}/{repo}/collaborators/<login>/permission -q .permission` prints `admin`); a bot account, which has Write, never does. An agent whose own account lacks admin gives the reviewer this command to run as themselves: `gh issue comment <n> --body "Plan approved by @$(gh api user -q .login)."`
 - The change's own issue, when planning was asked for, and each stage's PR at its gate (one per stage) need no further approval; each stage's merge is still gated. The stage sub-issues, where the brief lists stages, are created on approval - or, for a plan priced to decide (below), as it is published.
 - A plan turned down is closed as not planned, its stage sub-issues with it. Its brief, notes and stages stay, as the record of what was priced and why it was not done.
 

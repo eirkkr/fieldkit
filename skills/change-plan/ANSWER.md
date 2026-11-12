@@ -26,9 +26,9 @@ A *fresh* agent is a subagent given only what is listed here, nothing from this 
 
 Any clear yes is approval.
 
-1. Find the reviewer, as "Asking first, and approval" gives (an answer to your ask is their login). Compare `gh api user -q .login` with it:
-   - Equal: comment the approval line, naming that login.
-   - Different: the line is the reviewer's to post. Tell them to comment `Plan approved by @<login>.` on the plan's issue, and stop. Steps 2-3 run once that comment exists, on the reviewer's word to continue.
+1. Check your own permission ("Asking first, and approval"):
+   - Admin: comment the approval line, naming your login (`gh api user -q .login`).
+   - Else: give the reviewer the command that line gives, with the issue's number filled in, to run as themselves, and stop. Steps 2-3 run once that comment exists, on the reviewer's word to continue.
 2. Brief lists stages and no sub-issues exist yet: create each in order as a sub-issue (`gh issue create --parent <n>`), titled and filled as "A stage's issue" gives it; mark one blocked (`gh issue edit <stage> --add-blocked-by <other>`) where it cannot be built without the other. A change of one pull request gets none.
 3. Report what was created.
 
