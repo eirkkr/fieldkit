@@ -14,7 +14,7 @@ set -euo pipefail
 # admin on the repo, 1 when it does, and 2 on any error: a usage error, no
 # token, a refused token, a failed account or repo lookup, a response with
 # no permissions, an interrupt, or a missing gh. A failed protection lookup
-# is only a note.
+# and a missing token scope are only notes.
 
 die() {
     echo "check-bot-account: $1" >&2
@@ -69,6 +69,43 @@ fi
 [[ "$login" =~ ^[A-Za-z0-9-]+$ ]] || die "GitHub returned a login this check cannot read"
 echo "pass: the token belongs to $login"
 echo "      That must be the bot's login. If it is yours, this is the wrong token."
+
+# A classic token's scopes come back in the X-OAuth-Scopes header of any call
+# made with it. A fine-grained token sends no such header, so a missing
+# header is a note, not "no scopes". A missing scope is only a note too: the
+# token works for the rest. read:org is also granted by write:org and
+# admin:org, which GitHub lists in place of it.
+check_scopes() {
+    local headers line scopes="" found=false
+    headers="$(gh api -i user 2>/dev/null)" || return 0
+    while IFS= read -r line; do
+        line="${line%$'\r'}"
+        if [[ "$line" =~ ^[Xx]-[Oo][Aa]uth-[Ss]copes:(.*)$ ]]; then
+            found=true
+            scopes=" ${BASH_REMATCH[1]//,/ } "
+            break
+        fi
+    done <<<"$headers"
+    if [ "$found" = false ]; then
+        echo "note: GitHub sent no X-OAuth-Scopes header, so this check cannot read the"
+        echo "      token's scopes (a fine-grained token sends none). The doc asks for a"
+        echo "      classic token with repo and read:org."
+        return 0
+    fi
+    local missing=""
+    [[ "$scopes" == *" repo "* ]] || missing="repo"
+    if [[ "$scopes" != *" read:org "* && "$scopes" != *" write:org "* && "$scopes" != *" admin:org "* ]]; then
+        missing="${missing:+$missing and }read:org"
+    fi
+    if [ -z "$missing" ]; then
+        echo "pass: the token has the repo and read:org scopes"
+    else
+        echo "note: the token lacks $missing. repo is what lets the bot push and open"
+        echo "      pull requests; without read:org, gh pr edit fails with \"required"
+        echo "      scopes\". Edit the token's scopes, or make a new one (step 3 in the doc)."
+    fi
+}
+check_scopes
 
 # permissions is absent from the response for some token kinds; that is an
 # error, not a pass. The fields are joined with the unit separator, which
