@@ -6,11 +6,11 @@ Claims about GitHub below link their page and were checked on 2026-10-30 or 2026
 
 ## Which token
 
-A classic token with the `repo` scope, for every repo, personal or organization; [ADR 063](../docs/decisions/063-a-write-role-bot-account.md) says why not a fine-grained one. It reaches every repo the bot can reach, so the bot's role on each is what keeps it from admin actions. An organization that blocks classic tokens ([token policy](https://docs.github.com/en/organizations/managing-programmatic-access-to-your-organization/setting-a-personal-access-token-policy-for-your-organization)) cannot use this doc: check its Settings, Personal access tokens first.
+A classic token with the `repo` and `read:org` scopes, for every repo, personal or organization; [ADR 063](../docs/decisions/063-a-write-role-bot-account.md) says why not a fine-grained one. It reaches every repo the bot can reach, so the bot's role on each is what keeps it from admin actions. An organization that blocks classic tokens ([token policy](https://docs.github.com/en/organizations/managing-programmatic-access-to-your-organization/setting-a-personal-access-token-policy-for-your-organization)) cannot use this doc: check its Settings, Personal access tokens first.
 
-Tried with this classic token against a personal repo and an organization's repo, including running Claude as the bot through `kit-claude`.
+`read:org` is there because `gh pr edit` fails without it, and with `repo` alone `gh pr checks --watch` prints the same scope error ([ADR 071](../docs/decisions/071-bot-token-includes-read-org.md)). A token made with `repo` alone needs the scope added: as the bot, open Settings, Developer settings, Personal access tokens, Tokens (classic), pick the token, tick `read:org`, and Update token. The same token string kept working after this was done once (2026-11-11), so the copy saved in step 7 should too; if `gh` refuses it, make a new token.
 
-With this token, `gh pr edit` fails on the missing `read:org` scope. Edit a pull request through the REST API instead; [the reference](bot-account-reference.md#what-the-roles-allow) has the command and the other `gh` commands tried.
+Tried with a classic token of `repo` alone against a personal repo and an organization's repo, including running Claude as the bot through `kit-claude`. After `read:org` was added to that token, `gh pr edit` was tried again on 2026-11-11 and worked; the other `gh` commands were not re-tried with both scopes.
 
 ## You need
 
@@ -39,7 +39,7 @@ Worked when: the bot is listed as a collaborator, not pending, on a personal rep
 
 ### 3. Make the bot's token
 
-Log in as the bot, then your profile picture at the top right, Settings, Developer settings, Personal access tokens, Tokens (classic), Generate new token, Generate new token (classic). Set an expiration you will remember to renew. Tick `repo` and nothing else; leave `workflow` unticked, so the bot cannot add or edit workflow files. Generate token, and copy it: it is shown once.
+Log in as the bot, then your profile picture at the top right, Settings, Developer settings, Personal access tokens, Tokens (classic), Generate new token, Generate new token (classic). Set an expiration you will remember to renew. Tick `repo` and `read:org` and nothing else; leave `workflow` unticked, so the bot cannot add or edit workflow files. Generate token, and copy it: it is shown once.
 
 Worked when: the token is listed on the bot's token page.
 
