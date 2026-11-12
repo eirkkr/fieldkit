@@ -35,12 +35,12 @@ Everything but the requirements fits one screen.
 ### Asking first, and approval
 
 - Before the brief is written, the reviewer is asked what only they can decide, one question at a time.
-- Approval is the reviewer saying so with no conditions attached; anything less is a request for changes. It is recorded as a comment on the issue whose first line is `Plan approved by @<login>.`, and a change is built once it has that comment.
-- The login is the commenter's own, and the comment counts only when its author has admin permission on the repository. `gh api repos/{owner}/{repo}/collaborators/<author login>/permission -q .permission` prints `admin` for one; `maintain` and lower roles print less and do not count. The bot account has Write, as `bot-account.md` sets it up, so its comment never counts.
-- An agent whose own account lacks admin gives the reviewer this command, `<n>` being the plan's issue number, to run in a shell without the bot's `GH_TOKEN` (`unset GH_TOKEN`), so the line names the reviewer:
+- Approval is the reviewer saying so with no conditions attached; anything less is a request for changes. It is recorded as a comment on the issue whose first line is `Plan approved.`, and a change is built once it has that comment.
+- The comment's author is the approver, so the text names no one, and the comment counts only when its author has admin permission on the repository. `gh api repos/{owner}/{repo}/collaborators/<author login>/permission -q .permission` prints `admin` for one; `maintain` and lower roles print less and do not count. The bot account has Write, as `bot-account.md` sets it up, so its comment never counts.
+- An agent whose own account lacks admin gives the reviewer this command, `<n>` being the plan's issue number, to run in the reviewer's own shell, which has their credentials:
 
   ```bash
-  gh issue comment <n> --body "Plan approved by @$(gh api user -q .login)."
+  gh issue comment <n> --body "Plan approved."
   ```
 
 - The change's own issue, when planning was asked for, and each stage's PR at its gate (one per stage) need no further approval; each stage's merge is still gated. The stage sub-issues, where the brief lists stages, are created on approval - or, for a plan priced to decide (below), as it is published.
