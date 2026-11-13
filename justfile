@@ -24,6 +24,10 @@ check: lint check-branch-name check-pr-title
 # Lint markdown and shell scripts, and check the always-loaded text fits its budget.
 lint: rumdl check-shell check-context-size
 
+# Test the worktree creation script against throwaway repos.
+test-new-worktree:
+    @"{{ justfile_directory() }}/scripts/test-new-worktree.sh" "{{ justfile_directory() }}"
+
 # Lint all markdown.
 rumdl:
     #!/usr/bin/env bash
