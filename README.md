@@ -35,7 +35,7 @@ You are welcome to fork it, lift individual conventions, or just mine the ADRs f
 
 ## Setup
 
-Requires [just](https://just.systems), [uv](https://docs.astral.sh/uv/).
+Requires [just](https://just.systems) and [uv](https://docs.astral.sh/uv/).
 
 1. **Clone the kit.** Fork it first if you intend to change anything - the steps below push to whatever remote you cloned. Anywhere on disk - the kit doesn't care where it lives:
 
@@ -204,7 +204,7 @@ Issues and pull requests are welcome but may sit - this tracks one person's work
 
 ## Development
 
-Requires [just](https://just.systems), [uv](https://docs.astral.sh/uv/). Run `just` to list available commands.
+Requires [just](https://just.systems) and [uv](https://docs.astral.sh/uv/). Run `just` to list available commands.
 
 The kit uses its own tooling on itself. Two steps are per *clone* rather than per machine, so run them again after a fresh checkout:
 

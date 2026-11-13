@@ -21,7 +21,7 @@ From this repo's root, check:
 4. **The wiring.** Links into the kit that now dangle (`find . -xtype l`, plus `.git/hooks/`, which `find` won't reach). `.claude/skills/` is linked file by file, so a kit-side rename breaks it.
 5. **The CI callers.** Every `uses: <kit-repo>/.github/workflows/<file>@...` in `.github/workflows/` names a file existing at `.fieldkit/.github/workflows/<file>`. A missing one fails every PR.
 
-Fix each unresolved reference here, usually a one-line path change. `git -C .fieldkit log --diff-filter=DR --name-status -- <old-path>` finds where the target moved; removed: drop the reference and say so. Dangling link or CI caller naming a missing workflow: re-run the matching `.fieldkit/scripts/enable-*.sh` instead of editing by hand (`enable-pr-checks.sh` replaces a caller an earlier version wrote).
+Fix each unresolved reference here, usually a one-line path change. `git -C .fieldkit log --diff-filter=DR --name-status -- <old-path>` finds where the target moved; removed: drop the reference or link and say so. Dangling link or CI caller naming a missing workflow: re-run the matching `.fieldkit/scripts/enable-*.sh` instead of editing by hand (`enable-pr-checks.sh` replaces a caller an earlier version wrote).
 
 Then re-run every `enable-*.sh` this repo has already run (its links or files are present), even where nothing dangles: each is idempotent, and a kit change can add to what one installs (`enable-hooks.sh` gaining `commit-msg` reaches no clone until re-run). Enabling one the repo never ran is the human's call.
 
