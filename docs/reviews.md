@@ -8,7 +8,7 @@ Reviews to offer on this repo's plans and PRs; `conventions/specs.md`'s "Review"
 | A fresh agent (no skill) | A plan published: requirements, stage rules, guesses, per specs.md's "Review" |
 | `mattpocock-skills:code-review` | A diff that makes choices (new content, a convention applied, a stage's requirements to meet), not a mechanical rename. Standards: diff against convention docs and ADRs. Spec: against the issue or the stage's steps |
 | `mattpocock-skills:writing-for-agents` | `KIT.md`, `CLAUDE.md`, a skill, a convention doc, or a doc one of them points to: what an agent reads, checked for restatement, no-ops, rules worth disclosing |
-| `pr-review-toolkit:code-reviewer` | Logic in `scripts/` or `hooks/`: a diff that can go wrong in ways a check run misses (the kit has no tests) |
+| `pr-review-toolkit:code-reviewer` | Logic in `scripts/` or `hooks/`: a diff that can go wrong in ways a check run misses (`just test-new-worktree` covers only `scripts/new-worktree.sh`) |
 | `pr-review-toolkit:silent-failure-hunter` | A hook or check with a fallback or swallowed exit: one that fails open passes everything |
 | `pr-review-toolkit:comment-analyzer` | A script's or hook's comments, checked against the code beside them |
 | `security-review` (built into Claude Code) | A workflow reading PR text, or a hook: hooks run on every tool call, on every machine with the kit |

@@ -18,11 +18,15 @@ setup:
     git config fieldkit.fixCommand "just fix"
     @echo "Set fieldkit.fixCommand - the Stop hook will run 'just fix' at turn end"
 
-# Run all checks: the linters, plus this branch's name and its PR's title.
-check: lint check-branch-name check-pr-title
+# Run all checks: the linters, the script tests, plus this branch's name and its PR's title.
+check: lint test-new-worktree check-branch-name check-pr-title
 
 # Lint markdown and shell scripts, and check the always-loaded text fits its budget.
 lint: rumdl check-shell check-context-size
+
+# Test the worktree creation script against throwaway repos.
+test-new-worktree:
+    @"{{ justfile_directory() }}/scripts/test-new-worktree.sh" "{{ justfile_directory() }}"
 
 # Lint all markdown.
 rumdl:
