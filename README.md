@@ -23,12 +23,9 @@ You are welcome to fork it, lift individual conventions, or just mine the ADRs f
 - `conventions/` - the load-on-demand docs: `git`, `github`, `records`, `decisions`, `specs`, `ai`, `ci`, `bot-account` (with its `bot-account-reference`), and `python/` for Python repos - a slim `README.md` hub indexing `code`, `setup`, and `testing`, each read on demand.
 - `docs/decisions/` - ADRs recording this repo's own non-obvious design choices.
 - `docs/reviews.md` - the reviews to offer on this repo's plans and PRs, reached from `CLAUDE.md`'s Reviews heading.
-- `LICENSE`, `NOTICE` - MIT, plus the upstream copyright for the OpenSpec content in `repo-skills/` and `schemas/review-gated/` (see Licence).
+- `LICENSE` - MIT.
 - `skills/` - shared Claude Code skills, symlinked into `~/.claude/skills` by `just install` (see Setup).
-- `repo-skills/` - vendored OpenSpec Claude Code skills, symlinked into an *opt-in* consumer repo's `.claude/skills` by `.fieldkit/scripts/enable-openspec.sh` (not by `just install` - see "Adopting OpenSpec in a consumer repo").
-- `repo-skills-overlay/` - the kit's own additions to those vendored skills, appended by `just openspec-refresh` after it regenerates them; one `<skill-name>.md` per skill patched. Both halves are checked in, so editing an overlay without regenerating leaves the vendored skill serving the old text - which still loads and still reads plausibly. `just lint` fails on that drift.
 - `python-skills/` - skills that only apply in a Python repo (`update-deps`, `update-python`), symlinked into an *opt-in* consumer repo's `.claude/skills` by `.fieldkit/scripts/enable-python.sh` (not by `just install` - see "Enabling the Python skills in a consumer repo").
-- `schemas/` - kit-owned OpenSpec workflow schemas, linked file-by-file into an opt-in consumer repo's `openspec/schemas/`.
 - `agents/` - shared Claude Code subagents, symlinked into `~/.claude/agents` by `just install` (see Setup). None ship today: `push`, `pr` and `merge` run inline ([ADR 045](docs/decisions/045-inline-git-skills.md)), and `just install` prunes the links it made for them.
 - `statusline/` - the shared Claude Code status line script, symlinked to `~/.claude/statusline-command.sh` and wired up via `settings.json`'s `statusLine` key by `just install` (see Setup).
 - `hooks/` - shared hooks of both kinds, told apart by filename: the git `pre-commit` and `commit-msg` hooks, symlinked into an *opt-in* consumer repo's `.git/hooks` by `.fieldkit/scripts/enable-hooks.sh` (not by `just install` - `.git/hooks` is per-clone; see "Blocking commits to the default branch"), and the Claude Code session hooks `stop-autofix.py`, `pretooluse-branch-name.py` and `pretooluse-merge-message.py`, registered machine-wide by `just install`. `conventions.py` holds the branch and commit rules they all check against.
@@ -38,7 +35,7 @@ You are welcome to fork it, lift individual conventions, or just mine the ADRs f
 
 ## Setup
 
-Requires [just](https://just.systems), [uv](https://docs.astral.sh/uv/), and Node >= 20.19.0 (for the pinned `openspec` CLI; `just install` only checks the version - upgrade yourself first, e.g. `sudo n lts`).
+Requires [just](https://just.systems) and [uv](https://docs.astral.sh/uv/).
 
 1. **Clone the kit.** Fork it first if you intend to change anything - the steps below push to whatever remote you cloned. Anywhere on disk - the kit doesn't care where it lives:
 
@@ -78,44 +75,6 @@ Requires [just](https://just.systems), [uv](https://docs.astral.sh/uv/), and Nod
 ## Planning a change
 
 Work too big for one pull request is planned and built as a *change* ([ADR 054](docs/decisions/054-a-change-is-an-issue.md)): an issue holding the plan, a sub-issue and a pull request per stage where it needs more than one, and nothing about it in the repo's files. `/change-plan` asks its questions and writes the issue; `/change-stage` builds one stage, opens its PR and stops for approval. Each offers a review by fresh agents where it stops, and runs one when asked. Both are linked by `just install` and need no per-repo setup beyond `gh`. `conventions/specs.md` says what each issue must contain, and a repo can name the reviews to offer under a `## Reviews` heading in its own `CLAUDE.md`.
-
-## Adopting OpenSpec in a consumer repo
-
-OpenSpec is how changes were planned before ADR 054, and is kept so that a change already in flight can finish under it. New changes use the two skills above; don't opt a repo in for them.
-
-OpenSpec ([ADR 021](docs/decisions/021-adopt-openspec-centralised-via-kit.md)) is opt-in per repo. `just install` (Setup step 1) already puts the pinned `openspec` CLI on `PATH`, but adds no OpenSpec skills anywhere - a repo that skips the steps below carries no OpenSpec context at all.
-
-To opt in, from the consumer repo root (after Setup steps 1-2):
-
-```bash
-.fieldkit/scripts/enable-openspec.sh
-```
-
-This creates the repo's `openspec/` content dir (`specs/`, `changes/`, `config.yaml`), symlinks `.claude/skills/openspec-*` to the kit's vendored copies in `repo-skills/`, links the `review-gated` schema into `openspec/schemas/`, and selects it in `config.yaml`. It's idempotent - rerun it after an `openspec-refresh` (below) that adds a new skill, or after the kit gains a new schema file. Commit `openspec/` and the `.claude/skills` symlinks.
-
-The workflow is `review-gated` ([ADR 034](docs/decisions/034-review-gated-openspec-schema.md)), the kit's replacement for the stock `spec-driven` schema: bite-sized tasks, a human review gate ending every stage, and a final whole-change review before archive. A stage is also the unit of merge ([ADR 041](docs/decisions/041-stage-is-the-merge-unit.md)) - one branch, one PR, merged when its gate closes - so a change lands in instalments rather than as one large diff at the end. `conventions/specs.md` describes what that asks of an author and a reviewer. The schema itself lives in `schemas/review-gated/`; note that its files are linked individually rather than the directory being linked, because OpenSpec's schema discovery doesn't follow a symlinked directory.
-
-One thing the script can't do for you: the linked templates are fragments with no H1, and while `rumdl check` in the consumer repo resolves the symlink and honours the kit's own ignore for them, rumdl's language server reads only the workspace-root config - so an editor will flag `MD041` on them until the repo ignores it too. Add to the repo's rumdl config (a Python consumer's `pyproject.toml` is the natural home):
-
-```toml
-[tool.rumdl.per-file-ignores]
-"**/schemas/*/templates/*.md" = ["MD041", "MD032"]
-```
-
-The leading `**/` matters - the language server passes an absolute path, already resolved to the kit.
-
-The linked files also **dangle in any checkout without a `.fieldkit` symlink**, CI included, exactly as the `.claude/skills` links already do. That's harmless until a tool walks them: anything that reads every file in the tree will fail on them with an IO error, and unlike the skills links these sit inside the linted tree. A Python consumer hit this with `ruff format`, which reads Markdown, and excludes the directory:
-
-```toml
-[tool.ruff]
-extend-exclude = ["openspec/schemas"]
-```
-
-`rumdl` and `djlint` were unaffected - a directory sweep skips symlinks. Check whatever else walks your repo's tree wholesale.
-
-The kit owns keeping the vendored skills current: `just openspec-refresh` bumps the pinned `openspec` version, regenerates `repo-skills/` from it, and re-applies `repo-skills-overlay/*.md` on top - the rsync is `--delete`, so kit additions to a vendored skill live in the overlay or they don't survive. Adopting repos pick up the change through their symlinks next session; no per-repo `openspec update` needed.
-
-`package.json` also approves OpenSpec's install script, which only prints a completions tip, so npm does not warn that it was blocked. The approval is pinned to the version (`"@fission-ai/openspec@1.6.0": true`), so after a refresh bumps it, `npm ci` warns again. Read the new version's install script, then run `npm install-scripts approve @fission-ai/openspec` to pin the approval to it, or `deny` if it now does more than you want run.
 
 ## Enabling the Python skills in a consumer repo
 
@@ -241,14 +200,11 @@ This is human-facing on purpose - it's how you operate the loop, not a rule for 
 
 MIT - see [LICENSE](LICENSE). Take what's useful.
 
-Two parts are not mine: `repo-skills/` is vendored verbatim from [OpenSpec](https://github.com/Fission-AI/OpenSpec) and `schemas/review-gated/` is derived from its stock `spec-driven` schema, both MIT. See
-[NOTICE](NOTICE).
-
 Issues and pull requests are welcome but may sit - this tracks one person's working setup, so a change that suits your workflow and not mine is better off in your fork.
 
 ## Development
 
-Requires [just](https://just.systems), [uv](https://docs.astral.sh/uv/), and Node >= 20.19.0. Run `just` to list available commands.
+Requires [just](https://just.systems) and [uv](https://docs.astral.sh/uv/). Run `just` to list available commands.
 
 The kit uses its own tooling on itself. Two steps are per *clone* rather than per machine, so run them again after a fresh checkout:
 

@@ -1,9 +1,0 @@
-{
-  "private": true,
-  "dependencies": {
-    "@fission-ai/openspec": "1.6.0"
-  },
-  "allowScripts": {
-    "@fission-ai/openspec@1.6.0": true
-  }
-}

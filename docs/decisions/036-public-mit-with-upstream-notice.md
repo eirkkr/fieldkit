@@ -20,3 +20,5 @@ Framing it as a personal kit rather than a reusable starting point matches what 
 - References to specific private consumer repos are genericised in the README and ADRs 004 and 034. New writing names a consumer by role ("a Python consumer"), not by name.
 - `just openspec-refresh` regenerates `repo-skills/` from a newer upstream; if that upstream's licence ever changes, the `NOTICE` needs updating with it.
 - `package.json` keeps `"private": true` - that blocks accidental `npm publish` and is unrelated to repository visibility.
+
+> The vendored and derived OpenSpec content, and with it the `NOTICE`, `just openspec-refresh` and `package.json`, have been removed ([#126](https://github.com/eirkkr/fieldkit/issues/126)), so the attribution obligation lapsed. The decision to publish under MIT stands.

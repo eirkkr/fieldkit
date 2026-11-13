@@ -4,7 +4,6 @@ default:
 
 # Set up skills, agents, statusline, and Claude settings.
 install:
-    @"{{ justfile_directory() }}/scripts/install-openspec.sh" "{{ justfile_directory() }}"
     @"{{ justfile_directory() }}/scripts/link-skills.sh" "{{ justfile_directory() }}"
     @"{{ justfile_directory() }}/scripts/link-agents.sh" "{{ justfile_directory() }}"
     @"{{ justfile_directory() }}/scripts/link-statusline.sh" "{{ justfile_directory() }}"
@@ -19,15 +18,11 @@ setup:
     git config fieldkit.fixCommand "just fix"
     @echo "Set fieldkit.fixCommand - the Stop hook will run 'just fix' at turn end"
 
-# Bump the pinned openspec CLI and regenerate repo-skills/ from it.
-openspec-refresh:
-    @"{{ justfile_directory() }}/scripts/openspec-refresh.sh" "{{ justfile_directory() }}"
-
 # Run all checks: the linters, plus this branch's name and its PR's title.
 check: lint check-branch-name check-pr-title
 
-# Lint markdown and shell scripts, check the vendored skills still carry their overlays, and check the always-loaded text fits its budget.
-lint: rumdl check-shell check-overlays check-context-size
+# Lint markdown and shell scripts, and check the always-loaded text fits its budget.
+lint: rumdl check-shell check-context-size
 
 # Lint all markdown.
 rumdl:
@@ -38,10 +33,6 @@ rumdl:
 # Lint the shell scripts with shellcheck and check their shfmt formatting.
 check-shell:
     @"{{ justfile_directory() }}/scripts/check-shell.sh" "{{ justfile_directory() }}"
-
-# Check each vendored skill still ends with its overlay.
-check-overlays:
-    @"{{ justfile_directory() }}/scripts/check-skill-overlays.sh" "{{ justfile_directory() }}"
 
 # Check the text the kit loads into every consumer session against its byte budget.
 check-context-size:

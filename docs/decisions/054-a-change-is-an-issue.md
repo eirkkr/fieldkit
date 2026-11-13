@@ -106,3 +106,5 @@ The evidence is ten changes in one consumer repo, six of them review-gated, read
 - **A consumer's in-flight changes finish under the schema they started with.** Its `openspec/` directory, lint exclusions and skill symlinks are removed once the last one is archived; the living specs go with them, after anything the docs lack is moved across.
 
 > Amended by [057](057-a-priced-plan-keeps-its-stages-in-sub-issues.md): a plan priced to decide gets its stage sub-issues, holding their steps, when it is published, not its steps in the first build notes.
+>
+> The OpenSpec machinery this entry kept for now (the schema, the vendored skills, their scripts and `package.json`) has been removed: see [#126](https://github.com/eirkkr/fieldkit/issues/126).
