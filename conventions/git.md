@@ -40,7 +40,7 @@
   - A `+` can still be a rebased copy: the patch changes when the base changed neighbouring lines or a conflict was resolved. Then `git diff origin/<branch> <copy of the remote tip>` should show only what `git diff <old base> <new base>` does, each base being that side's merge-base with the default branch. Anything more exists only on the remote.
 - A force-push that loses nothing still replaces commits the reviewer of an open PR has read or pulled, so they are told first. The lease names the SHA that was checked; if it refuses, check again rather than reaching for `--force`.
 - The default branch is never rewritten.
-- A rewrite re-SHAs every commit, so anything citing the old SHAs goes stale: a comment that links a commit, and under the `review-gated` OpenSpec schema a stage's review note.
+- A rewrite re-SHAs every commit, so anything citing the old SHAs goes stale: a comment that links a commit.
 
 ## Hooks and CI checks
 

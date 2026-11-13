@@ -9,8 +9,7 @@ mode="${2:-check}"
 # enable-*.sh scripts in consumer repos, the statusline in every session.
 #
 # Scripts are found by the shebang on their first line, not by extension,
-# since hooks/pre-commit has none. Tracked files only, so node_modules/
-# stays out.
+# since hooks/pre-commit has none. Tracked files only.
 shellcheck=(uvx --from shellcheck-py@0.11.0.1 shellcheck)
 shfmt=(uvx --from shfmt-py@4.2.0 shfmt)
 
