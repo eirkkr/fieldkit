@@ -23,8 +23,7 @@ Reaching this skill means merging is approved for one head: user typed `/merge`,
      - `git worktree list --porcelain` shows it `locked` (never unlock it);
      - `git status --porcelain` prints anything;
      - its `HEAD` is not the approved sha (`git rev-parse HEAD`).
-
-     Otherwise remove it. Save its path and branch, then `cd` to the main checkout (the first line of `git worktree list --porcelain`): `git worktree remove` succeeds with the shell inside the tree and leaves the shell in a deleted directory. Then `git worktree remove <path>`; if that refuses only because of initialised submodules (the clean check above already passed), repeat it once with a single `--force`, never two. Then `git branch -D <branch>` (plain `-d` doesn't recognise a squash merge) and `git worktree prune`.
+     - Otherwise remove it. Save its path and branch, then `cd` to the main checkout (the first line of `git worktree list --porcelain`): `git worktree remove` succeeds with the shell inside the tree and leaves the shell in a deleted directory. Then `git worktree remove <path>`; if that refuses only because of initialised submodules (the clean check above already passed), repeat it once with a single `--force`, never two. Then `git branch -D <branch>` (plain `-d` doesn't recognise a squash merge) and `git worktree prune`.
    - Main checkout, with the branch checked out in another linked worktree: that worktree is not the one this `/merge` ran in. Keep it and the branch, noting the path and that it was not the worktree this `/merge` ran in.
    - Main checkout, branch in no linked worktree: on the merged branch, switch to the default branch (`gh repo view --json defaultBranchRef -q .defaultBranchRef.name`); on any other branch, stay. `git branch -D <branch>` if `git branch --list <branch>` prints it.
    - Last, in the checkout you are in (the main checkout, if you removed a worktree): `git pull --prune` on the default branch, else `git fetch --prune`.
