@@ -45,25 +45,25 @@ usage() {
 existing=false
 setup_path=""
 case "${1:-}" in
---existing)
-    [ "$#" -eq 2 ] || usage
-    existing=true
-    branch="$2"
-    # Split at the first slash, as a branch the script made would be.
-    type="${branch%%/*}"
-    description="${branch#*/}"
-    [ "$type" != "$branch" ] || die "branch '$branch' has no type/ prefix"
-    ;;
---setup)
-    [ "$#" -eq 2 ] || usage
-    setup_path="$2"
-    ;;
-*)
-    [ "$#" -eq 2 ] || usage
-    type="$1"
-    description="$2"
-    branch="$type/$description"
-    ;;
+    --existing)
+        [ "$#" -eq 2 ] || usage
+        existing=true
+        branch="$2"
+        # Split at the first slash, as a branch the script made would be.
+        type="${branch%%/*}"
+        description="${branch#*/}"
+        [ "$type" != "$branch" ] || die "branch '$branch' has no type/ prefix"
+        ;;
+    --setup)
+        [ "$#" -eq 2 ] || usage
+        setup_path="$2"
+        ;;
+    *)
+        [ "$#" -eq 2 ] || usage
+        type="$1"
+        description="$2"
+        branch="$type/$description"
+        ;;
 esac
 
 # The repo's setup recipe, run in the worktree $1 with its output on stderr.
@@ -89,9 +89,9 @@ run_setup() {
 common="$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)" ||
     die "not inside a git repository"
 case "$common" in
-*/.git/modules/*) die "this repository is a submodule; the sibling layout does not apply to one" ;;
-*/.git) main="${common%/.git}" ;;
-*) die "no main checkout here (a bare repository?): the git dir is $common" ;;
+    */.git/modules/*) die "this repository is a submodule; the sibling layout does not apply to one" ;;
+    */.git) main="${common%/.git}" ;;
+    *) die "no main checkout here (a bare repository?): the git dir is $common" ;;
 esac
 repo="$(basename "$main")"
 parent="$(dirname "$main")"

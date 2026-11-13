@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2329 # the case_ functions are called by name from the loop at the foot
 set -euo pipefail
 kit="$1"
 
@@ -53,28 +54,55 @@ refused() {
     shift 3
     before="$(snapshot "$dir")"
     run "$dir" "$@"
-    [ "$rc" -eq 1 ] || { echo "exit $rc, not 1" >&2; return 1; }
-    [[ "$err" == *"$fragment"* ]] || { echo "stderr lacks '$fragment': $err" >&2; return 1; }
-    [ -z "$out" ] || { echo "stdout is not empty: $out" >&2; return 1; }
-    [ "$(snapshot "$dir")" = "$before" ] || { echo "$name left something behind" >&2; return 1; }
+    [ "$rc" -eq 1 ] || {
+        echo "exit $rc, not 1" >&2
+        return 1
+    }
+    [[ "$err" == *"$fragment"* ]] || {
+        echo "stderr lacks '$fragment': $err" >&2
+        return 1
+    }
+    [ -z "$out" ] || {
+        echo "stdout is not empty: $out" >&2
+        return 1
+    }
+    [ "$(snapshot "$dir")" = "$before" ] || {
+        echo "$name left something behind" >&2
+        return 1
+    }
 }
 
 case_creates_beside_the_repo() {
     mkrepo api
     run "$tmp/work/api" chore try-it
-    [ "$rc" -eq 0 ] || { echo "exit $rc: $err" >&2; return 1; }
-    [ "$out" = "$tmp/work/api-try-it" ] || { echo "stdout is '$out'" >&2; return 1; }
+    [ "$rc" -eq 0 ] || {
+        echo "exit $rc: $err" >&2
+        return 1
+    }
+    [ "$out" = "$tmp/work/api-try-it" ] || {
+        echo "stdout is '$out'" >&2
+        return 1
+    }
     [ "$(git -C "$out" branch --show-current)" = chore/try-it ] || return 1
     [ "$(git -C "$out" rev-parse HEAD)" = "$(git -C "$tmp/work/api" rev-parse origin/main)" ] || return 1
-    ! git -C "$out" rev-parse --abbrev-ref '@{u}' >/dev/null 2>&1 || { echo "branch has an upstream" >&2; return 1; }
+    ! git -C "$out" rev-parse --abbrev-ref '@{u}' >/dev/null 2>&1 || {
+        echo "branch has an upstream" >&2
+        return 1
+    }
 }
 
 case_creates_from_inside_a_worktree() {
     mkrepo inner
     run "$tmp/work/inner" chore first
     run "$out" bugfix second
-    [ "$rc" -eq 0 ] || { echo "exit $rc: $err" >&2; return 1; }
-    [ "$out" = "$tmp/work/inner-second" ] || { echo "stdout is '$out'" >&2; return 1; }
+    [ "$rc" -eq 0 ] || {
+        echo "exit $rc: $err" >&2
+        return 1
+    }
+    [ "$out" = "$tmp/work/inner-second" ] || {
+        echo "stdout is '$out'" >&2
+        return 1
+    }
 }
 
 case_refuses_a_bad_prefix() {
@@ -172,10 +200,19 @@ EOF
     export PATH="$tmp/bin:$PATH"
     run "$tmp/work/stray" chore x
     export PATH="$path_before"
-    [ "$rc" -eq 1 ] || { echo "exit $rc, not 1" >&2; return 1; }
-    ! git -C "$tmp/work/stray" show-ref --verify --quiet refs/heads/chore/x || { echo "stray branch left" >&2; return 1; }
+    [ "$rc" -eq 1 ] || {
+        echo "exit $rc, not 1" >&2
+        return 1
+    }
+    ! git -C "$tmp/work/stray" show-ref --verify --quiet refs/heads/chore/x || {
+        echo "stray branch left" >&2
+        return 1
+    }
     run "$tmp/work/stray" chore x
-    [ "$rc" -eq 0 ] || { echo "retry exit $rc: $err" >&2; return 1; }
+    [ "$rc" -eq 0 ] || {
+        echo "retry exit $rc: $err" >&2
+        return 1
+    }
 }
 
 case_existing_after_removal() {
@@ -183,8 +220,14 @@ case_existing_after_removal() {
     run "$tmp/work/again" chore one
     git -C "$tmp/work/again" worktree remove "$out"
     run "$tmp/work/again" --existing chore/one
-    [ "$rc" -eq 0 ] || { echo "exit $rc: $err" >&2; return 1; }
-    [ "$out" = "$tmp/work/again-one" ] || { echo "stdout is '$out'" >&2; return 1; }
+    [ "$rc" -eq 0 ] || {
+        echo "exit $rc: $err" >&2
+        return 1
+    }
+    [ "$out" = "$tmp/work/again-one" ] || {
+        echo "stdout is '$out'" >&2
+        return 1
+    }
     [ "$(git -C "$out" branch --show-current)" = chore/one ] || return 1
 }
 
@@ -192,7 +235,10 @@ case_existing_from_origin_only() {
     mkrepo elsewhere
     git -C "$tmp/work/elsewhere" push -q origin main:chore/other
     run "$tmp/work/elsewhere" --existing chore/other
-    [ "$rc" -eq 0 ] || { echo "exit $rc: $err" >&2; return 1; }
+    [ "$rc" -eq 0 ] || {
+        echo "exit $rc: $err" >&2
+        return 1
+    }
     [ "$(git -C "$out" branch --show-current)" = chore/other ] || return 1
 }
 
@@ -204,27 +250,45 @@ case_existing_refuses_a_missing_branch() {
 case_runs_the_setup_recipe() {
     mkrepo built $'worktree-setup:\n\techo built > built.txt\n'
     run "$tmp/work/built" chore x
-    [ "$rc" -eq 0 ] || { echo "exit $rc: $err" >&2; return 1; }
+    [ "$rc" -eq 0 ] || {
+        echo "exit $rc: $err" >&2
+        return 1
+    }
     [ "$(cat "$out/built.txt")" = built ] || return 1
 }
 
 case_keeps_a_worktree_whose_recipe_fails() {
     mkrepo broken $'worktree-setup:\n\texit 7\n'
     run "$tmp/work/broken" chore x
-    [ "$rc" -eq 3 ] || { echo "exit $rc, not 3" >&2; return 1; }
-    [ "$out" = "$tmp/work/broken-x" ] || { echo "stdout is '$out'" >&2; return 1; }
+    [ "$rc" -eq 3 ] || {
+        echo "exit $rc, not 3" >&2
+        return 1
+    }
+    [ "$out" = "$tmp/work/broken-x" ] || {
+        echo "stdout is '$out'" >&2
+        return 1
+    }
     [ -d "$out" ] || return 1
     # The recipe's own output is on stderr, never stdout.
-    [[ "$err" == *"--setup $out"* ]] || { echo "no pointer to --setup: $err" >&2; return 1; }
+    [[ "$err" == *"--setup $out"* ]] || {
+        echo "no pointer to --setup: $err" >&2
+        return 1
+    }
 }
 
 case_setup_reruns_the_recipe() {
     mkrepo retry $'worktree-setup:\n\t[ -e ok ] && echo built > built.txt\n'
     run "$tmp/work/retry" chore x
-    [ "$rc" -eq 3 ] || { echo "first exit $rc, not 3" >&2; return 1; }
+    [ "$rc" -eq 3 ] || {
+        echo "first exit $rc, not 3" >&2
+        return 1
+    }
     touch "$out/ok"
     run "$tmp/work/retry" --setup "$out"
-    [ "$rc" -eq 0 ] || { echo "exit $rc: $err" >&2; return 1; }
+    [ "$rc" -eq 0 ] || {
+        echo "exit $rc: $err" >&2
+        return 1
+    }
     [ -e "$tmp/work/retry-x/built.txt" ] || return 1
 }
 
@@ -237,8 +301,14 @@ case_setup_refuses_a_foreign_directory() {
 case_says_when_the_repo_has_no_recipe() {
     mkrepo bare $'other:\n\t@true\n'
     run "$tmp/work/bare" chore x
-    [ "$rc" -eq 0 ] || { echo "exit $rc: $err" >&2; return 1; }
-    [[ "$err" == *"no 'worktree-setup' recipe"* ]] || { echo "no notice: $err" >&2; return 1; }
+    [ "$rc" -eq 0 ] || {
+        echo "exit $rc: $err" >&2
+        return 1
+    }
+    [[ "$err" == *"no 'worktree-setup' recipe"* ]] || {
+        echo "no notice: $err" >&2
+        return 1
+    }
 }
 
 case_links_fieldkit_when_the_main_checkout_has_it() {
@@ -246,10 +316,16 @@ case_links_fieldkit_when_the_main_checkout_has_it() {
     mkdir "$tmp/kit"
     ln -s "$tmp/kit" "$tmp/work/linked/.fieldkit"
     run "$tmp/work/linked" chore x
-    [ "$(readlink -f "$out/.fieldkit")" = "$tmp/kit" ] || { echo "link is wrong" >&2; return 1; }
+    [ "$(readlink -f "$out/.fieldkit")" = "$tmp/kit" ] || {
+        echo "link is wrong" >&2
+        return 1
+    }
     mkrepo unlinked
     run "$tmp/work/unlinked" chore x
-    [ ! -e "$out/.fieldkit" ] || { echo "a link was made with none to copy" >&2; return 1; }
+    [ ! -e "$out/.fieldkit" ] || {
+        echo "a link was made with none to copy" >&2
+        return 1
+    }
 }
 
 for case_fn in $(declare -F | awk '$3 ~ /^case_/ {print $3}'); do
