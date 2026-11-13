@@ -131,13 +131,13 @@ case_refuses_a_long_name() {
 # shellcheck disable=SC2329 # called by name from the loop at the foot
 case_refuses_an_uppercase_description() {
     mkrepo upper
-    refused upper "$tmp/work/upper" "lowercase letters, digits and hyphens" chore Upper
+    refused upper "$tmp/work/upper" "joined by single hyphens" chore Upper
 }
 
 # shellcheck disable=SC2329 # called by name from the loop at the foot
 case_refuses_an_underscore_description() {
     mkrepo under
-    refused under "$tmp/work/under" "lowercase letters, digits and hyphens" chore a_b
+    refused under "$tmp/work/under" "joined by single hyphens" chore a_b
 }
 
 # shellcheck disable=SC2329 # called by name from the loop at the foot
@@ -527,6 +527,15 @@ case_exits_3_when_the_link_fails() {
         echo "the recipe ran without its link" >&2
         return 1
     }
+}
+
+# shellcheck disable=SC2329 # called by name from the loop at the foot
+case_refuses_stray_hyphens_in_a_description() {
+    mkrepo hyphens
+    local description
+    for description in -x x- a--b; do
+        refused "hyphens ($description)" "$tmp/work/hyphens" "joined by single hyphens" chore "$description"
+    done
 }
 
 for case_fn in $(declare -F | awk '$3 ~ /^case_/ {print $3}'); do

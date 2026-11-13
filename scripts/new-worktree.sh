@@ -29,8 +29,8 @@ unset CDPATH GIT_DIR GIT_WORK_TREE GIT_COMMON_DIR GIT_INDEX_FILE
 # nothing on stdout.
 #
 # It refuses, creating nothing, when the branch name breaks conventions/git.md,
-# the description is not lowercase letters, digits and hyphens, the path
-# exists, the branch exists (or, with --existing, does not), or the layout
+# the description is not lowercase letters and digits joined by single
+# hyphens, the path exists, the branch exists (or, with --existing, does not), or the layout
 # cannot work here: a parent directory that is not writable or sits inside
 # another work tree, or a submodule.
 #
@@ -142,7 +142,7 @@ fi
 # Name rules: the kit's own check covers the prefix and length (ADR 046), the
 # description's characters are this script's.
 [[ "$type" =~ ^[a-z]+$ ]] || die "type '$type' is not lowercase letters"
-[[ "$description" =~ ^[a-z0-9-]+$ ]] || die "description '$description' is not lowercase letters, digits and hyphens"
+[[ "$description" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]] || die "description '$description' is not lowercase letters and digits joined by single hyphens"
 if ! reason="$(python3 "$kit/hooks/conventions.py" branch "$branch" 2>&1)"; then
     die "$reason"
 fi
