@@ -29,3 +29,5 @@ Alternatives rejected:
 - Entries a user already has in `symlinkDirectories` stay; `.fieldkit` is appended.
 - `"head"` stays available for a one-off by editing `settings.json` by hand; the next `just install` asks before restoring `"fresh"`, and keeps the `.fieldkit` link whichever way you answer.
 - If Claude Code renames or removes either key, update this ADR and `scripts/configure_worktree.py`.
+
+*Partly superseded by [073](073-worktrees-beside-the-repo.md): the agent no longer enters a new worktree with `EnterWorktree`.*
