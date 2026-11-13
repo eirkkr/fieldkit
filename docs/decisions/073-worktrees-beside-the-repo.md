@@ -28,7 +28,7 @@ Prose has not kept worktrees from being made at a session's start, inside the re
 
 ### Checks run on this layout
 
-Run on Claude Code 2.1.323 in WSL2, in a session with permission mode `auto`, against a worktree made by hand: `git worktree add --no-track -b chore/spike-sibling /home/eirkr/src/fieldkit-spike-sibling origin/main`.
+Run on Claude Code 2.1.323 in WSL2, in a session with permission mode `auto`, against a worktree made by hand: `git worktree add --no-track -b chore/spike-sibling ../fieldkit-spike-sibling origin/main`.
 
 - **Entering a sibling.** `EnterWorktree` with `path` from the launch directory accepted it. From inside a worktree session it refused: "limited to worktrees managed by Claude Code (created under .claude/worktrees/ of this repository)". `ExitWorktree` `keep` works for both a path-entered and an `EnterWorktree`-made worktree, and the session can then enter another by `path`, including a managed one it left earlier. So a stage's hand-off must leave the previous worktree with `keep` before entering the next.
 - **Editing in it.** Write, Bash and `git commit` in the sibling raised no permission prompt and no denial, and `git push --dry-run` targeted `origin/chore/spike-sibling`, because `--no-track` set no upstream. Auto mode may hide prompts a default-mode session would show, so the manual check below is still the record of R7.
