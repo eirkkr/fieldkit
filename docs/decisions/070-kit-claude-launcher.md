@@ -30,3 +30,5 @@ Alternatives rejected:
 - `--self` counts only as the first argument. A later one goes to `claude`.
 - The script resolves its own directory with `readlink -f` and stops if that fails. Without the check, a failed lookup would leave `as-bot.sh` to be looked up in the current directory, where a repo could plant one.
 - The script expands no possibly-empty array, so it runs on the bash 3.2 that macOS ships.
+
+*Partly superseded by [073](073-worktrees-beside-the-repo.md): once its stage 4 lands, new work no longer enters a worktree with `EnterWorktree`.*
