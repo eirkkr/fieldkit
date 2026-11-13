@@ -28,4 +28,4 @@ Reaching this skill means merging is approved for one head: user typed `/merge`,
    - Main checkout, with the branch checked out in another linked worktree: that worktree is not the one this `/merge` ran in. Keep it and the branch, noting the path and that it was not the worktree this `/merge` ran in.
    - Main checkout, branch in no linked worktree: on the merged branch, switch to the default branch (`gh repo view --json defaultBranchRef -q .defaultBranchRef.name`); on any other branch, stay. `git branch -D <branch>` if `git branch --list <branch>` prints it.
    - Last, in the checkout you are in (the main checkout, if you removed a worktree): `git pull --prune` on the default branch, else `git fetch --prune`.
-9. **Report** PR number and URL, and that it merged and was cleaned up, or what still blocks it.
+9. **Report** PR number and URL, and that it merged, or what still blocks it. Then the cleanup: each removal (worktree path and branch), each worktree or branch kept with its path and the reason, and, when a worktree was removed, that its git-ignored files went with it.
