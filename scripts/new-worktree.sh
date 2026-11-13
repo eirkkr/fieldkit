@@ -37,7 +37,8 @@ unset CDPATH GIT_DIR GIT_WORK_TREE GIT_COMMON_DIR GIT_INDEX_FILE
 # Exit codes: 1 refused or failed, 2 wrong usage, 3 worktree made but a git
 # hook, its .fieldkit link or its setup recipe failed.
 
-# Through readlink, not cd: a consumer runs this through its .fieldkit symlink.
+# Through readlink, so a symlink to this very file (one on PATH, say) finds the
+# kit as well as a .fieldkit symlink to the kit's directory does.
 kit="$(dirname "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")")"
 # This script as a pasteable command, for the messages that say what to run.
 self="$(printf '%q' "$kit/scripts/new-worktree.sh")"
@@ -76,19 +77,22 @@ case "${1:-}" in
         ;;
 esac
 
+# Whether git lists a worktree at $1. grep reads everything rather than
+# stopping at the first match with -q: git would then die of SIGPIPE on a long
+# list, and pipefail would report that as no match.
+is_registered() {
+    git -C "$main" worktree list --porcelain | grep -xF "worktree $1" >/dev/null
+}
+
 # The repo's setup recipe, run in the worktree $1 with its output on stderr.
 # Returns 0 when it ran or the repo has none, 1 when it could not run or failed.
 # A justfile `just` cannot load is a failure, not a missing recipe: an import of
 # a gitignored file, or syntax newer than the installed `just`, looks the same
 # as an absent recipe to `just --show`.
 run_setup() {
-    local dir="$1" name found="" summary
-    for name in justfile Justfile .justfile; do
-        if [ -f "$dir/$name" ]; then
-            found="$name"
-            break
-        fi
-    done
+    local dir="$1" found summary
+    # `just` matches the name without regard to case.
+    found="$(find "$dir" -maxdepth 1 -type f \( -iname justfile -o -iname .justfile \) -print -quit)"
     if [ -z "$found" ]; then
         echo "new-worktree: $repo has no justfile, so no environment was built in $dir" >&2
         return 0
@@ -98,11 +102,12 @@ run_setup() {
         return 1
     fi
     if ! summary="$(cd "$dir" && just --summary 2>&1)"; then
-        echo "new-worktree: just could not load $dir/$found: $summary" >&2
+        echo "new-worktree: just could not load $found: $summary" >&2
         echo "new-worktree: fix it, then: $self --setup $(printf '%q' "$dir")" >&2
         return 1
     fi
-    if ! tr ' ' '\n' <<<"$summary" | grep -qx worktree-setup; then
+    # Loading is ruled out, so a failure here means there is no such recipe or alias.
+    if ! (cd "$dir" && just --show worktree-setup >/dev/null 2>&1); then
         echo "new-worktree: $repo has no 'worktree-setup' recipe, so no environment was built in $dir" >&2
         return 0
     fi
@@ -148,7 +153,7 @@ if ! reason="$(python3 "$kit/hooks/conventions.py" branch "$branch" 2>&1)"; then
 fi
 
 path="$parent/$repo-$description"
-if [ -e "$path" ] || git -C "$main" worktree list --porcelain | grep -qxF "worktree $path"; then
+if [ -e "$path" ] || is_registered "$path"; then
     die "$path already exists; it is not reused. Pick another description, or remove it first. To re-run only its setup recipe: $self --setup $(printf '%q' "$path")"
 fi
 
@@ -182,7 +187,7 @@ add_worktree() {
     if git -C "$main" worktree add --quiet "$@" >&2; then
         return 0
     fi
-    if git -C "$main" worktree list --porcelain | grep -qxF "worktree $path"; then
+    if is_registered "$path"; then
         echo "new-worktree: git reported a failure after making $path, probably a hook; the worktree is kept" >&2
         hook_failed=true
         return 0

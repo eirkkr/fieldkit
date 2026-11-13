@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-kit="$1"
+kit="$(cd "$1" && pwd -P)"
 
 # Test scripts/new-worktree.sh against throwaway repos: a bare remote, a clone
 # of it, and the sibling worktrees the script makes beside the clone. Prints a
@@ -13,6 +13,9 @@ mkdir "$tmp/remotes" "$tmp/work"
 cd "$tmp"
 
 # Nothing from the machine's git config may reach the throwaway repos.
+# A GIT_DIR exported by a hook or `rebase --exec` would send every git call
+# here to that repo, not the throwaway ones.
+unset GIT_DIR GIT_WORK_TREE GIT_COMMON_DIR GIT_INDEX_FILE
 export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null
 export GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@t GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@t
 failed=0
@@ -356,6 +359,10 @@ case_links_fieldkit_when_the_main_checkout_has_it() {
     }
     mkrepo unlinked
     run "$tmp/work/unlinked" chore x
+    [ "$rc" -eq 0 ] || {
+        echo "exit $rc: $err" >&2
+        return 1
+    }
     [ ! -e "$out/.fieldkit" ] || {
         echo "a link was made with none to copy" >&2
         return 1
@@ -536,6 +543,108 @@ case_refuses_stray_hyphens_in_a_description() {
     for description in -x x- a--b; do
         refused "hyphens ($description)" "$tmp/work/hyphens" "joined by single hyphens" chore "$description"
     done
+}
+
+# shellcheck disable=SC2329 # called by name from the loop at the foot
+case_finds_a_recipe_that_is_an_alias_or_private() {
+    mkrepo aliased $'setup:\n\techo built > built.txt\nalias worktree-setup := setup\n'
+    run "$tmp/work/aliased" chore x
+    [ "$rc" -eq 0 ] || {
+        echo "alias: exit $rc: $err" >&2
+        return 1
+    }
+    [ -e "$out/built.txt" ] || {
+        echo "the aliased recipe did not run" >&2
+        return 1
+    }
+    mkrepo hidden $'[private]\nworktree-setup:\n\techo built > built.txt\n'
+    run "$tmp/work/hidden" chore x
+    [ "$rc" -eq 0 ] || {
+        echo "private: exit $rc: $err" >&2
+        return 1
+    }
+    [ -e "$out/built.txt" ] || {
+        echo "the private recipe did not run" >&2
+        return 1
+    }
+}
+
+# shellcheck disable=SC2329 # called by name from the loop at the foot
+case_does_not_take_a_longer_recipe_name_for_the_recipe() {
+    mkrepo longer $'worktree-setup-extra:\n\techo built > built.txt\n'
+    run "$tmp/work/longer" chore x
+    [ "$rc" -eq 0 ] || {
+        echo "exit $rc: $err" >&2
+        return 1
+    }
+    [[ "$err" == *"no 'worktree-setup' recipe"* ]] || {
+        echo "no notice: $err" >&2
+        return 1
+    }
+    [ ! -e "$out/built.txt" ] || {
+        echo "ran a recipe it was not asked for" >&2
+        return 1
+    }
+}
+
+# shellcheck disable=SC2329 # called by name from the loop at the foot
+case_finds_a_justfile_however_it_is_cased() {
+    mkrepo cased
+    printf 'worktree-setup:\n\techo built > built.txt\n' >"$tmp/work/cased/JUSTFILE"
+    git -C "$tmp/work/cased" add JUSTFILE
+    git -C "$tmp/work/cased" commit -q -m justfile
+    git -C "$tmp/work/cased" push -q origin main
+    run "$tmp/work/cased" chore x
+    [ "$rc" -eq 0 ] || {
+        echo "exit $rc: $err" >&2
+        return 1
+    }
+    [ -e "$out/built.txt" ] || {
+        echo "the recipe did not run: $err" >&2
+        return 1
+    }
+}
+
+# A long list of worktrees: git dies of SIGPIPE if the reader stops early, and
+# the sibling sorts before the repo's own `.claude/worktrees` entries.
+# shellcheck disable=SC2329 # called by name from the loop at the foot
+case_keeps_a_worktree_a_hook_failed_among_many() {
+    mkrepo crowded $'worktree-setup:\n\techo built > built.txt\n'
+    local i
+    for i in $(seq 1 60); do
+        git -C "$tmp/work/crowded" worktree add --quiet --detach "$tmp/work/crowded/.claude/worktrees/leftover-worktree-with-a-long-name-$i"
+    done
+    printf '#!/bin/sh\nexit 2\n' >"$tmp/work/crowded/.git/hooks/post-checkout"
+    chmod +x "$tmp/work/crowded/.git/hooks/post-checkout"
+    run "$tmp/work/crowded" chore x
+    [ "$rc" -eq 3 ] || {
+        echo "exit $rc, not 3: $err" >&2
+        return 1
+    }
+    [ "$out" = "$tmp/work/crowded-x" ] || {
+        echo "stdout is '$out'" >&2
+        return 1
+    }
+}
+
+# A failed add must not delete a branch the user already had.
+# shellcheck disable=SC2329 # called by name from the loop at the foot
+case_keeps_a_local_branch_when_the_add_fails() {
+    mkrepo mine
+    git -C "$tmp/work/mine" branch chore/mine
+    mkdir "$tmp/bin-add"
+    printf '#!/bin/sh\ncase " $* " in *" worktree add "*) echo "fatal: simulated failure" >&2; exit 128;; esac\nexec "%s" "$@"\n' "$(command -v git)" >"$tmp/bin-add/git"
+    chmod +x "$tmp/bin-add/git"
+    export PATH="$tmp/bin-add:$PATH"
+    run "$tmp/work/mine" --existing chore/mine
+    [ "$rc" -eq 1 ] || {
+        echo "exit $rc, not 1: $err" >&2
+        return 1
+    }
+    git -C "$tmp/work/mine" show-ref --verify --quiet refs/heads/chore/mine || {
+        echo "the user's branch was deleted" >&2
+        return 1
+    }
 }
 
 for case_fn in $(declare -F | awk '$3 ~ /^case_/ {print $3}'); do
