@@ -33,7 +33,7 @@ A stage is *at its gate* when open, assigned, and its branch has an open PR.
 
 - Stage at its gate, reviewer's message approves it, sends it back or asks for a review: [GATE.md](GATE.md).
 - Stage at its gate, message does none of those: say it is waiting, stop.
-- Stage assigned, no open PR: ask the reviewer whether to resume it. On yes, put the session on its branch (`git worktree list` shows it: `EnterWorktree` `path`; else `git switch <branch>`) and go to step 5, matching the step numbers in `git log` subjects against its steps.
+- Stage assigned, no open PR: ask the reviewer whether to resume it. On yes, put the session on its branch (`git worktree list` shows its worktree: `EnterWorktree` `path`; with none, `ExitWorktree` `keep` if the session entered one, run the creation script from the main checkout with `--existing <branch>`, and `EnterWorktree` `path` the path it prints) and go to step 5, matching the step numbers in `git log` subjects against its steps.
 - Change built in stages, every stage closed: [FINAL-REVIEW.md](FINAL-REVIEW.md).
 - Otherwise build: step 3.
 
