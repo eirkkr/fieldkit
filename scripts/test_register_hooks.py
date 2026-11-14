@@ -15,10 +15,8 @@ import tempfile
 import unittest
 from unittest import mock
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-
-import register_hooks  # noqa: E402
-import settings_edit  # noqa: E402
+import register_hooks
+import settings_edit
 
 KIT = "/kit"
 
@@ -60,6 +58,8 @@ class RegisterHooksTest(unittest.TestCase):
             ]
             self.assertEqual(len(found), 1, f"{event} {file}: want one group running {command!r}")
             self.assertEqual(found[0].get("matcher"), matcher, f"{file}: matcher")
+            if matcher is None:
+                self.assertNotIn("matcher", found[0], f"{file}: a group without a matcher has no key")
             self.assertEqual(found[0]["hooks"][0]["type"], "command", f"{file}: type")
 
     def test_the_registered_hooks_are_exactly_the_expected_ones(self) -> None:
@@ -85,4 +85,4 @@ class RegisterHooksTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main(verbosity=1)
+    unittest.main(verbosity=2)

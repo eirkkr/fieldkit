@@ -25,12 +25,12 @@ check: lint test check-branch-name check-pr-title
 # Run the tests of the kit's scripts and hooks, which CI runs.
 test: test-new-worktree test-worktree-edit-hook test-install-guard test-register-hooks
 
-# Lint markdown and shell scripts, and check the always-loaded text fits its budget.
+# Lint markdown and shell scripts, check the always-loaded text fits its budget, and that every registered PreToolUse hook is named in the docs.
 lint: rumdl check-shell check-context-size check-hooks-documented
 
 # Check that every registered PreToolUse hook is named in the git conventions and the README.
 check-hooks-documented:
-    @python3 "{{ justfile_directory() }}/scripts/check_hooks_documented.py" "{{ justfile_directory() }}"
+    @uv run python "{{ justfile_directory() }}/scripts/check_hooks_documented.py" "{{ justfile_directory() }}"
 
 # Test the worktree creation script against throwaway repos.
 test-new-worktree:
@@ -46,7 +46,9 @@ test-install-guard:
 
 # Test the settings the hook registration writes, against a scratch settings file.
 test-register-hooks:
-    @python3 "{{ justfile_directory() }}/scripts/test_register_hooks.py"
+    #!/usr/bin/env bash
+    set -euo pipefail
+    uv run python "{{ justfile_directory() }}/scripts/test_register_hooks.py" 2>&1 | sed 's/^/test-register-hooks: /'
 
 # Lint all markdown.
 rumdl:

@@ -3,15 +3,14 @@
 Run via `just check-hooks-documented`. Takes the kit directory as its one
 argument. Each `hooks/pretooluse-*.py` in register_hooks.HOOKS must be named
 in conventions/git.md and README.md, and each one on disk must be registered,
-so a hook added or renamed cannot leave the docs counting the old ones.
+so a hook added or renamed cannot go unnamed in the docs. It does not check
+the docs' count of hooks.
 """
 
 import pathlib
 import sys
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-
-import register_hooks  # noqa: E402
+import register_hooks
 
 DOCS = ("conventions/git.md", "README.md")
 

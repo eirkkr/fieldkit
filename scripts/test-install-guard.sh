@@ -25,12 +25,18 @@ main="$(cd "$base/main" && pwd -P)"
 
 # check <name> <command...>: run the command in a subshell; ok when it succeeds.
 check() {
-    local name="$1"
+    local name="$1" status
     shift
-    if (
+    # Outside an `if`, so set -e holds inside the case: a failed setup
+    # command fails it instead of being ignored.
+    set +e
+    (
         set -e
         "$@"
-    ); then
+    )
+    status=$?
+    set -e
+    if [ "$status" -eq 0 ]; then
         echo "test-install-guard: ok - $name"
     else
         echo "test-install-guard: FAILED - $name" >&2
