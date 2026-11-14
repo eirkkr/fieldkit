@@ -47,13 +47,12 @@ Done when the stage is assigned to you.
 
 1. Re-read the brief and notes against the repository as it now is ("A stage's issue"). Brief wrong: stop, tell the reviewer.
 2. Write the stage's steps and its branch name where "A stage's issue" puts them. Stage's issue already has `## Steps`: correct them against the repository instead, and comment on the stage's issue what changed.
-3. Cut the stage's branch from `origin/<default>`, whatever branch the session was on:
-   1. `git fetch`.
-   2. In a worktree this session entered: `ExitWorktree` `keep` (the previous stage may still be at its gate).
-   3. `EnterWorktree`, `name` the stage branch's description part; it starts at `origin/<default>`.
-   4. `git branch -m <stage's branch name>`.
+3. Cut the stage's branch from `origin/<default>` in its own sibling worktree, whatever branch the session was on:
+   1. In a worktree this session entered: `ExitWorktree` `keep` (the previous stage may still be at its gate). The session is back in the main checkout it was launched from.
+   2. From the main checkout, run `.fieldkit/scripts/new-worktree.sh <type> <description>` (in the kit, `scripts/new-worktree.sh`), the stage branch's name split at its first slash. It fetches, cuts the branch from `origin/<default>`, and prints the worktree's path. Exit 3 means the worktree exists but its setup failed: go on, and tell the reviewer.
+   3. `EnterWorktree` `path` the printed path. It prompts once.
 
-   `ExitWorktree` reports no worktree session but the session is in one (resumed, `claude --worktree`, a subagent's): `git switch -c <stage's branch name> origin/<default>` there instead of 3 and 4.
+   The previous stage's worktree stays for `merge` or the sweep. `ExitWorktree` reports no worktree session but the session is in a worktree (resumed, `claude --worktree`, a subagent's): run the script from there, which finds the main checkout itself, and `EnterWorktree` `path` the printed path; if that is refused, tell the reviewer the path and stop. Never `git switch -c` in place: it would switch the previous stage's worktree.
 
 Done when every step has a `Done when` that running or looking at something can check, and `git branch --show-current` prints the stage's branch name.
 
