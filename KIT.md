@@ -18,13 +18,14 @@ Where these rules conflict with the repo's own docs, flag it briefly before proc
 | Branching off a non-default branch | ask first | explain why; off default needs none |
 | Opening a PR | ask first | unless user typed `/pr`, or it is a change stage's gate PR |
 | Merging | ask first | unless user typed `/merge`; needs CI |
+| Removing other worktrees at `/merge` | ask first | the sweep's yes; the merge's own worktree needs none |
 | Starting CI by hand (a repo's recipe that re-runs or dispatches it) | ask first | name PR and head; a yes covers that head; `/merge` does not cover it |
 
 - Approval settles whether to act, not what the draft says. Once given (a yes, or the `/pr`, `/merge` or issue request itself), draft and go straight to it.
 - Merging needs CI. Failed check, conflict or missing required review stops it: report, never `--admin` or edit a ruleset unless asked. Running check: wait. Green: merge, no further sign-off.
 - Approval covers one head: the short SHA named when asking, or the head at a typed `/merge`. Any push adding or rewriting a commit voids it (a fix, a rebase, anyone's): stop, report, ask again. Sole exception: this PR's gate approval commits (`change-stage` GATE.md).
 - Commit onto the current branch, even if its work looks unrelated.
-- New work from the default branch: before the first edit to a non-ignored file, run `.fieldkit/scripts/new-worktree.sh <type> <description>` from the main checkout, then `EnterWorktree` the path it prints. Failure or refused entry: tell the reviewer; at exit 3 enter it, otherwise stop. In a worktree or on a non-default branch: stay. `--existing <branch>` replaces both for a branch no worktree has.
+- New work from the default branch: before the first edit to a non-ignored file, run `.fieldkit/scripts/new-worktree.sh <type> <description>` from the main checkout, then `EnterWorktree` the path it prints. Failure or refused entry: tell the reviewer; at exit 3 enter it, otherwise stop. In a worktree or on a non-default branch: stay.
 - A gate on a *follow-up* never holds the action before it: land the push, then ask.
 - A finding is *small* when fixing costs less than filing an issue, or slightly more. Small and unrelated: fix on the branch, act-then-show, own commit, named in the PR description; on a change's stage PR, only in files the stage already touches. Any other finding becomes an issue: say what it would say, file on a yes.
 - Route lessons worth keeping by scope: generic to the shared conventions kit, repo-specific to that repo's docs.
@@ -36,7 +37,7 @@ Where these rules conflict with the repo's own docs, flag it briefly before proc
 ### Linting and formatting
 
 - Lint once, at readiness. While iterating, match surrounding style by eye, no linters. Before handover (PR to open, `/pr` included; a stage's gate), run the repo's full local check, fix what it reports in its own commit via `push`. `/merge` is no handover: a fix would void the approved head.
-- That run does not start CI: starting it is ask first (table). Run more of CI only where the repo's docs ask; ask first for a slow recipe.
+- Run more of CI only where the repo's docs ask; ask first for a slow recipe.
 - Run tests for correctness feedback: repo's canonical command, quiet, short tracebacks, fail-fast on the narrowest relevant selection while iterating, full suite before declaring done.
 
 ### Reviewing and auditing
