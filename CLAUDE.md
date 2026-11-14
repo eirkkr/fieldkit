@@ -12,7 +12,7 @@ The kit is a public repository ([ADR 036](docs/decisions/036-public-mit-with-ups
 
 ## Paths differ from a consumer session
 
-KIT.md's load-on-demand table gives targets as `.fieldkit/conventions/<file>`, correct in a consumer repo reaching the kit through its symlink. This repo has no `.fieldkit` symlink to itself ([ADR 014](docs/decisions/014-skills-not-commands.md)): read those files at `conventions/<file>`.
+KIT.md's load-on-demand table gives targets as `.fieldkit/conventions/<file>`, correct in a consumer repo reaching the kit through its symlink. This repo has no `.fieldkit` symlink to itself ([ADR 014](docs/decisions/014-skills-not-commands.md)): read those files at `conventions/<file>`, and run the worktree script at `scripts/new-worktree.sh`.
 
 ## Reviews
 
