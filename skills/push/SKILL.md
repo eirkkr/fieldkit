@@ -8,7 +8,7 @@ argument-hint: "[short summary of what changed and why]"
 
 Decide, from context in hand plus `conventions/git.md`'s branch and commit rules (run `git status`/`git diff` if needed):
 
-- branch name: the current branch, unless it is the default branch or breaks git.md's branch-name rules (`worktree-<name>` from `EnterWorktree`): then a new `type/short-description`, reusing `<name>` where it fits
+- branch name: the current branch, unless it is the default branch or breaks git.md's branch-name rules (`worktree-<name>` from a worktree Claude Code made itself, a sub-agent's or `claude --worktree`'s; a branch the creation script made already conforms): then a new `type/short-description`, reusing `<name>` where it fits
 - commit message
 - exact list of files to stage
 
