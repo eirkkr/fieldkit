@@ -4,6 +4,7 @@ default:
 
 # Set up skills, agents, statusline, and Claude settings.
 install:
+    @"{{ justfile_directory() }}/scripts/require-main-checkout.sh" "{{ justfile_directory() }}"
     @"{{ justfile_directory() }}/scripts/link-skills.sh" "{{ justfile_directory() }}"
     @"{{ justfile_directory() }}/scripts/link-agents.sh" "{{ justfile_directory() }}"
     @"{{ justfile_directory() }}/scripts/link-statusline.sh" "{{ justfile_directory() }}"
@@ -18,11 +19,22 @@ setup:
     git config fieldkit.fixCommand "just fix"
     @echo "Set fieldkit.fixCommand - the Stop hook will run 'just fix' at turn end"
 
-# Run all checks: the linters, the script and hook tests, plus this branch's name and its PR's title.
-check: lint test-new-worktree test-worktree-edit-hook check-branch-name check-pr-title
+# Run all checks: the linters, the tests, plus this branch's name and its PR's title.
+check: lint test check-branch-name check-pr-title
 
-# Lint markdown and shell scripts, and check the always-loaded text fits its budget.
-lint: rumdl check-shell check-context-size
+# Start the Test workflow on this branch's pushed head, by re-running its skipped run.
+ci:
+    @"{{ justfile_directory() }}/scripts/ci.sh"
+
+# Run the tests of the kit's scripts and hooks; the Test workflow runs it when started.
+test: test-new-worktree test-worktree-edit-hook test-install-guard test-register-hooks
+
+# Lint markdown and shell scripts, check the always-loaded text fits its budget, and that every registered PreToolUse hook is named in the docs.
+lint: rumdl check-shell check-context-size check-hooks-documented
+
+# Check that every registered PreToolUse hook is named in the git conventions and the README.
+check-hooks-documented:
+    @uv run python "{{ justfile_directory() }}/scripts/check_hooks_documented.py" "{{ justfile_directory() }}"
 
 # Test the worktree creation script against throwaway repos.
 test-new-worktree:
@@ -31,6 +43,16 @@ test-new-worktree:
 # Test the hook that refuses edits in the main checkout against throwaway repos.
 test-worktree-edit-hook:
     @"{{ justfile_directory() }}/scripts/test-worktree-edit-hook.sh" "{{ justfile_directory() }}"
+
+# Test that install refuses to run from a linked worktree, against throwaway repos.
+test-install-guard:
+    @"{{ justfile_directory() }}/scripts/test-install-guard.sh" "{{ justfile_directory() }}"
+
+# Test the settings the hook registration writes, against a scratch settings file.
+test-register-hooks:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    uv run python "{{ justfile_directory() }}/scripts/test_register_hooks.py" 2>&1 | sed 's/^/test-register-hooks: /'
 
 # Lint all markdown.
 rumdl:
