@@ -8,7 +8,7 @@ A session's worktree is made by a kit script, not by `EnterWorktree`, at the ses
 - The script, not a hook, checks the branch name, links `.fieldkit` where the main checkout has one, and runs the setup recipe the repo names.
 - A repo names its setup recipe by having a `just worktree-setup` recipe. The script runs it in the new worktree; a repo without one is told so and the script exits 0. If the recipe fails, `just` cannot load the justfile, or a git hook fails once the worktree is made, the worktree stays, the path is still printed, and the exit code is 3; `--setup <path>` re-runs only the recipe.
 - A session in a consumer repo runs `.fieldkit/scripts/new-worktree.sh <type> <description>`, through the symlink every consumer already has. In the kit it is `scripts/new-worktree.sh`. `--existing <branch>` makes the sibling for a branch that already exists, locally or only on origin.
-- `/merge` removes the worktree it ran in, and a later sweep offers the other ended ones for removal on the reviewer's yes. Claude Code's own worktrees under `.claude/worktrees/` stay where they are.
+- `/merge` removes the worktree it ran in, and a later sweep offers the other ended ones for removal on the reviewer's yes. Claude Code's own worktrees stay under `.claude/worktrees/`, and the sweep treats them like any other: offered once their PR has ended, reported and never offered when they have no PR.
 
 If two repos map to the same path (`api` with `client-x` and `api-client` with `x` both give `../api-client-x`), creation stops at the existing path and says so.
 
@@ -63,7 +63,7 @@ Alternatives rejected:
 
 ## Consequences
 
-- Stage 4 of [#121](https://github.com/eirkkr/fieldkit/issues/121) moved the rules, `push` and `change-stage` to this layout: `KIT.md` and `git.md` run the script for new work, and `push` renames only the `worktree-*` branches of Claude Code's own worktrees. `/merge` removal is stage 2. Stage 5 added the sweep to the merge report: it lists the other worktrees whose pull request has ended at the worktree's head with a clean tree, and removes them on the reviewer's yes. The hook that refuses edits in the main checkout (stage 6) is still to come.
+- Stage 4 of [#121](https://github.com/eirkkr/fieldkit/issues/121) moved the rules, `push` and `change-stage` to this layout: `KIT.md` and `git.md` run the script for new work, and `push` renames only the `worktree-*` branches of Claude Code's own worktrees. `/merge` removal is stage 2. Stage 5 added the sweep to the merge report: it offers the other worktrees whose pull request has merged or closed at that worktree's own head with a clean tree, and removes them on the reviewer's yes. The hook that refuses edits in the main checkout (stage 6) is still to come.
 - `change-stage` cannot enter the next stage's sibling from inside the previous worktree: it leaves it with `keep` first, and runs creation from the main checkout. Its fallback of `git switch -c` in place would have switched the previous stage's sibling, so stage 4 replaced it with the creation script, and resuming a stage uses `--existing`.
 - A repo in which `..` is not writable (a container with only the repo mounted) cannot use the layout, and is told so. Stage 3's script also refuses a parent that is inside another work tree, and a main checkout that is a submodule.
 - If a Claude Code release lets a worktree session enter siblings, or locks siblings, revisit the hand-off and the removal rules.

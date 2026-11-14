@@ -18,7 +18,7 @@ Where these rules conflict with the repo's own docs, flag it briefly before proc
 | Branching off a non-default branch | ask first | explain why; off default needs none |
 | Opening a PR | ask first | unless user typed `/pr`, or it is a change stage's gate PR |
 | Merging | ask first | unless user typed `/merge`; needs CI |
-| Removing other worktrees at `/merge` | ask first | the sweep's yes; the merge's own worktree needs none |
+| Removing other worktrees at `/merge` | ask first | offered after the merge; `/merge` does not cover it |
 | Starting CI by hand (a repo's recipe that re-runs or dispatches it) | ask first | name PR and head; a yes covers that head; `/merge` does not cover it |
 
 - Approval settles whether to act, not what the draft says. Once given (a yes, or the `/pr`, `/merge` or issue request itself), draft and go straight to it.
