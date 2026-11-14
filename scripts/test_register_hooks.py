@@ -83,6 +83,15 @@ class RegisterHooksTest(unittest.TestCase):
         self.assertEqual(len(commands), 3)
         self.assertTrue(all(c.startswith("python3 /moved/hooks/") and c.endswith(" || true") for c in commands))
 
+    def test_non_ascii_text_is_kept_literal_and_out_of_the_diff(self) -> None:
+        seed = json.dumps({"note": "a — b"}, indent=2, ensure_ascii=False) + "\n"
+        self.settings.write_text(seed, encoding="utf-8")
+        with mock.patch("builtins.input", return_value="y"):
+            out = self.register()
+        self.assertNotIn("\\u", out)
+        self.assertIn("—".encode(), self.settings.read_bytes())
+        self.assertNotIn(b"\\u2014", self.settings.read_bytes())
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

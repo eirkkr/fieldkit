@@ -21,7 +21,7 @@ def load() -> tuple[str | None, dict]:
 
     Exits if the file isn't valid JSON, or holds JSON that isn't an object.
     """
-    old_text = SETTINGS.read_text() if SETTINGS.exists() else None
+    old_text = SETTINGS.read_text(encoding="utf-8") if SETTINGS.exists() else None
     try:
         data = json.loads(old_text) if old_text is not None else {}
     except json.JSONDecodeError as err:
@@ -32,12 +32,12 @@ def load() -> tuple[str | None, dict]:
 
 
 def dump(data: dict) -> str:
-    return json.dumps(data, indent=2) + "\n"
+    return json.dumps(data, indent=2, ensure_ascii=False) + "\n"
 
 
 def write(data: dict) -> None:
     SETTINGS.parent.mkdir(parents=True, exist_ok=True)
-    SETTINGS.write_text(dump(data))
+    SETTINGS.write_text(dump(data), encoding="utf-8")
 
 
 def create(data: dict, message: str) -> None:
