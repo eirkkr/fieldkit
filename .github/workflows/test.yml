@@ -1,8 +1,10 @@
-# Fail a PR that breaks the creation script, the worktree-edit hook, the install
-# guard or the hook registration, by running the kit's test recipe.
+# Run the kit's test recipe (the creation script, the worktree-edit hook, the
+# install guard and the hook registration) on demand only: a PR does not start
+# it. Run it from the Actions tab, or `gh workflow run test.yml --ref <branch>`.
+# `just check` runs the same recipe locally before a PR opens.
 name: Test
 
-on: pull_request
+on: workflow_dispatch
 
 permissions:
   contents: read
