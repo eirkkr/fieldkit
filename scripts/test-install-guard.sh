@@ -27,7 +27,10 @@ main="$(cd "$base/main" && pwd -P)"
 check() {
     local name="$1"
     shift
-    if (set -e; "$@"); then
+    if (
+        set -e
+        "$@"
+    ); then
         echo "test-install-guard: ok - $name"
     else
         echo "test-install-guard: FAILED - $name" >&2
@@ -35,10 +38,12 @@ check() {
     fi
 }
 
+# shellcheck disable=SC2329 # only called through check, by name
 allowed_in_main() {
     "$guard" "$base/main"
 }
 
+# shellcheck disable=SC2329 # only called through check, by name
 refused_in_worktree_naming_main() {
     local err rc=0
     err="$("$guard" "$base/linked" 2>&1)" || rc=$?
@@ -56,6 +61,7 @@ refused_in_worktree_naming_main() {
 }
 
 # The first command of `install` must be the guard, so nothing else runs first.
+# shellcheck disable=SC2329 # only called through check, by name
 install_runs_guard_first() {
     local first
     first="$(awk '/^install:/ {found=1; next} found && /^    / {print; exit}' "$kit/justfile")"
