@@ -25,6 +25,7 @@ HOOKS = (
     Hook("Stop", None, "stop-autofix.py", ("stop-format-drift.py",)),
     Hook("PreToolUse", "Bash", "pretooluse-branch-name.py"),
     Hook("PreToolUse", "Bash", "pretooluse-merge-message.py"),
+    Hook("PreToolUse", "Edit|Write|NotebookEdit", "pretooluse-worktree-edit.py"),
 )
 
 
@@ -53,7 +54,7 @@ def command_for(kit: str, hook: Hook) -> str:
     code, so any non-zero exit is a malfunction - a checked-out branch
     predating the hook file, an unreadable clone, a crash. `|| true` keeps it
     inert: a `Stop` hook would otherwise refuse to end every turn, and a
-    `PreToolUse` one exiting 2 would refuse every Bash call.
+    `PreToolUse` one exiting 2 would refuse every call it matches.
     """
     return f"python3 {kit}/hooks/{hook.file} || true"
 
