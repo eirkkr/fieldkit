@@ -254,6 +254,13 @@ case_does_not_run_a_repos_fsmonitor_command() {
 }
 
 # shellcheck disable=SC2329 # called by name from the loop at the foot
+case_quotes_the_repo_path_in_the_switch_command() {
+    mkconsumer "sp ace"
+    call Edit "$tmp/work/sp ace/tracked.txt" "$tmp/loose"
+    denied "git -C '$tmp/work/sp ace' config fieldkit.allowMainEdits true"
+}
+
+# shellcheck disable=SC2329 # called by name from the loop at the foot
 case_refuses_when_the_switch_value_is_not_a_boolean() {
     mkconsumer api
     git -C "$tmp/work/api" config fieldkit.allowMainEdits maybe

@@ -35,6 +35,7 @@ repo the session is in, so it must not depend on that repo's toolchain.
 
 import json
 import os
+import shlex
 import subprocess
 import sys
 
@@ -103,7 +104,12 @@ def session_relation(cwd, common_dir, git_dir, top, target):
     session_git = absolute_dir(cwd, "--git-dir")
     session_top = (git(cwd, "rev-parse", "--show-toplevel") or "").strip()
     if session_git and session_git != git_dir and session_top and top:
-        return "worktree", os.path.join(os.path.realpath(session_top), os.path.relpath(target, top))
+        relative = os.path.relpath(target, top)
+        # A path typed in another case on a case-insensitive filesystem lands
+        # outside `top`; say so without a path, not with a wrong one.
+        if relative.startswith(".."):
+            return "worktree", None
+        return "worktree", os.path.join(os.path.realpath(session_top), relative)
     return "same", None
 
 
@@ -155,12 +161,15 @@ def reason(branch, doc, top, relation):
     kind, path = relation
     kit = not doc.startswith(".fieldkit")
     base = f"This file is in a repo's main checkout, on its default branch `{branch}`. "
-    switch = f"Only if the reviewer says so, `git -C {top} config {SWITCH} true` switches this refusal off for that repo."
+    where_is_it = f"`git -C {shlex.quote(top)} config {SWITCH} true`"
+    switch = f"Only if the reviewer says so, {where_is_it} switches this refusal off for that repo."
     if kind == "worktree":
         return (
             base
-            + f"This session is already in a worktree of that repo: edit the same file there, at `{path}`, "
-            "and make no second worktree. " + switch
+            + "This session is already in a worktree of that repo: edit the same file there"
+            + (f", at `{path}`," if path else "")
+            + " and make no second worktree. "
+            + switch
         )
     if kind == "other":
         where = "a kit worktree" if kit else "a worktree of that repo"
@@ -176,8 +185,9 @@ def reason(branch, doc, top, relation):
         "then `EnterWorktree` the path it prints. Exit 3 means the worktree exists but its "
         "setup failed: enter it and tell the reviewer. Any other failure, or a refused entry: "
         "stop and tell the reviewer. `--existing <branch>` in place of both arguments makes the "
-        "worktree for a branch no worktree has. Only if the reviewer says so, "
-        f"`git config {SWITCH} true` in this repo switches this refusal off. See {doc}."
+        "worktree for a branch no worktree has. "
+        + switch
+        + f" See {doc}."
     )
 
 
