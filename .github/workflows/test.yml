@@ -1,16 +1,26 @@
 # Run the kit's test recipe (the creation script, the worktree-edit hook, the
-# install guard and the hook registration) on demand only: a PR does not start
-# it. Run it from the Actions tab, or `gh workflow run test.yml --ref <branch>`.
-# `just check` runs the same recipe locally before a PR opens.
+# install guard and the hook registration) when started, not on each push.
+# A push is attempt 1 and skips the job; a re-run, which `just ci` starts, is
+# attempt 2 and runs it. A PR shows the job as skipped until then. `just check`
+# runs the same recipe locally before a PR opens.
 name: Test
 
-on: workflow_dispatch
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+# A newer push supersedes a run still going on the same PR.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
   test:
+    # A push is attempt 1 and skips; a re-run is attempt 2 and runs.
+    if: github.run_attempt > 1
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

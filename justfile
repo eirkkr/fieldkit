@@ -22,7 +22,11 @@ setup:
 # Run all checks: the linters, the tests, plus this branch's name and its PR's title.
 check: lint test check-branch-name check-pr-title
 
-# Run the tests of the kit's scripts and hooks; the Test workflow runs it on demand.
+# Start the Test workflow on this branch's pushed head, by re-running its skipped run.
+ci:
+    @"{{ justfile_directory() }}/scripts/ci.sh"
+
+# Run the tests of the kit's scripts and hooks; the Test workflow runs it when started.
 test: test-new-worktree test-worktree-edit-hook test-install-guard test-register-hooks
 
 # Lint markdown and shell scripts, check the always-loaded text fits its budget, and that every registered PreToolUse hook is named in the docs.
