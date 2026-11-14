@@ -37,6 +37,10 @@ test-worktree-edit-hook:
 test-install-guard:
     @"{{ justfile_directory() }}/scripts/test-install-guard.sh" "{{ justfile_directory() }}"
 
+# Test the settings the hook registration writes, against a scratch settings file.
+test-register-hooks:
+    @python3 "{{ justfile_directory() }}/scripts/test_register_hooks.py"
+
 # Lint all markdown.
 rumdl:
     #!/usr/bin/env bash
