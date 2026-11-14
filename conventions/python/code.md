@@ -55,6 +55,10 @@ A constant doesn't help when the same value is also written outside Python. Pyth
 
 Let the side that owns the value pass it to the other, so it is written once: hand the constants to the template engine and render `name="{{ SAVE }}"`.
 
+## Constant tables
+
+On Python 3.15+ ([PEP 814](https://peps.python.org/pep-0814/)), write a lookup table the code never changes, at module or class level, as `frozendict({...})`. Never use `MappingProxyType`. Annotate it `Mapping[K, V]` when it is annotated at all, and leave it unannotated when it is an operand or result of `|`, since `Mapping` has no `|` and mypy infers `frozendict`. Type a function's mapping parameter `Mapping[K, V]`, not `dict`. Before passing a table to code that tests `isinstance(x, dict)`, convert it with `dict(table)`. Why: [ADR 072](../../docs/decisions/072-constant-tables-are-frozendict.md).
+
 ## Multi-line text
 
 Relies on review (no linter). Write text of three or more lines as it will appear: one triple-quoted block passed through `textwrap.dedent`, the call ending in `.strip()`, with the opening and closing quotes on lines of their own. Blank lines count as lines; shorter text stays one literal.
