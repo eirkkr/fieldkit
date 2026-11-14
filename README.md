@@ -66,7 +66,7 @@ Requires [just](https://just.systems) and [uv](https://docs.astral.sh/uv/).
 
    For a Python repo, also add `@.fieldkit/conventions/python/README.md`; it stays slim and indexes `code`, `setup`, and `testing`, which Claude reads on demand; see also "Enabling the Python skills in a consumer repo". `.fieldkit` is gitignored - every collaborator or CI checkout runs this step once to recreate the symlink.
 
-3. **Grant Claude access to the kit.** `just install` patches `~/.claude/settings.json`: adds the kit path to `permissions.additionalDirectories` so all consumer sessions can read it without a prompt, and sets `autoMemoryEnabled: false` so learnings go into docs or CLAUDE.md rather than machine-local memory files. It also sets `attribution: {commit: "", pr: "", sessionUrl: false}` so commits and PRs carry no AI attribution, `worktree.baseRef: "fresh"` so a new worktree branches from the remote default branch, and `.fieldkit` in `worktree.symlinkDirectories` so it carries the repo's kit link ([ADR 069](docs/decisions/069-configure-new-worktrees.md); written without asking unless it would replace a `worktree` value you hold), `statusLine` to run the kit's linked `statusline-command.sh`, a `hooks.Stop` entry for the autofix hook (see "Auto-fixing and catching formatter drift"), and `hooks.PreToolUse` entries for the branch-name and merge-message hooks (see "Refusing non-conforming branch names" and "Enforcing commit messages") - if the existing file already differs from any of the others, it shows the diff and asks before changing it. Each of these only touches its own key, leaving the rest of the file alone.
+3. **Grant Claude access to the kit.** `just install` patches `~/.claude/settings.json`: adds the kit path to `permissions.additionalDirectories` so all consumer sessions can read it without a prompt, and sets `autoMemoryEnabled: false` so learnings go into docs or CLAUDE.md rather than machine-local memory files. It also sets `attribution: {commit: "", pr: "", sessionUrl: false}` so commits and PRs carry no AI attribution, `worktree.baseRef: "fresh"` so a worktree Claude Code makes itself (a sub-agent's, `claude --worktree`) branches from the remote default branch, and `.fieldkit` in `worktree.symlinkDirectories` so it carries the repo's kit link ([ADR 069](docs/decisions/069-configure-new-worktrees.md); written without asking unless it would replace a `worktree` value you hold), `statusLine` to run the kit's linked `statusline-command.sh`, a `hooks.Stop` entry for the autofix hook (see "Auto-fixing and catching formatter drift"), and `hooks.PreToolUse` entries for the branch-name and merge-message hooks (see "Refusing non-conforming branch names" and "Enforcing commit messages") - if the existing file already differs from any of the others, it shows the diff and asks before changing it. Each of these only touches its own key, leaving the rest of the file alone.
 
 4. **Start sessions from the repo root.** The load-on-demand files are referenced relative to the consumer repo root, so launch `claude` there, not a subdirectory. Worth repeating in each consumer repo's README.
 
@@ -104,6 +104,18 @@ This symlinks `.git/hooks/pre-commit` and `.git/hooks/commit-msg` to the kit's c
 
 The `pre-commit` hook takes the default branch from the `fieldkit.defaultBranch` git config when set, otherwise `origin/HEAD`, otherwise `main` - so an explicit override always wins. `git commit --no-verify` bypasses it - deliberately left as your escape hatch, and deliberately absent from the hook's own output so an agent that hits the block branches instead of routing around it.
 
+## A worktree for each session's new work
+
+`conventions/git.md` has a session make its own worktree before its first edit to a file git does not ignore, so parallel sessions never share a working tree ([ADR 073](docs/decisions/073-worktrees-beside-the-repo.md)). The kit's script makes it, run from the main checkout:
+
+```bash
+.fieldkit/scripts/new-worktree.sh <type> <description>
+```
+
+It creates `../<repo>-<description>` beside the main checkout, on the branch `<type>/<description>` cut from the remote default branch, links the repo's `.fieldkit`, and prints the path. A branch name that breaks the rules, a path that exists and a parent that is not writable are refused before anything is made. In the kit the script is `scripts/new-worktree.sh`. The session then enters the path with `EnterWorktree`, which asks you to confirm once per entry, because the worktree is outside `.claude/worktrees/`.
+
+To have each new worktree's environment built (a virtualenv, installed dependencies), a repo adds a `worktree-setup` recipe to its `justfile`, which the script runs in the new worktree. A repo without one is told so and gets a bare worktree. If the recipe fails, the worktree stays, the path is still printed and the script exits 3; `new-worktree.sh --setup <path>` runs the recipe again. `--existing <branch>` makes the worktree for a branch that already exists. Worktrees Claude Code makes itself (sub-agents, `claude --worktree`) still go under `.claude/worktrees/`.
+
 ## Auto-fixing and catching formatter drift
 
 An auto-fixer can rewrite a file *after* Claude edited it, sometimes after Claude has already committed and pushed for the turn, leaving the reformat stranded until someone notices. The kit ships a Claude Code `Stop` hook ([ADR 035](docs/decisions/035-measure-the-fixer-not-the-transcript.md)) that fires as a turn ends and does two things in one process:
@@ -133,7 +145,7 @@ It runs on every turn, including turns that ended with everything committed - th
 
 `conventions/git.md` limits branch names to a closed set of prefixes and 50 characters, but an agent only follows that if it reads `git.md` first. The kit ships a Claude Code `PreToolUse` hook ([ADR 046](docs/decisions/046-enforce-branch-names-in-a-hook-and-ci.md)) that refuses a Bash command creating or renaming a branch to a name breaking either rule - `git checkout -b`, `git switch -c`, `git branch` (create, rename, copy) or `git worktree add -b`, even inside a compound command. The refusal names the rule, so Claude retries with a conforming name before anything is committed.
 
-- It only sees Claude's Bash commands, not branches you make yourself or ones `EnterWorktree` makes.
+- It only sees Claude's Bash commands, not branches you make yourself or ones `EnterWorktree` makes. The worktree script's `git worktree add` is inside the script, out of its sight, so the script checks the name itself.
 - `just install` registers it machine-wide, but it acts only in a repo with a `.fieldkit` entry (a linked worktree's main worktree counts) or in the kit.
 - It lets through anything it can't parse with confidence, and a crash does the same.
 - The rules are constants in `hooks/conventions.py`, mirroring `git.md`'s Branches bullets - change both together.

@@ -24,7 +24,7 @@ Where these rules conflict with the repo's own docs, flag it briefly before proc
 - Merging needs CI. Failed check, conflict or missing required review stops it: report, never `--admin` or edit a ruleset unless asked. Running check: wait. Green: merge, no further sign-off.
 - Approval covers one head: the short SHA named when asking, or the head at a typed `/merge`. Any push adding or rewriting a commit voids it (a fix, a rebase, anyone's): stop, report, ask again. Sole exception: this PR's gate approval commits (`change-stage` GATE.md).
 - Commit onto the current branch, even if its work looks unrelated.
-- New work from the default branch: before the first file edit, `EnterWorktree` (`name` = short description). Already in a worktree, or on another branch: stay. `push` renames the `worktree-*` branch.
+- New work from the default branch: before the first edit to a non-ignored file, run `.fieldkit/scripts/new-worktree.sh <type> <description>` from the main checkout, then `EnterWorktree` the path it prints. Failure or refused entry: tell the reviewer; at exit 3 enter it, otherwise stop. In a worktree or on a non-default branch: stay. `--existing <branch>` replaces both for a branch no worktree has.
 - A gate on a *follow-up* never holds the action before it: land the push, then ask.
 - A finding is *small* when fixing costs less than filing an issue, or slightly more. Small and unrelated: fix on the branch, act-then-show, own commit, named in the PR description; on a change's stage PR, only in files the stage already touches. Any other finding becomes an issue: say what it would say, file on a yes.
 - Route lessons worth keeping by scope: generic to the shared conventions kit, repo-specific to that repo's docs.

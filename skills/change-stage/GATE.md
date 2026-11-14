@@ -2,7 +2,7 @@
 
 Reached from [SKILL.md](SKILL.md) when a stage is at its gate and the reviewer has answered. Forms are in `conventions/specs.md`, under the headings named.
 
-Find the stage's PR first - `gh pr list --head <branch>`, the branch being the one its steps name - and put the session on it: `git worktree list` shows it, `EnterWorktree` `path`; else `git switch <branch>`. Done when the PR found closes this stage's issue.
+Find the stage's PR first - `gh pr list --head <branch>`, the branch being the one its steps name - and put the session on it: by the "On yes" procedure of `SKILL.md`'s "Stage assigned, no open PR" line (skip its question and its step 5). Done when the PR found closes this stage's issue.
 
 ## A review asked for
 

@@ -31,4 +31,4 @@ Alternatives rejected:
 - The script resolves its own directory with `readlink -f` and stops if that fails. Without the check, a failed lookup would leave `as-bot.sh` to be looked up in the current directory, where a repo could plant one.
 - The script expands no possibly-empty array, so it runs on the bash 3.2 that macOS ships.
 
-*Partly superseded by [073](073-worktrees-beside-the-repo.md): once its stage 4 lands, new work no longer enters a worktree with `EnterWorktree`.*
+*Partly superseded by [073](073-worktrees-beside-the-repo.md): new work no longer gets its worktree from `EnterWorktree`, so its branch no longer needs a rename: a script makes the worktree on a conforming branch. The rename in `push` stays for the worktrees Claude Code makes itself.*

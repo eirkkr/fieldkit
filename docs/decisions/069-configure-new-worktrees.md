@@ -30,4 +30,4 @@ Alternatives rejected:
 - `"head"` stays available for a one-off by editing `settings.json` by hand; the next `just install` asks before restoring `"fresh"`, and keeps the `.fieldkit` link whichever way you answer.
 - If Claude Code renames or removes either key, update this ADR and `scripts/configure_worktree.py`.
 
-*Partly superseded by [073](073-worktrees-beside-the-repo.md): once its stage 4 lands, new work no longer enters a worktree with `EnterWorktree`.*
+*Partly superseded by [073](073-worktrees-beside-the-repo.md): new work no longer gets its worktree from `EnterWorktree`: a script makes it, and `EnterWorktree` only enters it. The two settings still apply to the worktrees Claude Code makes itself.*
