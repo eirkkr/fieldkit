@@ -2,7 +2,7 @@
 
 Reached from [SKILL.md](SKILL.md) when a stage is at its gate and the reviewer has answered. Forms are in `conventions/specs.md`, under the headings named.
 
-Find the stage's PR first - `gh pr list --head <branch>`, the branch being the one its steps name - and put the session on it: `git worktree list` shows its worktree, `EnterWorktree` `path`; with none, run the creation script with `--existing <branch>` from the main checkout (`ExitWorktree` `keep` first in a worktree this session entered) and `EnterWorktree` `path` the path it prints. Done when the PR found closes this stage's issue.
+Find the stage's PR first - `gh pr list --head <branch>`, the branch being the one its steps name - and put the session on it: as `SKILL.md`'s resume line, "Stage assigned, no open PR", says (`ExitWorktree` `keep`, then `EnterWorktree` `path`, or the script's `--existing` when no worktree has the branch). Done when the PR found closes this stage's issue.
 
 ## A review asked for
 

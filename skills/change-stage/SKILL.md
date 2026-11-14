@@ -33,7 +33,7 @@ A stage is *at its gate* when open, assigned, and its branch has an open PR.
 
 - Stage at its gate, reviewer's message approves it, sends it back or asks for a review: [GATE.md](GATE.md).
 - Stage at its gate, message does none of those: say it is waiting, stop.
-- Stage assigned, no open PR: ask the reviewer whether to resume it. On yes, put the session on its branch (`git worktree list` shows its worktree: `EnterWorktree` `path`; with none, `ExitWorktree` `keep` if the session entered one, run the creation script from the main checkout with `--existing <branch>`, and `EnterWorktree` `path` the path it prints) and go to step 5, matching the step numbers in `git log` subjects against its steps.
+- Stage assigned, no open PR: ask the reviewer whether to resume it. On yes, put the session on its branch: `ExitWorktree` `keep` if it entered a worktree, then `EnterWorktree` `path` the branch's worktree (`git worktree list` shows it); with none, run the script as in step 4.3 with `--existing <branch>` in place of the type and description, and enter the path it prints. Then go to step 5, matching the step numbers in `git log` subjects against its steps.
 - Change built in stages, every stage closed: [FINAL-REVIEW.md](FINAL-REVIEW.md).
 - Otherwise build: step 3.
 
@@ -48,11 +48,11 @@ Done when the stage is assigned to you.
 1. Re-read the brief and notes against the repository as it now is ("A stage's issue"). Brief wrong: stop, tell the reviewer.
 2. Write the stage's steps and its branch name where "A stage's issue" puts them. Stage's issue already has `## Steps`: correct them against the repository instead, and comment on the stage's issue what changed.
 3. Cut the stage's branch from `origin/<default>` in its own sibling worktree, whatever branch the session was on:
-   1. In a worktree this session entered: `ExitWorktree` `keep` (the previous stage may still be at its gate). The session is back in the main checkout it was launched from.
-   2. From the main checkout, run `.fieldkit/scripts/new-worktree.sh <type> <description>` (in the kit, `scripts/new-worktree.sh`), the stage branch's name split at its first slash. It fetches, cuts the branch from `origin/<default>`, and prints the worktree's path. Exit 3 means the worktree exists but its setup failed: go on, and tell the reviewer.
-   3. `EnterWorktree` `path` the printed path. It prompts once.
+   1. In a worktree this session entered: `ExitWorktree` `keep` (the previous stage may still be at its gate).
+   2. Run `.fieldkit/scripts/new-worktree.sh <type> <description>` (in the kit, `scripts/new-worktree.sh`) from the main checkout, the first entry of `git worktree list`, with the stage branch's name split at its first slash. It fetches, cuts the branch from `origin/<default>`, and prints the worktree's path. Exit 3 means the worktree exists but its setup failed: go on, and tell the reviewer. Any other exit: stop, and tell the reviewer.
+   3. `EnterWorktree` `path` the printed path. It prompts once. If it is refused, stop, and tell the reviewer the path.
 
-   The previous stage's worktree stays for `merge` or the sweep. `ExitWorktree` reports no worktree session but the session is in a worktree (resumed, `claude --worktree`, a subagent's): run the script from there, which finds the main checkout itself, and `EnterWorktree` `path` the printed path; if that is refused, tell the reviewer the path and stop. Never `git switch -c` in place: it would switch the previous stage's worktree.
+   The previous stage's worktree stays for `merge` or the sweep. `ExitWorktree` reports no worktree session but the session is in a worktree (resumed, `claude --worktree`, a subagent's): run the script from there, which finds the main checkout itself, and enter the path as in 3. `git switch -c` in place would switch the previous stage's worktree, so it is no fallback.
 
 Done when every step has a `Done when` that running or looking at something can check, and `git branch --show-current` prints the stage's branch name.
 
