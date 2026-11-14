@@ -34,3 +34,4 @@ Reaching this skill means merging is approved for one head: user typed `/merge`,
 
    Never read a missing upstream as unpushed work: after a squash merge with the remote branch deleted every commit looks unpushed.
 10. **Report** PR number and URL, and that it merged, or what still blocks it. Then the cleanup: each removal (worktree path and branch), each worktree or branch kept with its path and the reason, and, when a worktree was removed, that its git-ignored files went with it.
+    Then list step 9's candidates, each with its path, branch, and PR number and state, and ask whether to remove them. On a yes, remove each accepted one by step 8's removal sequence (its three numbered steps), skip any that now refuses and say why, then name what was removed. Without a yes, nothing is removed.
