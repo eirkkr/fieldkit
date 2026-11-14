@@ -175,7 +175,7 @@ case_does_not_say_to_ask_for_a_file_in_the_session_repo() {
 case_names_the_consumer_script_and_the_rest_of_the_rule() {
     mkconsumer api
     call Edit "$tmp/work/api/tracked.txt" "$tmp/work/api"
-    denied '`.fieldkit/scripts/new-worktree.sh <type> <description>`' "EnterWorktree" \
+    denied "\`.fieldkit/scripts/new-worktree.sh <type> <description>\`" "EnterWorktree" \
         "Exit 3" "--existing <branch>" "fieldkit.allowMainEdits"
 }
 
@@ -183,7 +183,7 @@ case_names_the_consumer_script_and_the_rest_of_the_rule() {
 case_names_the_kits_own_script_path_in_the_kit() {
     mkkit lib
     call Edit "$tmp/work/lib/tracked.txt" "$tmp/work/lib"
-    denied '`scripts/new-worktree.sh <type> <description>`' "Exit 3" "--existing <branch>" || return 1
+    denied "\`scripts/new-worktree.sh <type> <description>\`" "Exit 3" "--existing <branch>" || return 1
     [[ "$out" != *.fieldkit/scripts* ]] || {
         echo "the kit's refusal names the consumer path: $out" >&2
         return 1
