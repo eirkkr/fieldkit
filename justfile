@@ -23,7 +23,11 @@ setup:
 check: lint test-new-worktree test-worktree-edit-hook check-branch-name check-pr-title
 
 # Lint markdown and shell scripts, and check the always-loaded text fits its budget.
-lint: rumdl check-shell check-context-size
+lint: rumdl check-shell check-context-size check-hooks-documented
+
+# Check that every registered PreToolUse hook is named in the git conventions and the README.
+check-hooks-documented:
+    @python3 "{{ justfile_directory() }}/scripts/check_hooks_documented.py" "{{ justfile_directory() }}"
 
 # Test the worktree creation script against throwaway repos.
 test-new-worktree:
