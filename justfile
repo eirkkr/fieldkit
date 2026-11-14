@@ -33,6 +33,10 @@ test-new-worktree:
 test-worktree-edit-hook:
     @"{{ justfile_directory() }}/scripts/test-worktree-edit-hook.sh" "{{ justfile_directory() }}"
 
+# Test that install refuses to run from a linked worktree, against throwaway repos.
+test-install-guard:
+    @"{{ justfile_directory() }}/scripts/test-install-guard.sh" "{{ justfile_directory() }}"
+
 # Lint all markdown.
 rumdl:
     #!/usr/bin/env bash
