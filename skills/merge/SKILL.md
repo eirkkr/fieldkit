@@ -26,4 +26,11 @@ Reaching this skill means merging is approved for one head: user typed `/merge`,
    - Main checkout, with the branch checked out in another linked worktree: that worktree is not the one this `/merge` ran in. Keep it and the branch, noting the path and that it was not the worktree this `/merge` ran in.
    - Main checkout, branch in no linked worktree: on the merged branch, switch to the default branch (`gh repo view --json defaultBranchRef -q .defaultBranchRef.name`); on any other branch, stay. `git branch -D <branch>` if `git branch --list <branch>` prints it.
    - Last, in the checkout you are in (the main checkout, if you removed a worktree): `git pull --prune` on the default branch, else `git fetch --prune`.
-9. **Report** PR number and URL, and that it merged, or what still blocks it. Then the cleanup: each removal (worktree path and branch), each worktree or branch kept with its path and the reason, and, when a worktree was removed, that its git-ignored files went with it.
+9. **Find the other ended worktrees.** Nothing is removed in this step. Read `git worktree list --porcelain`. Skip the first entry (the main worktree), the checkout step 8 handled, and any entry that is detached, `locked` (a live Claude Code session holds it; the lock goes when the session ends) or `prunable`. For each other worktree, run `gh pr list --head <branch> --state all --json number,state,headRefOid` (`--state` takes one value, so ask for `all` and read each PR's `state`), then:
+   - Any PR is `OPEN`: keep it, noting the PR.
+   - No PR at all: keep it, noting there is none. Never offer it: a fresh worktree has no PR and a sweep cannot tell it from an abandoned one. This covers Claude Code's own `worktree-*` worktrees (sub-agents, `claude --worktree`).
+   - A `MERGED` or `CLOSED` PR whose `headRefOid` equals `git -C <path> rev-parse HEAD`, and `git -C <path> status --porcelain` prints nothing: a candidate. The HEAD test matters because a reused branch name can match an older PR; rebase and merge-commit merges match it the same way.
+   - Anything else (a dirty tree, or a HEAD that is not the PR's head): keep it, noting which.
+
+   Never read a missing upstream as unpushed work: after a squash merge with the remote branch deleted every commit looks unpushed.
+10. **Report** PR number and URL, and that it merged, or what still blocks it. Then the cleanup: each removal (worktree path and branch), each worktree or branch kept with its path and the reason, and, when a worktree was removed, that its git-ignored files went with it.
