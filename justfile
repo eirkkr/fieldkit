@@ -19,8 +19,11 @@ setup:
     git config fieldkit.fixCommand "just fix"
     @echo "Set fieldkit.fixCommand - the Stop hook will run 'just fix' at turn end"
 
-# Run all checks: the linters, the script and hook tests, plus this branch's name and its PR's title.
-check: lint test-new-worktree test-worktree-edit-hook check-branch-name check-pr-title
+# Run all checks: the linters, the tests, plus this branch's name and its PR's title.
+check: lint test check-branch-name check-pr-title
+
+# Run the tests of the kit's scripts and hooks, which CI runs.
+test: test-new-worktree test-worktree-edit-hook test-install-guard test-register-hooks
 
 # Lint markdown and shell scripts, and check the always-loaded text fits its budget.
 lint: rumdl check-shell check-context-size check-hooks-documented
