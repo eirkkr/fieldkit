@@ -153,7 +153,7 @@ case_reads_the_default_branch_from_config_first() {
 case_refuses_a_kit_file_from_a_consumer_and_says_to_ask() {
     mkconsumer api
     call Edit "$tmp/work/api/.fieldkit/tracked.txt" "$tmp/work/api"
-    denied "ask the reviewer to open a session in a kit worktree" || return 1
+    denied "ask the reviewer to open a session in a kit worktree" "fieldkit.allowMainEdits" || return 1
     [[ "$out" != *new-worktree.sh* ]] || {
         echo "a kit file's refusal names the script: $out" >&2
         return 1
@@ -196,6 +196,69 @@ case_allows_a_file_in_a_linked_worktree() {
     git -C "$tmp/work/api" worktree add -q --no-track -b chore/x "$tmp/work/api-x" origin/main
     call Edit "$tmp/work/api-x/tracked.txt" "$tmp/work/api-x"
     allowed
+}
+
+# shellcheck disable=SC2329 # called by name from the loop at the foot
+case_sends_a_session_in_a_worktree_to_its_own_copy_of_the_file() {
+    mkconsumer api
+    git -C "$tmp/work/api" worktree add -q --no-track -b chore/x "$tmp/work/api-x" origin/main
+    call Edit "$tmp/work/api/tracked.txt" "$tmp/work/api-x"
+    denied "already in a worktree of that repo" "$tmp/work/api-x/tracked.txt" "fieldkit.allowMainEdits" || return 1
+    [[ "$out" != *"Create a worktree first"* ]] || {
+        echo "a session in a worktree is told to make another: $out" >&2
+        return 1
+    }
+}
+
+# shellcheck disable=SC2329 # called by name from the loop at the foot
+case_sends_a_kit_session_editing_a_consumer_file_to_the_reviewer() {
+    mkconsumer api
+    call Edit "$tmp/work/api/tracked.txt" "$tmp/work/api-kit"
+    denied "ask the reviewer to open a session in a worktree of that repo" "fieldkit.allowMainEdits" || return 1
+    [[ "$out" != *".fieldkit/scripts"* ]] || {
+        echo "a kit session is told to run the consumer's script: $out" >&2
+        return 1
+    }
+}
+
+# shellcheck disable=SC2329 # called by name from the loop at the foot
+case_gives_the_ordinary_text_when_the_session_is_in_no_repo() {
+    mkconsumer api
+    call Edit "$tmp/work/api/tracked.txt" "$tmp/loose"
+    denied "Create a worktree first" || return 1
+    [[ "$out" != *"ask the reviewer to open"* ]] || {
+        echo "a session in no repo is told to ask: $out" >&2
+        return 1
+    }
+}
+
+# shellcheck disable=SC2329 # called by name from the loop at the foot
+case_allows_a_repo_with_no_commit_yet() {
+    mkkit lib
+    git init -q -b main "$tmp/work/fresh"
+    ln -s "$tmp/work/lib" "$tmp/work/fresh/.fieldkit"
+    call Write "$tmp/work/fresh/README.md" "$tmp/work/fresh"
+    allowed
+}
+
+# shellcheck disable=SC2329 # called by name from the loop at the foot
+case_does_not_run_a_repos_fsmonitor_command() {
+    mkconsumer api
+    git -C "$tmp/work/api" config core.fsmonitor "touch $tmp/ran; echo"
+    call Edit "$tmp/work/api/tracked.txt" "$tmp/work/api"
+    denied || return 1
+    [ ! -e "$tmp/ran" ] || {
+        echo "the repo's fsmonitor command ran" >&2
+        return 1
+    }
+}
+
+# shellcheck disable=SC2329 # called by name from the loop at the foot
+case_refuses_when_the_switch_value_is_not_a_boolean() {
+    mkconsumer api
+    git -C "$tmp/work/api" config fieldkit.allowMainEdits maybe
+    call Edit "$tmp/work/api/tracked.txt" "$tmp/work/api"
+    denied
 }
 
 # shellcheck disable=SC2329 # called by name from the loop at the foot

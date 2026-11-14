@@ -16,7 +16,10 @@ checkout, and other sessions' work shared its tree. This hook refuses an
   `hooks/pre-commit` reads it in, so change both together;
 - git does not ignore the file, which leaves Claude Code's own worktrees
   (under the gitignored `.claude/worktrees/`) and any other ignored file free;
-- `fieldkit.allowMainEdits` is not `true` in the repo's git config.
+- the repo has a commit (an unborn HEAD is let through: the creation script
+  needs `origin/<default>`, so a fresh repo has no way to follow the refusal);
+- `fieldkit.allowMainEdits` is not a git-config true in the repo (a value git
+  cannot read as a boolean counts as off, so the edit is refused).
 
 Anything else, and anything it cannot read - an odd payload, a git failure, a
 file outside any repo - is let through: a missed refusal is no worse than no
@@ -73,15 +76,35 @@ def main():
     branch = (git(directory, "symbolic-ref", "--quiet", "--short", "HEAD") or "").strip()
     if not branch or branch != default_branch(directory):
         return
+    if git(directory, "rev-parse", "--verify", "--quiet", "HEAD") is None:
+        return
     if is_ignored(directory, target) is not False:
         return
     if (git(directory, "config", "--type=bool", "--get", SWITCH) or "").strip() == "true":
         return
 
-    # A kit file edited from a session whose own repo is another one: the
-    # creation script run from that session would make the other repo's sibling.
-    from_elsewhere = not doc.startswith(".fieldkit") and absolute_dir(cwd, "--git-common-dir") != common_dir
-    deny(reason(branch, doc, from_elsewhere))
+    top = (git(directory, "rev-parse", "--show-toplevel") or "").strip()
+    deny(reason(branch, doc, top, session_relation(cwd, common_dir, git_dir, top, target)))
+
+
+def session_relation(cwd, common_dir, git_dir, top, target):
+    """How the session relates to the file's repo: what the refusal should say.
+
+    Returns ("same", None) for a session in the main checkout, or whose repo
+    cannot be read; ("other", None) for one in another repo, where the creation
+    script would make that repo's sibling; and ("worktree", path) for one in a
+    linked worktree of this repo, with `target`'s path in that worktree.
+    """
+    session_common = absolute_dir(cwd, "--git-common-dir")
+    if session_common is None:
+        return "same", None
+    if session_common != common_dir:
+        return "other", None
+    session_git = absolute_dir(cwd, "--git-dir")
+    session_top = (git(cwd, "rev-parse", "--show-toplevel") or "").strip()
+    if session_git and session_git != git_dir and session_top and top:
+        return "worktree", os.path.join(os.path.realpath(session_top), os.path.relpath(target, top))
+    return "same", None
 
 
 def existing_directory(path):
@@ -114,27 +137,39 @@ def is_ignored(directory, target):
     """True if git ignores `target`, False if not, None if git could not say."""
     try:
         done = subprocess.run(
-            ("git", "check-ignore", "-q", "--", target),
+            # A repo's own `core.fsmonitor` is a command git runs when it
+            # refreshes the index; the file's repo is not one the user chose.
+            ("git", "-c", "core.fsmonitor=false", "check-ignore", "-q", "--", target),
             cwd=directory,
             capture_output=True,
             check=False,
+            timeout=10,
         )
-    except OSError:
+    except (OSError, subprocess.TimeoutExpired):
         return None
     return {0: True, 1: False}.get(done.returncode)
 
 
-def reason(branch, doc, from_elsewhere):
-    """The refusal: why, how to get a worktree, and how to switch the hook off."""
+def reason(branch, doc, top, relation):
+    """The refusal: why, what to do instead, and how to switch the hook off."""
+    kind, path = relation
+    kit = not doc.startswith(".fieldkit")
     base = f"This file is in a repo's main checkout, on its default branch `{branch}`. "
-    if from_elsewhere:
+    switch = f"Only if the reviewer says so, `git -C {top} config {SWITCH} true` switches this refusal off for that repo."
+    if kind == "worktree":
         return (
             base
-            + "It is in the kit, which this session is not in. Do not edit it here: "
-            "ask the reviewer to open a session in a kit worktree, and say what "
-            "the change is."
+            + f"This session is already in a worktree of that repo: edit the same file there, at `{path}`, "
+            "and make no second worktree. " + switch
         )
-    script = ".fieldkit/scripts/new-worktree.sh" if doc.startswith(".fieldkit") else "scripts/new-worktree.sh"
+    if kind == "other":
+        where = "a kit worktree" if kit else "a worktree of that repo"
+        return (
+            base
+            + f"It is not in this session's repo, so the creation script run here would make the wrong repo's worktree. "
+            f"Do not edit it here: ask the reviewer to open a session in {where}, and say what the change is. " + switch
+        )
+    script = "scripts/new-worktree.sh" if kit else ".fieldkit/scripts/new-worktree.sh"
     return (
         base
         + f"Create a worktree first. From the main checkout run `{script} <type> <description>`, "
