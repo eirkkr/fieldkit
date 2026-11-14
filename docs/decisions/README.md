@@ -75,4 +75,5 @@ Lightweight architecture decision records (ADRs) for non-obvious design choices.
 | 069 | [Configure new worktrees: the remote default base and the .fieldkit link](069-configure-new-worktrees.md) | Accepted |
 | 070 | [One launcher starts Claude as the bot](070-kit-claude-launcher.md) | Accepted |
 | 071 | [The bot's token carries read:org](071-bot-token-includes-read-org.md) | Accepted |
+| 072 | [Constant tables are frozendict](072-constant-tables-are-frozendict.md) | Accepted |
 | 073 | [Worktrees beside the repo, made by a kit script](073-worktrees-beside-the-repo.md) | Accepted |
