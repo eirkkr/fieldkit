@@ -23,7 +23,7 @@ Conventions for authoring Python source. Several rules below have no linter and 
 
 ## Member ordering
 
-Relies on review (no linter). Order modules: constants, then public functions and classes, then private helpers (callers above callees). Order class members:
+Order modules: constants, then public functions and classes, then private helpers (callers above callees). Order class members:
 
 1. Class variables and constants
 2. `__init__`, then other dunders
@@ -66,7 +66,7 @@ On Python 3.15+ ([PEP 814](https://peps.python.org/pep-0814/)), write a constant
 
 ## Multi-line text
 
-Relies on review (no linter). Write text of three or more lines as it will appear: one triple-quoted block passed through `textwrap.dedent`, the call ending in `.strip()`, with the opening and closing quotes on lines of their own. Blank lines count as lines; shorter text stays one literal.
+Write text of three or more lines as it will appear: one triple-quoted block passed through `textwrap.dedent`, the call ending in `.strip()`, with the opening and closing quotes on lines of their own. Blank lines count as lines; shorter text stays one literal.
 
 ```python
 _BODY = textwrap.dedent(
@@ -78,7 +78,7 @@ _BODY = textwrap.dedent(
 ).strip()
 ```
 
-`_BODY` is `"Hello,\n\nYour report is ready."`: `dedent` removes the shared indent (a line indented further keeps the difference) and `.strip()` removes whitespace at both ends.
+`dedent` removes the shared indent; a line indented further keeps the difference.
 
 End in `.lstrip()` instead where the text must end in a newline:
 
@@ -91,8 +91,6 @@ _USAGE = textwrap.dedent(
     """
 ).lstrip()
 ```
-
-`_USAGE` is `"usage: prog [-h] FILE\n  FILE  the file to read\n  -h    show this help\n"`.
 
 Avoid adjacent literals each ending in `\n` and lists passed to `"\n".join`: the reader has to look past quotes to see the text. Prefer `textwrap` to `inspect.cleandoc`, which also expands tabs and is not where a reader looks for text handling.
 
