@@ -57,7 +57,12 @@ Let the side that owns the value pass it to the other, so it is written once: ha
 
 ## Constant tables
 
-On Python 3.15+ ([PEP 814](https://peps.python.org/pep-0814/)), write a constant lookup table as `frozendict({...})`, never `dict` or `MappingProxyType`. Annotate it `Mapping[K, V]`, or leave it unannotated when `|` is involved (`Mapping` has no `|`; mypy infers `frozendict`). Annotate `frozendict[K, V]` only where the table must be hashable through its type. Type a function's mapping parameter `Mapping[K, V]`, not `dict`. `isinstance(x, dict)` is false for a `frozendict`, so pass `dict(table)` to code that tests for it. Why: [ADR 072](../../docs/decisions/072-constant-tables-are-frozendict.md).
+On Python 3.15+ ([PEP 814](https://peps.python.org/pep-0814/)), write a constant lookup table as `frozendict({...})`, not `dict` or `MappingProxyType`. Why: [ADR 072](../../docs/decisions/072-constant-tables-are-frozendict.md).
+
+- Annotate it `Mapping[K, V]`. Leave it unannotated when `|` is involved.
+- Annotate `frozendict[K, V]` only where the table must be hashable through its type.
+- Type a function's mapping parameter `Mapping[K, V]`, not `dict`.
+- `isinstance(x, dict)` is false for a `frozendict`: pass `dict(table)` to code that tests for it.
 
 ## Multi-line text
 
