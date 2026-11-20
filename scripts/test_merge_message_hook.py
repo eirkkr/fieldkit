@@ -99,13 +99,15 @@ class CreditHookTest(unittest.TestCase):
         data = json.dumps({"author": {"login": "bot"}, "commits": [{"authors": [{"login": "", "name": "X"}]}]})
         self.assertEqual(self.run_hook("A body.", FAKE_VIEW=data), "")
 
-    def test_failed_lookup_lets_the_merge_through(self) -> None:
-        """When `gh pr view` fails the hook can't know, so it doesn't block."""
-        self.assertEqual(self.run_hook("A body.", FAKE_VIEW_FAILS="1"), "")
+    def test_failed_lookup_refuses_the_merge(self) -> None:
+        """When `gh pr view` fails the credit can't be checked, so the merge is refused."""
+        out = self.run_hook("A body.", FAKE_VIEW_FAILS="1")
+        self.assertIn("Couldn't read the PR's authors", self.reason(out))
 
-    def test_unreadable_lookup_lets_the_merge_through(self) -> None:
-        """Output that isn't the expected JSON doesn't block either."""
-        self.assertEqual(self.run_hook("A body.", FAKE_VIEW="not json"), "")
+    def test_unreadable_lookup_refuses_the_merge(self) -> None:
+        """Output that isn't the expected JSON is refused the same way."""
+        out = self.run_hook("A body.", FAKE_VIEW="not json")
+        self.assertIn("Couldn't read the PR's authors", self.reason(out))
 
     def test_message_and_credit_problems_are_reported_together(self) -> None:
         """A wrapping problem and a missing credit both appear in one refusal."""

@@ -16,7 +16,8 @@ It also refuses a message lacking the `Co-authored-by` line for each commit
 author who isn't the PR's author (git.md's Squash credit rule). That needs the
 PR's authors, so it asks `gh pr view` - the one network call a merge pays, and
 a second, `gh api users/<login>`, only to word a refusal. A lookup that fails
-or times out lets the merge through: the hook never blocks on a network error.
+or times out refuses the merge: a squash commit can't be amended, so an
+unchecked merge is the worse outcome.
 
 Like the branch-name hook it applies only in a repo that reaches the kit, lets
 through anything it can't parse, and refuses through PreToolUse's JSON `deny`.
@@ -70,7 +71,9 @@ def main():
         if problems:
             reasons.append(message_reason(problems, doc))
         missing = missing_credit_lines(text, selector, cwd)
-        if missing:
+        if missing is None:
+            reasons.append(lookup_reason(doc))
+        elif missing:
             reasons.append(credit_reason(missing, doc))
         if reasons:
             deny("\n\n".join(reasons))
@@ -131,14 +134,14 @@ def read_body_file(path, bodies, cwd):
 
 
 def missing_credit_lines(text, selector, cwd):
-    """The `Co-authored-by` lines `text` lacks, or [] when none are or a lookup fails."""
+    """The `Co-authored-by` lines `text` lacks ([] when none), or None when the PR can't be read."""
     raw = gh(cwd, "pr", "view", *([selector] if selector else []), "--json", "author,commits")
     try:
         data = json.loads(raw or "")
         author = data["author"]["login"]
         commit_authors = [a for commit in data["commits"] for a in commit["authors"]]
     except (ValueError, KeyError, TypeError):
-        return []
+        return None
     lines = []
     for login, name in credited_authors(author, commit_authors, text):
         found = gh(cwd, "api", f"users/{login}", "-q", ".id")
@@ -175,6 +178,15 @@ def credit_reason(lines, doc):
         f"The squash message lacks credit for commit authors other than the PR's. "
         f"Add, after a blank line below any `Closes` lines:\n{listed}\n"
         f"See the Squash credit rule in {doc}."
+    )
+
+
+def lookup_reason(doc):
+    """A refusal for a merge whose PR authors couldn't be read, so its credit lines can't be checked."""
+    return (
+        "Couldn't read the PR's authors from `gh pr view`, so the squash credit lines "
+        f"can't be checked, and a squash commit can't be amended once merged. "
+        f"Check that `gh` is installed, signed in and online, then retry the merge. See {doc}."
     )
 
 
