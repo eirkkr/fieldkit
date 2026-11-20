@@ -12,6 +12,14 @@ def test_parse_empty_input_returns_none() -> None:
 
 Mirror the source layout under `tests/`, one file per module: `tests/test_<module>.py`, or `tests/<package>/test_<module>.py` for a subpackage. Shared fixtures go in `conftest.py` at the right directory level.
 
+## A test must be able to fail
+
+A test of a behaviour must fail when the behaviour is removed. After writing it, delete the line or branch it is about, run the test once and watch it fail, then restore the line.
+
+The usual way a test cannot fail is that its setup already produces the expected result. A test that saves, assigns the field again and saves a second time passes with the post-save reset deleted, because the assignment alone gives the expected state. Make the setup differ from the expected result, so only the behaviour closes the gap.
+
+A test that asserts a private attribute pins the code, not the behaviour. Prefer an observable effect, such as a second object reading what the first left in storage.
+
 ## CLI testing
 
 Test entry points in-process with `monkeypatch.setattr`, not a subprocess: faster, and pytest captures output:

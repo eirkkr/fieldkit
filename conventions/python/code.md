@@ -64,6 +64,31 @@ On Python 3.15+ ([PEP 814](https://peps.python.org/pep-0814/)), write a constant
 - Type a function's mapping parameter `Mapping[K, V]`, not `dict`.
 - `isinstance(x, dict)` is false for a `frozendict`: pass `dict(table)` to code that tests for it.
 
+## Logging
+
+- Give each module one logger, bound at module level from `logging.getLogger(__name__)`. The hierarchy that follows lets a repo configure `pkg.models` and `pkg.cli` separately.
+- Name it `_LOGGER`. It is bound once and used by one module, the "one module uses it" case of [Constants](#constants): a leading underscore, at the top of the module. This also keeps it out of a package's `__all__`.
+- Don't log through the root logger or Flask's `current_app.logger`, and don't use `print` for diagnostics. `current_app.logger` needs an app context, so it fails in CLI and seed code, and it puts every module under one logger name.
+- Stdlib `logging` is the default. A repo that adopts structlog or similar documents the deviation in its own docs, ideally in an ADR since it adds a dependency. The rule still holds there: one logger per module, named by `__name__`, as `_LOGGER`.
+
+## Parameters of the same type
+
+Where two or more adjacent parameters share a type (several dicts, strings or ints), take them keyword-only, after `*`. The type checker cannot tell them apart, and neither can a reader of a call site that passes them positionally: a swap type-checks and runs.
+
+```python
+# Before: the condition lands where the fields belong, and nothing complains.
+update(db, {"id": 1}, {"owner": "me"}, {"owner": "you"})
+
+# After: each argument is named.
+def update(db: Db, *, match: Mapping, fields: Mapping, condition: Mapping) -> None: ...
+
+update(db, match={"id": 1}, fields={"owner": "me"}, condition={"owner": "you"})
+```
+
+Optional parameters that belong together, such as a set of fields to set and a set to remove, take the same form: both keyword-only with the same kind of default, so they read alike.
+
+The empty default for a mapping is an immutable one, not `{}`, which every call would share. On Python 3.15 that is `frozendict()`, and the parameter is typed `Mapping`.
+
 ## Multi-line text
 
 Write text of three or more lines as it will appear: one triple-quoted block passed through `textwrap.dedent`, the call ending in `.strip()`, with the opening and closing quotes on lines of their own. Blank lines count as lines; shorter text stays one literal.
