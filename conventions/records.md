@@ -13,7 +13,7 @@ Issues, ADRs, specs and convention docs outlive the conversation that produced t
 
 - An exemption list gives each entry's reason in terms of the rule it escapes, so the reason could refuse an entry. A reason describing what the code does instead ("uses the raw driver", "runs at startup") can't be audited, and the list grows by precedent.
 - Known violations of a convention live in the issue tracker, not the convention doc: the doc outlives them, and a stale list of files reads as permission.
-- When the cause of a linter or type-checker complaint is wider than the change in hand, don't rewrite locally just to silence the tool, and don't suppress because a neighbouring function does. Suppress with the reason beside it, in terms of the rule the code escapes (the first bullet above), and file an issue for the cause that names the suppression.
+- When the cause of a linter or type-checker complaint is wider than the change in hand, don't rewrite locally when the rewrite's only gain is a quiet tool, and don't suppress because a neighbouring function does. Suppress with the reason beside it, in terms of the rule the code escapes (as for an exemption's reason, above), and file an issue for the cause that names the suppression.
 
 ## Convention docs
 
