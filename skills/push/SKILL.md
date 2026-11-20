@@ -18,7 +18,7 @@ Then run it, in this turn:
 
 1. `git status`. Unexpected tree (mid-merge, files touched outside the list, unrelated change mixed in): stop and ask.
 2. Branch name needs changing:
-   - on the default branch (`gh repo view --json defaultBranchRef -q .defaultBranchRef.name`): the edits are in this checkout and a worktree would leave them behind. Create and switch to the new branch here, not in a worktree.
+   - on the default branch (`gh repo view --json defaultBranchRef -q .defaultBranchRef.name`): recovery only, as `KIT.md` has a session make its worktree before its first edit: the edits are already in this checkout and a worktree would leave them behind. Create and switch to the new branch here, not in a worktree.
    - on a branch that breaks the rules, no remote branch yet (`git ls-remote --exit-code --heads origin <branch>` fails): `git branch -m <new name>`.
    - on a branch that breaks the rules and is pushed: stop and ask, a rename would orphan the remote branch.
 3. Stage exactly the listed files by name, never `git add -A` or `.`.
