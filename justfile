@@ -27,7 +27,7 @@ ci:
     @"{{ justfile_directory() }}/scripts/ci.sh"
 
 # Run the tests of the kit's scripts and hooks; the Test workflow runs it when started.
-test: test-new-worktree test-worktree-edit-hook test-install-guard test-register-hooks
+test: test-new-worktree test-worktree-edit-hook test-merge-message-hook test-install-guard test-register-hooks
 
 # Lint markdown and shell scripts, check the always-loaded text fits its budget, and that every registered PreToolUse hook is named in the docs.
 lint: rumdl check-shell check-context-size check-hooks-documented
@@ -43,6 +43,12 @@ test-new-worktree:
 # Test the hook that refuses edits in the main checkout against throwaway repos.
 test-worktree-edit-hook:
     @"{{ justfile_directory() }}/scripts/test-worktree-edit-hook.sh" "{{ justfile_directory() }}"
+
+# Test the merge-message hook's squash-credit check against a fake gh.
+test-merge-message-hook:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    uv run python "{{ justfile_directory() }}/scripts/test_merge_message_hook.py" 2>&1 | sed 's/^/test-merge-message-hook: /'
 
 # Test that install refuses to run from a linked worktree, against throwaway repos.
 test-install-guard:
