@@ -4,14 +4,14 @@
 
 `hooks/pretooluse-merge-message.py` refuses a `gh pr merge` whose message lacks a `Co-authored-by` line for each commit author who is not the PR's author, the rule `conventions/git.md` calls Squash credit.
 
-- The hook asks `gh pr view [<PR>] --json author,commits` for the PR's author and each commit's author login. The PR is the command's selector, or the current branch's when the command names none.
-- A line counts when it is a `Co-authored-by:` trailer whose address is `<id>+<login>@users.noreply.github.com` for that login, whatever name precedes it. Logins compare without regard to case. A commit author with no login needs no line.
-- Only a refusal makes a second call, `gh api users/<login> -q .id`, so the message can spell out the line to add.
-- A lookup that fails, times out (15 seconds) or returns something unreadable refuses the merge, saying the PR's authors couldn't be read. The reviewer fixes `gh` and retries.
+- The hook runs when the command gives a subject or a body, since either replaces GitHub's own message. It asks `gh pr view [<PR>] [-R <repo>] --json author,commits` for the PR's author and each commit's author login. The PR is the command's selector, or the current branch's when the command names none; the values of `--match-head-commit`, `-A` and `-R` are never read as the selector.
+- A line counts when it is a `Co-authored-by:` trailer in the message's last paragraph, where git reads trailers, whose address is `<id>+<login>@users.noreply.github.com` for that login, whatever name precedes it. Logins compare without regard to case. A commit author with no login needs no line.
+- Only a refusal makes a second call, `gh api users/<login> -q .id`, so the message can spell out the line to add. If that call fails the line carries `<id>` for the reviewer to fill in.
+- A lookup that fails, runs past 15 seconds (25 for a merge's lookups together), or returns something unreadable or of an unexpected shape refuses the merge, saying the PR's authors couldn't be read. So does an error in the check itself, which the hook catches, because the hook is registered with `|| true` and a crash would otherwise let the merge through. The reviewer fixes `gh` and retries.
 
 ## Reason
 
-The rule had no enforcement: the merge skill points at it, and a merge that skipped the read landed without credit. Two merges in the repo's history did, each a PR the bot account opened with commits authored by a human. A squash commit on the default branch cannot be amended afterwards, so a miss is permanent.
+The rule had no enforcement: the merge skill points at it, and a merge that skipped the read landed without credit. PR #190 and PR #222 did, each opened by the bot account with commits authored by a human. A squash commit on the default branch cannot be amended afterwards, so a miss is permanent.
 
 **Why a hook, not CI.** The squash message is written at merge time, after every PR check has run. A workflow on `push` to the default branch could see a missing line, but only once the commit is public.
 
@@ -26,8 +26,9 @@ Alternatives rejected:
 
 ## Consequences
 
-- Every merge through Claude now pays one `gh` call, and a refused one pays a second.
+- Every merge through Claude that gives a subject or a body now pays one `gh` call, and a refused one pays a second.
 - A merge made in GitHub's UI is outside the hook, as for every other message rule. The UI adds these trailers itself.
 - A PR whose commits are all by its own author needs no line, and the hook makes no call beyond the one.
+- Some commands are not checked. A `gh pr merge` giving neither subject nor body leaves the message to GitHub. A subject holding `$` or a backtick, a `--body-file` that doesn't exist yet or a flag with no value can't be read, so the hook lets it through, as it does for every message rule. A merge run another way (`gh -R x pr merge`, `env gh pr merge`, `bash -c '...'`, `gh api` to the merge endpoint) is not recognised. The hook guards against an agent skipping the rule, not against a determined bypass.
 - The hook needs `gh` on the PATH and signed in, which the merge skill needs already. Without it the merge is refused, not let through.
 - A merge command that names a PR `gh` can't find is refused by the hook before `gh pr merge` would have refused it. The outcome is the same.
