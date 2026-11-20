@@ -12,6 +12,12 @@ or `-` fed by a heredoc. With no `--subject`, GitHub builds the subject from
 the PR title, which CI checks instead, so the merge is let through. The PR
 number comes from the command's argument; with none, any ` (#N)` is accepted.
 
+It also refuses a message lacking the `Co-authored-by` line for each commit
+author who isn't the PR's author (git.md's Squash credit rule). That needs the
+PR's authors, so it asks `gh pr view` - the one network call a merge pays, and
+a second, `gh api users/<login>`, only to word a refusal. A lookup that fails
+or times out lets the merge through: the hook never blocks on a network error.
+
 Like the branch-name hook it applies only in a repo that reaches the kit, lets
 through anything it can't parse, and refuses through PreToolUse's JSON `deny`.
 See ADR 047 under docs/decisions/.
@@ -24,9 +30,13 @@ library only.
 import json
 import os
 import re
+import subprocess
 import sys
 
 from conventions import heredocs, message_problems, message_reason, reaches_kit, segments
+
+# Seconds a `gh` lookup may take before the merge is let through unchecked.
+GH_TIMEOUT = 15
 
 
 def main():
@@ -51,22 +61,31 @@ def main():
         message = merge_message(words[3:], bodies, cwd)
         if message is None:
             continue
-        pr, text = message
+        pr, text, selector = message
+        doc = reaches_kit(cwd)
+        if not doc:
+            continue
+        reasons = []
         problems = message_problems(text, pr)
-        doc = reaches_kit(cwd) if problems else None
-        if doc:
-            deny(message_reason(problems, doc))
+        if problems:
+            reasons.append(message_reason(problems, doc))
+        missing = missing_credit_lines(text, selector, cwd)
+        if missing:
+            reasons.append(credit_reason(missing, doc))
+        if reasons:
+            deny("\n\n".join(reasons))
             return
 
 
 def merge_message(args, bodies, cwd):
-    """The (PR number or "any", message) a `gh pr merge` would write, or None.
+    """The (PR number or "any", message, PR selector or None) a `gh pr merge` would write, or None.
 
     None when there's no `--subject` - GitHub then uses the PR title - or when
     a value can't be read.
     """
     subject = body = None
     pr = "any"
+    selector = None
     index = 0
     while index < len(args):
         arg = args[index]
@@ -89,6 +108,7 @@ def merge_message(args, bodies, cwd):
                 if body is None:
                     return None
         elif not arg.startswith("-"):
+            selector = arg
             number = re.fullmatch(r"#?(\d+)|.*/pull/(\d+)/?", arg)
             if number:
                 pr = number[1] or number[2]
@@ -96,7 +116,7 @@ def merge_message(args, bodies, cwd):
     # A `$` or backtick in the subject means the shell rewrites it first.
     if subject is None or re.search(r"[$`]", subject):
         return None
-    return pr, subject + ("\n\n" + body if body else "")
+    return pr, subject + ("\n\n" + body if body else ""), selector
 
 
 def read_body_file(path, bodies, cwd):
@@ -108,6 +128,65 @@ def read_body_file(path, bodies, cwd):
             return handle.read()
     except OSError:
         return None
+
+
+def missing_credit_lines(text, selector, cwd):
+    """The `Co-authored-by` lines `text` lacks, or [] when none are or a lookup fails."""
+    raw = gh(cwd, "pr", "view", *([selector] if selector else []), "--json", "author,commits")
+    try:
+        data = json.loads(raw or "")
+        author = data["author"]["login"]
+        commit_authors = [a for commit in data["commits"] for a in commit["authors"]]
+    except (ValueError, KeyError, TypeError):
+        return []
+    lines = []
+    for login, name in credited_authors(author, commit_authors, text):
+        found = gh(cwd, "api", f"users/{login}", "-q", ".id")
+        user_id = found.strip() if found and found.strip().isdigit() else "<id>"
+        lines.append(f"Co-authored-by: {name} <{user_id}+{login}@users.noreply.github.com>")
+    return lines
+
+
+def credited_authors(pr_author, commit_authors, text):
+    """The (login, name) of each commit author, other than the PR's, `text` doesn't credit.
+
+    An author with no login gets no line, as git.md says. Logins compare
+    without regard to case, as GitHub's do.
+    """
+    seen = {str(pr_author).lower()}
+    missing = []
+    for author in commit_authors:
+        if not isinstance(author, dict) or not author.get("login"):
+            continue
+        login = author["login"]
+        if login.lower() in seen:
+            continue
+        seen.add(login.lower())
+        trailer = rf"^Co-authored-by:.*<\d+\+{re.escape(login)}@users\.noreply\.github\.com>[ \t]*$"
+        if not re.search(trailer, text, re.IGNORECASE | re.MULTILINE):
+            missing.append((login, author.get("name") or login))
+    return missing
+
+
+def credit_reason(lines, doc):
+    """A refusal naming each credit line the squash message needs."""
+    listed = "\n".join(f"- {line}" for line in lines)
+    return (
+        f"The squash message lacks credit for commit authors other than the PR's. "
+        f"Add, after a blank line below any `Closes` lines:\n{listed}\n"
+        f"See the Squash credit rule in {doc}."
+    )
+
+
+def gh(cwd, *args):
+    """Run a `gh` command, returning stdout, or None if it failed or timed out."""
+    try:
+        done = subprocess.run(
+            ("gh", *args), cwd=cwd, capture_output=True, text=True, check=False, timeout=GH_TIMEOUT
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return done.stdout if done.returncode == 0 else None
 
 
 def deny(reason):

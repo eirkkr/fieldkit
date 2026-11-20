@@ -170,7 +170,7 @@ It runs on every turn, including turns that ended with everything committed - th
 `conventions/git.md`'s Commits section sets strict rules for messages ([ADR 047](docs/decisions/047-enforce-commit-messages.md)). The kit squash-merges, so the message that lasts is the squash commit's. Three checks cover it:
 
 - **The `commit-msg` git hook**, installed with `pre-commit` by `enable-hooks.sh`, refuses any commit breaking the rules - yours or Claude's. Messages git writes itself (merges, reverts, `fixup!`) pass.
-- **A `PreToolUse` hook** checks the squash message Claude passes to `gh pr merge --subject ... --body-file -`, including that the subject ends with the PR's `(#N)`. `just install` registers it next to the branch hook, and like that one it acts only in repos that reach the kit.
+- **A `PreToolUse` hook** checks the squash message Claude passes to `gh pr merge --subject ... --body-file -`, including that the subject ends with the PR's `(#N)` and that it credits each commit author other than the PR's with a `Co-authored-by` line ([ADR 074](docs/decisions/074-merge-hook-checks-squash-credit.md)). `just install` registers it next to the branch hook, and like that one it acts only in repos that reach the kit.
 - **CI** checks the PR title, as the subject it becomes once GitHub appends `(#N)`, and that a `!` title and a `BREAKING CHANGE:` line in the PR body come together - see below.
 
 ## Checking PRs in CI
