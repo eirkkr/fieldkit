@@ -76,18 +76,20 @@ On Python 3.15+ ([PEP 814](https://peps.python.org/pep-0814/)), write a constant
 Where two or more adjacent parameters share a type (several dicts, strings or ints), take them keyword-only, after `*`. The type checker cannot tell them apart, and neither can a reader of a call site that passes them positionally: a swap type-checks and runs.
 
 ```python
-# Before: the condition lands where the fields belong, and nothing complains.
-update(db, {"id": 1}, {"owner": "me"}, {"owner": "you"})
+# Before: three adjacent Mapping parameters. A swap of the last two type-checks.
+def update(db: Db, match: Mapping[str, str], fields: Mapping[str, str], condition: Mapping[str, str]) -> None: ...
 
-# After: each argument is named.
-def update(db: Db, *, match: Mapping, fields: Mapping, condition: Mapping) -> None: ...
+update(db, {"id": 1}, {"owner": "you"}, {"owner": "me"})  # fields and condition swapped
 
-update(db, match={"id": 1}, fields={"owner": "me"}, condition={"owner": "you"})
+# After: keyword-only, so each call names what it passes.
+def update(db: Db, *, match: Mapping[str, str], fields: Mapping[str, str], condition: Mapping[str, str]) -> None: ...
+
+update(db, match={"id": 1}, fields={"owner": "you"}, condition={"owner": "me"})
 ```
 
 Optional parameters that belong together, such as a set of fields to set and a set to remove, take the same form: both keyword-only with the same kind of default, so they read alike.
 
-The empty default for a mapping is an immutable one, not `{}`, which every call would share. On Python 3.15 that is `frozendict()`, and the parameter is typed `Mapping`.
+The empty default for a mapping is an immutable one, not `{}`, which every call would share. On Python 3.15 that is `frozendict()` ([Constant tables](#constant-tables)), and the parameter is typed `Mapping[K, V]`.
 
 ## Multi-line text
 
