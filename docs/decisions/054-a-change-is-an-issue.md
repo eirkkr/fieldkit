@@ -108,3 +108,5 @@ The evidence is ten changes in one consumer repo, six of them review-gated, read
 > Amended by [057](057-a-priced-plan-keeps-its-stages-in-sub-issues.md): a plan priced to decide gets its stage sub-issues, holding their steps, when it is published, not its steps in the first build notes.
 >
 > The OpenSpec machinery this entry kept for now (the schema, the vendored skills, their scripts and `package.json`) has been removed: see [#126](https://github.com/eirkkr/fieldkit/issues/126).
+>
+> Amended by [075](075-the-reviewer-ends-the-review-loop.md): the offer of review repeats after each fix until the reviewer ends it, so "every stop says so" now includes a stop after a fix and the ending the reviewer gives. The PR body's Review line, which "always says which reviews have run", now gives the number of rounds run and whether the reviewer ended the loop.
