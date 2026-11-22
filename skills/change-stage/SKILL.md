@@ -1,6 +1,6 @@
 ---
 name: change-stage
-description: Build a stage of a change up to its gate, or act on the reviewer's answer at a gate - approved, sent back, review asked for. Also a change's final review.
+description: Build a stage of a change up to its gate, or act on the reviewer's answer at a gate - approved, sent back, review asked for, review ended. Also a change's final review.
 argument-hint: "[the change's issue, or a stage's]"
 ---
 
@@ -31,7 +31,7 @@ Done when each of these holds, or the reviewer has been told which does not and 
 
 A stage is *at its gate* when open, assigned, and its branch has an open PR.
 
-- Stage at its gate, reviewer's message approves it, sends it back or asks for a review: [GATE.md](GATE.md).
+- Stage at its gate, reviewer's message approves it, sends it back, asks for a review or ends the review: [GATE.md](GATE.md).
 - Stage at its gate, message does none of those: say it is waiting, stop.
 - Stage assigned, no open PR: ask the reviewer whether to resume it. On yes, put the session on its branch: `ExitWorktree` `keep` if it entered a worktree, then `EnterWorktree` `path` the branch's worktree (`git worktree list` shows it); with none, run the script as in 4.3.2 with `--existing <branch>` in place of the type and description, and enter the path as in 4.3.3. Then go to step 5, matching the step numbers in `git log` subjects against its steps.
 - Change built in stages, every stage closed: [FINAL-REVIEW.md](FINAL-REVIEW.md).
@@ -69,6 +69,6 @@ Done when every step has a commit, its `Done when` checked, and the repo's full 
 1. Open through the `pr` skill, body as "The PR body" gives it, with `Review: Not run.`
 2. `gh pr checks --watch`; fix a red check.
 3. Show the reviewer the PR body and its URL.
-4. Offer the reviews worth running ("Review"), each with its reason drawn from this diff, or say why none is. Name any issue you would file.
+4. Name each review worth running ("Review"), the review and then its reason drawn from this diff, or say in one line that none is worth running. Name any issue you would file.
 
 Then stop. The reviewer's answer is the next step; [GATE.md](GATE.md) handles it.

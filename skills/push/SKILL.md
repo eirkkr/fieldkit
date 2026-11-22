@@ -12,7 +12,7 @@ Decide, from context in hand plus `conventions/git.md`'s branch and commit rules
 - commit message
 - exact list of files to stage
 
-If the branch has an open PR (`gh pr view --json number,url,title,body`), check its description against what you're about to push, including `Closes #X` for an issue the push finishes. If stale, draft a revised title/body, keeping the human's wording where it still holds. `$ARGUMENTS`, if given, is extra context.
+If the branch has an open PR (`gh pr view --json number,url,title,body,comments`), check its description against what you're about to push, including `Closes #X` for an issue the push finishes. If stale, draft a revised title/body, keeping the human's wording where it still holds. A **Review** line is rewritten from the PR's comments (`conventions/specs.md`, "The PR body"). `$ARGUMENTS`, if given, is extra context.
 
 Then run it, in this turn:
 
