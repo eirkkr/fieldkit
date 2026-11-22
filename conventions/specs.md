@@ -101,7 +101,7 @@ A stage is the smallest part of a larger change that leaves the default branch g
 - **One step, one commit.** Its subject ends with the stage and step it is, as `(2.3)`, so a stage picked up again can be matched against its steps. Its body says why, and anything the step needed that the steps did not foresee.
 - **A small fix outside the stage stays in the stage's files.** Where it is small (cheaper to fix than to file, or close to it) and lies in a file the stage already touches, it is its own commit with no step number, and the PR body's **Changed from the plan** names it. Anywhere else it becomes an issue ([ADR 059](../docs/decisions/059-small-findings-are-fixed-in-place.md)).
 - **Green before the PR opens.** The repo's full check passes, not its tests alone.
-- **Then a full stop: the gate.** The PR waits for the reviewer to approve it or send it back. Any clear yes is approval, and approval is the word to merge. The next stage begins when it is asked for, on a branch cut from the default branch ([ADR 049](../docs/decisions/049-approval-does-not-start-the-next-stage.md)).
+- **Then a full stop: the gate.** The PR waits for the reviewer to approve it, send it back, ask for a review or end the review. Any clear yes is approval, and approval is the word to merge. The next stage begins when it is asked for, on a branch cut from the default branch ([ADR 049](../docs/decisions/049-approval-does-not-start-the-next-stage.md)).
 - **What is sent back is fixed on the same branch and PR**, as plain commits. The steps stay as they were written.
 
 ### The PR body
@@ -112,13 +112,13 @@ The PR body is the reviewer's page, and holds only what needs them:
 - **Changed from the plan** - anything built differently from the brief or from the steps, with the reason, and any small fix outside the stage, or one line saying nothing was.
 - **Yours to overturn** - choices the agent made between real alternatives, or one line saying there were none.
 - **Try it** - one thing to do by hand and what a good result looks like, saying whether the agent was able to do it itself. Copy the steps and the expected result from the repo's manual-testing guide, where it has one.
-- **Review** - which reviews have run on the PR as it now stands, or `Not run.`
+- **Review** - `Review: Not run.` or `Review: <n> round(s) run.` (`(s)` is literal), where a round is one run of a review, its parallel axes counting as one, counted as the `## Review findings` comments on the PR; once the reviewer has ended the loop, followed by ` Ended by the reviewer (declined).` (a no to suggestions) or ` Ended by the reviewer (no more needed).` (word that enough has run). The line is derived from the comments on every rewrite, the count from the findings comments and the ending from the newest ending comment, never copied from the old line.
 
 Every other command in the body was run as written. The body closes the stage's issue, or for a change of one pull request, the change's.
 
 ### What is said at a gate
 
-A decision made while a stage is reviewed is written down where it will be found: the exchange as a comment on the PR; an edit to the brief, with its comment, if the plan changed; an ADR if it outlasts the change. A gate settled only in a terminal leaves no record.
+A decision made while a stage is reviewed is written down where it will be found: the exchange as a comment on the PR; an edit to the brief, with its comment, if the plan changed; an ADR if it outlasts the change. The reviewer's ending of the review loop is written down too, as a comment: `Review ended by the reviewer at PR (declined).` or `Review ended by the reviewer at PR (no more needed).` on the PR, `at plan` in place of `at PR` on a plan's issue. The newest such comment from an `OWNER`, `MEMBER` or `COLLABORATOR` author governs, so a second ending replaces the first. A gate settled only in a terminal leaves no record.
 
 ## Review
 
@@ -130,7 +130,7 @@ Review is offered, and runs when the reviewer asks for it. A *fresh* agent is on
   - **One message, two asks.** An ending that comes with something else is recorded first: a change asked for is a send-back, an approval is approval, a review asked for runs, and none of them suggests another review.
 - **A plan** is read by a fresh agent for requirements no test could hold, stages that break the stage rules, and what an agent building from it would have to guess.
 - **A PR review**, when run, reads it with fresh agents on two axes, kept apart: the repo's conventions, including whether everything a person will read is in plain words; and the requirements it says it delivers.
-- **Findings.** The building agent reproduces each one, then triages it: fixed here, edited into the later stage that will handle it, or listed as an issue to file. They go on the PR as a comment headed `## Review findings`, each with its outcome. Listed issues are filed when the reviewer says so.
+- **Findings.** The building agent reproduces each one, then triages it: fixed here, edited into the later stage that will handle it, or listed as an issue to file. They go on the PR, or on the issue for a plan or a stage's steps, as a comment headed `## Review findings`, each with its outcome; every round posts one, reading `No findings.` when it found none. Listed issues are filed when the reviewer says so. The last step is the loop's: suggest a review of the fix, or say none is worth running or that there is nothing to review, as "When it is offered" says.
 - **Which skills.** A repo names the skills to offer, each with when to offer it, as a table of skill and "When to offer" (for example `code-review` | a diff that makes choices, not a rename; "None - a fresh agent" | a plan published) under a `## Reviews` heading in its own `CLAUDE.md`, or in a doc that heading points to. The reviewer names one for a single run. The conversation wins over the repo, and the repo over the two axes above.
 
 ## The final review
