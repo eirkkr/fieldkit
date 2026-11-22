@@ -74,7 +74,7 @@ Requires [just](https://just.systems) and [uv](https://docs.astral.sh/uv/).
 
 ## Planning a change
 
-Work too big for one pull request is planned and built as a *change* ([ADR 054](docs/decisions/054-a-change-is-an-issue.md)): an issue holding the plan, a sub-issue and a pull request per stage where it needs more than one, and nothing about it in the repo's files. `/change-plan` asks its questions and writes the issue; `/change-stage` builds one stage, opens its PR and stops for approval. Each offers a review by fresh agents where it stops, and runs one when asked. Both are linked by `just install` and need no per-repo setup beyond `gh`. `conventions/specs.md` says what each issue must contain, and a repo can name the reviews to offer under a `## Reviews` heading in its own `CLAUDE.md`.
+Work too big for one pull request is planned and built as a *change* ([ADR 054](docs/decisions/054-a-change-is-an-issue.md)): an issue holding the plan, a sub-issue and a pull request per stage where it needs more than one, and nothing about it in the repo's files. `/change-plan` asks its questions and writes the issue; `/change-stage` builds one stage, opens its PR and stops for approval. Each names the reviews by fresh agents worth running where it stops and runs none unasked; the reviewer can end the suggestions. Both are linked by `just install` and need no per-repo setup beyond `gh`. `conventions/specs.md` says what each issue must contain, and a repo can name the reviews to offer under a `## Reviews` heading in its own `CLAUDE.md`.
 
 ## Enabling the Python skills in a consumer repo
 
