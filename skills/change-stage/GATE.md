@@ -26,6 +26,16 @@ Any answer asking for something to change is this one.
 3. `gh pr checks --watch`.
 4. Show the reviewer what changed. Fix more than wording: offer a review again, with the reason; it reads the fix's diff. Stop.
 
+## A review ended
+
+The reviewer declines the suggested reviews, or says no more is needed ("Review"). Alone, or with another ask: record the ending first, then do what else was asked, as that outcome says, and suggest no review.
+
+1. Comment the ending on the PR in the form "What is said at a gate" gives: `(declined)` for a no to suggestions, `(no more needed)` for word that enough has run; where the word does not say which, `(declined)` if no round has run, else `(no more needed)`.
+2. Rewrite the PR body's Review line from the comments, not from the old line: the count from the `## Review findings` comments, the ending from the newest ending comment ("The PR body").
+3. Run no review. Say what has not been reviewed, and stop.
+
+Done when the ending is a comment on the PR and the Review line carries it. A run that dies after step 1 is repaired by the next rewrite of the line, which recounts from the comments.
+
 ## Approved
 
 Any clear yes is approval, and the word to merge.
