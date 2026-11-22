@@ -30,3 +30,5 @@ Rejected:
 - A stage gate's approval commits do not void the approval, and the merge passes the head they leave. A gate that wrote anything else after the yes would.
 - `KIT.md` grows by a bullet; the always-loaded budget in [060](060-budget-the-always-loaded-context.md) still holds.
 - A consumer that documents its own route around a failed CI run, as one does for billing refusals, should say that a fix made along the way voids the approval too.
+
+*Amended by [074](074-merge-hook-checks-squash-credit.md): the merge hook now reads the value of `--match-head-commit`, `-A` and `-R` as a flag's value, so the flag no longer has to be written with `=`.*

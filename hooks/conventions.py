@@ -39,6 +39,9 @@ BREAKING_FOOTER = re.compile(r"^BREAKING[ -]CHANGE: \S", re.MULTILINE)
 # optionally after a list marker or a `[1]: ` link label, since wrapping it is
 # impossible.
 UNWRAPPABLE = re.compile(r"\s*(?:[-*]\s+|\d+\.\s+|\[[^\]]+\]:\s+)?\S+")
+# A `Co-authored-by:` trailer is allowed past BODY_MAX too: git.md requires it,
+# and a name, a login and a nine-digit id can't be wrapped to fit.
+CREDIT_LINE = re.compile(r"Co-authored-by: .+ <[^<>\s]+>\s*", re.IGNORECASE)
 # Messages git writes itself, not the committer.
 GENERATED = ("Merge ", 'Revert "', "fixup! ", "squash! ", "amend! ")
 SCISSORS = "# ------------------------ >8 ------------------------"
@@ -165,7 +168,7 @@ def message_problems(message, pr=None):
     if len(lines) > 1 and lines[1].strip():
         problems.append("has no blank line after the subject")
     for number, line in enumerate(lines[1:], start=2):
-        if len(line) > BODY_MAX and not UNWRAPPABLE.fullmatch(line):
+        if len(line) > BODY_MAX and not (UNWRAPPABLE.fullmatch(line) or CREDIT_LINE.fullmatch(line)):
             problems.append(f"line {number} is {len(line)} characters, over the {BODY_MAX}-character wrap")
     return problems
 
