@@ -13,34 +13,34 @@ A *fresh* agent is a subagent given only what is listed here, nothing from this 
    - **Requirements.** Give it the same diff, the stage's steps and the brief's requirements. It reports each requirement the stage claims and misses, each with no test behind it, and each thing built that none asked for.
 2. Reproduce each finding, then triage: fix it here as a commit; edit it into the later stage that will handle it, with a comment there saying so; or list it as an issue to file.
 3. Comment the findings and outcomes on the PR as `## Review findings` ("Review"), `No findings.` when there are none, so every round leaves its comment; rewrite the Review line from the comments ("The PR body").
-4. `gh pr checks --watch`. Show the reviewer the findings and outcomes. Then look for the newest ending comment ("What is said at a gate"). One exists: suggest no review, and say what has not been reviewed. None, and a finding was fixed: suggest a review of the fix, with its reason, or say none is worth running. None, and nothing was fixed: say there is nothing to review. Stop.
+4. `gh pr checks --watch`. Show the reviewer the findings and outcomes, then close the stop as "When it is offered" says, looking for the newest ending comment on the PR ("What is said at a gate"): a fix made here is what a suggested review would read. Stop.
 
 Done when every finding has one of those three outcomes, the round has its comment and the full check passes.
 
 ## Sent back
 
-Any answer asking for something to change is this one. An ending that comes with it ("fix X, no more reviews") is recorded first, as "A review ended" steps 1 and 2 say, and the fix follows. A review asked for in the same message runs after the fix, as "A review asked for".
+Any answer asking for something to change is this one. An ending that comes with it ("fix X, no more reviews") is recorded first, by "A review ended" steps 1 and 2, and the fix follows. A review asked for in the same message runs after the fix, as "A review asked for".
 
 1. Fix it on the stage's branch, as plain commits.
-2. Comment on the PR what was asked and what changed ("What is said at a gate"); bring the PR body up to date, its Review line rewritten from the comments ("The PR body"), not copied: the stop in step 4 says what the fix leaves unreviewed.
+2. Comment on the PR what was asked and what changed ("What is said at a gate"); bring the PR body up to date, its Review line rewritten from the comments ("The PR body").
 3. `gh pr checks --watch`.
-4. Show the reviewer what changed. Then look for the newest ending comment. One exists: suggest no review. None, and the fix is more than wording: suggest a review again, with the reason; it reads the fix's diff. None, and it is no more than wording: say none is worth running. Stop.
+4. Show the reviewer what changed, then close the stop as "When it is offered" says, looking for the newest ending comment on the PR. A fix of more than wording is worth a suggested review, which reads the fix's diff; a rewording is not. Stop.
 
 ## A review ended
 
-The reviewer declines the suggested reviews, or says no more is needed ("Review"). Alone, or with another ask: record the ending first, then do what else was asked, as that outcome says, and suggest no review.
+The reviewer declines the suggested reviews, or says no more is needed ("Review"). With another ask in the same message, do steps 1 and 2, then that other outcome, and skip step 3: nothing is suggested, and a review the reviewer asked for still runs, as "A review asked for".
 
-1. Comment the ending on the PR in the form "What is said at a gate" gives: `(declined)` for a no to suggestions, `(no more needed)` for word that enough has run; where the word does not say which, `(declined)` if no round has run, else `(no more needed)`.
-2. Rewrite the PR body's Review line from the comments, not from the old line: the count from the `## Review findings` comments, the ending from the newest ending comment ("The PR body").
-3. Run no review. Say what has not been reviewed, and stop.
+1. Comment the ending on the PR, in the form and with the choice of text "What is said at a gate" gives.
+2. Rewrite the PR body's Review line from the comments ("The PR body").
+3. Suggest no review. Say what has not been reviewed, and stop.
 
 Done when the ending is a comment on the PR and the Review line carries it. A run that dies after step 1 is repaired by the next rewrite of the line, which recounts from the comments.
 
 ## Approved
 
-Any clear yes is approval, and the word to merge. An ending that comes with it ("looks good, no review needed") is recorded first, as "A review ended" steps 1 and 2 say, and the approval then runs as below, so the PR merges with the ending on its Review line.
+Any clear yes is approval, and the word to merge. An ending that comes with it ("looks good, no review needed") is recorded first, by "A review ended" steps 1 and 2, and the approval then runs as below.
 
-1. Write down what the gate decided ("What is said at a gate"): on the PR; in the brief with its comment if the plan changed; in an ADR committed to the stage's branch if it outlasts the change.
+1. Write down what the gate decided ("What is said at a gate"): on the PR; in the brief with its comment if the plan changed; in an ADR committed to the stage's branch if it outlasts the change. Rewrite the PR body's Review line from the comments ("The PR body"), so a run that died after an ending still merges with it recorded.
 2. File the issues the reviewer said yes to.
 3. Merge through the `merge` skill. Step 1's ADR commit and, for a staged change, the commit that sets **Reviewed at** and ticks the box are the only pushes the approval survives: the approved sha is the head they leave. A fix the reviewer asked for is not one of them.
 

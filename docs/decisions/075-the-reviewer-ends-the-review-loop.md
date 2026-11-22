@@ -14,21 +14,22 @@ A review is suggested at every stop and never run unasked, and the suggestion re
 
 ## Reason
 
-[ADR 054](054-a-change-is-an-issue.md) made review offered, not run, because its first trial ran it eleven times. That left two gaps. The offer did not repeat after a review's own fixes, so a fix made on a reviewer's finding went unreviewed unless the reviewer thought to ask. And nothing let the reviewer stop being asked, so the offer either nagged at every fix or had to be suppressed for good.
+[ADR 054](054-a-change-is-an-issue.md) made review offered, not run, because its first trial ran it eleven times. 054's rule already put a stop after a fix ("a fix made after either"), but the skills built from it showed the findings and stopped, so a fix made on a reviewer's finding went unreviewed unless the reviewer thought to ask. And nothing let the reviewer stop being asked, so an offer at every fix could only nag or be suppressed for good.
 
 The loop closes both while keeping 054's reason: nothing runs unasked, the reviewer decides each round, and one word ends the suggestions.
 
 Why the choices above:
 
-- **The comments are the state, the Review line is derived**, over a line that carries the count and the ending. Three writers touch the line (the `pr` and `push` skills when a body goes stale, and `GATE.md`), and a run can die between a comment and a rewrite. A line recounted from the comments on every rewrite cannot be left stale by any of them, and nothing reads it as the state.
+- **The comments are the state, the Review line is derived**, over a line that carries the count and the ending. Three writers touch the line (the stage's PR when it is opened, `push` when a body goes stale, and `GATE.md`), and a run can die between a comment and a rewrite. A line recounted from the comments on every rewrite cannot be left stale by any of them, and nothing reads it as the state.
 - **An empty round still posts a comment**, or the count would miss a review that found nothing, and a decline after it would read as made before any round.
 - **The newest ending from a trusted author governs**, because the repository is public and anyone can post a comment that begins with the same words.
 - **An ending covers one gate**, over lasting until the next push, because a new gate is a new thing to look at and the reviewer can end it again in a word.
-- **The reviewer's own word chooses `declined` or `no more needed`**, with the round count only breaking a tie, over a count alone: the later records of stage 5 of the same change tell the two apart, and they should record what the reviewer said.
+- **The reviewer's own word chooses `declined` or `no more needed`**, with the round count only breaking a tie, over a count alone. The change this belongs to, [Review loop, step pause and a record for every stage](https://github.com/eirkkr/fieldkit/issues/173), later records each suggested review's answer, and "declined" and "said enough" are separate answers there; the line should carry what the reviewer said.
 
 ## Consequences
 
 - A reviewer who wants no suggestions says so once per gate.
-- Every skill that writes review wording uses one stop shape: the review, then its reason, or one line saying none is worth running.
+- Every stop of the loop uses one shape: the review, then its reason, or one line saying none is worth running. The final review's offer is a separate offer and keeps its own wording.
 - A PR can merge with `Review: Not run. Ended by the reviewer (declined).`, which says what happened more plainly than `Not run.` did.
-- The stop after a stage's steps, and the record of who did what, are separate decisions, made in the stages that build them.
+- The Review line no longer says whether the last review covers the PR's current head, as "on the PR as it now stands" did. Each stop says what has not been reviewed instead, so a fix made after the last round is named there, not on the line.
+- The stop after a stage's steps, and the record of who did what, are separate decisions, made by the later stages of that change.
