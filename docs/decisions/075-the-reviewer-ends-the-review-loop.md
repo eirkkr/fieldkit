@@ -7,8 +7,8 @@ A review is suggested at every stop and never run unasked, and the suggestion re
 - **At each stop** (a plan published, a PR at its gate, a fix made) the agent names every review worth running with its reason, or says in one line that none is, and says what has not been reviewed.
 - **After a fix** it suggests a review of the fix, or says none is worth running, or, when no finding was fixed, that there is nothing to review.
 - **The reviewer ends it** by declining, or by saying no more is needed. The ending covers that gate only (a PR at its gate, or a published plan awaiting its answer); every stop still says what has not been reviewed, and a review the reviewer asks for afterwards still runs.
-- **The ending is a comment**, `Review ended by the reviewer at PR (declined).` or `at plan`, `(no more needed)` in place of `(declined)` for word that enough has run. Where the word does not say which, no round run means `declined`, else `no more needed`. The newest such comment from an `OWNER`, `MEMBER` or `COLLABORATOR` author governs, so a second ending replaces the first.
-- **Every round posts a `## Review findings` comment**, `No findings.` when it found none, on the PR or on the issue for a plan. A round is one run of a review, its parallel axes counting as one.
+- **The ending is a comment**, `Review ended by the reviewer at PR (declined).` or `at plan`, `(no more needed)` in place of `(declined)` for word that enough has run. Where the word does not say which, the count decides: no round run means `declined`, else `no more needed`; "no more reviews" said before any round has run is such a word. The newest such comment from an `OWNER`, `MEMBER` or `COLLABORATOR` author governs, so a second ending replaces the first.
+- **Every round posts a `## Review findings` comment**, `No findings.` when it found none, on the PR or on the issue for a plan. A round is everything run for one request of the reviewer, whether one skill, two or the two axes, and counts once; only comments from an `OWNER`, `MEMBER` or `COLLABORATOR` author count.
 - **The PR body's Review line is derived**, never copied: `Review: Not run.` or `Review: <n> round(s) run.`, the count from the findings comments, followed once ended by `Ended by the reviewer (declined).` or `(no more needed).`, from the newest ending comment.
 - **A message with two asks records the ending first**, then does the rest: a change asked for is a send-back, an approval is approval, a review asked for runs, and none of them suggests another review.
 
@@ -29,7 +29,7 @@ Why the choices above:
 ## Consequences
 
 - A reviewer who wants no suggestions says so once per gate.
-- Every stop of the loop uses one shape: the review, then its reason, or one line saying none is worth running. The final review's offer is a separate offer and keeps its own wording.
+- Every stop that suggests reviews uses one shape: the review, then its reason, or one line saying none is worth running. A stop after an ending says what is unreviewed and suggests nothing, and a stop where no finding was fixed says there is nothing to review. The final review's offer is a separate offer and keeps its own wording.
 - A PR can merge with `Review: Not run. Ended by the reviewer (declined).`, which says what happened more plainly than `Not run.` did.
 - The Review line no longer says whether the last review covers the PR's current head, as "on the PR as it now stands" did. Each stop says what has not been reviewed instead, so a fix made after the last round is named there, not on the line.
 - The stop after a stage's steps, and the record of who did what, are separate decisions, made by the later stages of that change.

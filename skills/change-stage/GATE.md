@@ -13,7 +13,7 @@ A *fresh* agent is a subagent given only what is listed here, nothing from this 
    - **Requirements.** Give it the same diff, the stage's steps and the brief's requirements. It reports each requirement the stage claims and misses, each with no test behind it, and each thing built that none asked for.
 2. Reproduce each finding, then triage: fix it here as a commit; edit it into the later stage that will handle it, with a comment there saying so; or list it as an issue to file.
 3. Comment the findings and outcomes on the PR as `## Review findings` ("Review"), `No findings.` when there are none, so every round leaves its comment; rewrite the Review line from the comments ("The PR body").
-4. `gh pr checks --watch`. Show the reviewer the findings and outcomes, then close the stop as "When it is offered" says, looking for the newest ending comment on the PR ("What is said at a gate"): a fix made here is what a suggested review would read. Stop.
+4. `gh pr checks --watch`. Show the reviewer the findings and outcomes, then close the stop as "Review", "When it is offered" says, looking for the newest ending comment on the PR ("What is said at a gate"): a fix made here is what a suggested review would read. Stop.
 
 Done when every finding has one of those three outcomes, the round has its comment and the full check passes.
 
@@ -24,7 +24,7 @@ Any answer asking for something to change is this one. An ending that comes with
 1. Fix it on the stage's branch, as plain commits.
 2. Comment on the PR what was asked and what changed ("What is said at a gate"); bring the PR body up to date, its Review line rewritten from the comments ("The PR body").
 3. `gh pr checks --watch`.
-4. Show the reviewer what changed, then close the stop as "When it is offered" says, looking for the newest ending comment on the PR. A fix of more than wording is worth a suggested review, which reads the fix's diff; a rewording is not. Stop.
+4. Show the reviewer what changed, then close the stop as "Review", "When it is offered" says, looking for the newest ending comment on the PR ("What is said at a gate"). A fix of more than wording is worth a suggested review, which reads the fix's diff; a rewording is not. Stop.
 
 ## A review ended
 
