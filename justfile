@@ -44,7 +44,7 @@ test-new-worktree:
 test-worktree-edit-hook:
     @"{{ justfile_directory() }}/scripts/test-worktree-edit-hook.sh" "{{ justfile_directory() }}"
 
-# Test the merge-message hook's squash-credit check against a fake gh.
+# Test the merge-message hook against a fake gh.
 test-merge-message-hook:
     #!/usr/bin/env bash
     set -euo pipefail

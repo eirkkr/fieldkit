@@ -18,7 +18,7 @@
 - Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`. No others (`ci`, `style`, `perf`, `build`, etc.).
 - The description starts lowercase and has no trailing period.
 - The subject is at most 72 characters - GitHub cuts longer ones on its commit pages.
-- For more context, add a body after a blank line, every line at most 72 characters, so `git log`'s 4-space indent still fits 80 columns. A line that is one unbreakable word - a URL or a path, optionally after a list marker or a `[1]:` label - may run longer, since it can't be wrapped. So may a `Co-authored-by:` line (see Squash credit below), whose name and address can't be.
+- For more context, add a body after a blank line, every line at most 72 characters, so `git log`'s 4-space indent still fits 80 columns. A line that is one unbreakable word - a URL or a path, optionally after a list marker or a `[1]:` label - may run longer, since it can't be wrapped. A `Co-authored-by:` line may too (see Squash credit below), since a name and address can't be wrapped.
 
 ## Pull requests and merging
 
@@ -29,7 +29,7 @@
 - Work in progress stays on the branch: push freely, but open a PR only when the work is ready for review.
 - Every push to an open PR's branch must leave its description true: push, check the body against the branch as pushed, and revise it at once if stale ([github.md](github.md)).
 - Squash-merge: synthesise a subject + body summarising the whole change; don't concatenate commit messages. Append `(#PR)` to a custom `--subject` manually (GitHub omits it when you provide a custom subject). The footer takes its `Closes #X` lines from both `gh pr view --json closingIssuesReferences -q '.closingIssuesReferences[].number'` and the PR body's closing-keyword lines (`Closes`, `Fixes`, `Resolves`), each number checked as above. GitHub's list can be empty at merge time, and an issue it has not linked stays open, so the footer is what closes it. With neither, omit the line.
-- Squash credit: the squash commit's author is the PR's opener, so a bot opener takes the credit. Below any `Closes` lines, after a blank line, add `Co-authored-by: Name <id+login@users.noreply.github.com>` for each commit author in `gh pr view --json commits` whose login is not the PR author's (`gh api users/<login> -q .id` gives the id). The lines form the message's last paragraph, nothing else in it: git reads a trailer only there, and only in a paragraph made of trailers. The name is free; the login in the address must be the author's. An author with no login gets no line.
+- Squash credit: the squash commit's author is the PR's opener, so a bot opener takes the credit. Below any `Closes` lines, after a blank line, add `Co-authored-by: Name <id+login@users.noreply.github.com>` for each commit author in `gh pr view --json commits` whose login is not the PR author's (`gh api users/<login> -q .id` gives the id). The lines form the message's last paragraph and nothing else goes in it, because git reads a trailer only there, and only in a paragraph made of trailers. The name is free; the login in the address must be the author's. An author with no login gets no line.
 - Merge once CI is green and the PR has no conflicts; a red check or unresolved conflicts block it outright, a still-running check is waited out instead. Where a repo uses [Manual CI](ci.md#manual-ci), a `skipping` check is not green.
 
 ## Rewriting history

@@ -192,58 +192,90 @@ def message_reason(problems, doc):
     )
 
 
-HEREDOC = re.compile(r"<<(-?)\s*(['\"]?)([A-Za-z_][A-Za-z0-9_]*)\2")
+# `<<WORD`, not the here-string `<<<WORD`; the quote, if any, is group 2.
+HEREDOC = re.compile(r"(?<!<)<<(?!<)(-?)\s*(['\"]?)([A-Za-z_][A-Za-z0-9_]*)\2")
+
+
+def scan_heredocs(command):
+    """The command with each heredoc's body cut out, and a (body, quoted) for each, in order.
+
+    A body is text, not shell: an apostrophe in it would otherwise read as an
+    unclosed quote and make the whole command unparseable. `quoted` is whether
+    the delimiter was quoted, which stops the shell expanding the body. A
+    `<<WORD` with no closing line is no heredoc, and the command comes back whole.
+    """
+    found = []
+    kept = []
+    pending = []
+    for line in command.split("\n"):
+        if pending:
+            strip_tabs, delimiter, quoted, body = pending[0]
+            text = line.lstrip("\t") if strip_tabs else line
+            if text == delimiter:
+                found.append(("\n".join(body), quoted))
+                pending.pop(0)
+            else:
+                body.append(text)
+            continue
+        kept.append(line)
+        pending = [(dash == "-", word, bool(quote), []) for dash, quote, word in HEREDOC.findall(line)]
+    if pending:
+        return command, []
+    return "\n".join(kept), found
 
 
 def heredocs(command):
-    """The command with each heredoc's body cut out, and the bodies in order.
-
-    A body is text, not shell: an apostrophe in it would otherwise read as an
-    unclosed quote and make the whole command unparseable.
-    """
-    bodies = []
-    kept = []
-    lines = command.split("\n")
-    pending = []
-    for line in lines:
-        if pending:
-            strip_tabs, delimiter, body = pending[0]
-            if (line.lstrip("\t") if strip_tabs else line) == delimiter:
-                bodies.append("\n".join(body))
-                pending.pop(0)
-            else:
-                body.append(line)
-            continue
-        kept.append(line)
-        pending = [(dash == "-", word, []) for dash, _, word in HEREDOC.findall(line)]
-    return "\n".join(kept), bodies
+    """The command with each heredoc's body cut out, and the bodies in order."""
+    kept, found = scan_heredocs(command)
+    return kept, [body for body, _ in found]
 
 
 def segments(command):
     """Split a shell command into the word lists of its simple commands."""
-    command, _ = heredocs(command)
+    for words, _ in segments_with_heredocs(command):
+        yield words
+
+
+def segments_with_heredocs(command):
+    """Split a shell command into the (words, heredoc numbers) of its simple commands.
+
+    A heredoc number is the position, in `scan_heredocs`'s list, of a heredoc
+    the simple command opens, whether with a `<<` of its own or inside a quoted
+    word such as `"$(cat <<'EOF' ...)"`. A backslash-newline joins the lines
+    before the command is split, as the shell does.
+    """
+    command, _ = scan_heredocs(command)
+    command = command.replace("\\\n", "")
     lexer = shlex.shlex(command, posix=True, punctuation_chars="();<>|&\n")
     lexer.whitespace = " \t\r"
     lexer.whitespace_split = True
     words = []
+    numbers = []
     redirect = False
+    count = 0
     try:
         for token in lexer:
             if token in SEPARATORS:
-                yield words
-                words, redirect = [], False
+                yield words, numbers
+                words, numbers, redirect = [], [], False
             elif re.fullmatch(r"[<>&|]+", token):
                 # A redirection: drop its fd (`2>`) and, next pass, its target.
                 if words and words[-1].isdigit():
                     words.pop()
+                if token == "<<":
+                    numbers.append(count)
+                    count += 1
                 redirect = True
             elif redirect:
                 redirect = False
             else:
                 words.append(token)
+                for _ in HEREDOC.findall(token):
+                    numbers.append(count)
+                    count += 1
     except ValueError:
         return
-    yield words
+    yield words, numbers
 
 
 def reaches_kit(directory):
