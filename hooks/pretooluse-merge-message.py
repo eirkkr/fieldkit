@@ -24,8 +24,9 @@ In a repo that reaches the kit, a `gh pr merge` the hook can't check is
 refused, not let through: a squash commit can't be amended, so an unchecked
 merge is the worse outcome (ADR 074). That covers a lookup that fails, times
 out or is unreadable, a subject or body the shell rewrites or a file that
-can't be read, and an error in the check itself. A command that isn't
-literally `gh pr merge` is not recognised.
+can't be read, and an error in the check itself. `FOO=1`, `env` or `command`
+before `gh`, and `-R`/`--repo` between `gh` and `pr`, are read; a merge run
+through `bash -c`, `eval`, `xargs` or `gh api` is not recognised.
 
 Like the branch-name hook it applies only in a repo that reaches the kit and
 refuses through PreToolUse's JSON `deny`. See ADR 047 under docs/decisions/.
@@ -50,6 +51,9 @@ _LONG_VALUE_FLAGS = frozenset(
     {"--subject", "--body", "--body-file", "--repo", "--match-head-commit", "--author-email"}
 )
 _SHORT_VALUE_FLAGS = {"t": "--subject", "b": "--body", "F": "--body-file", "R": "--repo", "A": "--author-email"}
+
+# `FOO=1` ahead of a command.
+_ASSIGNMENT = re.compile(r"[A-Za-z_][A-Za-z0-9_]*=.*")
 
 # A `$name`, `${...}`, `$(...)` or backtick: the shell rewrites the value first.
 _EXPANSION = re.compile(r"\$[({A-Za-z_]|`")
@@ -102,10 +106,11 @@ def main():
         if words[:1] == ["cd"] and len(words) == 2:
             cwd = os.path.join(cwd, os.path.expanduser(words[1]))
             continue
-        if words[:3] != ["gh", "pr", "merge"]:
+        found = merge_arguments(words)
+        if found is None:
             continue
         try:
-            reason = check_merge(words[3:], bodies, cwd)
+            reason = check_merge(*found, bodies, cwd)
         except Exception:  # noqa: BLE001 - registered `|| true`, so a crash would let the merge through
             reason = crash_reason()
         if reason:
@@ -113,10 +118,41 @@ def main():
             return
 
 
-def check_merge(args, bodies, cwd):
+def merge_arguments(words):
+    """The (arguments after `pr merge`, repo named before `pr`) of a `gh pr merge`, or None.
+
+    `FOO=1`, `env` and `command` may come first, and `gh`'s own `-R`/`--repo`
+    may sit between `gh` and `pr`, where it names the repo like the flag after.
+    """
+    index = 0
+    while index < len(words) and (_ASSIGNMENT.fullmatch(words[index]) or words[index] in ("command", "env")):
+        index += 1
+    if words[index : index + 1] != ["gh"]:
+        return None
+    index += 1
+    repo = None
+    while index < len(words) and words[index].startswith("-"):
+        flag, sep, inline = words[index].partition("=")
+        index += 1
+        if flag in ("--repo", "-R"):
+            if sep:
+                repo = inline
+            elif index < len(words):
+                repo = words[index]
+                index += 1
+            else:
+                return None
+        elif not flag.startswith("--") and flag.startswith("-R"):
+            repo = flag[2:] or None
+    if words[index : index + 2] != ["pr", "merge"]:
+        return None
+    return words[index + 2 :], repo
+
+
+def check_merge(args, repo, bodies, cwd):
     """The refusal for one `gh pr merge`'s arguments, or None to let it through."""
     try:
-        message = merge_message(args, bodies, cwd)
+        message = merge_message(args, repo, bodies, cwd)
     except Unreadable as error:
         doc = reaches_kit(cwd)
         return unreadable_reason(str(error), doc) if doc else None
@@ -141,18 +177,19 @@ def check_merge(args, bodies, cwd):
     return "\n\n".join(reasons) or None
 
 
-def merge_message(args, bodies, cwd):
+def merge_message(args, repo, bodies, cwd):
     """The (PR number or "any", subject, text, PR selector, repo) a `gh pr merge` would write, or None.
 
     `subject` is the subject to lint, None where the command gives none or the
     shell rewrites it; `text` is the whole message, the part the credit check
-    reads. The selector and repo are None where the command names none. None
-    overall when the command gives neither subject nor body - GitHub then
-    builds the message, and CI checks the PR title - or when a flag has no
-    value, which `gh` refuses itself. Raises Unreadable for a body the hook
+    reads. The selector is None where the command names none, and `repo` is
+    the one passed in unless a flag names another. None overall when the
+    command gives neither subject nor body - GitHub then builds the message,
+    and CI checks the PR title - or when a flag has no value, which `gh`
+    refuses itself. Raises Unreadable for a body the hook
     can't read.
     """
-    subject = body = selector = repo = None
+    subject = body = selector = None
     pr = "any"
     index = 0
     while index < len(args):
@@ -309,8 +346,18 @@ def credited_authors(pr_author, commit_authors, text):
         seen.add(login.lower())
         trailer = rf"^Co-authored-by:.*<\d+\+{re.escape(login)}@users\.noreply\.github\.com>[ \t]*$"
         if not re.search(trailer, trailers, re.IGNORECASE | re.MULTILINE):
-            missing.append((login, author.get("name") or login))
+            missing.append((login, plain_name(author.get("name"), login)))
     return missing
+
+
+def plain_name(name, login):
+    """A commit author's name as fit for a refusal's credit line, or the login.
+
+    The name is git metadata anyone can set, and it ends up in text the agent
+    acts on, so only letters, digits, spaces and `.'-` stay, up to 60.
+    """
+    cleaned = re.sub(r"[^\w .'-]", "", name if isinstance(name, str) else "").strip()[:60].strip()
+    return cleaned or login
 
 
 def credit_reason(lines, doc):
