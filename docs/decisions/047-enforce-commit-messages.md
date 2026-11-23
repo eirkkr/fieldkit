@@ -65,4 +65,4 @@ Alternatives rejected:
 - `git commit --no-verify` bypasses the `commit-msg` hook, as it does `pre-commit`, and is left out of its output for the same reason (ADR 023): an agent that hits the refusal should fix the message, not route around it.
 - The branch hook no longer has a `--name` mode; `conventions.py branch <name>` replaces it, and `check-branch-name.sh` calls that.
 
-*Amended by [074](074-merge-hook-checks-squash-credit.md): the merge hook now also checks credit lines, including for a body given with no `--subject`, which it no longer lets through; and a `Co-authored-by:` line is exempt from the body wrap.*
+> Amended by [074](074-merge-hook-checks-squash-credit.md): the merge hook now also checks credit lines, including for a body given with no `--subject`, which it no longer lets through; and a `Co-authored-by:` line is exempt from the body wrap.
