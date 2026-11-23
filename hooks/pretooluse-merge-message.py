@@ -25,14 +25,16 @@ In a repo that reaches the kit, a `gh pr merge` the hook can't check is
 refused, not let through: a squash commit can't be amended, so an unchecked
 merge is the worse outcome (ADR 074). That covers a lookup that fails, times
 out or is unreadable; a body the shell rewrites (an unquoted heredoc, a
-`$VAR`) or a file that can't be read; a directory that doesn't exist; a merge
-hidden in a string a shell runs (`bash -c`, `eval`); and a merge with a `GH_`
-or `GITHUB_` variable set on it, which the hook's own lookup wouldn't see. A
+`$VAR`) or a file that can't be read; a merge that reads a heredoc in a
+command whose heredocs can't be matched to their `<<` operators; a payload
+directory that doesn't exist; a merge in a string a shell runs (after
+`bash -c`, or `eval`'s words); and a merge with a `GH_` or `GITHUB_` variable
+set on it or exported before it, which the hook's own lookup wouldn't see. A
 crash in the check refuses the merge in any repo, since by then the hook can't
 tell which repo it is in. A `gh pr merge` is found after `FOO=1`, `env`,
 `command`, `time`, `sudo`, `!`, `{`, `then` or a path to `gh`, and
-`-R`/`--repo` may come before `pr` or `merge`. A merge through `gh api`, or
-built from a variable, is not recognised.
+`-R`/`--repo` may come before `pr` or `merge`. A merge through `gh api`, built
+from a variable, or fed to a shell on stdin, is not recognised (issue #228).
 
 Like the branch-name hook it applies only in a repo that reaches the kit and
 refuses through PreToolUse's JSON `deny`. See ADR 047 and ADR 074 under
@@ -43,6 +45,8 @@ Registered in ~/.claude/settings.json by `just install`
 library only.
 """
 
+from __future__ import annotations
+
 import json
 import os
 import re
@@ -51,7 +55,7 @@ import sys
 import time
 from typing import NamedTuple
 
-from conventions import message_problems, message_reason, reaches_kit, scan_heredocs, segments_with_heredocs
+from conventions import message_problems, message_reason, parse_command, reaches_kit
 
 # Every `gh pr merge` flag that takes a value, so a value is never read as the PR.
 # A short flag's value may follow it, or follow `=`, or be joined to it (`-bTEXT`).
@@ -75,7 +79,13 @@ _STDIN_PATHS = frozenset({"-", "/dev/stdin", "/dev/fd/0", "/proc/self/fd/0"})
 
 # Shells that run a string as a command, where `gh pr merge` may be hiding.
 _SHELLS = frozenset({"bash", "sh", "zsh", "dash", "eval"})
-_MERGE_TEXT = re.compile(r"\bgh\b.*\bpr\b.*\bmerge\b", re.DOTALL)
+# `gh pr merge` where a command starts in a shell string: at its start, after a
+# separator, or after a word that runs the next one; not inside a quoted message.
+_MERGE_TEXT = re.compile(
+    r"(?:^|[;&|({!]\s*|\b(?:sudo|time|env|command|then|do|else|xargs)\s+)"
+    r"gh\s+(?:-\S+\s+(?:[^\s-]\S*\s+)?)*pr\s+(?:-\S+\s+(?:[^\s-]\S*\s+)?)*merge\b",
+    re.MULTILINE,
+)
 
 # A trailer line is `Token: value` or an indented continuation. Git reads
 # trailers in a last paragraph made of them; this is stricter than git, which
@@ -84,7 +94,7 @@ _MERGE_TEXT = re.compile(r"\bgh\b.*\bpr\b.*\bmerge\b", re.DOTALL)
 _TRAILER_LINE = re.compile(r"[A-Za-z][A-Za-z0-9-]*:[ \t]+\S.*|[ \t]+\S.*")
 # A co-author in a commit message, by GitHub's no-reply address, which names the login.
 _NOREPLY_TRAILER = re.compile(
-    r"^Co-authored-by:.*<\d+\+([^@<>\s]+)@users\.noreply\.github\.com>", re.IGNORECASE | re.MULTILINE
+    r"^Co-authored-by:.*<\d+\+([A-Za-z0-9-]+(?:\[bot\])?)@users\.noreply\.github\.com>", re.IGNORECASE | re.MULTILINE
 )
 
 # Seconds one `gh` lookup may take, and all the lookups for one `gh pr merge`
@@ -146,10 +156,17 @@ def main():
     cwd = payload.get("cwd")
     if not isinstance(cwd, str) or not cwd:
         cwd = os.getcwd()
-    _, found = scan_heredocs(command)
-    for words, numbers in segments_with_heredocs(command):
+    parsed, found, matched = parse_command(command)
+    exported = False
+    for words, numbers in parsed:
         if words[:1] == ["cd"] and len(words) == 2:
-            cwd = os.path.join(cwd, os.path.expanduser(words[1]))
+            # A `cd` that can't be followed (a `$(...)`, `-`, a missing directory) leaves the directory as it was.
+            target = os.path.join(cwd, os.path.expanduser(words[1]))
+            if os.path.isdir(target):
+                cwd = target
+            continue
+        if words[:1] in (["export"], ["declare"], ["typeset"], ["readonly"]):
+            exported = exported or any(_GH_ENVIRONMENT.match(word) for word in words[1:])
             continue
         merge = merge_arguments(words) or embedded_merge(words)
         if merge is None and not hides_merge(words):
@@ -157,10 +174,11 @@ def main():
         try:
             if merge is None:
                 reason = unrecognised_reason(cwd, "inside a string a shell runs")
-            elif any(_GH_ENVIRONMENT.match(word) for word in words):
-                reason = unrecognised_reason(cwd, "with a `GH_` or `GITHUB_` variable set on it")
+            elif exported or any(_GH_ENVIRONMENT.match(word) for word in words):
+                reason = unrecognised_reason(cwd, "with a `GH_` or `GITHUB_` variable set on it or exported before it")
             else:
-                reason = check_merge(*merge, [found[number] for number in numbers], cwd)
+                own = [found[number] for number in numbers] if matched else None
+                reason = check_merge(*merge, own, cwd)
         except Exception:  # noqa: BLE001 - registered `|| true`, so a crash would let the merge through
             reason = crash_reason()
         if reason:
@@ -223,8 +241,25 @@ def embedded_merge(words):
 
 
 def hides_merge(words):
-    """Whether a command hides a `gh pr merge` in a string that a shell runs (`bash -c 'gh pr merge ...'`)."""
-    return bool(words) and os.path.basename(words[0]) in _SHELLS and any(_MERGE_TEXT.search(w) for w in words[1:])
+    """Whether a command hides a `gh pr merge` in a string a shell runs.
+
+    That is the string after `-c` of `bash`, `sh`, `zsh` or `dash`, or the
+    words of `eval`, wherever in the command they come (`env bash -c '...'`,
+    `timeout 600 bash -c '...'`). A script (`bash run.sh`) is not looked into.
+    """
+    for position, word in enumerate(words):
+        shell = os.path.basename(word)
+        if shell not in _SHELLS:
+            continue
+        rest = words[position + 1 :]
+        if shell != "eval":
+            flags = [index for index, arg in enumerate(rest) if re.fullmatch(r"-[A-Za-z]*c[A-Za-z]*", arg)]
+            if not flags:
+                continue
+            rest = rest[flags[0] + 1 :]
+        if any(_MERGE_TEXT.search(arg) for arg in rest):
+            return True
+    return False
 
 
 def kit_doc(cwd):
@@ -237,7 +272,8 @@ def kit_doc(cwd):
 def check_merge(args, repo, own_heredocs, cwd):
     """The refusal for one `gh pr merge`'s arguments, or None to let it through.
 
-    `own_heredocs` is the (body, quoted) of each heredoc the merge's own command opens.
+    `own_heredocs` is the (body, quoted) of each heredoc the merge's own command opens,
+    or None when the command's heredocs can't be matched to its `<<` operators.
     """
     try:
         doc = kit_doc(cwd)
@@ -278,7 +314,7 @@ def unrecognised_reason(cwd, how):
         f"This command runs `gh pr merge` {how}, so the hook can't check the squash message, and a squash "
         "commit can't be amended once merged. Run it as a plain "
         "`gh pr merge <PR> --squash --subject ... --body-file -` command, not through `bash -c` or `eval`, "
-        f"and with any `GH_` variable exported beforehand instead. See {doc}."
+        f"and name another repo with `-R owner/repo`, not a `GH_` variable. See {doc}."
     )
 
 
@@ -381,6 +417,12 @@ def read_body_file(path, own_heredocs, cwd):
 
 def heredoc_text(own_heredocs, what):
     """The text of the one heredoc a merge reads its body from, or raise Unreadable."""
+    if own_heredocs is None:
+        raise Unreadable(
+            f"{what}, but the hook can't match this command's heredocs to their `<<` operators (an arithmetic "
+            "`<<`, a `<<` in a comment, or a delimiter it doesn't read); write the body as "
+            "`--body-file - <<'EOF'` on the merge command"
+        )
     if len(own_heredocs) != 1:
         raise Unreadable(f"{what}, but the merge command opens {len(own_heredocs)} heredocs, not one")
     body, quoted = own_heredocs[0]
@@ -411,7 +453,7 @@ def missing_credit_lines(text, selector, repo, cwd):
     if not isinstance(author, str) or not author:
         raise LookupFailed("the PR's author has no login (a deleted account?)", permanent=True)
     if not all(isinstance(a, dict) and isinstance(a.get("login") or "", str) for a in commit_authors):
-        raise LookupFailed("a commit author wasn't the shape the check expects")
+        raise LookupFailed("a commit author wasn't the shape the check expects", permanent=True)
     lines = []
     id_failure = ""
     for login in credited_authors(author, commit_authors, text):
@@ -450,14 +492,14 @@ def paged_commit_authors(cwd, deadline, url):
     )
     rows = []
     try:
-        for line in raw.splitlines():
+        for line in raw.split("\n"):
             if line.strip():
                 rows.extend(json.loads(line))
         logins = []
         for row in rows:
             logins += [row["login"], *_NOREPLY_TRAILER.findall(row["message"] or "")]
     except (ValueError, TypeError, KeyError):
-        raise LookupFailed("the commit list wasn't the JSON the check expects") from None
+        raise LookupFailed("the commit list wasn't the JSON the check expects", permanent=True) from None
     if len(rows) >= _COMMIT_CAP:
         raise LookupFailed(
             f"GitHub lists at most {_COMMIT_CAP} commits of a PR, so the authors of any beyond that can't be read",

@@ -11,6 +11,7 @@ it does when $CLICOLOR_FORCE or $GH_FORCE_TTY is set. A few cases load the hook
 as a module, to reach what a payload can't: a crash, a timeout.
 """
 
+import ast
 import contextlib
 import importlib.util
 import io
@@ -60,7 +61,7 @@ def view(pr_author, *commit_logins, url=PR_URL):
 
 def page(*rows):
     """One page of the REST commit list, as the fake `gh api --paginate` prints it: (login, message) rows."""
-    return json.dumps([{"login": login, "message": message} for login, message in rows])
+    return json.dumps([{"login": login, "message": message} for login, message in rows], ensure_ascii=False)
 
 
 def load_hook():
@@ -340,7 +341,7 @@ class CreditHookTest(unittest.TestCase):
                 self.assertEqual(self.calls(), [])
 
     def test_a_subject_the_shell_rewrites_is_still_credit_checked(self) -> None:
-        """A `$` in the subject skips only the subject's own checks; the credit check still runs."""
+        """A `$` in the subject skips the message checks (subject, wrap, breaking-change footer); the credit check still runs."""
         command = "gh pr merge 7 --squash --subject \"$TITLE\" --body-file - <<'EOF'\nA body.\nEOF"
         out = self.run_command(command, FAKE_VIEW=view("bot", "human"))
         self.assertIn("4242+human@", self.reason(out))
@@ -480,19 +481,20 @@ class CreditHookTest(unittest.TestCase):
                 self.assertEqual(self.calls(), [])
 
     def test_a_quoted_or_plain_heredoc_is_read(self) -> None:
-        """A quoted heredoc may hold `$` and backticks, and an unquoted one with none behaves the same."""
-        for delimiter, body in (("'EOF'", "Rename `foo` to $BAR."), ("EOF", "Plain text.")):
+        """A quoted or backslashed heredoc may hold `$` and backticks, and an unquoted one with none behaves the same."""
+        for delimiter, body in (("'EOF'", "Rename `foo` to $BAR."), ("\\EOF", "Rename `foo` to $BAR."), ("EOF", "Plain text.")):
             with self.subTest(delimiter=delimiter):
                 command = f"gh pr merge 7 --squash --subject '{SUBJECT}' --body-file - <<{delimiter}\n{body}\nEOF"
                 self.assertEqual(self.run_command(command, FAKE_VIEW=view("bot", "bot")), "")
 
     def test_only_the_merges_own_heredoc_counts(self) -> None:
-        """A heredoc another command in the same call opens isn't the merge's, so a commit and a merge can share a call."""
-        command = (
-            "git commit -m \"$(cat <<'EOF'\nfeat: a thing\nEOF\n)\" && "
-            f"gh pr merge 7 --squash --subject '{SUBJECT}' --body-file - <<'EOF'\nA body.\nEOF"
-        )
-        self.assertEqual(self.run_command(command, FAKE_VIEW=view("bot", "bot")), "")
+        """A commit's heredoc in the same call isn't the merge's: the credit line must be in the merge's own."""
+        commit = "git commit -m \"$(cat <<'EOF'\nfeat: a thing\n\n%s\nEOF\n)\" && "
+        merge = f"gh pr merge 7 --squash --subject '{SUBJECT}' --body-file - <<'EOF'\nA body.\n\n%s\nEOF"
+        mine = self.run_command(commit % "More." + merge % CREDIT, FAKE_VIEW=view("bot", "human"))
+        theirs = self.run_command(commit % CREDIT + merge % "More.", FAKE_VIEW=view("bot", "human"))
+        self.assertEqual(mine, "")
+        self.assertIn("4242+human@", self.reason(theirs))
 
     def test_a_here_string_does_not_swallow_the_merge(self) -> None:
         """`<<<EOF` is a here-string, not a heredoc, so the merge on the next line is still seen."""
@@ -556,6 +558,118 @@ class CreditHookTest(unittest.TestCase):
         command = f"gh pr merge 7 --squash --subject '{SUBJECT}' --body-file - <<-'EOF'\n{body}\n\tEOF"
         self.assertEqual(self.run_command(command, FAKE_VIEW=view("bot", "human")), "")
 
+    def test_a_credit_line_must_end_at_its_bracket(self) -> None:
+        """Text after the closing bracket makes the line no trailer for that login, so the credit is missing."""
+        out = self.run_hook(f"A body.\n\n{CREDIT} extra", FAKE_VIEW=view("bot", "human"))
+        self.assertIn("4242+human@", self.reason(out))
+
+    def test_heredoc_delimiters_the_shell_accepts_are_read(self) -> None:
+        """A hyphenated, dotted or backslashed delimiter is still a heredoc, so the credit line in it counts."""
+        for opener, closer in (("'END-OF-BODY'", "END-OF-BODY"), ("\\EOF", "EOF"), ('"a.b"', "a.b"), ("-'EOF'", "EOF")):
+            with self.subTest(delimiter=opener):
+                body = f"A body.\n\n{CREDIT}"
+                command = f"gh pr merge 7 --squash --subject '{SUBJECT}' --body-file - <<{opener}\n{body}\n{closer}"
+                self.assertEqual(self.run_command(command, FAKE_VIEW=view("bot", "human")), "")
+
+    def test_heredocs_the_hook_cannot_match_refuse_a_merge_that_reads_one(self) -> None:
+        """An arithmetic `<<`, or one in a comment, throws the count off; the merge is refused for that, not as a crash."""
+        merge = f"gh pr merge 7 --squash --subject '{SUBJECT}' --body-file - <<'EOF'\nA body.\n\n{CREDIT}\nEOF"
+        commands = (
+            "echo $((1 << 2)) && " + merge,
+            "# use <<EOF here\n" + merge.replace("'EOF'", "'DONE'").replace("\nEOF", "\nDONE"),
+            f"echo $((1 << 2)) && {merge} && cat <<'NOTE'\n{CREDIT}\nNOTE",
+        )
+        for command in commands:
+            with self.subTest(command=command[:30]):
+                reason = self.reason(self.run_command(command, FAKE_VIEW=view("bot", "human")))
+                self.assertIn("can't match this command's heredocs", reason)
+                self.assertEqual(self.calls(), [])
+
+    def test_a_merge_that_reads_no_heredoc_is_unaffected_by_a_miscount(self) -> None:
+        """With the body given in a flag, an arithmetic `<<` elsewhere changes nothing."""
+        command = f"echo $((1 << 2)) && gh pr merge 7 --squash --subject '{SUBJECT}' --body 'A body.\n\n{CREDIT}'"
+        self.assertEqual(self.run_command(command, FAKE_VIEW=view("bot", "human")), "")
+
+    def test_odd_heredocs_outside_the_kit_are_not_a_crash(self) -> None:
+        """Away from the kit a heredoc the hook can't read makes no refusal and no `gh` call."""
+        command = f"gh pr merge 7 --squash --subject '{SUBJECT}' --body-file - <<'END-OF-BODY'\nA body.\nEND-OF-BODY"
+        out = self.run_command(command, cwd=self.tmp, FAKE_VIEW=view("bot", "human"))
+        self.assertEqual((out, self.calls()), ("", []))
+        command = "echo $((1 << 2)) && " + command
+        self.assertEqual((self.run_command(command, cwd=self.tmp, FAKE_VIEW=view("bot", "human")), self.calls()), ("", []))
+
+    def test_a_cd_the_hook_cannot_follow_keeps_the_directory(self) -> None:
+        """A `cd` to `$(...)`, `-` or a directory that isn't there changes nothing, so a merge outside the kit stays unchecked."""
+        for cd in ('cd "$(git rev-parse --show-toplevel)"', "cd -", "cd gone"):
+            with self.subTest(cd=cd):
+                out = self.run_command(f"{cd} && gh pr merge 7 --squash --delete-branch", cwd=self.tmp)
+                self.assertEqual((out, self.calls()), ("", []))
+
+    def test_a_cd_that_fails_leaves_the_merge_in_the_kit(self) -> None:
+        """When the `cd` target is missing the merge still runs where it did, so it is checked."""
+        command = f"cd gone ; gh pr merge 7 --squash --subject '{SUBJECT}' --body-file - <<'EOF'\nA body.\nEOF"
+        out = self.run_command(command, FAKE_VIEW=view("bot", "human"))
+        self.assertIn("4242+human@", self.reason(out))
+
+    def test_a_gh_variable_exported_before_the_merge_is_refused(self) -> None:
+        """`export GH_REPO=... && gh pr merge` changes the repo too, and the refusal names `-R`, not another export."""
+        for export in ("export GH_REPO=owner/other", "declare -x GITHUB_TOKEN=x", "export FOO=1 GH_HOST=example.com"):
+            with self.subTest(export=export):
+                tail = f"gh pr merge 7 --squash --subject '{SUBJECT}' --body-file - <<'EOF'\nA body.\nEOF"
+                reason = self.reason(self.run_command(f"{export} && {tail}", FAKE_VIEW=view("bot", "bot")))
+                self.assertIn("exported before it", reason)
+                self.assertIn("-R owner/repo", reason)
+                self.assertEqual(self.calls(), [])
+
+    def test_another_variable_exported_before_the_merge_is_checked(self) -> None:
+        """An export of a variable that doesn't change `gh`'s repo leaves the merge an ordinary, checked one."""
+        tail = f"gh pr merge 7 --squash --subject '{SUBJECT}' --body-file - <<'EOF'\nA body.\nEOF"
+        out = self.run_command(f"export FOO=1 && {tail}", FAKE_VIEW=view("bot", "human"))
+        self.assertIn("4242+human@", self.reason(out))
+
+    def test_a_script_or_a_quoted_mention_run_by_a_shell_is_left_alone(self) -> None:
+        """A script named for the merge, or a commit message about it inside `sh -c`, is not a merge."""
+        commands = (
+            "bash scripts/test-gh-pr-merge.sh",
+            "sh -c 'git commit -m \"docs: explain gh pr merge\"'",
+            "bash -c 'gh pr checks 7 && git merge origin/main'",
+            "bash run.sh 'gh pr merge 7 --body x'",
+        )
+        for command in commands:
+            with self.subTest(command=command):
+                self.assertEqual((self.run_command(command, FAKE_VIEW=view("bot", "human")), self.calls()), ("", []))
+
+    def test_a_shell_string_behind_a_wrapper_is_refused(self) -> None:
+        """`env bash -c` and `timeout 600 bash -c` hide a merge just as `bash -c` does."""
+        for prefix in ("env X=1 ", "timeout 600 ", ""):
+            for tail in ("bash -c 'gh pr merge 7 --body x'", "bash -c 'cd x && gh -R o/r pr merge 7 --body x'"):
+                with self.subTest(command=prefix + tail):
+                    reason = self.reason(self.run_command(prefix + tail, FAKE_VIEW=view("bot", "human")))
+                    self.assertIn("inside a string a shell runs", reason)
+
+    def test_a_trailing_backslash_does_not_hide_the_merge(self) -> None:
+        """A backslash that ends the command is a literal one, so the merge before it is still checked."""
+        command = f"gh pr merge 7 --squash --subject '{SUBJECT}' --body ok \\"
+        out = self.run_command(command, FAKE_VIEW=view("bot", "human"))
+        self.assertIn("4242+human@", self.reason(out))
+
+    def test_a_separator_character_in_a_commit_message_does_not_break_paging(self) -> None:
+        """U+2028 inside a JSON string isn't a line break for the hook, so the page still parses."""
+        pages = page(("human", "line one line two"))
+        out = self.run_hook("A body.", FAKE_VIEW=view("bot", *["bot"] * 100), FAKE_PAGES=pages)
+        self.assertIn("4242+human@", self.reason(out))
+
+    def test_a_paged_list_that_cannot_be_read_is_not_worth_retrying(self) -> None:
+        """A commit list that isn't JSON will be no better the next time, so the refusal doesn't say to retry."""
+        reason = self.reason(self.run_hook("A body.", FAKE_VIEW=view("bot", *["bot"] * 100), FAKE_PAGES="not json"))
+        self.assertIn("No retry of this command will pass", reason)
+
+    def test_a_login_in_a_commit_message_must_look_like_one(self) -> None:
+        """A co-author address whose login holds `/` or `.` isn't read, so it can't steer an `api` call or the refusal."""
+        message = "fix\n\nCo-authored-by: X <1+../../repos/o/r@users.noreply.github.com>"
+        out = self.run_hook("A body.", FAKE_VIEW=view("bot", *["bot"] * 100), FAKE_PAGES=page(("bot", message)))
+        self.assertEqual((out, [c for c in self.calls() if c.startswith("api users/")]), ("", []))
+
     def test_a_flag_with_no_value_is_left_to_gh(self) -> None:
         """`--subject` as the last word gives `gh` nothing to use and `gh` refuses it, so the hook makes no call."""
         out = self.run_command("gh pr merge 7 --squash --subject", FAKE_VIEW=view("bot", "human"))
@@ -567,13 +681,13 @@ class CreditHookTest(unittest.TestCase):
         self.assertEqual(out, "")
 
 
-
 class HookModuleTest(unittest.TestCase):
     def setUp(self) -> None:
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         self.tmp = pathlib.Path(tmp.name)
         self.hook = load_hook()
+        self.hook_conventions = sys.modules["conventions"]
 
     def sleeping_gh(self):
         """Put a `gh` that sleeps for five seconds first on PATH."""
@@ -615,6 +729,26 @@ class HookModuleTest(unittest.TestCase):
             self.assertRaisesRegex(self.hook.LookupFailed, "timed out"),
         ):
             self.hook.missing_credit_lines("A body.", "7", None, str(KIT))
+
+    def test_an_escaped_backslash_does_not_join_the_next_line(self) -> None:
+        """`\\` before a newline is a literal backslash, so the next line is a command of its own."""
+        words = [w for w in self.hook_conventions.segments("echo foo\\\\\ngit checkout -b BadName")]
+        self.assertEqual(words[-1], ["git", "checkout", "-b", "BadName"])
+        joined = [w for w in self.hook_conventions.segments("echo foo \\\ngit status")]
+        self.assertEqual(joined, [["echo", "foo", "git", "status"]])
+
+    def test_the_hook_can_be_imported_on_python_3_9(self) -> None:
+        """The hook is registered `|| true`, so an import error on an older system `python3` lets every merge through."""
+        for name in ("pretooluse-merge-message.py", "conventions.py"):
+            with self.subTest(file=name):
+                source = (KIT / "hooks" / name).read_text(encoding="utf-8")
+                tree = ast.parse(source, feature_version=(3, 9))
+                uses_union = "| None" in source
+                has_future = any(
+                    isinstance(node, ast.ImportFrom) and node.module == "__future__" and node.names[0].name == "annotations"
+                    for node in tree.body
+                )
+                self.assertTrue(has_future or not uses_union)
 
     def test_a_crash_in_the_check_refuses_the_merge(self) -> None:
         """An error in the check is a refusal: the hook is registered `|| true`, so a crash would pass the merge."""

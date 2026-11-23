@@ -192,8 +192,11 @@ def message_reason(problems, doc):
     )
 
 
-# `<<WORD`, not the here-string `<<<WORD`; the quote, if any, is group 2.
-HEREDOC = re.compile(r"(?<!<)<<(?!<)(-?)\s*(['\"]?)([A-Za-z_][A-Za-z0-9_]*)\2")
+# `<<WORD`, not the here-string `<<<WORD`. The delimiter is a quoted word (the
+# quote is group 2, the word group 3) or a bare one (a backslash before it is
+# group 4, the word group 5); quoting any part of it stops the shell expanding
+# the body.
+HEREDOC = re.compile(r"(?<!<)<<(?!<)(-?)\s*(?:(['\"])([^'\"\n]+)\2|(\\)?([^\s'\"\\<>|&;()$`]+))")
 
 
 def scan_heredocs(command):
@@ -218,37 +221,42 @@ def scan_heredocs(command):
                 body.append(text)
             continue
         kept.append(line)
-        pending = [(dash == "-", word, bool(quote), []) for dash, quote, word in HEREDOC.findall(line)]
+        pending = [
+            (dash == "-", qword or plain, bool(quote or backslash), [])
+            for dash, quote, qword, backslash, plain in HEREDOC.findall(line)
+        ]
     if pending:
         return command, []
     return "\n".join(kept), found
 
 
-def heredocs(command):
-    """The command with each heredoc's body cut out, and the bodies in order."""
-    kept, found = scan_heredocs(command)
-    return kept, [body for body, _ in found]
-
-
 def segments(command):
     """Split a shell command into the word lists of its simple commands."""
-    for words, _ in segments_with_heredocs(command):
+    parsed, _, _ = parse_command(command)
+    for words, _ in parsed:
         yield words
 
 
-def segments_with_heredocs(command):
-    """Split a shell command into the (words, heredoc numbers) of its simple commands.
+def parse_command(command):
+    """Split a shell command into its simple commands and the heredocs it opens.
 
-    A heredoc number is the position, in `scan_heredocs`'s list, of a heredoc
-    the simple command opens, whether with a `<<` of its own or inside a quoted
-    word such as `"$(cat <<'EOF' ...)"`. A backslash-newline joins the lines
-    before the command is split, as the shell does.
+    Returns (segments, heredocs, matched). Each segment is (words, heredoc
+    numbers): the position, in `heredocs`, of each heredoc the simple command
+    opens, whether with a `<<` of its own or inside a quoted word such as
+    `"$(cat <<'EOF' ...)"`. `heredocs` is `scan_heredocs`'s list. `matched` is
+    false when the lexer counted a different number of heredocs than the scan
+    found (an arithmetic `<<`, a `<<` in a comment, a delimiter the scan
+    doesn't read), in which case the numbers can't be trusted. A
+    backslash-newline joins the lines, and a backslash that ends the command
+    is dropped, as the shell does.
     """
-    command, _ = scan_heredocs(command)
-    command = command.replace("\\\n", "")
+    command, found = scan_heredocs(command)
+    command = re.sub(r"(?<!\\)((?:\\\\)*)\\\n", r"\1", command)
+    command = re.sub(r"(?<!\\)((?:\\\\)*)\\\Z", r"\1", command)
     lexer = shlex.shlex(command, posix=True, punctuation_chars="();<>|&\n")
     lexer.whitespace = " \t\r"
     lexer.whitespace_split = True
+    parsed = []
     words = []
     numbers = []
     redirect = False
@@ -256,7 +264,7 @@ def segments_with_heredocs(command):
     try:
         for token in lexer:
             if token in SEPARATORS:
-                yield words, numbers
+                parsed.append((words, numbers))
                 words, numbers, redirect = [], [], False
             elif re.fullmatch(r"[<>&|]+", token):
                 # A redirection: drop its fd (`2>`) and, next pass, its target.
@@ -273,9 +281,10 @@ def segments_with_heredocs(command):
                 for _ in HEREDOC.findall(token):
                     numbers.append(count)
                     count += 1
+        parsed.append((words, numbers))
     except ValueError:
-        return
-    yield words, numbers
+        pass
+    return parsed, found, count == len(found)
 
 
 def reaches_kit(directory):
