@@ -73,19 +73,14 @@ _GH_ENVIRONMENT = re.compile(r"(?:GH|GITHUB)_[A-Z_]+=")
 # single-quoted `'$X'` is flagged too; `$1`, `$?` and `$$` are not.
 _EXPANSION = re.compile(r"\$[({A-Za-z_']|`")
 # `$(cat <<'EOF'` with its body cut out of the command: the usual way to pass a body.
-_CAT_HEREDOC = re.compile(r"\$\(\s*cat\s+<<-?\s*['\"]?\w+['\"]?\s*\)")
+_CAT_HEREDOC = re.compile(
+    r"\$\(\s*cat\s+<<-?\s*(?:['\"][^'\"\n]+['\"]|\\?[A-Za-z_][^\s'\"\\<>|&;()$`]*)\s*\)"
+)
 # What `--body-file` may name in place of a heredoc: the hook's own stdin isn't it.
 _STDIN_PATHS = frozenset({"-", "/dev/stdin", "/dev/fd/0", "/proc/self/fd/0"})
 
 # Shells that run a string as a command, where `gh pr merge` may be hiding.
 _SHELLS = frozenset({"bash", "sh", "zsh", "dash", "eval"})
-# `gh pr merge` where a command starts in a shell string: at its start, after a
-# separator, or after a word that runs the next one; not inside a quoted message.
-_MERGE_TEXT = re.compile(
-    r"(?:^|[;&|({!]\s*|\b(?:sudo|time|env|command|then|do|else|xargs)\s+)"
-    r"gh\s+(?:-\S+\s+(?:[^\s-]\S*\s+)?)*pr\s+(?:-\S+\s+(?:[^\s-]\S*\s+)?)*merge\b",
-    re.MULTILINE,
-)
 
 # A trailer line is `Token: value` or an indented continuation. Git reads
 # trailers in a last paragraph made of them; this is stricter than git, which
@@ -245,7 +240,10 @@ def hides_merge(words):
 
     That is the string after `-c` of `bash`, `sh`, `zsh` or `dash`, or the
     words of `eval`, wherever in the command they come (`env bash -c '...'`,
-    `timeout 600 bash -c '...'`). A script (`bash run.sh`) is not looked into.
+    `timeout 600 bash -c '...'`). Each is parsed as a command of its own and
+    searched the way a direct command is, so `bash -c 'GH_REPO=x /usr/bin/gh pr
+    merge ...'` is found, and a quoted message that only says it is not. A
+    script (`bash run.sh`) is not looked into.
     """
     for position, word in enumerate(words):
         shell = os.path.basename(word)
@@ -257,7 +255,11 @@ def hides_merge(words):
             if not flags:
                 continue
             rest = rest[flags[0] + 1 :]
-        if any(_MERGE_TEXT.search(arg) for arg in rest):
+        candidates = [rest]
+        for arg in rest:
+            parsed, _, _ = parse_command(arg)
+            candidates += [inner for inner, _ in parsed]
+        if any(merge_arguments(c) or embedded_merge(c) for c in candidates):
             return True
     return False
 
@@ -272,7 +274,7 @@ def kit_doc(cwd):
 def check_merge(args, repo, own_heredocs, cwd):
     """The refusal for one `gh pr merge`'s arguments, or None to let it through.
 
-    `own_heredocs` is the (body, quoted) of each heredoc the merge's own command opens,
+    `own_heredocs` is the (body, quoted, delimiter) of each heredoc the merge's own command opens,
     or None when the command's heredocs can't be matched to its `<<` operators.
     """
     try:
@@ -425,7 +427,7 @@ def heredoc_text(own_heredocs, what):
         )
     if len(own_heredocs) != 1:
         raise Unreadable(f"{what}, but the merge command opens {len(own_heredocs)} heredocs, not one")
-    body, quoted = own_heredocs[0]
+    body, quoted, _ = own_heredocs[0]
     if not quoted and _EXPANSION.search(body):
         raise Unreadable(f"{what}, and it is unquoted, so the shell expands its `$` and backticks; write `<<'EOF'`")
     return body

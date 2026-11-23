@@ -572,15 +572,15 @@ class CreditHookTest(unittest.TestCase):
                 self.assertEqual(self.run_command(command, FAKE_VIEW=view("bot", "human")), "")
 
     def test_heredocs_the_hook_cannot_match_refuse_a_merge_that_reads_one(self) -> None:
-        """An arithmetic `<<`, or one in a comment, throws the count off; the merge is refused for that, not as a crash."""
+        """An arithmetic `<<`, or a real one the lexer misses, throws the delimiters off; the merge is refused for that."""
         merge = f"gh pr merge 7 --squash --subject '{SUBJECT}' --body-file - <<'EOF'\nA body.\n\n{CREDIT}\nEOF"
         commands = (
             "echo $((1 << 2)) && " + merge,
-            "# use <<EOF here\n" + merge.replace("'EOF'", "'DONE'").replace("\nEOF", "\nDONE"),
             f"echo $((1 << 2)) && {merge} && cat <<'NOTE'\n{CREDIT}\nNOTE",
         )
         for command in commands:
             with self.subTest(command=command[:30]):
+                self.log.unlink(missing_ok=True)
                 reason = self.reason(self.run_command(command, FAKE_VIEW=view("bot", "human")))
                 self.assertIn("can't match this command's heredocs", reason)
                 self.assertEqual(self.calls(), [])
@@ -648,7 +648,7 @@ class CreditHookTest(unittest.TestCase):
                     self.assertIn("inside a string a shell runs", reason)
 
     def test_a_trailing_backslash_does_not_hide_the_merge(self) -> None:
-        """A backslash that ends the command is a literal one, so the merge before it is still checked."""
+        """A backslash that ends the command escapes nothing and is dropped, so the merge before it is still checked."""
         command = f"gh pr merge 7 --squash --subject '{SUBJECT}' --body ok \\"
         out = self.run_command(command, FAKE_VIEW=view("bot", "human"))
         self.assertIn("4242+human@", self.reason(out))
@@ -669,6 +669,59 @@ class CreditHookTest(unittest.TestCase):
         message = "fix\n\nCo-authored-by: X <1+../../repos/o/r@users.noreply.github.com>"
         out = self.run_hook("A body.", FAKE_VIEW=view("bot", *["bot"] * 100), FAKE_PAGES=page(("bot", message)))
         self.assertEqual((out, [c for c in self.calls() if c.startswith("api users/")]), ("", []))
+
+    def test_two_miscounts_do_not_cancel(self) -> None:
+        """An arithmetic `<<$n` the scan skips and a `<<'NOTE'` the lexer skips don't net to a match: the merge is refused."""
+        command = (
+            f"echo $((1<<$n)) && gh pr merge 7 --squash --subject '{SUBJECT}' --body-file - <<'EOF'\nA body.\nEOF\n"
+            f"echo a#<<'NOTE'\nMore.\n\n{CREDIT}\nNOTE"
+        )
+        reason = self.reason(self.run_command(command, FAKE_VIEW=view("bot", "human")))
+        self.assertIn("can't match this command's heredocs", reason)
+        self.assertEqual(self.calls(), [])
+
+    def test_a_marker_in_a_comment_is_read_correctly(self) -> None:
+        """A `# ... <<EOF` comment that no line closes is no heredoc, so the merge after it is checked as written."""
+        merge = f"gh pr merge 7 --squash --subject '{SUBJECT}' --body-file - <<'DONE'\nA body.\n\n{CREDIT}\nDONE"
+        out = self.run_command("# use <<EOF here\n" + merge, FAKE_VIEW=view("bot", "human"))
+        self.assertEqual((out, self.calls()), ("", [f"pr view 7 {VIEW_ARGS}"]))
+
+    def test_an_unclosed_marker_does_not_turn_a_later_body_into_commands(self) -> None:
+        """A `<<EOF` in a string that no line closes leaves the later heredoc a heredoc, so a merge in its text isn't run."""
+        command = f"echo \"x <<EOF\"\ncat > notes.md <<'DONE'\ngh pr merge 7 --squash --subject '{SUBJECT}' --body ok\nDONE"
+        self.assertEqual((self.run_command(command, FAKE_VIEW=view("bot", "human")), self.calls()), ("", []))
+
+    def test_a_shift_or_format_string_is_not_a_heredoc(self) -> None:
+        """`1<<20` and `<<%s>>` are not heredocs, so a real heredoc after them keeps its body out of the shell."""
+        body = f"gh pr merge 7 --squash --subject '{SUBJECT}' --body ok"
+        for first in ("python3 -c 'print(1<<20)'", "printf '<<%s>>\\n' a"):
+            with self.subTest(first=first):
+                command = f"{first} && cat > notes.md <<'EOF'\n{body}\nEOF"
+                self.assertEqual((self.run_command(command, FAKE_VIEW=view("bot", "human")), self.calls()), ("", []))
+
+    def test_a_merge_in_any_shape_inside_a_shell_string_is_refused(self) -> None:
+        """The string a shell runs is read like a command: a leading space, a variable, a path, a wrapper or an indent don't hide it."""
+        strings = (
+            " gh pr merge 7 --squash --body x",
+            "set -e\n  gh pr merge 7 --squash --body x\n",
+            "GH_REPO=o/other gh pr merge 7 --squash --body x",
+            "/usr/bin/gh pr merge 7 --squash --body x",
+            "timeout 60 gh pr merge 7 --body x",
+            "exec gh pr merge 7 --body x",
+        )
+        for text in strings:
+            for shell in ("bash -c", "sh -c"):
+                with self.subTest(shell=shell, text=text[:30]):
+                    reason = self.reason(self.run_command(f"{shell} {text!r}".replace("\\n", "\n"), FAKE_VIEW=view("bot", "human")))
+                    self.assertIn("inside a string a shell runs", reason)
+
+    def test_a_cat_heredoc_body_takes_the_delimiters_the_shell_accepts(self) -> None:
+        """`--body \"$(cat <<'END-OF-BODY' ...)\"` and `<<\\EOF` are read as heredocs, not refused as expansions."""
+        for opener, closer in (("'END-OF-BODY'", "END-OF-BODY"), ("\\EOF", "EOF"), ('"a.b"', "a.b")):
+            with self.subTest(delimiter=opener):
+                body = f"A body.\n\n{CREDIT}"
+                command = f"gh pr merge 7 --squash --subject '{SUBJECT}' --body \"$(cat <<{opener}\n{body}\n{closer}\n)\""
+                self.assertEqual(self.run_command(command, FAKE_VIEW=view("bot", "human")), "")
 
     def test_a_flag_with_no_value_is_left_to_gh(self) -> None:
         """`--subject` as the last word gives `gh` nothing to use and `gh` refuses it, so the hook makes no call."""

@@ -194,40 +194,54 @@ def message_reason(problems, doc):
 
 # `<<WORD`, not the here-string `<<<WORD`. The delimiter is a quoted word (the
 # quote is group 2, the word group 3) or a bare one (a backslash before it is
-# group 4, the word group 5); quoting any part of it stops the shell expanding
+# group 4, the word group 5, which starts with a letter or `_`, so `1<<20` and
+# `<<%s` are not heredocs); quoting any part of it stops the shell expanding
 # the body.
-HEREDOC = re.compile(r"(?<!<)<<(?!<)(-?)\s*(?:(['\"])([^'\"\n]+)\2|(\\)?([^\s'\"\\<>|&;()$`]+))")
+HEREDOC = re.compile(
+    r"(?<!<)<<(?!<)(-?)\s*(?:(['\"])([^'\"\n]+)\2|(\\)?([A-Za-z_][^\s'\"\\<>|&;()$`]*))"
+)
 
 
 def scan_heredocs(command):
-    """The command with each heredoc's body cut out, and a (body, quoted) for each, in order.
+    """The command with each heredoc's body cut out, and a (body, quoted, delimiter) for each, in order.
 
     A body is text, not shell: an apostrophe in it would otherwise read as an
     unclosed quote and make the whole command unparseable. `quoted` is whether
     the delimiter was quoted, which stops the shell expanding the body. A
-    `<<WORD` with no closing line is no heredoc, and the command comes back whole.
+    `<<WORD` that no later line closes is no heredoc: its line is kept as
+    shell, and the lines after it are scanned afresh.
     """
+    lines = command.split("\n")
+    ignore = set()
+    while True:
+        kept, found, unclosed = scan_lines(lines, ignore)
+        if unclosed is None:
+            return "\n".join(kept), found
+        ignore.add(unclosed)
+
+
+def scan_lines(lines, ignore):
+    """The (kept lines, heredocs, line of the first unclosed `<<` or None) of one pass of `scan_heredocs`."""
     found = []
     kept = []
     pending = []
-    for line in command.split("\n"):
+    for number, line in enumerate(lines):
         if pending:
-            strip_tabs, delimiter, quoted, body = pending[0]
+            strip_tabs, delimiter, quoted, body, _ = pending[0]
             text = line.lstrip("\t") if strip_tabs else line
             if text == delimiter:
-                found.append(("\n".join(body), quoted))
+                found.append(("\n".join(body), quoted, delimiter))
                 pending.pop(0)
             else:
                 body.append(text)
             continue
         kept.append(line)
-        pending = [
-            (dash == "-", qword or plain, bool(quote or backslash), [])
-            for dash, quote, qword, backslash, plain in HEREDOC.findall(line)
-        ]
-    if pending:
-        return command, []
-    return "\n".join(kept), found
+        if number not in ignore:
+            pending = [
+                (dash == "-", qword or plain, bool(quote or backslash), [], number)
+                for dash, quote, qword, backslash, plain in HEREDOC.findall(line)
+            ]
+    return kept, found, (pending[0][4] if pending else None)
 
 
 def segments(command):
@@ -244,11 +258,11 @@ def parse_command(command):
     numbers): the position, in `heredocs`, of each heredoc the simple command
     opens, whether with a `<<` of its own or inside a quoted word such as
     `"$(cat <<'EOF' ...)"`. `heredocs` is `scan_heredocs`'s list. `matched` is
-    false when the lexer counted a different number of heredocs than the scan
-    found (an arithmetic `<<`, a `<<` in a comment, a delimiter the scan
-    doesn't read), in which case the numbers can't be trusted. A
-    backslash-newline joins the lines, and a backslash that ends the command
-    is dropped, as the shell does.
+    false when the delimiters the lexer saw after its `<<` operators differ
+    from the ones the scan found (an arithmetic `<<`, a `<<` in a comment, a
+    delimiter the scan doesn't read), in which case the numbers can't be
+    trusted. A backslash-newline joins the lines, and a backslash that ends the
+    command is dropped, as the shell does.
     """
     command, found = scan_heredocs(command)
     command = re.sub(r"(?<!\\)((?:\\\\)*)\\\n", r"\1", command)
@@ -259,8 +273,8 @@ def parse_command(command):
     parsed = []
     words = []
     numbers = []
+    delimiters = []
     redirect = False
-    count = 0
     try:
         for token in lexer:
             if token in SEPARATORS:
@@ -271,20 +285,22 @@ def parse_command(command):
                 if words and words[-1].isdigit():
                     words.pop()
                 if token == "<<":
-                    numbers.append(count)
-                    count += 1
+                    numbers.append(len(delimiters))
+                    delimiters.append(None)
                 redirect = True
             elif redirect:
+                if delimiters and delimiters[-1] is None:
+                    delimiters[-1] = token.lstrip("-")
                 redirect = False
             else:
                 words.append(token)
-                for _ in HEREDOC.findall(token):
-                    numbers.append(count)
-                    count += 1
+                for match in HEREDOC.findall(token):
+                    numbers.append(len(delimiters))
+                    delimiters.append(match[2] or match[4])
         parsed.append((words, numbers))
     except ValueError:
         pass
-    return parsed, found, count == len(found)
+    return parsed, found, delimiters == [delimiter for _, _, delimiter in found]
 
 
 def reaches_kit(directory):
