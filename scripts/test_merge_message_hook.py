@@ -605,6 +605,75 @@ class CreditHookTest(unittest.TestCase):
                 out = self.run_command(f"{cd} && gh pr merge 7 --squash --delete-branch", cwd=self.tmp)
                 self.assertEqual((out, self.calls()), ("", []))
 
+    def merge_command(self):
+        return f"gh pr merge 7 --squash --subject '{SUBJECT}' --body-file - <<'EOF'\nA body.\nEOF"
+
+    def assert_checked(self, command, cwd=None):
+        """The merge in `command` is checked in the kit, so it is refused for its missing credit line."""
+        out = self.run_command(command, cwd=cwd or self.tmp, FAKE_VIEW=view("bot", "human"))
+        self.assertIn("4242+human@", self.reason(out))
+
+    def test_a_pushd_into_the_kit_is_followed(self) -> None:
+        """`pushd` moves the directory as `cd` does, so a merge after it is checked."""
+        self.assert_checked(f"pushd {KIT} && {self.merge_command()}")
+
+    def test_popd_returns_to_the_directory_pushd_left(self) -> None:
+        """`popd` goes back to where `pushd` came from, in or out of the kit."""
+        self.assert_checked(f"pushd {KIT} && pushd {self.tmp} && popd && {self.merge_command()}")
+        self.log.unlink()
+        out = self.run_command(f"pushd {KIT} && popd && gh pr merge 7 --squash --delete-branch", cwd=self.tmp)
+        self.assertEqual((out, self.calls()), ("", []))
+
+    def test_cd_dash_may_return_to_the_kit(self) -> None:
+        """`cd -` goes somewhere the hook doesn't track, so every directory it has seen is checked."""
+        self.assert_checked(f"cd {KIT} && cd {self.tmp} && cd - && {self.merge_command()}")
+
+    def test_a_subshells_cd_leaves_both_directories_possible(self) -> None:
+        """A `cd` inside parentheses ends at the `)`, so a merge after it may be in either directory."""
+        self.assert_checked(f"(cd {self.tmp} && true) ; {self.merge_command()}", cwd=KIT)
+        self.log.unlink(missing_ok=True)
+        self.assert_checked(f"(cd {KIT} && true) ; {self.merge_command()}")
+        self.assert_checked(f"(cd {KIT} && {self.merge_command()}\n)")
+        self.log.unlink()
+        out = self.run_command(f"(cd {self.tmp} && true) ; gh pr merge 7 --squash --delete-branch", cwd=self.tmp)
+        self.assertEqual((out, self.calls()), ("", []))
+
+    def test_a_bare_cd_goes_home(self) -> None:
+        """`cd` with no argument is `cd ~`, and a merge there is outside the kit."""
+        home = self.tmp / "home"
+        home.mkdir()
+        out = self.run_command("cd && gh pr merge 7 --squash --delete-branch", cwd=KIT, HOME=str(home))
+        self.assertEqual((out, self.calls()), ("", []))
+
+    def test_a_command_the_shell_lexer_rejects_is_refused_in_the_kit(self) -> None:
+        """An unbalanced quote hides the merge it is in, so a command mentioning `gh` and `merge` is refused."""
+        command = "gh pr merge 7 --squash --body 'unterminated"
+        out = self.run_command(command, FAKE_VIEW=view("bot", "human"))
+        self.assertIn("can't parse", self.reason(out))
+        self.assertEqual(self.run_command(command, cwd=self.tmp), "")
+        self.assertEqual(self.run_command("echo 'unterminated"), "")
+
+    def test_git_that_cannot_run_refuses_the_merge_in_the_kit(self) -> None:
+        """With no `git`, a kit repo reads as no kit repo, so a merge there is refused, not let through."""
+        empty = self.tmp / "nogit"
+        empty.mkdir()
+        (empty / "gh").symlink_to(self.tmp / "gh")
+        out = self.run_command(self.merge_command(), PATH=str(empty), FAKE_VIEW=view("bot", "human"))
+        self.assertIn("git can't be run", self.reason(out))
+
+    def test_git_trouble_names_a_slow_or_refusing_git_but_not_a_missing_repo(self) -> None:
+        """A directory that is no repo is an answer; a timeout or a refused repo is trouble."""
+        sys.path.insert(0, str(KIT / "hooks"))
+        import conventions
+
+        self.assertIsNone(conventions.git_trouble(self.tmp))
+        timeout = subprocess.TimeoutExpired("git", 10)
+        with mock.patch.object(conventions.subprocess, "run", side_effect=timeout):
+            self.assertIn("past 10 seconds", conventions.git_trouble(self.tmp))
+        refused = subprocess.CompletedProcess(("git",), 128, "", "fatal: detected dubious ownership")
+        with mock.patch.object(conventions.subprocess, "run", return_value=refused):
+            self.assertIn("dubious ownership", conventions.git_trouble(self.tmp))
+
     def test_a_cd_that_fails_leaves_the_merge_in_the_kit(self) -> None:
         """When the `cd` target is missing the merge still runs where it did, so it is checked."""
         command = f"cd gone ; gh pr merge 7 --squash --subject '{SUBJECT}' --body-file - <<'EOF'\nA body.\nEOF"

@@ -246,22 +246,26 @@ def scan_lines(lines, ignore):
 
 def segments(command):
     """Split a shell command into the word lists of its simple commands."""
-    parsed, _, _ = parse_command(command)
-    for words, _ in parsed:
+    parsed, _, _, _ = parse_command(command)
+    for words, _, _ in parsed:
         yield words
 
 
 def parse_command(command):
     """Split a shell command into its simple commands and the heredocs it opens.
 
-    Returns (segments, heredocs, matched). Each segment is (words, heredoc
-    numbers): the position, in `heredocs`, of each heredoc the simple command
+    Returns (segments, heredocs, matched, complete). Each segment is (words,
+    heredoc numbers, nested): `nested` is whether it sits inside parentheses (a
+    subshell, a `$(...)`), where a `cd` doesn't outlast the `)`. The heredoc
+    numbers are the position, in `heredocs`, of each heredoc the simple command
     opens, whether with a `<<` of its own or inside a quoted word such as
     `"$(cat <<'EOF' ...)"`. `heredocs` is `scan_heredocs`'s list. `matched` is
     false when the delimiters the lexer saw after its `<<` operators differ
     from the ones the scan found (an arithmetic `<<`, a `<<` in a comment, a
     delimiter the scan doesn't read), in which case the numbers can't be
-    trusted. A backslash-newline joins the lines, and a backslash that ends the
+    trusted. `complete` is false when the lexer gave up on the command (an
+    unbalanced quote), so the simple command it was in the middle of is lost.
+    A backslash-newline joins the lines, and a backslash that ends the
     command is dropped, as the shell does.
     """
     command, found = scan_heredocs(command)
@@ -275,11 +279,16 @@ def parse_command(command):
     numbers = []
     delimiters = []
     redirect = False
+    depth = 0
+    nested = False
+    complete = True
     try:
         for token in lexer:
             if token in SEPARATORS:
-                parsed.append((words, numbers))
+                parsed.append((words, numbers, nested))
                 words, numbers, redirect = [], [], False
+                depth = max(0, depth + (token == "(") - (token == ")"))
+                nested = depth > 0
             elif re.fullmatch(r"[<>&|]+", token):
                 # A redirection: drop its fd (`2>`) and, next pass, its target.
                 if words and words[-1].isdigit():
@@ -297,10 +306,10 @@ def parse_command(command):
                 for match in HEREDOC.findall(token):
                     numbers.append(len(delimiters))
                     delimiters.append(match[2] or match[4])
-        parsed.append((words, numbers))
+        parsed.append((words, numbers, nested))
     except ValueError:
-        pass
-    return parsed, found, delimiters == [delimiter for _, _, delimiter in found]
+        complete = False
+    return parsed, found, delimiters == [delimiter for _, _, delimiter in found], complete
 
 
 def reaches_kit(directory):
@@ -324,15 +333,39 @@ def reaches_kit(directory):
     return None
 
 
+GIT_TIMEOUT = 10
+
+
 def git(cwd, *args):
-    """Run a git command, returning stdout, or None if it failed."""
+    """Run a git command, returning stdout, or None if it failed or ran past GIT_TIMEOUT seconds."""
     try:
         done = subprocess.run(
-            ("git", *args), cwd=cwd, capture_output=True, text=True, check=False
+            ("git", *args), cwd=cwd, capture_output=True, text=True, check=False, timeout=GIT_TIMEOUT
         )
-    except OSError:
+    except (OSError, subprocess.SubprocessError):
         return None
     return done.stdout if done.returncode == 0 else None
+
+
+def git_trouble(directory):
+    """Why git can't tell whether `directory` is in a repo, or None when it can.
+
+    A directory that is no repo is an answer, not trouble. Trouble is what makes
+    `reaches_kit` read a kit repo as "not a kit repo": git missing or too slow,
+    or a repo it refuses (safe.directory).
+    """
+    try:
+        done = subprocess.run(
+            ("git", "rev-parse", "--show-toplevel"),
+            cwd=directory, capture_output=True, text=True, check=False, timeout=GIT_TIMEOUT,
+        )
+    except subprocess.TimeoutExpired:
+        return f"git ran past {GIT_TIMEOUT} seconds"
+    except OSError as error:
+        return f"git can't be run ({error})"
+    if done.returncode == 0 or "not a git repository" in done.stderr:
+        return None
+    return f"git refused the directory: {done.stderr.strip() or 'exit ' + str(done.returncode)}"
 
 
 def main():
