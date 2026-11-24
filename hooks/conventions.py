@@ -255,8 +255,9 @@ def parse_command(command):
     """Split a shell command into its simple commands and the heredocs it opens.
 
     Returns (segments, heredocs, matched, complete). Each segment is (words,
-    heredoc numbers, nested): `nested` is whether it sits inside parentheses (a
-    subshell, a `$(...)`), where a `cd` doesn't outlast the `)`. The heredoc
+    heredoc numbers, nested): `nested` is whether it runs in a subshell, inside
+    parentheses or backgrounded or in a pipeline, where a `cd` doesn't outlast
+    it. A comment is dropped, its newline kept. The heredoc
     numbers are the position, in `heredocs`, of each heredoc the simple command
     opens, whether with a `<<` of its own or inside a quoted word such as
     `"$(cat <<'EOF' ...)"`. `heredocs` is `scan_heredocs`'s list. `matched` is
@@ -269,9 +270,11 @@ def parse_command(command):
     command is dropped, as the shell does.
     """
     command, found = scan_heredocs(command)
+    command = drop_shell_comments(command)
     command = re.sub(r"(?<!\\)((?:\\\\)*)\\\n", r"\1", command)
     command = re.sub(r"(?<!\\)((?:\\\\)*)\\\Z", r"\1", command)
     lexer = shlex.shlex(command, posix=True, punctuation_chars="();<>|&\n")
+    lexer.commenters = ""
     lexer.whitespace = " \t\r"
     lexer.whitespace_split = True
     parsed = []
@@ -280,15 +283,17 @@ def parse_command(command):
     delimiters = []
     redirect = False
     depth = 0
-    nested = False
+    piped = False
     complete = True
     try:
         for token in lexer:
             if token in SEPARATORS:
-                parsed.append((words, numbers, nested))
+                # A command in parentheses, backgrounded or in a pipeline runs in a subshell.
+                forked = token in ("&", "|", "|&")
+                parsed.append((words, numbers, depth > 0 or piped or forked))
                 words, numbers, redirect = [], [], False
                 depth = max(0, depth + (token == "(") - (token == ")"))
-                nested = depth > 0
+                piped = token in ("|", "|&")
             elif re.fullmatch(r"[<>&|]+", token):
                 # A redirection: drop its fd (`2>`) and, next pass, its target.
                 if words and words[-1].isdigit():
@@ -306,10 +311,44 @@ def parse_command(command):
                 for match in HEREDOC.findall(token):
                     numbers.append(len(delimiters))
                     delimiters.append(match[2] or match[4])
-        parsed.append((words, numbers, nested))
+        parsed.append((words, numbers, depth > 0 or piped))
     except ValueError:
         complete = False
     return parsed, found, delimiters == [delimiter for _, _, delimiter in found], complete
+
+
+def drop_shell_comments(command):
+    """The command with each comment cut out and its newline kept.
+
+    A comment starts at an unquoted `#` that begins a word. shlex's own comment
+    handling would swallow the newline too, joining the next line's words to
+    this one's.
+    """
+    out = []
+    quote = None
+    index = 0
+    while index < len(command):
+        char = command[index]
+        if quote:
+            out.append(char)
+            if char == "\\" and quote != "'" and index + 1 < len(command):
+                index += 1
+                out.append(command[index])
+            elif char == quote:
+                quote = None
+        elif char == "\\" and index + 1 < len(command):
+            out.append(command[index : index + 2])
+            index += 1
+        elif char in "'\"":
+            quote = char
+            out.append(char)
+        elif char == "#" and (index == 0 or command[index - 1] in " \t\n;&|()"):
+            while index + 1 < len(command) and command[index + 1] != "\n":
+                index += 1
+        else:
+            out.append(char)
+        index += 1
+    return "".join(out)
 
 
 def reaches_kit(directory):
@@ -318,54 +357,70 @@ def reaches_kit(directory):
     A linked worktree lacks the gitignored `.fieldkit` symlink, so the main
     worktree - the common git dir's parent - is checked as well.
     """
+    return kit_status(directory)[0]
+
+
+def kit_status(directory):
+    """(git.md's path or None, why git couldn't say or None) for the repo at `directory`.
+
+    The second is set when `reaches_kit` would read a kit repo as no kit repo:
+    git is missing, runs past GIT_TIMEOUT seconds or refuses the directory
+    (safe.directory). A directory that is no repo at all is an answer, not
+    trouble.
+    """
     roots = set()
-    top = git(directory, "rev-parse", "--show-toplevel")
+    top, trouble = git_output(directory, "rev-parse", "--show-toplevel")
+    if trouble:
+        return None, trouble
     if top:
         roots.add(os.path.realpath(top.strip()))
-    common = git(directory, "rev-parse", "--path-format=absolute", "--git-common-dir")
-    if common:
-        roots.add(os.path.dirname(os.path.realpath(common.strip())))
+        common, trouble = git_output(directory, "rev-parse", "--path-format=absolute", "--git-common-dir")
+        if trouble:
+            return None, trouble
+        if common:
+            roots.add(os.path.dirname(os.path.realpath(common.strip())))
     for root in roots:
         if root == KIT:
-            return "conventions/git.md"
+            return "conventions/git.md", None
         if os.path.exists(os.path.join(root, ".fieldkit")):
-            return ".fieldkit/conventions/git.md"
-    return None
+            return ".fieldkit/conventions/git.md", None
+    return None, None
 
 
 GIT_TIMEOUT = 10
 
 
-def git(cwd, *args):
-    """Run a git command, returning stdout, or None if it failed or ran past GIT_TIMEOUT seconds."""
-    try:
-        done = subprocess.run(
-            ("git", *args), cwd=cwd, capture_output=True, text=True, check=False, timeout=GIT_TIMEOUT
-        )
-    except (OSError, subprocess.SubprocessError):
-        return None
-    return done.stdout if done.returncode == 0 else None
+def git_output(cwd, *args):
+    """(stdout or None, trouble or None) of a git command.
 
-
-def git_trouble(directory):
-    """Why git can't tell whether `directory` is in a repo, or None when it can.
-
-    A directory that is no repo is an answer, not trouble. Trouble is what makes
-    `reaches_kit` read a kit repo as "not a kit repo": git missing or too slow,
-    or a repo it refuses (safe.directory).
+    Run in the C locale so "not a git repository" can be told from a refusal.
+    Output is read leniently: a path that isn't UTF-8 must not crash the hook.
     """
     try:
         done = subprocess.run(
-            ("git", "rev-parse", "--show-toplevel"),
-            cwd=directory, capture_output=True, text=True, check=False, timeout=GIT_TIMEOUT,
+            ("git", *args),
+            cwd=cwd,
+            capture_output=True,
+            text=True,
+            errors="replace",
+            check=False,
+            timeout=GIT_TIMEOUT,
+            env={**os.environ, "LC_ALL": "C", "LANGUAGE": "C"},
         )
     except subprocess.TimeoutExpired:
-        return f"git ran past {GIT_TIMEOUT} seconds"
-    except OSError as error:
-        return f"git can't be run ({error})"
-    if done.returncode == 0 or "not a git repository" in done.stderr:
-        return None
-    return f"git refused the directory: {done.stderr.strip() or 'exit ' + str(done.returncode)}"
+        return None, f"git ran past {GIT_TIMEOUT} seconds"
+    except (OSError, subprocess.SubprocessError) as error:
+        return None, f"git can't be run ({error})"
+    if done.returncode == 0:
+        return done.stdout, None
+    if "not a git repository" in done.stderr:
+        return None, None
+    return None, f"git refused the directory: {done.stderr.strip() or 'exit ' + str(done.returncode)}"
+
+
+def git(cwd, *args):
+    """Run a git command, returning stdout, or None if it failed or ran past GIT_TIMEOUT seconds."""
+    return git_output(cwd, *args)[0]
 
 
 def main():
