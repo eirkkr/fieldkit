@@ -244,6 +244,31 @@ def scan_lines(lines, ignore):
     return kept, found, (pending[0][4] if pending else None)
 
 
+COMPOUND_OPEN = ("{", "then", "do")
+COMPOUND_CLOSE = ("}", "fi", "done")
+
+
+def mark_compound(parsed):
+    """`parsed` as (words, heredoc numbers, nested) tuples, a command inside `{ }`, `then` or `do` marked nested.
+
+    Such a group can run in a subshell (`{ ...; } | cat`, `... | while ...; do ...; done`)
+    or not at all (`if false; then ...; fi`), so a `cd` in it needn't outlast it.
+    """
+    depth = 0
+    marked = []
+    for words, numbers, nested in parsed:
+        leading = 0
+        while leading < len(words) and words[leading] in COMPOUND_OPEN + ("if", "elif", "else", "while", "until", "!"):
+            depth += words[leading] in COMPOUND_OPEN
+            if words[leading] == "elif":
+                depth = max(0, depth - 1)  # the earlier `then` branch ends
+            leading += 1
+        marked.append((words, numbers, nested or depth > 0))
+        if words[:1] and words[0] in COMPOUND_CLOSE:
+            depth = max(0, depth - 1)
+    return marked
+
+
 def segments(command):
     """Split a shell command into the word lists of its simple commands."""
     parsed, _, _, _ = parse_command(command)
@@ -270,9 +295,9 @@ def parse_command(command):
     command is dropped, as the shell does.
     """
     command, found = scan_heredocs(command)
-    command = drop_shell_comments(command)
     command = re.sub(r"(?<!\\)((?:\\\\)*)\\\n", r"\1", command)
     command = re.sub(r"(?<!\\)((?:\\\\)*)\\\Z", r"\1", command)
+    command = drop_shell_comments(command)
     lexer = shlex.shlex(command, posix=True, punctuation_chars="();<>|&\n")
     lexer.commenters = ""
     lexer.whitespace = " \t\r"
@@ -285,12 +310,19 @@ def parse_command(command):
     depth = 0
     piped = False
     complete = True
+    list_start = 0
     try:
         for token in lexer:
             if token in SEPARATORS:
                 # A command in parentheses, backgrounded or in a pipeline runs in a subshell.
                 forked = token in ("&", "|", "|&")
-                parsed.append((words, numbers, depth > 0 or piped or forked))
+                parsed.append([words, numbers, depth > 0 or piped or forked])
+                if token == "&":
+                    # `a && b &` backgrounds the whole list.
+                    for entry in parsed[list_start:]:
+                        entry[2] = True
+                if token not in ("&&", "||", "|", "|&"):
+                    list_start = len(parsed)
                 words, numbers, redirect = [], [], False
                 depth = max(0, depth + (token == "(") - (token == ")"))
                 piped = token in ("|", "|&")
@@ -311,10 +343,10 @@ def parse_command(command):
                 for match in HEREDOC.findall(token):
                     numbers.append(len(delimiters))
                     delimiters.append(match[2] or match[4])
-        parsed.append((words, numbers, depth > 0 or piped))
+        parsed.append([words, numbers, depth > 0 or piped])
     except ValueError:
         complete = False
-    return parsed, found, delimiters == [delimiter for _, _, delimiter in found], complete
+    return mark_compound(parsed), found, delimiters == [delimiter for _, _, delimiter in found], complete
 
 
 def drop_shell_comments(command):
@@ -374,11 +406,11 @@ def kit_status(directory):
         return None, trouble
     if top:
         roots.add(os.path.realpath(top.strip()))
-        common, trouble = git_output(directory, "rev-parse", "--path-format=absolute", "--git-common-dir")
-        if trouble:
-            return None, trouble
-        if common:
-            roots.add(os.path.dirname(os.path.realpath(common.strip())))
+    common, trouble = git_output(directory, "rev-parse", "--path-format=absolute", "--git-common-dir")
+    if trouble:
+        return None, trouble
+    if common:
+        roots.add(os.path.dirname(os.path.realpath(common.strip())))
     for root in roots:
         if root == KIT:
             return "conventions/git.md", None
@@ -413,7 +445,7 @@ def git_output(cwd, *args):
         return None, f"git can't be run ({error})"
     if done.returncode == 0:
         return done.stdout, None
-    if "not a git repository" in done.stderr:
+    if "not a git repository" in done.stderr or "must be run in a work tree" in done.stderr:
         return None, None
     return None, f"git refused the directory: {done.stderr.strip() or 'exit ' + str(done.returncode)}"
 

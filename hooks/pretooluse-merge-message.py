@@ -32,7 +32,7 @@ directory that doesn't exist; a merge in a string a shell runs (after
 set on it or exported before it, which the hook's own lookup wouldn't see; a
 repo `git` can't be asked about (missing, slow, refused); a command the lexer
 rejects (an unbalanced quote) that mentions `gh` and `merge`; and a command
-that moves among more than 8 possible directories, in any repo. `cd`, `pushd`
+that may run in more than 8 directories, in any repo. `cd`, `pushd`
 and `popd` are followed, and a merge is checked in each directory it might run
 in when a subshell's `cd`, `cd -` or a move the hook can't read leaves that
 unclear. A
@@ -194,6 +194,9 @@ def main():
                 deny(reason)
                 return
     if not complete and _MENTIONS_MERGE.search(command):
+        if here.overflow:
+            deny(too_many_directories_reason())
+            return
         for directory in here.possible:
             try:
                 reason = unrecognised_reason(directory, "in a command the hook can't parse (an unbalanced quote)", _UNBALANCED_FIX)
@@ -206,8 +209,13 @@ def main():
 
 # The most directories the hook tracks as possible. Past it the hook refuses a merge, whatever repo it is in.
 _MAX_DIRECTORIES = 8
-# Words a command may begin with before `cd`: the keywords of a block, and the builtins that run it.
-_BEFORE_CD = ("{", "then", "do", "else", "!", "builtin", "command")
+# Words a command may begin with before `cd`: block keywords, `!`, the builtins that run it, a variable set on it.
+_BEFORE_CD = ("{", "then", "do", "else", "if", "elif", "while", "until", "!", "builtin", "command")
+_ASSIGNMENT = re.compile(r"[A-Za-z_][A-Za-z0-9_]*=")
+# `pushd +N` and `pushd -N` rotate the stack.
+_ROTATION = re.compile(r"[+-]\d+")
+_HOME = re.compile(r"\$\{HOME\}|\$HOME(?![A-Za-z0-9_])")
+_PWD = re.compile(r"\$\{PWD\}|\$PWD(?![A-Za-z0-9_])")
 
 
 class Directories:
@@ -215,30 +223,37 @@ class Directories:
 
     `possible` is every directory the next command could run in, by real path.
     It is one unless the hook can't tell: a `cd` in a subshell (parentheses, a
-    pipeline, `&`) leaves the old directory in as well, and so do `cd -`, a
-    `pushd` or `popd` the hook can't follow, and a `cd` it can't read. A merge
-    is checked in each. A `cd` to a target the hook can't expand (`$(...)`, an
-    unset variable) or a directory that isn't there changes nothing. Past
-    `_MAX_DIRECTORIES` the hook gives up: `overflow` is set.
+    pipeline, `&`) or a group (`{ }`, `then`, `do`) leaves the old directory in
+    as well, and so do `cd -`, `$OLDPWD`, a `pushd` or `popd` the hook can't
+    follow, and a `cd` it can't read. A merge is checked in each. A `cd` to a
+    target the hook can't expand (`$(...)`, an unset variable) or a directory
+    that isn't there changes nothing. When more than `_MAX_DIRECTORIES` are
+    possible the hook gives up: `overflow` is set.
     """
 
     def __init__(self, start):
-        self.possible = [os.path.realpath(start)]
-        self.seen = list(self.possible)
+        try:
+            start = os.path.realpath(start)
+        except Exception:  # noqa: BLE001 - a path with a NUL byte or a lone surrogate; `kit_doc` refuses it as missing
+            pass
+        self.possible = [start]
+        self.seen = [start]
         self.stack = []
         self.overflow = False
 
     def follow(self, words, nested):
         """Move on `words` if it is a directory change, returning whether it was one."""
-        while words and words[0] in _BEFORE_CD:
+        while words and (words[0] in _BEFORE_CD or _ASSIGNMENT.match(words[0])):
             words = words[1:]
         if not words or words[0] not in ("cd", "pushd", "popd"):
             return False
         options = [w for w in words[1:] if _OPTION.fullmatch(w)]
         args = [w for w in words[1:] if w != "--" and w not in options]
         try:
-            if words[0] != "cd" and (options or any(a.startswith("+") for a in args)):
+            if words[0] != "cd" and (options or any(_ROTATION.fullmatch(a) for a in args)):
                 # `pushd -n`, `popd -n` and `pushd +N` move the stack, not the directory, or rotate it.
+                self._unknown()
+            elif any("OLDPWD" in a for a in args):
                 self._unknown()
             else:
                 self._follow(words[0], args, nested)
@@ -248,35 +263,35 @@ class Directories:
 
     def _follow(self, name, args, nested):
         if name == "popd":
-            if args:
-                self._unknown()
-            elif nested:
+            if args or nested:
                 self._unknown()
             elif self.stack:
                 self._move(self.stack.pop(), False)
             return
-        if len(args) > 1 or (name == "pushd" and not args):
-            # `pushd` with no argument swaps the top two entries, `pushd +N` rotates, and more words are an error.
+        if len(args) > 1 or (name == "pushd" and not args) or args == ["-"]:
+            # `pushd` with no argument swaps the top two entries; more words are an error.
             self._unknown()
-        elif args == ["-"]:
-            self._unknown()
-        else:
-            target = args[0] if args else "~"
-            moved = [self._resolve(d, target) for d in self.possible]
-            if name == "pushd" and not nested and moved != self.possible:
-                self.stack.append(list(self.possible))
-            elif name == "pushd" and nested:
-                self._unknown()
-                return
-            self._move(moved, nested)
+            return
+        target = args[0] if args else "~"
+        resolved = [self._resolve(d, target) for d in self.possible]
+        moved = [path for path, _ in resolved]
+        if name == "pushd" and not nested and any(ok for _, ok in resolved):
+            # A `pushd` that fails pushes nothing.
+            self.stack.append(list(self.possible))
+        self._move(moved, nested)
 
     @staticmethod
     def _resolve(directory, target):
-        target = os.path.expandvars(os.path.expanduser(target))
+        """(the real path `cd target` reaches from `directory`, whether it went there)."""
+        home = os.environ.get("HOME")
+        target = os.path.expanduser(target)
+        if home:
+            target = _HOME.sub(lambda _: home, target)
+        target = _PWD.sub(lambda _: directory, target)
         if "$" in target or "`" in target:
-            return directory
+            return directory, False
         path = os.path.realpath(os.path.join(directory, target))
-        return path if os.path.isdir(path) else directory
+        return (path, True) if os.path.isdir(path) else (directory, False)
 
     def _unknown(self):
         """A change the hook can't follow: everywhere it has been is possible."""
@@ -287,9 +302,8 @@ class Directories:
         wanted = self.possible + directories if nested else directories
         self.possible = list(dict.fromkeys(wanted)) or self.possible
         self.seen = list(dict.fromkeys(self.seen + self.possible))
-        if len(self.possible) > _MAX_DIRECTORIES or len(self.seen) > _MAX_DIRECTORIES:
+        if len(self.possible) > _MAX_DIRECTORIES:
             self.overflow = True
-            del self.possible[_MAX_DIRECTORIES:], self.seen[_MAX_DIRECTORIES:]
 
 
 def merge_arguments(words):
