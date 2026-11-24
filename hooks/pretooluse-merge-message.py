@@ -23,18 +23,9 @@ call, `gh api users/<login>`, per missing author, to spell out the line.
 
 In a repo that reaches the kit, a `gh pr merge` the hook can't check is
 refused, not let through: a squash commit can't be amended, so an unchecked
-merge is the worse outcome (ADR 074). That covers a lookup that fails, times
-out or is unreadable; a body the shell rewrites (an unquoted heredoc, a
-`$VAR`) or a file that can't be read; a merge that reads a heredoc in a
-command whose heredocs can't be matched to their `<<` operators; a payload
-directory that doesn't exist; a merge in a string a shell runs (after
-`bash -c`, or `eval`'s words); and a merge with a `GH_` or `GITHUB_` variable
-set on it or exported before it, which the hook's own lookup wouldn't see. A
-crash in the check refuses the merge in any repo, since by then the hook can't
-tell which repo it is in. A `gh pr merge` is found after `FOO=1`, `env`,
-`command`, `time`, `sudo`, `!`, `{`, `then` or a path to `gh`, and
-`-R`/`--repo` may come before `pr` or `merge`. A merge through `gh api`, built
-from a variable, or fed to a shell on stdin, is not recognised (issue #228).
+merge is the worse outcome. ADR 074 lists what makes a merge unchecked, what
+the hook follows (`cd`, `pushd`, `popd`, a merge in `bash -c` or `eval`) and
+the gaps it accepts.
 
 Like the branch-name hook it applies only in a repo that reaches the kit and
 refuses through PreToolUse's JSON `deny`. See ADR 047 and ADR 074 under
@@ -55,7 +46,7 @@ import sys
 import time
 from typing import NamedTuple
 
-from conventions import message_problems, message_reason, parse_command, reaches_kit
+from conventions import kit_status, message_problems, message_reason, parse_command
 
 # Every `gh pr merge` flag that takes a value, so a value is never read as the PR.
 # A short flag's value may follow it, or follow `=`, or be joined to it (`-bTEXT`).
@@ -106,6 +97,13 @@ _COMMIT_CAP = 250
 _COLOUR_VARS = ("CLICOLOR_FORCE", "GH_FORCE_TTY")
 
 
+# A `cd` option (`-P`, `-L`, `-e`, `-@`); a lone `-` is `cd -`'s argument.
+_OPTION = re.compile(r"-[A-Za-z@]+")
+
+# A command that mentions both words, which the hook refuses when it can't parse it.
+_MENTIONS_MERGE = re.compile(r"\bgh\b[\s\S]*\bmerge\b")
+
+
 class Unreadable(Exception):
     """A `gh pr merge` whose body, or whose directory, the hook can't read."""
 
@@ -151,14 +149,11 @@ def main():
     cwd = payload.get("cwd")
     if not isinstance(cwd, str) or not cwd:
         cwd = os.getcwd()
-    parsed, found, matched = parse_command(command)
+    parsed, found, matched, complete = parse_command(command)
     exported = False
-    for words, numbers in parsed:
-        if words[:1] == ["cd"] and len(words) == 2:
-            # A `cd` that can't be followed (a `$(...)`, `-`, a missing directory) leaves the directory as it was.
-            target = os.path.join(cwd, os.path.expanduser(words[1]))
-            if os.path.isdir(target):
-                cwd = target
+    here = Directories(cwd)
+    for words, numbers, nested in parsed:
+        if here.follow(words, nested):
             continue
         if words[:1] in (["export"], ["declare"], ["typeset"], ["readonly"]):
             exported = exported or any(_GH_ENVIRONMENT.match(word) for word in words[1:])
@@ -166,19 +161,134 @@ def main():
         merge = merge_arguments(words) or embedded_merge(words)
         if merge is None and not hides_merge(words):
             continue
-        try:
-            if merge is None:
-                reason = unrecognised_reason(cwd, "inside a string a shell runs")
-            elif exported or any(_GH_ENVIRONMENT.match(word) for word in words):
-                reason = unrecognised_reason(cwd, "with a `GH_` or `GITHUB_` variable set on it or exported before it")
-            else:
-                own = [found[number] for number in numbers] if matched else None
-                reason = check_merge(*merge, own, cwd)
-        except Exception:  # noqa: BLE001 - registered `|| true`, so a crash would let the merge through
-            reason = crash_reason()
-        if reason:
-            deny(reason)
+        if here.overflow:
+            deny(too_many_directories_reason())
             return
+        for directory in here.possible:
+            try:
+                if merge is None:
+                    reason = unrecognised_reason(directory, "inside a string a shell runs")
+                elif exported or any(_GH_ENVIRONMENT.match(word) for word in words):
+                    reason = unrecognised_reason(directory, "with a `GH_` or `GITHUB_` variable set on it or exported before it")
+                else:
+                    own = [found[number] for number in numbers] if matched else None
+                    reason = check_merge(*merge, own, directory)
+            except Exception:  # noqa: BLE001 - registered `|| true`, so a crash would let the merge through
+                reason = crash_reason()
+            if reason:
+                deny(reason)
+                return
+    if not complete and _MENTIONS_MERGE.search(command):
+        if here.overflow:
+            deny(too_many_directories_reason())
+            return
+        for directory in here.possible:
+            try:
+                reason = unrecognised_reason(directory, "in a command the hook can't parse (an unbalanced quote)", _UNBALANCED_FIX)
+            except Exception:  # noqa: BLE001 - as above
+                reason = crash_reason()
+            if reason:
+                deny(reason)
+                return
+
+
+# The most directories the hook tracks as possible. Past it the hook refuses a merge, whatever repo it is in.
+_MAX_DIRECTORIES = 8
+# Words a command may begin with before `cd`: block keywords, `!`, the builtins that run it, a variable set on it.
+_BEFORE_CD = ("{", "then", "do", "else", "if", "elif", "while", "until", "!", "builtin", "command")
+_ASSIGNMENT = re.compile(r"[A-Za-z_][A-Za-z0-9_]*=")
+# `pushd +N` and `pushd -N` rotate the stack.
+_ROTATION = re.compile(r"[+-]\d+")
+_HOME = re.compile(r"\$\{HOME\}|\$HOME(?![A-Za-z0-9_])")
+_PWD = re.compile(r"\$\{PWD\}|\$PWD(?![A-Za-z0-9_])")
+
+
+class Directories:
+    """Where the command may be running, as `cd`, `pushd` and `popd` move it.
+
+    `possible` is every directory the next command could run in, by real path.
+    It is one unless the hook can't tell: a `cd` in a subshell (parentheses, a
+    pipeline, `&`) or a group (`{ }`, `then`, `do`) leaves the old directory in
+    as well, and so do `cd -`, `$OLDPWD`, a `pushd` or `popd` the hook can't
+    follow, and a `cd` it can't read. A merge is checked in each. A `cd` to a
+    target the hook can't expand (`$(...)`, an unset variable) or a directory
+    that isn't there changes nothing. When more than `_MAX_DIRECTORIES` are
+    possible the hook gives up: `overflow` is set.
+    """
+
+    def __init__(self, start):
+        try:
+            start = os.path.realpath(start)
+        except Exception:  # noqa: BLE001 - a path with a NUL byte or a lone surrogate; `kit_doc` refuses it as missing
+            pass
+        self.possible = [start]
+        self.seen = [start]
+        self.stack = []
+        self.overflow = False
+
+    def follow(self, words, nested):
+        """Move on `words` if it is a directory change, returning whether it was one."""
+        while words and (words[0] in _BEFORE_CD or _ASSIGNMENT.match(words[0])):
+            words = words[1:]
+        if not words or words[0] not in ("cd", "pushd", "popd"):
+            return False
+        options = [w for w in words[1:] if _OPTION.fullmatch(w)]
+        args = [w for w in words[1:] if w != "--" and w not in options]
+        try:
+            if words[0] != "cd" and (options or any(_ROTATION.fullmatch(a) for a in args)):
+                # `pushd -n`, `popd -n` and `pushd +N` move the stack, not the directory, or rotate it.
+                self._unknown()
+            elif any("OLDPWD" in a for a in args):
+                self._unknown()
+            else:
+                self._follow(words[0], args, nested)
+        except Exception:  # noqa: BLE001 - a target `expanduser` chokes on (a NUL byte, a lone surrogate) is one we can't follow
+            self._unknown()
+        return True
+
+    def _follow(self, name, args, nested):
+        if name == "popd":
+            if args or nested:
+                self._unknown()
+            elif self.stack:
+                self._move(self.stack.pop(), False)
+            return
+        if len(args) > 1 or (name == "pushd" and not args) or args == ["-"]:
+            # `pushd` with no argument swaps the top two entries; more words are an error.
+            self._unknown()
+            return
+        target = args[0] if args else "~"
+        resolved = [self._resolve(d, target) for d in self.possible]
+        moved = [path for path, _ in resolved]
+        if name == "pushd" and not nested and any(ok for _, ok in resolved):
+            # A `pushd` that fails pushes nothing.
+            self.stack.append(list(self.possible))
+        self._move(moved, nested)
+
+    @staticmethod
+    def _resolve(directory, target):
+        """(the real path `cd target` reaches from `directory`, whether it went there)."""
+        home = os.environ.get("HOME")
+        target = os.path.expanduser(target)
+        if home:
+            target = _HOME.sub(lambda _: home, target)
+        target = _PWD.sub(lambda _: directory, target)
+        if "$" in target or "`" in target:
+            return directory, False
+        path = os.path.realpath(os.path.join(directory, target))
+        return (path, True) if os.path.isdir(path) else (directory, False)
+
+    def _unknown(self):
+        """A change the hook can't follow: everywhere it has been is possible."""
+        self._move(list(self.seen), True)
+
+    def _move(self, directories, nested):
+        # In a subshell the old directory is still where the command after `)` runs.
+        wanted = self.possible + directories if nested else directories
+        self.possible = list(dict.fromkeys(wanted)) or self.possible
+        self.seen = list(dict.fromkeys(self.seen + self.possible))
+        if len(self.possible) > _MAX_DIRECTORIES:
+            self.overflow = True
 
 
 def merge_arguments(words):
@@ -257,8 +367,10 @@ def hides_merge(words):
             rest = rest[flags[0] + 1 :]
         candidates = [rest]
         for arg in rest:
-            parsed, _, _ = parse_command(arg)
-            candidates += [inner for inner, _ in parsed]
+            parsed, _, _, complete = parse_command(arg)
+            candidates += [inner for inner, _, _ in parsed]
+            if not complete and _MENTIONS_MERGE.search(arg):
+                return True
         if any(merge_arguments(c) or embedded_merge(c) for c in candidates):
             return True
     return False
@@ -268,7 +380,10 @@ def kit_doc(cwd):
     """git.md's path as the repo at `cwd` reaches it, or None. Raises Unreadable if `cwd` isn't a directory."""
     if not os.path.isdir(cwd):
         raise Unreadable(f"the directory `{cwd}` doesn't exist, so the hook can't tell which repo the merge is for")
-    return reaches_kit(cwd)
+    doc, trouble = kit_status(cwd)
+    if trouble:
+        raise Unreadable(f"{trouble}, so the hook can't tell whether the repo reaches the kit")
+    return doc
 
 
 def check_merge(args, repo, own_heredocs, cwd):
@@ -304,7 +419,27 @@ def check_merge(args, repo, own_heredocs, cwd):
     return "\n\n".join(reasons) or None
 
 
-def unrecognised_reason(cwd, how):
+_DIRECT_FIX = (
+    "Run it as a plain "
+    "`gh pr merge <PR> --squash --subject ... --body-file -` command, not through `bash -c` or `eval`, "
+    "and name another repo with `-R owner/repo`, not a `GH_` variable."
+)
+_UNBALANCED_FIX = (
+    "Balance its quotes (a quote left open, or `$'...'` with an escaped quote inside) and run it as a plain "
+    "`gh pr merge <PR> --squash --subject ... --body-file -` command."
+)
+
+
+def too_many_directories_reason():
+    """The refusal for a command that moves among more directories than the hook tracks."""
+    return (
+        f"This command changes directory so many ways (more than {_MAX_DIRECTORIES} possible directories) that "
+        "the hook can't tell which repo its `gh pr merge` runs in, and a squash commit can't be amended once "
+        "merged. Split it: `cd` to the repo in one command, then run the merge on its own."
+    )
+
+
+def unrecognised_reason(cwd, how, fix=_DIRECT_FIX):
     """The refusal for a `gh pr merge` the hook can't check, run `how`, or None outside the kit."""
     try:
         doc = kit_doc(cwd)
@@ -314,9 +449,7 @@ def unrecognised_reason(cwd, how):
         return None
     return (
         f"This command runs `gh pr merge` {how}, so the hook can't check the squash message, and a squash "
-        "commit can't be amended once merged. Run it as a plain "
-        "`gh pr merge <PR> --squash --subject ... --body-file -` command, not through `bash -c` or `eval`, "
-        f"and name another repo with `-R owner/repo`, not a `GH_` variable. See {doc}."
+        f"commit can't be amended once merged. {fix} See {doc}."
     )
 
 

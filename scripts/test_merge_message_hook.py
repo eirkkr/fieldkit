@@ -599,11 +599,236 @@ class CreditHookTest(unittest.TestCase):
         self.assertEqual((self.run_command(command, cwd=self.tmp, FAKE_VIEW=view("bot", "human")), self.calls()), ("", []))
 
     def test_a_cd_the_hook_cannot_follow_keeps_the_directory(self) -> None:
-        """A `cd` to `$(...)`, `-` or a directory that isn't there changes nothing, so a merge outside the kit stays unchecked."""
+        """A `cd` to `$(...)`, an unset variable or a directory that isn't there changes nothing, so a merge outside the kit stays unchecked; `cd -` adds the directories already seen."""
         for cd in ('cd "$(git rev-parse --show-toplevel)"', "cd -", "cd gone"):
             with self.subTest(cd=cd):
                 out = self.run_command(f"{cd} && gh pr merge 7 --squash --delete-branch", cwd=self.tmp)
                 self.assertEqual((out, self.calls()), ("", []))
+
+    def merge_command(self):
+        return f"gh pr merge 7 --squash --subject '{SUBJECT}' --body-file - <<'EOF'\nA body.\nEOF"
+
+    def assert_checked(self, command, cwd=None, **env):
+        """The merge in `command` is checked in the kit, so it is refused for its missing credit line."""
+        out = self.run_command(command, cwd=cwd or self.tmp, FAKE_VIEW=view("bot", "human"), **env)
+        self.assertIn("4242+human@", self.reason(out), command)
+        self.log.unlink(missing_ok=True)
+
+    def assert_unchecked(self, command, cwd=None, **env):
+        """The merge in `command` runs outside the kit, so the hook makes no `gh` call and no refusal."""
+        out = self.run_command(command, cwd=cwd or self.tmp, FAKE_VIEW=view("bot", "human"), **env)
+        self.assertEqual((out, self.calls()), ("", []), command)
+
+    def test_a_pushd_into_the_kit_is_followed(self) -> None:
+        """`pushd` moves the directory as `cd` does, so a merge after it is checked."""
+        self.assert_checked(f"pushd {KIT} && {self.merge_command()}")
+
+    def test_popd_returns_to_the_directory_pushd_left(self) -> None:
+        """`popd` goes back to where `pushd` came from, in or out of the kit."""
+        self.assert_checked(f"pushd {KIT} && pushd {self.tmp} && popd && {self.merge_command()}")
+        self.assert_unchecked(f"pushd {KIT} && popd && {self.merge_command()}")
+
+    def test_a_pushd_that_fails_pushes_nothing(self) -> None:
+        """`pushd gone` fails and leaves the stack alone, so a later `popd` has nothing to go back to."""
+        self.assert_checked(f"pushd {self.tmp} ; pushd gone ; popd ; {self.merge_command()}", cwd=KIT)
+
+    def test_a_bare_pushd_swaps_it_does_not_go_home(self) -> None:
+        """`pushd` with no argument, or `popd -n`, is not `cd ~`, so a merge that stays in the kit is checked."""
+        home = self.tmp / "home"
+        home.mkdir()
+        self.assert_checked(f"pushd ; {self.merge_command()}", cwd=KIT, HOME=str(home))
+        self.assert_checked(f"pushd {KIT} && popd -n && {self.merge_command()}")
+
+    def test_cd_dash_may_return_to_the_kit(self) -> None:
+        """`cd -` goes somewhere the hook doesn't track, so every directory it has seen is checked."""
+        self.assert_checked(f"cd {KIT} && cd {self.tmp} && cd - && {self.merge_command()}")
+
+    def test_a_subshells_cd_leaves_both_directories_possible(self) -> None:
+        """A `cd` in parentheses, a pipeline or the background ends with it, so a merge after it may be in either directory."""
+        self.assert_checked(f"(cd {self.tmp} && true) ; {self.merge_command()}", cwd=KIT)
+        self.assert_checked(f"(cd {KIT} && true) ; {self.merge_command()}")
+        self.assert_checked(f"(cd {KIT} && {self.merge_command()}\n)")
+        self.assert_checked(f"cd {self.tmp} & {self.merge_command()}", cwd=KIT)
+        self.assert_checked(f"cd {self.tmp} | true ; {self.merge_command()}", cwd=KIT)
+        self.assert_unchecked(f"(cd {self.tmp} && true) ; {self.merge_command()}")
+
+    def test_a_pushd_in_a_subshell_stays_off_the_stack(self) -> None:
+        """A `pushd` inside parentheses pushes nothing the shell keeps, so a later `popd` fails and stays."""
+        self.assert_checked(f"(pushd /) ; cd {KIT} ; popd ; {self.merge_command()}")
+
+    def test_cd_options_and_leading_words_are_followed(self) -> None:
+        """`cd -P x`, `cd -- x`, `builtin cd x`, `{ cd x; }` and `then cd x` all move as a plain `cd x` does."""
+        for head in (
+            f"cd -P {KIT}",
+            f"cd -- {KIT}",
+            f"builtin cd {KIT}",
+            f"command cd {KIT}",
+            f"{{ cd {KIT}; }}",
+            f"if true; then cd {KIT}; fi",
+        ):
+            with self.subTest(head=head):
+                self.assert_checked(f"{head} ; {self.merge_command()}")
+
+    def test_a_cd_to_a_variable_is_expanded(self) -> None:
+        """`cd "$HOME/..."` goes where the variable says, and `cd` alone goes to `$HOME`."""
+        self.assert_checked(f'cd "$HOME" && {self.merge_command()}', HOME=str(KIT))
+        self.assert_checked(f"cd && {self.merge_command()}", HOME=str(KIT))
+        self.assert_checked(f'cd "$HOME/hooks/.." && {self.merge_command()}', HOME=str(KIT))
+
+    def test_a_bare_cd_goes_home(self) -> None:
+        """`cd` with no argument is `cd ~`, so from the kit a merge after it is outside it."""
+        home = self.tmp / "home"
+        home.mkdir()
+        self.assert_unchecked(f"cd && {self.merge_command()}", cwd=KIT, HOME=str(home))
+
+    def test_a_cd_the_hook_cannot_expand_is_no_crash(self) -> None:
+        """A target with an unset variable or a NUL byte or lone surrogate is not followed, and the hook doesn't crash."""
+        for target in ('"$UNSET_NOT_A_VARIABLE/x"', "'~a\x00b'", "'~\ud800'"):
+            with self.subTest(target=target):
+                self.assert_checked(f"cd {target} ; {self.merge_command()}", cwd=KIT)
+
+    def test_a_comment_after_a_cd_does_not_hide_it(self) -> None:
+        """A comment's newline ends the line, so the next line's words aren't joined to the `cd`."""
+        self.assert_checked(f"cd {KIT}   # the kit\n{self.merge_command()}")
+        self.assert_checked(f"gh pr merge 7 --squash --subject '{SUBJECT}' --body-file - <<'EOF' # squash it\nA body.\nEOF", cwd=KIT)
+
+    def test_a_hash_in_a_word_or_quote_is_no_comment(self) -> None:
+        """`#` inside a quote, after `$` or in a word starts no comment, so the `(#7)` subject is still read."""
+        command = f"echo $# a#b && gh pr merge 7 --squash --subject 'docs: add a thing (#8)' --body-file - <<'EOF'\nA body.\nEOF"
+        self.assertIn("(#7)", self.reason(self.run_command(command, cwd=KIT, FAKE_VIEW=view("bot", "bot"))))
+
+    def test_alternating_subshell_cds_stay_small(self) -> None:
+        """Two directories reached by different paths are one directory, so a long run of `cd`s doesn't multiply."""
+        steps = " ; ".join("( cd hooks/.. ) ; ( cd docs/.. )" for _ in range(40))
+        self.assert_checked(f"{steps} ; {self.merge_command()}", cwd=KIT)
+
+    def test_more_directories_than_the_hook_tracks_refuses_the_merge(self) -> None:
+        """When the hook can't narrow a command to a few directories it refuses the merge, in any repo."""
+        for number in range(10):
+            (self.tmp / f"d{number}").mkdir()
+        steps = " ; ".join(f"( cd d{number} )" for number in range(10))
+        out = self.run_command(f"{steps} ; {self.merge_command()}", cwd=self.tmp, FAKE_VIEW=view("bot", "human"))
+        self.assertIn("so many ways", self.reason(out))
+        self.assertEqual(self.calls(), [])
+
+    def test_a_pushd_in_a_subshell_moves_without_pushing(self) -> None:
+        """`(pushd KIT && merge)` runs in the kit, as `(cd KIT && merge)` does."""
+        self.assert_checked(f"(pushd {KIT} && {self.merge_command()}\n)")
+
+    def test_a_cd_after_a_keyword_is_followed(self) -> None:
+        """`if cd x; then`, `elif cd x`, `while cd x` and `until cd x` run the `cd` in the current shell."""
+        self.assert_checked(f"if cd {KIT}; then {self.merge_command()}\nfi")
+        self.assert_checked(f"until cd {KIT}; do :; done; {self.merge_command()}")
+        self.assert_checked(f"if false; then :; elif cd {KIT}; then {self.merge_command()}\nfi")
+
+    def test_a_cd_after_a_variable_assignment_is_followed(self) -> None:
+        """`X=1 cd x` still changes the directory."""
+        self.assert_checked(f"X=1 cd {KIT} && {self.merge_command()}")
+
+    def test_pushd_dot_succeeds_and_pushes(self) -> None:
+        """`pushd .` stays put but is a push, so the `popd` after it returns to the directory before it."""
+        self.assert_checked(f"pushd {KIT} ; pushd . ; popd ; {self.merge_command()}")
+
+    def test_a_rotating_pushd_is_not_a_directory(self) -> None:
+        """`pushd -0` and `pushd +1` rotate the stack, not `cd` to a directory of that name."""
+        self.assert_checked(f"pushd {self.tmp} ; pushd -0 ; {self.merge_command()}", cwd=KIT)
+        self.assert_checked(f"pushd {self.tmp} ; pushd +1 ; {self.merge_command()}", cwd=KIT)
+
+    def test_a_long_run_of_plain_cds_is_not_too_many_directories(self) -> None:
+        """Nine `cd`s in a row leave one possible directory, so nothing is refused for them outside the kit."""
+        for number in range(9):
+            (self.tmp / f"s{number}").mkdir()
+        steps = " && ".join(f"cd {self.tmp}/s{number}" for number in range(9))
+        self.assert_unchecked(f"{steps} && {self.merge_command()}")
+
+    def test_pwd_is_the_tracked_directory_not_the_hooks(self) -> None:
+        """`$PWD` is where the command is, not what the hook process's environment says, and `$OLDPWD` is unknown."""
+        self.assert_checked(f'cd "$PWD" && {self.merge_command()}', cwd=KIT, PWD=str(self.tmp))
+        self.assert_checked(f'cd {self.tmp} && cd "$OLDPWD" && {self.merge_command()}', cwd=KIT, OLDPWD=str(self.tmp))
+
+    def test_too_many_directories_and_an_unbalanced_quote_is_refused(self) -> None:
+        """The refusal for more directories than the hook tracks comes before the one for an unparseable command."""
+        for number in range(10):
+            (self.tmp / f"d{number}").mkdir()
+        steps = " ; ".join(f"( cd d{number} )" for number in range(10))
+        out = self.run_command(f"{steps} ; gh pr merge 7 --squash --body 'unterminated", cwd=self.tmp)
+        self.assertIn("so many ways", self.reason(out))
+
+    def test_a_payload_directory_that_cannot_be_a_path_is_refused_not_a_crash(self) -> None:
+        """A `cwd` with a NUL byte or a lone surrogate is a directory that doesn't exist, so the merge is refused."""
+        for cwd in ("/tmp/a\x00b", "/tmp/a\ud800"):
+            with self.subTest(cwd=cwd):
+                out = self.run_command(self.merge_command(), cwd=cwd, FAKE_VIEW=view("bot", "human"))
+                self.assertIn("doesn't exist", self.reason(out))
+
+    def test_a_backslash_newline_before_a_hash_is_no_comment(self) -> None:
+        """`echo a\\<newline>#` joins to `echo a#`, which is no comment, so the merge after it is still read."""
+        self.assert_checked(f"echo a\\\n#; {self.merge_command()}", cwd=KIT)
+
+    def test_a_group_in_a_subshell_or_not_run_leaves_the_directory(self) -> None:
+        """A `cd` in `{ }`, `then`, `do` or a backgrounded list needn't outlast it, so the old directory is checked too."""
+        for head in (
+            f"{{ cd {self.tmp}; }} | cat",
+            f"{{ cd {self.tmp}; }} &",
+            f"echo | while read x; do cd {self.tmp}; done",
+            f"if false; then cd {self.tmp}; fi",
+            f"cd {self.tmp} && true &",
+        ):
+            with self.subTest(head=head):
+                self.assert_checked(f"{head} ; {self.merge_command()}", cwd=KIT)
+
+    def test_a_merge_from_a_bare_repo_is_no_trouble(self) -> None:
+        """`git rev-parse --show-toplevel` fails in a bare repo, which is an answer, not git trouble."""
+        bare = self.tmp / "bare.git"
+        subprocess.run(["git", "init", "-q", "--bare", str(bare)], check=True)
+        self.assert_unchecked(self.merge_command(), cwd=bare)
+
+    def test_a_command_the_shell_lexer_rejects_is_refused_in_the_kit(self) -> None:
+        """An unbalanced quote hides the merge it is in, so a command mentioning `gh` and `merge` is refused, saying to balance it."""
+        command = "gh pr merge 7 --squash --body 'unterminated"
+        out = self.run_command(command, FAKE_VIEW=view("bot", "human"))
+        self.assertIn("can't parse", self.reason(out))
+        self.assertIn("Balance its quotes", self.reason(out))
+        self.assertEqual(self.run_command(command, cwd=self.tmp), "")
+        self.assertEqual(self.run_command("echo 'unterminated"), "")
+
+    def test_an_unparseable_string_a_shell_runs_is_refused(self) -> None:
+        """A `bash -c` string the lexer rejects that mentions `gh` and `merge` is refused, not skipped."""
+        out = self.run_command('bash -c "gh pr merge 7 --body \'unterminated"', FAKE_VIEW=view("bot", "human"))
+        self.assertIn("a shell runs", self.reason(out))
+
+    def test_git_that_cannot_run_refuses_the_merge_in_the_kit(self) -> None:
+        """With no `git`, a kit repo reads as no kit repo, so a merge there is refused, not let through."""
+        empty = self.tmp / "nogit"
+        empty.mkdir()
+        (empty / "gh").symlink_to(self.tmp / "gh")
+        out = self.run_command(self.merge_command(), PATH=str(empty), FAKE_VIEW=view("bot", "human"))
+        self.assertIn("git can't be run", self.reason(out))
+
+    def test_kit_status_names_trouble_from_either_git_call(self) -> None:
+        """A directory that is no repo is an answer; a timeout or refusal from either `rev-parse` is trouble."""
+        sys.path.insert(0, str(KIT / "hooks"))
+        import conventions
+
+        self.assertEqual(conventions.kit_status(self.tmp), (None, None))
+        timeout = subprocess.TimeoutExpired("git", 10)
+        with mock.patch.object(conventions.subprocess, "run", side_effect=timeout):
+            self.assertIn("past 10 seconds", conventions.kit_status(self.tmp)[1])
+        ok = subprocess.CompletedProcess(("git",), 0, f"{self.tmp}\n", "")
+        refused = subprocess.CompletedProcess(("git",), 128, "", "fatal: detected dubious ownership")
+        with mock.patch.object(conventions.subprocess, "run", side_effect=[ok, refused]):
+            self.assertIn("dubious ownership", conventions.kit_status(self.tmp)[1])
+
+    def test_git_runs_in_the_c_locale_and_reads_bytes_leniently(self) -> None:
+        """A translated "not a git repository" must still be read as one, and a path that isn't UTF-8 must not crash."""
+        sys.path.insert(0, str(KIT / "hooks"))
+        import conventions
+
+        done = subprocess.CompletedProcess(("git",), 0, "", "")
+        with mock.patch.object(conventions.subprocess, "run", return_value=done) as run:
+            conventions.git_output(self.tmp, "rev-parse")
+        self.assertEqual(run.call_args.kwargs["env"]["LC_ALL"], "C")
+        self.assertEqual(run.call_args.kwargs["errors"], "replace")
 
     def test_a_cd_that_fails_leaves_the_merge_in_the_kit(self) -> None:
         """When the `cd` target is missing the merge still runs where it did, so it is checked."""
