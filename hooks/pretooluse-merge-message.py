@@ -23,24 +23,9 @@ call, `gh api users/<login>`, per missing author, to spell out the line.
 
 In a repo that reaches the kit, a `gh pr merge` the hook can't check is
 refused, not let through: a squash commit can't be amended, so an unchecked
-merge is the worse outcome (ADR 074). That covers a lookup that fails, times
-out or is unreadable; a body the shell rewrites (an unquoted heredoc, a
-`$VAR`) or a file that can't be read; a merge that reads a heredoc in a
-command whose heredocs can't be matched to their `<<` operators; a payload
-directory that doesn't exist; a merge in a string a shell runs (after
-`bash -c`, or `eval`'s words); and a merge with a `GH_` or `GITHUB_` variable
-set on it or exported before it, which the hook's own lookup wouldn't see; a
-repo `git` can't be asked about (missing, slow, refused); a command the lexer
-rejects (an unbalanced quote) that mentions `gh` and `merge`; and a command
-that may run in more than 8 directories, in any repo. `cd`, `pushd`
-and `popd` are followed, and a merge is checked in each directory it might run
-in when a subshell's `cd`, `cd -` or a move the hook can't read leaves that
-unclear. A
-crash in the check refuses the merge in any repo, since by then the hook can't
-tell which repo it is in. A `gh pr merge` is found after `FOO=1`, `env`,
-`command`, `time`, `sudo`, `!`, `{`, `then` or a path to `gh`, and
-`-R`/`--repo` may come before `pr` or `merge`. A merge through `gh api`, built
-from a variable, or fed to a shell on stdin, is not recognised (ADR 074).
+merge is the worse outcome. ADR 074 lists what makes a merge unchecked, what
+the hook follows (`cd`, `pushd`, `popd`, a merge in `bash -c` or `eval`) and
+the gaps it accepts.
 
 Like the branch-name hook it applies only in a repo that reaches the kit and
 refuses through PreToolUse's JSON `deny`. See ADR 047 and ADR 074 under
