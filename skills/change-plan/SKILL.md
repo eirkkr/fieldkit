@@ -39,6 +39,6 @@ Done when every section of the brief is filled or says it is empty, every requir
 2. Post the notes as its first comment.
 3. Plan priced to decide: create each stage in order as a sub-issue (`gh issue create --parent <n>`), titled and filled as "A stage's issue" gives it, with its steps; mark one blocked (`gh issue edit <stage> --add-blocked-by <other>`) where it cannot be built without the other.
 4. Show the reviewer the brief as published and the issue's URL.
-5. Say the plan has not been reviewed. Name each review worth running ("Review"), the review and then its reason, or say in one line that none is worth running.
+5. Say the plan has not been reviewed. Name each review worth running ("Review"), the review, its size, its reason, and the agent and effort proposed ("Sizing a suggestion" in `skills/change-stage/GATE.md`), or say in one line that none is worth running.
 
 Then stop. The reviewer's answer is the next step; [ANSWER.md](ANSWER.md) handles it.
