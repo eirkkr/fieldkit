@@ -1,6 +1,6 @@
 # Reviews
 
-Reviews to offer on this repo's plans and PRs; `conventions/specs.md`'s "Review" covers when; the skills size and run a review.
+Reviews to offer on this repo's plans and PRs; `conventions/specs.md`'s "Review" covers when, what a review reads and how findings are handled; the skills size and run a review.
 
 | Skill or agent | When to offer |
 | --- | --- |
