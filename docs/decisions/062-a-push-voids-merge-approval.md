@@ -32,3 +32,5 @@ Rejected:
 - A consumer that documents its own route around a failed CI run, as one does for billing refusals, should say that a fix made along the way voids the approval too.
 
 > Amended by [074](074-merge-hook-checks-squash-credit.md): the merge hook now reads the value of `--match-head-commit`, `-A` and `-R` as a flag's value, so the flag no longer has to be written with `=`.
+>
+> Amended by [054](054-a-change-is-an-issue.md): the **Reviewed at** line and its tick are retired, with the rest of the bookkeeping that copied into files what a pull request already knows about itself. The decision record's commit is the one push a gate's approval now survives; `skills/change-stage/GATE.md` and `skills/merge/SKILL.md` say so.
