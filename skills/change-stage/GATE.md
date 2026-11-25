@@ -76,10 +76,12 @@ Where the signals disagree, the larger size wins.
 
 | Size | Agent | Effort |
 | --- | --- | --- |
-| Small | Sonnet | medium |
-| Medium | Opus | medium |
-| Large | Opus | high |
+| Small | the cheaper model | medium |
+| Medium | the stronger model | medium |
+| Large | the stronger model | high |
 
-A review run through a skill names the skill and the effort it is run at. A skill with no effort setting is run by a subagent of the size's model, and the effort is set when dispatching it, as this section names or the reviewer chose. A review's parallel axes count as one review, each run at the size's agent and effort. The reviewer may change the agent or the effort before the review runs.
+The repo's reviews doc (the `## Reviews` heading in its `CLAUDE.md`, or the doc that points to) may say which model each of the two is. Where it does not, name the tier, and say which model you picked when you run the review.
+
+A review run through a skill names the skill and the effort it is run at. A skill with no effort setting is run by a subagent of the size's tier, and the effort is set when dispatching it, as this section names or the reviewer chose. A review's parallel axes count as one review, each run at the size's agent and effort. The reviewer may change the agent or the effort before the review runs.
 
 The sizes top out at high. The reviewer names `xhigh`, `max` or `code-review ultra`; none is proposed unasked.
