@@ -102,7 +102,7 @@ A stage is the smallest part of a larger change that leaves the default branch g
 - **One step, one commit.** Its subject ends with the stage and step it is, as `(2.3)`, so a stage picked up again can be matched against its steps. Its body says why, and anything the step needed that the steps did not foresee.
 - **A small fix outside the stage stays in the stage's files.** Where it is small (cheaper to fix than to file, or close to it) and lies in a file the stage already touches, it is its own commit with no step number, and the PR body's **Changed from the plan** names it. Anywhere else it becomes an issue ([ADR 059](../docs/decisions/059-small-findings-are-fixed-in-place.md)).
 - **Green before the PR opens.** The repo's full check passes, not its tests alone.
-- **Then a full stop: the gate.** The PR waits for the reviewer to approve it, send it back, ask for a review or end the review. Any clear yes is approval, and approval is the word to merge. The next stage begins when it is asked for, on a branch cut from the default branch ([ADR 049](../docs/decisions/049-approval-does-not-start-the-next-stage.md)).
+- **Then a full stop: the gate.** The PR waits for the reviewer to approve it, send it back, ask for a review or end the review. Any clear yes is approval, and approval is the word to merge. The next stage begins when it is asked for, on a branch cut from the default branch ([ADR 049](../docs/decisions/049-approval-does-not-start-the-next-stage.md)), and it stops after its steps until the reviewer's word to build ([ADR 076](../docs/decisions/076-a-stage-stops-after-its-steps.md)).
 - **What is sent back is fixed on the same branch and PR**, as plain commits. The steps stay as they were written.
 
 ### The PR body
