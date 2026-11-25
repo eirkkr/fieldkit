@@ -30,3 +30,5 @@ Starting unasked costs more than tokens:
 - A consumer reaches the schema and the skill through symlinks, so it follows the rule as soon as its kit checkout has this change.
 
 > [054](054-a-change-is-an-issue.md) keeps this rule and moves where it is stated: `conventions/specs.md` and the `change-stage` skill, whose gate handling sits in a file of its own so the steps after approval are out of view while a stage is built. The five files listed above hold it only for a change still running under the `review-gated` schema.
+>
+> Amended by [076](076-a-stage-stops-after-its-steps.md): "carry on" in an approval still starts the next stage, but it no longer starts its build. The stage writes and re-reads its steps, stops, and builds only on the reviewer's word to build.
