@@ -80,7 +80,7 @@ Where the signals disagree, the larger size wins.
 | Medium | the stronger model | medium |
 | Large | the stronger model | high |
 
-The repo's reviews doc (the `## Reviews` heading in its `CLAUDE.md`, or the doc that points to) may say which model each of the two is. Where it does not, name the tier, and say which model you picked when you run the review.
+The repo's reviews doc (the `## Reviews` heading in its `CLAUDE.md`, or the doc that heading points to) may say which model the cheaper and the stronger tiers are. Where it does not, the suggestion names the tier and the model you would pick for it, so the reviewer can change it before the review runs. A review run through a skill with no model of its own to choose names the skill and the effort only.
 
 A review run through a skill names the skill and the effort it is run at. A skill with no effort setting is run by a subagent of the size's tier, and the effort is set when dispatching it, as this section names or the reviewer chose. A review's parallel axes count as one review, each run at the size's agent and effort. The reviewer may change the agent or the effort before the review runs.
 

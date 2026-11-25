@@ -13,7 +13,7 @@ Reviews to offer on this repo's plans and PRs; `conventions/specs.md`'s "Review"
 | `pr-review-toolkit:comment-analyzer` | A script's or hook's comments, checked against the code beside them |
 | `security-review` (built into Claude Code) | A workflow reading PR text, or a hook: hooks run on every tool call, on every machine with the kit |
 
-- The cheaper model is Sonnet and the stronger is Opus, for the sizes a suggestion proposes.
+- The cheaper model (small reviews) is Sonnet; the stronger (medium and large) is Opus.
 - `code-reviewer` reads `CLAUDE.md` and unstaged changes by default. Give it the PR's diff (`git diff origin/main...HEAD`) and the convention docs the diff touches.
 - `silent-failure-hunter` carries another stack's rules (Sentry, `logError`). Tell it to judge each failure path by what the hook or check is for: a check exiting 0 on an error reports a pass.
 - `mattpocock-skills:code-review` runs its two axes in subagents that can invoke the skill again and fan out. Tell each to review directly and start no agents of its own.
