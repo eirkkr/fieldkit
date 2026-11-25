@@ -4,7 +4,7 @@ Reached from [SKILL.md](SKILL.md) when every stage of a change built in stages i
 
 Brief's Not yet specified still holds work: tell the reviewer and stop; the change has stages left to plan.
 
-Reviewer has not asked for the final review: offer it, saying what it would read, its size, the agent and effort proposed ("Sizing a suggestion" in `GATE.md`, beside this file) and why that is or is not worth it for this change; ask whether to close the change; stop. Close it on their yes.
+Reviewer has not asked for the final review: offer it, saying what it would read, its size, the agent and effort proposed ("Sizing a suggestion" in `skills/change-stage/GATE.md`) and why that is or is not worth it for this change; ask whether to close the change; stop. Close it on their yes.
 
 When they ask for it:
 
