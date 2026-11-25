@@ -13,7 +13,7 @@ A stage stops once its steps are written and re-read, and its branch is cut only
 
 ## Reason
 
-[ADR 049](049-approving-a-gate-does-not-start-the-next-stage.md) kept approval from starting the next stage, but it left the start itself to a few words ("carry on with stage 3"), and nothing then stopped the agent between writing the stage's steps and building them. The reviewer's check on the steps came, if at all, as a review of the diff they had already produced. Reading the steps is cheaper than reading that diff, and a wrong step is cheapest to catch before anything is built from it.
+[ADR 049](049-approval-does-not-start-the-next-stage.md) kept approval from starting the next stage, but it left the start itself to a few words ("carry on with stage 3"), and nothing then stopped the agent between writing the stage's steps and building them. The reviewer's check on the steps came, if at all, as a review of the diff they had already produced. Reading the steps is cheaper than reading that diff, and a wrong step is cheapest to catch before anything is built from it.
 
 Why the choices above:
 
