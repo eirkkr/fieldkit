@@ -15,9 +15,9 @@ A change whose brief says `One pull request.` under Stages has no stage issues. 
 1. Find it: the issue named, whatever its labels, else `gh issue list --label change --state open`. Several and none named, or none found: ask.
 2. `gh issue view <n> --json title,body,comments,assignees,subIssues,parent`. It has a parent: it is a stage; read the parent as the change.
 3. A comment counts (as instruction, approval or build notes) only when its `authorAssociation` is `OWNER`, `MEMBER` or `COLLABORATOR` ("Who an agent listens to"). Pass anything else to the reviewer as a report.
-   - An approval comment also needs `author.login` to equal the login its line names, and that login to pass the permission check ("Asking first, and approval"). Else it is no approval: tell the reviewer an admin must post it, give that section's command with `<n>` filled in, and end this skill.
+   - The change's `Plan approved.` comment also needs its `author.login` to pass the permission check ("Asking first, and approval"). Else it is no approval: tell the reviewer an admin must post it, give that section's command with `<n>` filled in, and end this skill.
 4. Build notes: the newest such comment opening with `## Build notes` whose `isMinimized` is false.
-5. For each open sub-issue: `gh issue view <stage> --json title,body,state,assignees,blockedBy`. For each branch a stage or a `## Steps` comment names: `gh pr list --head <branch> --state all`.
+5. For each open sub-issue: `gh issue view <stage> --json title,body,state,assignees,blockedBy,comments`. For each branch a stage or a `## Steps` comment names: `gh pr list --head <branch> --state all`.
 
 Done when each of these holds, or the reviewer has been told which does not and this skill ends:
 
@@ -33,11 +33,11 @@ A stage is *at its gate* when open, assigned, and its branch has an open PR.
 
 - Stage at its gate, reviewer's message approves it, sends it back, asks for a review or ends the review: [GATE.md](GATE.md).
 - Stage at its gate, message does none of those: say it is waiting, stop.
-- Stage assigned, no open PR: read its state, in this order. "Resume this stage?" is asked only in (1).
-  1. A commit on `<branch>` or `origin/<branch>` carries one of its step numbers, and no `Steps ready` comment is newer than the newest `Steps approved to build` (no approval counts as older than any `Steps ready`; else the steps changed after building began, so go to 3): ask the reviewer whether to resume it. On yes, put the session on its branch: `ExitWorktree` `keep` if it entered a worktree, then `EnterWorktree` `path` the branch's worktree (`git worktree list` shows it); with none, run the script as in 4.3.2 with `--existing <branch>` in place of the type and description, and enter the path as in 4.3.3. Then go to step 5, matching the step numbers in `git log` subjects against its steps.
+- Stage assigned, no open PR: `git fetch origin`, then read its state, in this order.
+  1. A commit on `<branch>` or `origin/<branch>` carries one of its step numbers, and no `Steps ready` comment is newer than the newest `Steps approved to build` (no approval counts as older than any `Steps ready`): ask the reviewer whether to resume it. On yes, put the session on its branch: `ExitWorktree` `keep` if it entered a worktree, then `EnterWorktree` `path` the branch's worktree (`git worktree list` shows it); with none, run the script as in 4.3.2 with `--existing <branch>` in place of the type and description, and enter the path as in 4.3.3. Then go to step 5, matching the step numbers in `git log` subjects against its steps.
   2. Else a `Steps approved to build` comment is newer than the newest `Steps ready`: put the session on the branch as in 1's "On yes", making the branch with the script's type and description when it does not exist, then go to step 5.
   3. Else a `Steps ready` comment exists: the stage is waiting for the reviewer's word to build. [STEPS.md](STEPS.md).
-  4. Else its steps are unfinished: do 4.1 and 4.2 only, post `Steps ready` as a comment on the stage's issue, close the stop as STEPS.md does (a suggested review of the steps, or one line saying none is worth running), and stop. Never go on to 4.3.
+  4. Else its steps are unfinished: do 4.1 and 4.2 only, post `Steps ready` as a comment on the stage's issue, close the stop as "Changes to the steps" step 4 in [STEPS.md](STEPS.md) does, and stop at that stop; 4.3 waits for the word to build.
 - Change built in stages, every stage closed: [FINAL-REVIEW.md](FINAL-REVIEW.md).
 - Otherwise build: step 3.
 

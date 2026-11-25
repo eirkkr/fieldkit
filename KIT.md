@@ -18,7 +18,7 @@ Where these rules conflict with the repo's own docs, flag it briefly before proc
 | Branching off a non-default branch | ask first | explain why; off default needs none |
 | Opening a PR | ask first | unless user typed `/pr`, or it is a change stage's gate PR |
 | Merging | ask first | unless user typed `/merge`; needs CI |
-| Building a stage from its written steps | ask first | the reviewer's word, a `Steps approved to build` comment on the stage's issue; "carry on" is not it |
+| Building a stage from its written steps | ask first | the reviewer's word, recorded as a `Steps approved to build` comment on the stage's issue; "carry on" is not it |
 | Removing other worktrees at `/merge` | ask first | offered after the merge; `/merge` does not cover it |
 | Starting CI by hand (a repo's recipe that re-runs or dispatches it) | ask first | name PR and head; a yes covers that head; `/merge` does not cover it |
 
