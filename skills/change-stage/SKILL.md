@@ -31,6 +31,7 @@ Done when each of these holds, or the reviewer has been told which does not and 
 
 A stage is *at its gate* when open, assigned, and its branch has an open PR.
 
+- Run on a change, not a stage; one stage at its gate and another waiting for the word to build (state 3 below); and a message that is a bare yes (`yes`, `ok`, `go ahead`, `carry on`), saying neither to merge nor to build: it could be the word to merge the first or to build the second. Ask which and act on neither. Checked first. A message that says to merge goes to the stage at its gate, one that says to build to the stage waiting, and one that names a stage to that stage.
 - Stage at its gate, reviewer's message approves it, sends it back, asks for a review or ends the review: [GATE.md](GATE.md).
 - Stage at its gate, message does none of those: say it is waiting, stop.
 - Stage assigned, no open PR: `git fetch origin`, then read its state, in this order.
