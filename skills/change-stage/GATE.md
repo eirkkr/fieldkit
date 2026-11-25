@@ -59,3 +59,27 @@ Change built in stages, carry on:
 7. That was the last stage: offer the final review ("The final review"), ask whether to close the change.
 
 Then stop, unless the approval also asked for the next stage: then start again at SKILL.md, step 1.
+
+## Sizing a suggestion
+
+Applies to every stop that suggests a review (a plan published, the steps written, a PR at its gate, a fix made, the final review's offer), not only to an answer at a gate. A suggestion names the review, its size, its reason, and the agent and effort proposed, so the reviewer can change either before it runs. A review the reviewer asks for that no suggestion proposed is sized the same way.
+
+**The size.** Count a first review of a plan over the brief and the notes, of steps over the steps, of a PR over its diff, and of the final review over the diffs it reads, summed. Count a later review over the lines changed since the last one. Then:
+
+- *Small*: at most 50 changed lines, at most two requirements, and no choices beyond a rename or a rewording.
+- *Large*: over 300 changed lines, or five or more requirements, or three or more files that change what an agent does.
+- *Medium*: anything else.
+
+Where the signals disagree, the larger size wins.
+
+**The agent and effort.**
+
+| Size | Agent | Effort |
+| --- | --- | --- |
+| Small | Sonnet | medium |
+| Medium | Opus | medium |
+| Large | Opus | high |
+
+A review run through a skill names the skill and the effort it is run at. A skill that takes no effort of its own is run by a subagent of the size's model, dispatched at that effort. A review's parallel axes count as one review, each run at the size's agent and effort. The reviewer may change the agent or the effort before the review runs.
+
+`xhigh`, `max` and `code-review ultra` are proposed only when the reviewer asks for them.
