@@ -33,3 +33,5 @@ Why the choices above:
 - A PR can merge with `Review: Not run. Ended by the reviewer (declined).`, which says what happened more plainly than `Not run.` did.
 - The Review line no longer says whether the last review covers the PR's current head, as "on the PR as it now stands" did. Each stop says what has not been reviewed instead, so a fix made after the last round is named there, not on the line.
 - The stop after a stage's steps, and the record of who did what, are separate decisions, made by the later stages of that change.
+
+> Amended by [change #173](https://github.com/eirkkr/fieldkit/issues/173), stage 2: a suggestion now names the review, its size, its reason, and the agent and effort proposed, which the reviewer may change before it runs, so the Decision's "names every review worth running with its reason" and the Consequences' one shape ("the review, then its reason") each gain a size, an agent and an effort. The final review's offer is sized the same way, so it no longer keeps its own wording. The rule is "Sizing a suggestion" in `skills/change-stage/GATE.md`.
