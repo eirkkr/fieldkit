@@ -4,7 +4,7 @@ Reached from [SKILL.md](SKILL.md) step 2, state 3: the stage's steps are written
 
 A message that only started the run (`/change-stage <n>`) and an answer to "resume this stage?" are not the word to build. Nor is "carry on", which is the word to start a stage. A message that says to build this stage's steps (`build it`, `yes, build`) is, even when it started the run.
 
-An ending or a word to build that comes in the same message as changes to the steps or a step review is posted after the last `Steps ready` this run posts, so a new `Steps ready` never voids it. The changes or the review's fix then suggest nothing. With the word to build in the same message as changes to the steps, make the changes, post `Steps ready`, post the word, then build. With a step review in it, run the review first, post the word after its last `Steps ready`, and stop: the reviewer has not seen the findings.
+An ending or a word to build that comes in the same message as changes to the steps or a step review is posted after the last `Steps ready` this run posts, so a new `Steps ready` never voids it. The changes or the review's fix then suggest nothing. With the word to build in the same message as changes to the steps, make the changes, post `Steps ready`, post the word, then build. With a step review in it, run the review and do not post the word: the reviewer has not seen the findings, so the word comes in their next message.
 
 ## A step review
 
@@ -32,7 +32,7 @@ The reviewer declines the suggested review of the steps, or says no more is need
 Any clear yes to building, as above.
 
 1. Comment on the stage's issue `Steps approved to build by @<login>.`, the login being the author of the change's `Plan approved.` comment.
-2. Put the session on the stage's branch as `SKILL.md` step 2, state 2 says, then go to step 5, matching the step numbers in `git log` subjects against the steps as state 1 does. A commit whose step number no longer fits its step: tell the reviewer, and stop.
+2. Put the session on the stage's branch as `SKILL.md` step 2, state 2 says, then go to step 5, matching the step numbers in `git log` subjects against the steps as state 1 does. Steps renumbered since the commits were made (a commit's step number names a step whose text differs from the commit's subject): tell the reviewer, and stop.
 
 Suggest no review. A decline, if the same message made one, was posted first, after the last `Steps ready`.
 
@@ -41,4 +41,4 @@ Suggest no review. A decline, if the same message made one, was posted first, af
 1. Edit `## Steps` in the stage's issue.
 2. Comment what changed and why.
 3. Post `Steps ready` again, which voids older approvals and older `at steps` endings.
-4. Close the stop with a suggested review of the steps, sized as above, or one line saying none is worth running; an `at steps` ending posted after this `Steps ready` governs and suggests nothing. Say what has not been reviewed. Stop.
+4. Close the stop with a suggested review of the steps, sized as above, or one line saying none is worth running; an `at steps` ending posted after this `Steps ready` governs and suggests nothing. Say what has not been reviewed. Stop, unless the message also gave the word to build: then post it and build (the opening paragraph).
