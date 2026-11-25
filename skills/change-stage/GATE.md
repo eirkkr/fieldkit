@@ -64,10 +64,10 @@ Then stop, unless the approval also asked for the next stage: then start again a
 
 Applies to every stop that suggests a review (a plan published, the steps written, a PR at its gate or just opened, a fix made, the final review's offer), not only to an answer at a gate. A suggestion names the review, its size, its reason, and the agent and effort proposed, so the reviewer can change either before it runs. A review the reviewer asks for that no suggestion proposed is sized the same way.
 
-**The size.** Count a first review of a plan over the brief and the notes, of steps over the steps, of a PR over its diff, and of the final review over the diffs it reads, summed. Count a later review over the lines changed since the last one. Requirements are the brief's for a plan, the stage's for steps or a PR, and for a later review only those the changed lines touch; the final review counts the change's. Then:
+**The size.** Count a first review of a plan over the brief and the notes, of steps over the steps, of a PR over its diff, and of the final review over the diffs it reads, summed. Count a later review over the lines changed since the last one. A later review of anything counts only the requirements the changed lines touch. A first review counts the brief's for a plan, the stage's for steps or a PR, and the change's for the final review; a PR with no stage counts the change's if it has them, else none. Then:
 
 - *Small*: at most 50 changed lines, at most two requirements, and no choices beyond a rename or a rewording.
-- *Large*: over 300 changed lines, or five or more requirements, or three or more files that change what an agent does (skill files and hooks, not docs a person reads).
+- *Large*: over 300 changed lines, or five or more requirements, or three or more files that change what an agent does (skill files, hooks, and the instruction docs an agent loads: `KIT.md`, `CLAUDE.md` and `conventions/`).
 - *Medium*: anything else.
 
 Where the signals disagree, the larger size wins.
