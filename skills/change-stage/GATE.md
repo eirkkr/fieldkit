@@ -38,7 +38,7 @@ Done when the ending is a comment on the PR and the Review line carries it. A ru
 
 ## Approved
 
-Any clear yes is approval, and the word to merge. An ending that comes with it ("looks good, no review needed") is recorded first, by "A review ended" steps 1 and 2, and the approval then runs as below.
+Any clear yes is approval, and the word to merge, unless another stage waits for the word to build and the yes says neither: `SKILL.md` step 2 asks which first. An ending that comes with it ("looks good, no review needed") is recorded first, by "A review ended" steps 1 and 2, and the approval then runs as below.
 
 1. Write down what the gate decided ("What is said at a gate"): on the PR; in the brief with its comment if the plan changed; in an ADR committed to the stage's branch if it outlasts the change. Rewrite the PR body's Review line from the comments ("The PR body"), so a run that died after an ending still merges with it recorded.
 2. File the issues the reviewer said yes to.
