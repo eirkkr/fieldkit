@@ -79,3 +79,4 @@ Lightweight architecture decision records (ADRs) for non-obvious design choices.
 | 073 | [Worktrees beside the repo, made by a kit script](073-worktrees-beside-the-repo.md) | Accepted |
 | 074 | [The merge hook checks the squash credit lines](074-merge-hook-checks-squash-credit.md) | Accepted |
 | 075 | [The reviewer ends the review loop](075-the-reviewer-ends-the-review-loop.md) | Accepted |
+| 076 | [A stage stops after its steps](076-a-stage-stops-after-its-steps.md) | Accepted |
