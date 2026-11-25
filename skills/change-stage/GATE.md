@@ -58,7 +58,7 @@ Change built in stages, carry on:
 6. Report the stage has merged. Something under the brief's Not yet specified can now be said in a line: propose it as a stage; on the reviewer's yes, add it to the brief with its comment and create its sub-issue.
 7. That was the last stage: offer the final review ("The final review") with its size, agent and effort ("Sizing a suggestion"), ask whether to close the change.
 
-Then stop, unless the approval also asked for the next stage: then start again at SKILL.md, step 1.
+Then stop, unless the approval also asked for the next stage: then start again at SKILL.md, step 1, which takes that stage up to its steps. The build waits for the reviewer's word to build (`STEPS.md`); the approval, and "carry on", are not that word.
 
 ## Sizing a suggestion
 
