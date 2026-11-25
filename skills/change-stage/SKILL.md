@@ -69,6 +69,6 @@ Done when every step has a commit, its `Done when` checked, and the repo's full 
 1. Open through the `pr` skill, body as "The PR body" gives it, with `Review: Not run.`
 2. `gh pr checks --watch`; fix a red check.
 3. Show the reviewer the PR body and its URL.
-4. Name each review worth running ("Review"), the review and then its reason drawn from this diff, or say in one line that none is worth running. Name any issue you would file.
+4. Name each review worth running ("Review"), the review, its size, its reason drawn from this diff, and the agent and effort proposed ("Sizing a suggestion" in `skills/change-stage/GATE.md`), or say in one line that none is worth running. Name any issue you would file.
 
 Then stop. The reviewer's answer is the next step; [GATE.md](GATE.md) handles it.
