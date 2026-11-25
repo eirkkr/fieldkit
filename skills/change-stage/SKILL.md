@@ -34,10 +34,10 @@ A stage is *at its gate* when open, assigned, and its branch has an open PR.
 - Stage at its gate, reviewer's message approves it, sends it back, asks for a review or ends the review: [GATE.md](GATE.md).
 - Stage at its gate, message does none of those: say it is waiting, stop.
 - Stage assigned, no open PR: `git fetch origin`, then read its state, in this order.
-  1. A commit on `<branch>` or `origin/<branch>` carries one of its step numbers, and no `Steps ready` comment is newer than the newest `Steps approved to build` (no approval counts as older than any `Steps ready`): ask the reviewer whether to resume it. On yes, put the session on its branch: `ExitWorktree` `keep` if it entered a worktree, then `EnterWorktree` `path` the branch's worktree (`git worktree list` shows it); with none, run the script as in 4.3.2 with `--existing <branch>` in place of the type and description, and enter the path as in 4.3.3. Then go to step 5, matching the step numbers in `git log` subjects against its steps.
-  2. Else a `Steps approved to build` comment is newer than the newest `Steps ready`: put the session on the branch as in 1's "On yes", making the branch with the script's type and description when it does not exist, then go to step 5.
+  1. A commit on `<branch>` or `origin/<branch>` carries one of its step numbers, and no `Steps ready` comment is newer than the newest `Steps approved to build` (no approval counts as older than any `Steps ready`): ask the reviewer whether to resume it. On yes, put the session on its branch: `ExitWorktree` `keep` if it entered a worktree, then `EnterWorktree` `path` the branch's worktree (`git worktree list` shows it); with none, run the script as in 4.4.2 with `--existing <branch>` in place of the type and description, and enter the path as in 4.4.3. Then go to step 5, matching the step numbers in `git log` subjects against its steps.
+  2. Else a `Steps approved to build` comment is newer than the newest `Steps ready`: put the session on the branch as in 1's "On yes", making the branch as 4.4 does when it does not exist, then go to step 5.
   3. Else a `Steps ready` comment exists: the stage is waiting for the reviewer's word to build. [STEPS.md](STEPS.md).
-  4. Else its steps are unfinished: do 4.1 and 4.2 only, post `Steps ready` as a comment on the stage's issue, close the stop as "Changes to the steps" step 4 in [STEPS.md](STEPS.md) does, and stop at that stop; 4.3 waits for the word to build.
+  4. Else its steps are unfinished: step 4, which stops at its 4.3.
 - Change built in stages, every stage closed: [FINAL-REVIEW.md](FINAL-REVIEW.md).
 - Otherwise build: step 3.
 
@@ -51,14 +51,18 @@ Done when the stage is assigned to you.
 
 1. Re-read the brief and notes against the repository as it now is ("A stage's issue"). Brief wrong: stop, tell the reviewer.
 2. Write the stage's steps and its branch name where "A stage's issue" puts them. Stage's issue already has `## Steps`: correct them against the repository instead, and comment on the stage's issue what changed.
-3. Cut the stage's branch from `origin/<default>` in its own sibling worktree, whatever branch the session was on:
+3. Post `Steps ready` as a comment on the stage's issue, close the stop as "Changes to the steps" step 4 in [STEPS.md](STEPS.md) does, and stop. The branch is cut only on the reviewer's word to build (state 2, [STEPS.md](STEPS.md)), never in this run.
+
+Done when every step has a `Done when` that running or looking at something can check, and `Steps ready` is posted.
+
+4. On the word to build, cut the stage's branch from `origin/<default>` in its own sibling worktree, whatever branch the session was on:
    1. In a worktree this session entered: `ExitWorktree` `keep` (the previous stage may still be at its gate).
    2. Run `.fieldkit/scripts/new-worktree.sh <type> <description>` (in the kit, `scripts/new-worktree.sh`) from the main checkout, the first entry of `git worktree list`, with the stage branch's name split at its first slash. It fetches, cuts the branch from `origin/<default>`, and prints the worktree's path. Exit 3 means the worktree exists but its setup failed: go on, and tell the reviewer. Exit 1 or 2: stop, and tell the reviewer.
    3. `EnterWorktree` `path` the printed path. It prompts once. If it is refused, stop, and tell the reviewer the path.
 
    The previous stage's worktree stays for `merge` or the sweep. `ExitWorktree` reports no worktree session but the session is in a worktree (resumed, `claude --worktree`, a subagent's): run the script from there, which finds the main checkout itself, and enter the path as in 3. `git switch -c` in place would switch the previous stage's worktree, so it is no fallback.
 
-Done when every step has a `Done when` that running or looking at something can check, and `git branch --show-current` prints the stage's branch name.
+Done when `git branch --show-current` prints the stage's branch name.
 
 ## 5. Build
 
