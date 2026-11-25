@@ -41,7 +41,7 @@ Any clear yes is approval. An ending that comes with it ("looks good, no review 
 2. Brief lists stages and no sub-issues exist yet: create each in order as a sub-issue (`gh issue create --parent <n>`), titled and filled as "A stage's issue" gives it; mark one blocked (`gh issue edit <stage> --add-blocked-by <other>`) where it cannot be built without the other. A change of one pull request gets none.
 3. Report what was created.
 
-Then stop, unless the approval also asked for the build: then start the `change-stage` skill.
+Then stop, unless the approval also asked for the build: then start the `change-stage` skill, which takes the first stage up to its steps. The build waits for the reviewer's word to build (`skills/change-stage/STEPS.md`); the approval, and "carry on", are not that word.
 
 ## Turned down
 

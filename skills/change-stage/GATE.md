@@ -2,7 +2,7 @@
 
 Reached from [SKILL.md](SKILL.md) when a stage is at its gate and the reviewer has answered. Forms are in `conventions/specs.md`, under the headings named.
 
-Find the stage's PR first - `gh pr list --head <branch>`, the branch being the one its steps name - and put the session on it: by the "On yes" procedure of `SKILL.md`'s "Stage assigned, no open PR" line (skip its question and its step 5). Done when the PR found closes this stage's issue.
+Find the stage's PR first - `gh pr list --head <branch>`, the branch being the one its steps name - and put the session on it: by the "On yes" procedure of `SKILL.md` step 2, state 1 (skip its question and its step 5). Done when the PR found closes this stage's issue.
 
 ## A review asked for
 
@@ -42,7 +42,7 @@ Any clear yes is approval, and the word to merge. An ending that comes with it (
 
 1. Write down what the gate decided ("What is said at a gate"): on the PR; in the brief with its comment if the plan changed; in an ADR committed to the stage's branch if it outlasts the change. Rewrite the PR body's Review line from the comments ("The PR body"), so a run that died after an ending still merges with it recorded.
 2. File the issues the reviewer said yes to.
-3. Merge through the `merge` skill. Step 1's ADR commit and, for a staged change, the commit that sets **Reviewed at** and ticks the box are the only pushes the approval survives: the approved sha is the head they leave. A fix the reviewer asked for is not one of them.
+3. Merge through the `merge` skill. Step 1's ADR commit is the only push the approval survives: the approved sha is the head it leaves. A fix the reviewer asked for is not that push.
 
 Change of one pull request: the merge closes the change. Report it, stop.
 
@@ -58,7 +58,7 @@ Change built in stages, carry on:
 6. Report the stage has merged. Something under the brief's Not yet specified can now be said in a line: propose it as a stage; on the reviewer's yes, add it to the brief with its comment and create its sub-issue.
 7. That was the last stage: offer the final review ("The final review") with its size, agent and effort ("Sizing a suggestion"), ask whether to close the change.
 
-Then stop, unless the approval also asked for the next stage: then start again at SKILL.md, step 1.
+Then stop, unless the approval also asked for the next stage: then start again at SKILL.md, step 1, which takes that stage up to its steps. The build waits for the reviewer's word to build (`STEPS.md`); the approval, and "carry on", are not that word.
 
 ## Sizing a suggestion
 
