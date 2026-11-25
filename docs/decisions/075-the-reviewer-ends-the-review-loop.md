@@ -35,3 +35,5 @@ Why the choices above:
 - The stop after a stage's steps, and the record of who did what, are separate decisions, made by the later stages of that change.
 
 > Amended by [change #173](https://github.com/eirkkr/fieldkit/issues/173), stage 2: a suggestion now names the review, its size, its reason, and the agent and effort proposed, which the reviewer may change before it runs, so the Decision's "names every review worth running with its reason" and the Consequences' one shape ("the review, then its reason") each gain a size, an agent and an effort. The final review's offer keeps its own wording and gains the same size, agent and effort. The rule is "Sizing a suggestion" in `skills/change-stage/GATE.md`.
+>
+> Amended by [076](076-a-stage-stops-after-its-steps.md): the steps written is a stop that suggests a review too, so the Decision's list of stops gains it, its ending is `Review ended by the reviewer at steps (declined).` (or `(no more needed)`) on the stage's issue, and its rounds are `## Review findings` comments there. The ending covers that stop only, and a new `Steps ready` voids an older one.
