@@ -18,12 +18,13 @@ Where these rules conflict with the repo's own docs, flag it briefly before proc
 | Branching off a non-default branch | ask first | explain why; off default needs none |
 | Opening a PR | ask first | unless user typed `/pr`, or it is a change stage's gate PR |
 | Merging | ask first | unless user typed `/merge`; needs CI |
+| Building a stage from its written steps | ask first | the reviewer's word, a `Steps approved to build` comment on the stage's issue; "carry on" is not it |
 | Removing other worktrees at `/merge` | ask first | offered after the merge; `/merge` does not cover it |
 | Starting CI by hand (a repo's recipe that re-runs or dispatches it) | ask first | name PR and head; a yes covers that head; `/merge` does not cover it |
 
 - Approval settles whether to act, not what the draft says. Once given (a yes, or the `/pr`, `/merge` or issue request itself), draft and go straight to it.
 - Merging needs CI. Failed check, conflict or missing required review stops it: report, never `--admin` or edit a ruleset unless asked. Running check: wait. Green: merge, no further sign-off.
-- Approval covers one head: the short SHA named when asking, or the head at a typed `/merge`. Any push adding or rewriting a commit voids it (a fix, a rebase, anyone's): stop, report, ask again. Sole exception: this PR's gate approval commits (`change-stage` GATE.md).
+- Approval covers one head: the short SHA named when asking, or the head at a typed `/merge`. Any push adding or rewriting a commit voids it (a fix, a rebase, anyone's): stop, report, ask again. Sole exception: this PR's gate approval commit (`change-stage` GATE.md).
 - Commit onto the current branch, even if its work looks unrelated.
 - New work from the default branch: before the first edit to a non-ignored file, run `.fieldkit/scripts/new-worktree.sh <type> <description>` from the main checkout, then `EnterWorktree` the path it prints. Failure or refused entry: tell the reviewer; at exit 3 enter it, otherwise stop. In a worktree or on a non-default branch: stay.
 - A gate on a *follow-up* never holds the action before it: land the push, then ask.
